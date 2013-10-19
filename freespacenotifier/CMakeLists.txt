@@ -23,7 +23,6 @@ target_link_libraries(kded_freespacenotifier
     KF5::KIOCore
     KF5::KIOWidgets
     KF5::KNotifications
-    ${KDE4Support_LIBRARIES}
 )
 
 install(TARGETS kded_freespacenotifier  DESTINATION ${PLUGIN_INSTALL_DIR} )

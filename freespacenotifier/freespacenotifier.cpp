@@ -23,10 +23,11 @@
 #include <QFile>
 #include <QLabel>
 #include <QSpinBox>
+#include <QDebug>
 
 #include <QtDBus/QtDBus>
 
-#include <KDebug>
+//#include <KDebug>
 #include <KLocale>
 #include <KRun>
 #include <KConfigDialog>
@@ -178,7 +179,7 @@ bool FreeSpaceNotifier::dbusError( QDBusInterface &iface )
     QDBusError err = iface.lastError();
     if ( err.isValid() )
     {
-        kError() << "Failed to perform operation on kded [" << err.name() << "]:" << err.message();
+        qCritical() << "Failed to perform operation on kded [" << err.name() << "]:" << err.message();
         return true;
     }
     return false;
