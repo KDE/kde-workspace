@@ -41,6 +41,9 @@ find_package(Qt5X11Extras REQUIRED NO_MODULE)
 
 add_definitions(-DQT_DISABLE_DEPRECATED_BEFORE=0)
 
+
+
+
 # Load CMake, Compiler and InstallDirs settings from KF5, as well as the frameworks we need
 find_package(KF5 MODULE REQUIRED COMPONENTS CMake Compiler InstallDirs
     KIdleTime ItemModels KWidgetsAddons KWindowSystem KCodecs KArchive KCoreAddons Solid ThreadWeaver
@@ -130,6 +133,8 @@ if (X11_FOUND)
 else ()
    set (HAVE_X11 0)
 endif ()
+add_definitions(-DHAVE_X11=${HAVE_X11})
+
 set_package_properties(X11 PROPERTIES DESCRIPTION "X11 libraries"
                         URL "http://www.x.org"
                         TYPE OPTIONAL

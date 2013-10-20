@@ -19,14 +19,17 @@
 
 #include "kdisplaymanager.h"
 
-#ifdef Q_WS_X11
+#ifdef HAVE_X11
 
 #include <kapplication.h>
 #include <klocale.h>
 #include <kuser.h>
 
+#include <KLocalizedString>
+
 #include <QtDBus/QtDBus>
 #include <QRegExp>
+#include <QX11Info>
 
 #include <X11/Xauth.h>
 #include <X11/Xlib.h>
@@ -906,4 +909,4 @@ KDisplayManager::GDMAuthenticate()
     fclose (fp);
 }
 
-#endif // Q_WS_X11
+#endif // HAVE_X11

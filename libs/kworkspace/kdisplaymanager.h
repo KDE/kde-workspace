@@ -37,7 +37,7 @@ typedef QList<SessEnt> SessList;
 
 class KWORKSPACE_EXPORT KDisplayManager {
 
-#ifdef Q_WS_X11
+#ifdef HAVE_X11
 
 public:
     KDisplayManager();
@@ -88,13 +88,13 @@ public:
 
     bool bootOptions(QStringList &opts, int &dflt, int &curr);
 
-#endif // Q_WS_X11
+#endif // HAVE_X11
 
 private:
-#ifdef Q_WS_X11
+#ifdef HAVE_X11
     class Private;
     Private * const d;
-#endif // Q_WS_X11
+#endif // HAVE_X11
 
 }; // class KDisplayManager
 
