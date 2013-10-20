@@ -24,7 +24,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #define SCREENLOCKER_GREETER_H
 
 #include <kgreeterplugin.h>
-#include <QtDeclarative/QDeclarativeItem>
 
 // forward declarations
 class KGreetPlugin;
@@ -38,46 +37,6 @@ struct GreeterPluginHandle {
 
 namespace ScreenLocker
 {
-class Greeter;
-
-class GreeterItem : public QDeclarativeItem
-{
-    Q_OBJECT
-public:
-    GreeterItem(QDeclarativeItem *parent = NULL);
-    virtual ~GreeterItem();
-
-public Q_SLOTS:
-    void verify();
-    void clear();
-
-Q_SIGNALS:
-    void greeterFailed();
-    void greeterReady();
-    void greeterMessage(const QString &text);
-    void greeterAccepted();
-protected:
-    virtual void focusInEvent(QFocusEvent *event);
-
-private:
-    void init();
-    QGraphicsProxyWidget *m_proxy;
-    QWidget *m_widget;
-    Greeter *m_unlocker;
-};
-
-class KeyboardItem : public QDeclarativeItem
-{
-    Q_OBJECT
-public:
-    KeyboardItem(QDeclarativeItem *parent = NULL);
-    virtual ~KeyboardItem();
-
-private:
-    QWidget *m_widget;
-    QGraphicsProxyWidget *m_proxy;
-};
-
 /**
  * @short Class which checks authentication through KGreeterPlugin framework.
  *

@@ -37,8 +37,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <QtCore/QFile>
 #include <QtCore/QSocketNotifier>
 #include <QtCore/QTimer>
-#include <QtDeclarative/QDeclarativeContext>
-#include <QtDeclarative/QDeclarativeEngine>
 #include <QGraphicsProxyWidget>
 #include <QLineEdit>
 
@@ -57,87 +55,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace ScreenLocker
 {
-
-GreeterItem::GreeterItem(QDeclarativeItem *parent)
-    : QDeclarativeItem(parent)
-    , m_proxy(new QGraphicsProxyWidget(this))
-    , m_unlocker(new Greeter(this))
-{
-    init();
-}
-
-GreeterItem::~GreeterItem()
-{
-}
-
-//#define SHOW_GREETER_BACKGROUND
-void GreeterItem::init()
-{
-    if (!m_unlocker->isValid()) {
-        exit(1);
-        return;
-    }
-    m_widget = m_unlocker->greeterWidget();
-    
-#ifndef SHOW_GREETER_BACKGROUND
-    m_widget->setAttribute(Qt::WA_TranslucentBackground);
-#endif
-
-    m_proxy->setWidget(m_widget);
-    m_proxy->setFlag(QGraphicsItem::ItemIsFocusable);
-    setFlag(QGraphicsItem::ItemIsFocusable);
-    m_proxy->setFocus();
-    QGraphicsItem::setFocus();
-    connect(m_unlocker, SIGNAL(greeterFailed()), this, SIGNAL(greeterFailed()));
-    connect(m_unlocker, SIGNAL(greeterReady()), this, SIGNAL(greeterReady()));
-    connect(m_unlocker, SIGNAL(greeterMessage(QString)), this, SIGNAL(greeterMessage(QString)));
-    connect(m_unlocker, SIGNAL(greeterAccepted()), this, SIGNAL(greeterAccepted()));
-    setWidth(m_proxy->size().width());
-    setHeight(m_proxy->size().height());
-}
-
-void GreeterItem::verify()
-{
-    m_unlocker->verify();
-}
-
-void GreeterItem::clear()
-{
-    m_unlocker->clear();
-}
-
-void GreeterItem::focusInEvent(QFocusEvent *event)
-{
-    QGraphicsItem::focusInEvent(event);
-    if (QLineEdit *lineEdit = m_proxy->widget()->findChild<QLineEdit *>()) {
-        lineEdit->setFocus(Qt::OtherFocusReason);
-    }
-}
-
-// KeyboardItem
-
-KeyboardItem::KeyboardItem(QDeclarativeItem *parent)
-    : QDeclarativeItem(parent)
-    , m_widget(new QWidget())
-    , m_proxy(new QGraphicsProxyWidget(this))
-{
-    m_widget->setAttribute(Qt::WA_TranslucentBackground);
-    KPluginFactory *kxkbFactory = KPluginLoader(QLatin1String("keyboard_layout_widget")).factory();
-    if (kxkbFactory) {
-        kxkbFactory->create<QWidget>(m_widget);
-    } else {
-        kDebug() << "can't load keyboard layout widget library";
-    }
-
-    m_proxy->setWidget(m_widget);
-
-    setWidth(m_proxy->size().width());
-    setHeight(m_proxy->size().height());
-}
-
-KeyboardItem::~KeyboardItem()
-{
-}
 
 Greeter::Greeter(QObject *parent)
     : QObject(parent)

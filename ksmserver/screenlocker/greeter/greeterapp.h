@@ -23,8 +23,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <KDE/KApplication>
 
 #include <Plasma/PackageStructure>
-
-#include <QDeclarativeView>
+#include <QQuickView>
 
 namespace Plasma {
     class Package;
@@ -51,7 +50,7 @@ protected:
     virtual bool eventFilter(QObject *obj, QEvent *event);
 
 private Q_SLOTS:
-    void viewStatusChanged(const QDeclarativeView::Status &status);
+    void viewStatusChanged(const QQuickView::Status &status);
     void resetRequestIgnore();
     void suspendToRam();
     void suspendToDisk();
@@ -63,7 +62,7 @@ private:
     void capsLocked();
 
     QString m_mainQmlPath;
-    QList<QDeclarativeView*> m_views;
+    QList<QQuickView*> m_views;
     QList<ScreenSaverWindow*> m_screensaverWindows;
     QTimer *m_resetRequestIgnoreTimer;
     Plasma::Package m_package;

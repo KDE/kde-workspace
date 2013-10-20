@@ -16,9 +16,13 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************/
-#include <KDE/KAboutData>
 #include <KDE/KCmdLineArgs>
 #include <KDE/KLocale>
+
+#include <k4aboutdata.h>
+
+#include <KLocalizedString>
+
 #include <KDE/KGlobal>
 #include <QDateTime>
 
@@ -31,12 +35,12 @@ static const char version[] = "0.1";
 
 int main(int argc, char* argv[])
 {
-    KAboutData aboutData( "kscreenlocker_greet", 0, ki18n( "KScreenLocker Greeter" ),
-                          version, ki18n(description), KAboutData::License_GPL,
+    K4AboutData aboutData( "kscreenlocker_greet", 0, ki18n( "KScreenLocker Greeter" ),
+                          version, ki18n(description), K4AboutData::License_GPL,
                           ki18n("(c) 2011, Martin Gräßlin") );
     aboutData.addAuthor( ki18n("Martin Gräßlin"),
                          ki18n( "Author and maintainer" ),
-                         "mgraesslin@kde.org" );
+                         "mgraesslin@kde.org");
     aboutData.addAuthor( ki18n("Chani Armitage"),
                          ki18n("Author"),
                          "chanika@gmail.com");
@@ -59,7 +63,6 @@ int main(int argc, char* argv[])
     KCmdLineArgs::addCmdLineOptions(options);
 
     ScreenLocker::UnlockApp app;
-    KGlobal::locale()->insertCatalog(QLatin1String( "libkworkspace" ));
     app.disableSessionManagement(); // manually-started
     KCmdLineArgs *args = KCmdLineArgs::parsedArgs();
     if (args->isSet("testing")) {

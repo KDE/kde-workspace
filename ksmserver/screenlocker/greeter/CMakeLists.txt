@@ -18,13 +18,17 @@ kde4_add_executable(kscreenlocker_greet ${kscreenlocker_greet_SRCS})
 
 target_link_libraries(kscreenlocker_greet
                         kworkspace
-                        ${KDE4_KDEUI_LIBS}
-                        ${KDE4_SOLID_LIBS}
-                        ${QT_QTDECLARATIVE_LIBRARY}
+                        KF5::Solid
+                        KF5::Plasma
+                        KF5::KService
+                        KF5::KDeclarative
+                        KF5::KCrash
+                        Qt5::Quick
+                        Qt5::Qml
                         Qt5::X11Extras
                         ${X11_LIBRARIES}
-                        ${KDE4_PLASMA_LIBS}
-                        ${KDECLARATIVE_LIBRARIES})
+                        ${KDE4Support_LIBRARIES}
+                        )
 
 install(TARGETS kscreenlocker_greet DESTINATION ${LIBEXEC_INSTALL_DIR})
 

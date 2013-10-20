@@ -39,14 +39,14 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <Plasma/PackageStructure>
 // Qt
 #include <QtCore/QTimer>
-#include <QtDeclarative/QDeclarativeContext>
-#include <QtDeclarative/QDeclarativeEngine>
-#include <QtDeclarative/QDeclarativeItem>
-#include <QtDeclarative/QDeclarativeProperty>
-#include <QtDeclarative/QDeclarativeView>
-#include <QtDeclarative/qdeclarative.h>
 #include <QtGui/QKeyEvent>
 #include <QDesktopWidget>
+
+#include <QQuickView>
+#include <QQuickItem>
+#include <QQmlContext>
+#include <QQmlProperty>
+
 #include <QX11Info>
 // X11
 #include <X11/Xatom.h>
@@ -81,8 +81,9 @@ UnlockApp::~UnlockApp()
 void UnlockApp::initialize()
 {
     const char *uri = "org.kde.kscreenlocker";
-    qmlRegisterType<GreeterItem>(uri, 1, 0, "GreeterItem");
-    qmlRegisterType<KeyboardItem>(uri, 1, 0, "KeyboardItem");
+    //FIXME
+//     qmlRegisterType<GreeterItem>(uri, 1, 0, "GreeterItem");
+//     qmlRegisterType<KeyboardItem>(uri, 1, 0, "KeyboardItem");
     qmlRegisterType<SessionSwitching>(uri, 1, 0, "Sessions");
     qmlRegisterType<QAbstractItemModel>();
 
@@ -109,12 +110,12 @@ void UnlockApp::initialize()
     installEventFilter(this);
 }
 
-void UnlockApp::viewStatusChanged(const QDeclarativeView::Status &status)
+void UnlockApp::viewStatusChanged(const QQuickView::Status &status)
 {
     // on error, if we did not load the default qml, try to do so now.
-    if (status == QDeclarativeView::Error &&
+    if (status == QQuickView::Error &&
         m_package.metadata().pluginName() != QLatin1String(DEFAULT_MAIN_PACKAGE)) {
-        if (QDeclarativeView *view = qobject_cast<QDeclarativeView *>(sender())) {
+        if (QQuickView *view = qobject_cast<QQuickView *>(sender())) {
             m_package.setPath(KStandardDirs::locate("data", QStringLiteral("ksmserver/screenlocker/") + QString::fromLatin1(DEFAULT_MAIN_PACKAGE)));
 
             m_mainQmlPath = m_package.filePath("mainscript");
@@ -141,44 +142,46 @@ void UnlockApp::desktopResized()
     const QSet<Solid::PowerManagement::SleepState> spdMethods = Solid::PowerManagement::supportedSleepStates();
     for (int i = m_views.count(); i < nScreens; ++i) {
         // create the view
-        QDeclarativeView *view = new QDeclarativeView();
-        connect(view, SIGNAL(statusChanged(QDeclarativeView::Status)),
-                this, SLOT(viewStatusChanged(QDeclarativeView::Status)));
-        view->setWindowFlags(Qt::X11BypassWindowManagerHint);
-        view->setFrameStyle(QFrame::NoFrame);
-        view->installEventFilter(this);
+        QQuickView *view = new QQuickView();
+        connect(view, SIGNAL(statusChanged(QQuickView::Status)),
+                this, SLOT(viewStatusChanged(QQuickView::Status)));
+
+        //FIXME
+//         view->setWindowFlags(Qt::X11BypassWindowManagerHint);
+//         view->setFrameStyle(QFrame::NoFrame);
+//         view->installEventFilter(this);
 
         // engine stuff
         KDeclarative kdeclarative;
         kdeclarative.setDeclarativeEngine(view->engine());
         kdeclarative.initialize();
         kdeclarative.setupBindings();
-        QDeclarativeContext *context = view->engine()->rootContext();
+        QQmlContext* context = view->engine()->rootContext();
         const KUser user;
         const QString fullName = user.property(KUser::FullName).toString();
 
         context->setContextProperty(QStringLiteral("kscreenlocker_userName"), fullName.isEmpty() ? user.loginName() : fullName);
 
         view->setSource(QUrl::fromLocalFile(m_mainQmlPath));
-        view->setResizeMode(QDeclarativeView::SizeRootObjectToView);
+        view->setResizeMode(QQuickView::SizeRootObjectToView);
 
         connect(view->rootObject(), SIGNAL(unlockRequested()), SLOT(quit()));
 
-        QDeclarativeProperty sleepProperty(view->rootObject(), QStringLiteral("suspendToRamSupported"));
+        QQmlProperty sleepProperty(view->rootObject(), QStringLiteral("suspendToRamSupported"));
         sleepProperty.write(spdMethods.contains(Solid::PowerManagement::SuspendState));
         if (spdMethods.contains(Solid::PowerManagement::SuspendState) &&
             view->rootObject()->metaObject()->indexOfSignal(QMetaObject::normalizedSignature("suspendToRam()").constData()) != -1) {
             connect(view->rootObject(), SIGNAL(suspendToRam()), SLOT(suspendToRam()));
         }
 
-        QDeclarativeProperty hibernateProperty(view->rootObject(), QStringLiteral("suspendToDiskSupported"));
+        QQmlProperty hibernateProperty(view->rootObject(), QStringLiteral("suspendToDiskSupported"));
         hibernateProperty.write(spdMethods.contains(Solid::PowerManagement::SuspendState));
         if (spdMethods.contains(Solid::PowerManagement::SuspendState) &&
             view->rootObject()->metaObject()->indexOfSignal(QMetaObject::normalizedSignature("suspendToDisk()").constData()) != -1) {
             connect(view->rootObject(), SIGNAL(suspendToDisk()), SLOT(suspendToDisk()));
         }
 
-        QDeclarativeProperty shutdownProperty(view->rootObject(), QStringLiteral("shutdownSupported"));
+        QQmlProperty shutdownProperty(view->rootObject(), QStringLiteral("shutdownSupported"));
         shutdownProperty.write(canLogout);
         if (canLogout &&
             view->rootObject()->metaObject()->indexOfSignal(QMetaObject::normalizedSignature("shutdown()").constData()) != -1) {
@@ -196,7 +199,7 @@ void UnlockApp::desktopResized()
 
     // update geometry of all views and savers
     for (int i = 0; i < nScreens; ++i) {
-        QDeclarativeView *view = m_views.at(i);
+        QQuickView *view = m_views.at(i);
 
         view->setGeometry(desktop()->screenGeometry(i));
         view->show();
@@ -206,10 +209,7 @@ void UnlockApp::desktopResized()
             ScreenSaverWindow *screensaverWindow = m_screensaverWindows.at(i);
             screensaverWindow->setGeometry(view->geometry());
 
-            QPixmap backgroundPix(screensaverWindow->size());
-            QPainter p(&backgroundPix);
-            view->render(&p);
-            p.end();
+            const QPixmap backgroundPix = QPixmap::fromImage(view->grabWindow());
             screensaverWindow->setBackground(backgroundPix);
             screensaverWindow->show();
             screensaverWindow->activateWindow();
@@ -224,7 +224,8 @@ void UnlockApp::desktopResized()
 void UnlockApp::getFocus()
 {
     if (!m_views.isEmpty()) {
-        m_views.first()->activateWindow();
+        //FIXME
+//         m_views.first()->activateWindow();
     }
 }
 
@@ -281,12 +282,14 @@ void UnlockApp::setTesting(bool enable)
     }
     if (enable) {
         // remove bypass window manager hint
-        foreach (QDeclarativeView * view, m_views) {
-            view->setWindowFlags(view->windowFlags() & ~Qt::X11BypassWindowManagerHint);
+        foreach (QQuickView * view, m_views) {
+        //FIXME
+//             view->setWindowFlags(view->windowFlags() & ~Qt::X11BypassWindowManagerHint);
         }
     } else {
-        foreach (QDeclarativeView * view, m_views) {
-            view->setWindowFlags(view->windowFlags() | Qt::X11BypassWindowManagerHint);
+        foreach (QQuickView * view, m_views) {
+        //FIXME
+//             view->setWindowFlags(view->windowFlags() | Qt::X11BypassWindowManagerHint);
         }
     }
 }
@@ -294,18 +297,19 @@ void UnlockApp::setTesting(bool enable)
 bool UnlockApp::eventFilter(QObject *obj, QEvent *event)
 {
     if (obj != this && event->type() == QEvent::Show) {
-        QDeclarativeView *view(0);
-        foreach (QDeclarativeView *v, m_views) {
+        QQuickView *view(0);
+        foreach (QQuickView *v, m_views) {
             if (v == obj) {
                 view = v;
                 break;
             }
         }
-        if (view && view->testAttribute(Qt::WA_WState_Created) && view->internalWinId()) {
-            // showing greeter view window, set property
-            static Atom tag = XInternAtom(QX11Info::display(), "_KDE_SCREEN_LOCKER", False);
-            XChangeProperty(QX11Info::display(), view->winId(), tag, tag, 32, PropModeReplace, 0, 0);
-        }
+        //FIXME
+//         if (view && view->testAttribute(Qt::WA_WState_Created) && view->internalWinId()) {
+//             // showing greeter view window, set property
+//             static Atom tag = XInternAtom(QX11Info::display(), "_KDE_SCREEN_LOCKER", False);
+//             XChangeProperty(QX11Info::display(), view->winId(), tag, tag, 32, PropModeReplace, 0, 0);
+//         }
         // no further processing
         return false;
     }
@@ -357,15 +361,17 @@ bool UnlockApp::eventFilter(QObject *obj, QEvent *event)
         }
         return true; // don't pass
     } else if (event->type() == QEvent::GraphicsSceneMousePress) {
-        QGraphicsSceneMouseEvent *me = static_cast<QGraphicsSceneMouseEvent *>(event);
 
-        foreach (QDeclarativeView *view, m_views) {
-            if (view->geometry().contains(me->screenPos())) {
-                view->activateWindow();
-                view->grabKeyboard();
-                break;
-            }
-        }
+        //FIXME FIXME
+//         QGraphicsSceneMouseEvent *me = static_cast<QGraphicsSceneMouseEvent *>(event);
+//
+//         foreach (QQuickView *view, m_views) {
+//             if (view->geometry().contains(me->screenPos())) {
+//                 view->activateWindow();
+//                 view->grabKeyboard();
+//                 break;
+//             }
+//         }
     }
 
     return false;
@@ -380,7 +386,7 @@ void UnlockApp::capsLocked()
     const bool before = m_capsLocked;
     m_capsLocked = lmask & LockMask;
     if (before != m_capsLocked) {
-        foreach (QDeclarativeView *view, m_views) {
+        foreach (QQuickView *view, m_views) {
             view->rootObject()->setProperty("capsLockOn", m_capsLocked);
         }
     }
