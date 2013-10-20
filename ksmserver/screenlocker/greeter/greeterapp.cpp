@@ -33,10 +33,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <KDE/KStandardDirs>
 #include <KDE/KUser>
 #include <Solid/PowerManagement>
-#include <kdeclarative.h>
+#include <kdeclarative/kdeclarative.h>
 //Plasma
 #include <Plasma/Package>
-#include <Plasma/PackageMetadata>
+#include <Plasma/PackageStructure>
 // Qt
 #include <QtCore/QTimer>
 #include <QtDeclarative/QDeclarativeContext>
@@ -47,6 +47,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <QtDeclarative/qdeclarative.h>
 #include <QtGui/QKeyEvent>
 #include <QDesktopWidget>
+#include <QX11Info>
 // X11
 #include <X11/Xatom.h>
 #include <X11/Xlib.h>
@@ -97,13 +98,12 @@ void UnlockApp::initialize()
     KScreenSaverSettings::self()->readConfig();
     m_showScreenSaver = KScreenSaverSettings::legacySaverEnabled();
 
-    m_structure = Plasma::PackageStructure::load("Plasma/Generic");
-    m_package = new Plasma::Package(KStandardDirs::locate("data", "ksmserver/screenlocker/"), KScreenSaverSettings::greeterQML(), m_structure);
-    m_mainQmlPath = m_package->filePath("mainscript");
+    m_package.setPath(KStandardDirs::locate("data", QStringLiteral("ksmserver/screenlocker/") + KScreenSaverSettings::greeterQML()));
+
+    m_mainQmlPath = m_package.filePath("mainscript");
     if (m_mainQmlPath.isEmpty()) {
-        delete m_package;
-        m_package = new Plasma::Package(KStandardDirs::locate("data", "ksmserver/screenlocker/"), DEFAULT_MAIN_PACKAGE, m_structure);
-        m_mainQmlPath = m_package->filePath("mainscript");
+        m_package.setPath(KStandardDirs::locate("data", QStringLiteral("ksmserver/screenlocker/") + QString::fromLatin1(DEFAULT_MAIN_PACKAGE)));
+        m_mainQmlPath = m_package.filePath("mainscript");
     }
 
     installEventFilter(this);
@@ -113,10 +113,11 @@ void UnlockApp::viewStatusChanged(const QDeclarativeView::Status &status)
 {
     // on error, if we did not load the default qml, try to do so now.
     if (status == QDeclarativeView::Error &&
-        m_package->metadata().pluginName() != DEFAULT_MAIN_PACKAGE) {
+        m_package.metadata().pluginName() != QLatin1String(DEFAULT_MAIN_PACKAGE)) {
         if (QDeclarativeView *view = qobject_cast<QDeclarativeView *>(sender())) {
-            m_package = new Plasma::Package(KStandardDirs::locate("data", "ksmserver/screenlocker/"), DEFAULT_MAIN_PACKAGE, m_structure);
-            m_mainQmlPath = m_package->filePath("mainscript");
+            m_package.setPath(KStandardDirs::locate("data", QStringLiteral("ksmserver/screenlocker/") + QString::fromLatin1(DEFAULT_MAIN_PACKAGE)));
+
+            m_mainQmlPath = m_package.filePath("mainscript");
             view->setSource(QUrl::fromLocalFile(m_mainQmlPath));
         }
     }
@@ -136,7 +137,7 @@ void UnlockApp::desktopResized()
     Q_ASSERT((!m_showScreenSaver || m_views.count() == m_screensaverWindows.count()));
 
     // extend views and savers to current demand
-    const bool canLogout = KAuthorized::authorizeKAction("logout") && KAuthorized::authorize("logout");
+    const bool canLogout = KAuthorized::authorizeKAction(QStringLiteral("logout")) && KAuthorized::authorize(QStringLiteral("logout"));
     const QSet<Solid::PowerManagement::SleepState> spdMethods = Solid::PowerManagement::supportedSleepStates();
     for (int i = m_views.count(); i < nScreens; ++i) {
         // create the view
@@ -155,31 +156,32 @@ void UnlockApp::desktopResized()
         QDeclarativeContext *context = view->engine()->rootContext();
         const KUser user;
         const QString fullName = user.property(KUser::FullName).toString();
-        context->setContextProperty("kscreenlocker_userName", fullName.isEmpty() ? user.loginName() : fullName);
+
+        context->setContextProperty(QStringLiteral("kscreenlocker_userName"), fullName.isEmpty() ? user.loginName() : fullName);
 
         view->setSource(QUrl::fromLocalFile(m_mainQmlPath));
         view->setResizeMode(QDeclarativeView::SizeRootObjectToView);
 
         connect(view->rootObject(), SIGNAL(unlockRequested()), SLOT(quit()));
 
-        QDeclarativeProperty sleepProperty(view->rootObject(), "suspendToRamSupported");
+        QDeclarativeProperty sleepProperty(view->rootObject(), QStringLiteral("suspendToRamSupported"));
         sleepProperty.write(spdMethods.contains(Solid::PowerManagement::SuspendState));
         if (spdMethods.contains(Solid::PowerManagement::SuspendState) &&
-            view->rootObject()->metaObject()->indexOfSignal(QMetaObject::normalizedSignature("suspendToRam()")) != -1) {
+            view->rootObject()->metaObject()->indexOfSignal(QMetaObject::normalizedSignature("suspendToRam()").constData()) != -1) {
             connect(view->rootObject(), SIGNAL(suspendToRam()), SLOT(suspendToRam()));
         }
 
-        QDeclarativeProperty hibernateProperty(view->rootObject(), "suspendToDiskSupported");
+        QDeclarativeProperty hibernateProperty(view->rootObject(), QStringLiteral("suspendToDiskSupported"));
         hibernateProperty.write(spdMethods.contains(Solid::PowerManagement::SuspendState));
         if (spdMethods.contains(Solid::PowerManagement::SuspendState) &&
-            view->rootObject()->metaObject()->indexOfSignal(QMetaObject::normalizedSignature("suspendToDisk()")) != -1) {
+            view->rootObject()->metaObject()->indexOfSignal(QMetaObject::normalizedSignature("suspendToDisk()").constData()) != -1) {
             connect(view->rootObject(), SIGNAL(suspendToDisk()), SLOT(suspendToDisk()));
         }
 
-        QDeclarativeProperty shutdownProperty(view->rootObject(), "shutdownSupported");
+        QDeclarativeProperty shutdownProperty(view->rootObject(), QStringLiteral("shutdownSupported"));
         shutdownProperty.write(canLogout);
         if (canLogout &&
-            view->rootObject()->metaObject()->indexOfSignal(QMetaObject::normalizedSignature("shutdown()")) != -1) {
+            view->rootObject()->metaObject()->indexOfSignal(QMetaObject::normalizedSignature("shutdown()").constData()) != -1) {
             connect(view->rootObject(), SIGNAL(shutdown()), SLOT(shutdown()));
         }
 

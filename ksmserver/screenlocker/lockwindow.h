@@ -23,7 +23,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************/
 #ifndef SCREENLOCKER_LOCKWINDOW_H
 #define SCREENLOCKER_LOCKWINDOW_H
-#include <QtGui/QWidget>
+#include <QWidget>
 #include <X11/Xlib.h>
 #include <fixx11h.h>
 

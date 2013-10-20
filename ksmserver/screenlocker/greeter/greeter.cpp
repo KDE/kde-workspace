@@ -55,10 +55,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <QPalette>
 
-//Plasma
-#include <Plasma/Theme>
-
-
 namespace ScreenLocker
 {
 
@@ -226,7 +222,7 @@ bool Greeter::loadGreetPlugin()
             continue;
         }
         plugin.library = lib;
-        plugin.info = (KGreeterPluginInfo *)lib->resolveSymbol( "kgreeterplugin_info" );
+        plugin.info = (KGreeterPluginInfo *)lib->resolveFunction( "kgreeterplugin_info" );
         if (!plugin.info ) {
             kWarning(1212) << "GreeterPlugin " << *it << " (" << lib->fileName() << ") is no valid greet widget plugin" ;
             lib->unload();

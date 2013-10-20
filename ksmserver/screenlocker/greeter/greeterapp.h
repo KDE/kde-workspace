@@ -66,8 +66,7 @@ private:
     QList<QDeclarativeView*> m_views;
     QList<ScreenSaverWindow*> m_screensaverWindows;
     QTimer *m_resetRequestIgnoreTimer;
-    Plasma::PackageStructure::Ptr m_structure;
-    Plasma::Package *m_package;
+    Plasma::Package m_package;
     bool m_testing;
     bool m_capsLocked;
     bool m_ignoreRequests;
