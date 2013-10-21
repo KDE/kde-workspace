@@ -118,6 +118,12 @@ set_package_properties(OpenGLES PROPERTIES DESCRIPTION "The OpenGLES libraries"
                        TYPE OPTIONAL
                       )
 
+find_package(KActivities)
+set_package_properties(KActivities PROPERTIES DESCRIPTION "The KActivities library"
+                       URL "https://projects.kde.org/kactivities"
+                       TYPE OPTIONAL
+                      )
+
 find_package(X11)
 if (X11_FOUND)
    set (HAVE_X11 1)

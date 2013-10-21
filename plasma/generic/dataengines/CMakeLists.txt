@@ -1,6 +1,8 @@
 
 add_subdirectory(applicationjobs)
-#add_subdirectory(activities)
+if (KActivities_FOUND)
+    add_subdirectory(activities)
+endif ()
 add_subdirectory(apps)
 add_subdirectory(devicenotifications)
 add_subdirectory(dict)

@@ -20,6 +20,7 @@
 
 #include <KActivities/Controller>
 #include <QDebug>
+#include <KLocalizedString>
 
 #include <QDBusConnection>
 #include <QDBusMessage>
@@ -82,11 +83,6 @@ void ActivityJob::start()
     }
     if (operation == "setIcon") {
         m_activityController->setActivityIcon(m_id, parameters()["Icon"].toString());
-        setResult(true);
-        return;
-    }
-    if (operation == "setEncrypted") {
-        m_activityController->setActivityEncrypted(m_id, parameters()["Encrypted"].toBool());
         setResult(true);
         return;
     }

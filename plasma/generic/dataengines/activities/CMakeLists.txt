@@ -7,16 +7,20 @@ set(activity_engine_SRCS
         activityjob.cpp)
 
 set_source_files_properties(org.kde.ActivityManager.ActivityRanking.xml PROPERTIES INCLUDE "ActivityData.h")
-qt4_add_dbus_interface(
+qt5_add_dbus_interface(
    activity_engine_SRCS org.kde.ActivityManager.ActivityRanking.xml
    ActivityRankingInterface
    )
 
+kservice_desktop_to_json(plasma-engine-activities.desktop)
 plasma_add_plugin(plasma_engine_activities ${activity_engine_SRCS})
 target_link_libraries(plasma_engine_activities
                       KF5::KCoreAddons
                       KF5::Plasma
-                      ${KACTIVITIES_LIBRARY})
+                      KF5::KActivities
+                      KF5::KI18n
+                      KF5::KService
+                      )
 
 install(TARGETS plasma_engine_activities
         DESTINATION ${PLUGIN_INSTALL_DIR}/plasma/dataengine)

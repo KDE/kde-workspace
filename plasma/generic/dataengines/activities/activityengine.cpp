@@ -34,6 +34,7 @@ ActivityEngine::ActivityEngine(QObject* parent, const QVariantList& args)
     : Plasma::DataEngine(parent, args)
 {
     Q_UNUSED(args);
+    init();
 }
 
 void ActivityEngine::init()
@@ -87,7 +88,6 @@ void ActivityEngine::insertActivity(const QString &id)
     setData(id, "Name", activity->name());
     setData(id, "Icon", activity->icon());
     setData(id, "Current", m_currentActivity == id);
-    setData(id, "Encrypted", false);
 
     QString state;
     switch (activity->state()) {
@@ -213,7 +213,6 @@ void ActivityEngine::activityDataChanged()
     }
     setData(activity->id(), "Name", activity->name());
     setData(activity->id(), "Icon", activity->icon());
-    setData(activity->id(), "Encrypted", false);
     setData(activity->id(), "Current", m_currentActivity == activity->id());
     setData(activity->id(), "Score", m_activityScores.value(activity->id()));
 }
@@ -265,6 +264,6 @@ Plasma::Service *ActivityEngine::serviceForSource(const QString &source)
     return service;
 }
 
-K_EXPORT_PLASMA_DATAENGINE(activities, ActivityEngine)
+K_EXPORT_PLASMA_DATAENGINE_WITH_JSON(activities, ActivityEngine, "plasma-engine-activities.json")
 
 #include "activityengine.moc"
