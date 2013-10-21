@@ -16,7 +16,11 @@ endif(X11_Xkb_FOUND)
 
 if(NOT WIN32)
 add_subdirectory( bell )
-add_subdirectory( input )
+
+if (LIBUSB_FOUND)
+    add_subdirectory( input )
+endif()
+
 add_subdirectory( access )
 add_subdirectory( dateandtime )
 add_subdirectory( autostart )

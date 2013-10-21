@@ -231,6 +231,14 @@ set_package_properties(KdepimLibs PROPERTIES DESCRIPTION "The KDEPIM libraries"
                        PURPOSE "Required to build certain Plasma DataEngines (Akonadi, Calendar)"
                       )
 
+find_package(USB)
+macro_bool_to_01(LIBUSB_FOUND HAVE_LIBUSB)
+set_package_properties(USB PROPERTIES DESCRIPTION "User level access to USB devices"
+                       URL "http://libusb.sourceforge.net"
+                       TYPE OPTIONAL		
+                       PURPOSE "Provides Logitech mouse support in KControl."
+		       )
+
 
 include(ConfigureChecks.cmake)
 if(NOT WIN32)
@@ -260,7 +268,7 @@ add_definitions(-DDISABLE_NEPOMUK_LEGACY)
 # add_subdirectory(cmake)
 add_subdirectory(libs)
 #
-# # system settings (kcontrol replacement)
+ # system settings (kcontrol replacement)
 if(${KDE_PLATFORM_PROFILE} STREQUAL "Desktop")
    ecm_optional_add_subdirectory( systemsettings )
 endif(${KDE_PLATFORM_PROFILE} STREQUAL "Desktop")
