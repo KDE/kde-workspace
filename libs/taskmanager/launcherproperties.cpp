@@ -29,6 +29,8 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <KDE/KUrl>
 #include <KDE/KWindowInfo>
 #include <KDE/KWindowSystem>
+#include <KLocalizedString>
+
 #include <QtGui/QMouseEvent>
 #include <QtX11Extras/QX11Info>
 #include <X11/Xlib.h>

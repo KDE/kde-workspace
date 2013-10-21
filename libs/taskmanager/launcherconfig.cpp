@@ -30,6 +30,8 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <KDE/KLocale>
 #include <KDE/KMessageBox>
 #include <KDE/KUrl>
+#include <KLocalizedString>
+
 #include <QtWidgets/QWhatsThis>
 
 namespace TaskManager
