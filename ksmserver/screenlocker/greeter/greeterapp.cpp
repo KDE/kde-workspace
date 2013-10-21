@@ -20,7 +20,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************/
 #include "greeterapp.h"
 #include "kscreensaversettings.h"
-#include "greeter.h"
 #include "sessions.h"
 #include "screensaverwindow.h"
 

@@ -6,7 +6,6 @@ include_directories(
 )
 
 set(kscreenlocker_greet_SRCS
-   greeter.cpp
    sessions.cpp
    greeterapp.cpp
    screensaverwindow.cpp
