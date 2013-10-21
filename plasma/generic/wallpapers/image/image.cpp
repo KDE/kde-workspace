@@ -768,6 +768,11 @@ void Image::nextSlide()
         // the last one picked from the previous set
         if (!previousPath.isEmpty()) {
             m_unseenSlideshowBackgrounds.removeAll(previousPath);
+
+            // prevent empty list
+            if (m_unseenSlideshowBackgrounds.isEmpty()) {
+                m_unseenSlideshowBackgrounds = m_slideshowBackgrounds;
+            }
         }
     }
 
