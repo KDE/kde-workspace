@@ -30,7 +30,6 @@ add_subdirectory( style )
 add_subdirectory( desktoptheme )
 add_subdirectory( standard_actions )
 add_subdirectory( keys )
-# add_subdirectory( workspaceoptions )
 
 add_subdirectory( hardware )
 add_subdirectory( desktoppaths )
