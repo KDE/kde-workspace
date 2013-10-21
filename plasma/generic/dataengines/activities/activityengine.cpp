@@ -45,7 +45,7 @@ void ActivityEngine::init()
     } else {
         m_activityController = new KActivities::Controller(this);
         m_currentActivity = m_activityController->currentActivity();
-        QStringList activities = m_activityController->listActivities();
+        QStringList activities = m_activityController->activities();
         //setData("allActivities", activities);
         foreach (const QString &id, activities) {
             insertActivity(id);
@@ -58,7 +58,7 @@ void ActivityEngine::init()
         //some convenience sources for times when checking every activity source would suck
         //it starts with _ so that it can easily be filtered out of sources()
         //maybe I should just make it not included in sources() instead?
-        m_runningActivities = m_activityController->listActivities(KActivities::Info::Running);
+        m_runningActivities = m_activityController->activities(KActivities::Info::Running);
         setData("Status", "Current", m_currentActivity);
         setData("Status", "Running", m_runningActivities);
 
@@ -173,7 +173,7 @@ void ActivityEngine::setActivityScores(const ActivityDataList &activities)
         m_activityScores[activity.id] = activity.score;
     }
 
-    foreach (const QString &activityId, m_activityController->listActivities()) {
+    foreach (const QString &activityId, m_activityController->activities()) {
         if (!presentActivities.contains(activityId) && m_activities.contains(activityId)) {
             setData(activityId, "Score", 0);
         }
