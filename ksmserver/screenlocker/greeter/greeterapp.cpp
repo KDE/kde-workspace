@@ -36,6 +36,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //Plasma
 #include <Plasma/Package>
 #include <Plasma/PackageStructure>
+#include <Plasma/PluginLoader>
 // Qt
 #include <QtCore/QTimer>
 #include <QtGui/QKeyEvent>
@@ -65,6 +66,7 @@ UnlockApp::UnlockApp()
     , m_capsLocked(false)
     , m_ignoreRequests(false)
     , m_showScreenSaver(false)
+    , m_package(Plasma::PluginLoader::self()->loadPackage(QStringLiteral("Plasma/Generic")))
 {
     initialize();
     connect(desktop(), SIGNAL(resized(int)), SLOT(desktopResized()));
@@ -98,9 +100,10 @@ void UnlockApp::initialize()
     KScreenSaverSettings::self()->readConfig();
     m_showScreenSaver = KScreenSaverSettings::legacySaverEnabled();
 
-    m_package.setPath(KStandardDirs::locate("data", QStringLiteral("ksmserver/screenlocker/") + KScreenSaverSettings::greeterQML()));
+    m_package.setPath(QStandardPaths::locate(QStandardPaths::QStandardPaths::GenericDataLocation, QStringLiteral("ksmserver/screenlocker/") + KScreenSaverSettings::greeterQML(), QStandardPaths::LocateDirectory));
 
     m_mainQmlPath = m_package.filePath("mainscript");
+
     if (m_mainQmlPath.isEmpty()) {
         m_package.setPath(KStandardDirs::locate("data", QStringLiteral("ksmserver/screenlocker/") + QString::fromLatin1(DEFAULT_MAIN_PACKAGE)));
         m_mainQmlPath = m_package.filePath("mainscript");
