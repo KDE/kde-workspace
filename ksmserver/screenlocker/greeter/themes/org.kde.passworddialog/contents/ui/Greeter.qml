@@ -17,9 +17,9 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************/
-import QtQuick 1.1
-import org.kde.plasma.core 0.1 as PlasmaCore
-import org.kde.plasma.components 0.1 as PlasmaComponents
+import QtQuick 2.0
+import org.kde.plasma.core 2.0 as PlasmaCore
+import org.kde.plasma.components 2.0 as PlasmaComponents
 import org.kde.kscreenlocker 1.0
 
 Item {
@@ -30,7 +30,7 @@ Item {
     property alias notification: message.text
     property bool switchUserEnabled
     property bool capsLockOn
-    implicitWidth: layoutItem.width + theme.defaultFont.mSize.width * 4 + 12
+    implicitWidth: layoutItem.width + theme.mSize(theme.defaultFont).width * 4 + 12
     implicitHeight: layoutItem.height + 12
 
     anchors {
@@ -45,7 +45,7 @@ Item {
     Column {
         id: layoutItem
         anchors.centerIn: parent
-        spacing: theme.defaultFont.mSize.height/2
+        spacing: theme.mSize(theme.defaultFont).height/2
 
 
         PlasmaComponents.Label {
@@ -85,21 +85,21 @@ Item {
             width: greeter.width
             height: greeter.height
             anchors.horizontalCenter: parent.horizontalCenter
-            GreeterItem {
-                id: greeter
-                objectName: "greeter"
-
-                Keys.onEnterPressed: verify()
-                Keys.onReturnPressed: verify()
-                Keys.onEscapePressed: clear()
-            }
-            KeyboardItem {
-                anchors {
-                    left: greeter.right
-                    bottom: greeter.bottom
-                    bottomMargin: -2
-                }
-            }
+//             GreeterItem {
+//                 id: greeter
+//                 objectName: "greeter"
+//
+//                 Keys.onEnterPressed: verify()
+//                 Keys.onReturnPressed: verify()
+//                 Keys.onEscapePressed: clear()
+//             }
+//             KeyboardItem {
+//                 anchors {
+//                     left: greeter.right
+//                     bottom: greeter.bottom
+//                     bottomMargin: -2
+//                 }
+//             }
             Timer {
                 id: focusTimer
                 interval: 10
@@ -115,7 +115,7 @@ Item {
             id: buttonRow
             property bool showAccel: false
             exclusive: false
-            spacing: theme.defaultFont.mSize.width / 2
+            spacing: theme.mSize(theme.defaultFont).width / 2
             anchors.horizontalCenter: parent.horizontalCenter
 
             AccelButton {

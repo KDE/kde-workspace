@@ -17,20 +17,18 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************/
-import QtQuick 1.1
-import org.kde.plasma.core 0.1 as PlasmaCore
-import org.kde.qtextracomponents 0.1
+import QtQuick 2.0
+import org.kde.plasma.core 2.0 as PlasmaCore
+
+import org.kde.qtextracomponents 2.0
 import org.kde.kscreenlocker 1.0
-import org.kde.plasma.components 0.1 as PlasmaComponents
+
+import org.kde.plasma.components 2.0 as PlasmaComponents
 
 Item {
     id: lockScreen
     signal unlockRequested()
-    property alias capsLockOn: unlockUI.capsLockOn
-
-    PlasmaCore.Theme {
-        id: theme
-    }
+//     property alias capsLockOn: unlockUI.capsLockOn
 
     // if there's no image, have a near black background
     Rectangle {
