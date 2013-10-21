@@ -37,9 +37,6 @@ add_subdirectory( standard_actions )
 add_subdirectory( keys )
 # add_subdirectory( workspaceoptions )
 
-# TODO needs porting
-#add_subdirectory( smartcard )
-
 add_subdirectory( hardware )
 add_subdirectory( desktoppaths )
 
