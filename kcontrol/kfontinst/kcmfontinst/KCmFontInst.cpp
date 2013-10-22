@@ -188,9 +188,9 @@ CKCmFontInst::CKCmFontInst(QWidget *parent, const QVariantList&)
     KIconLoader::global()->addAppDir(KFI_NAME);
     KIconLoader::global()->reconfigure(KFI_NAME, KGlobal::dirs());
 
-    KAboutData *about = new KAboutData("fontinst", 0, ki18n("KDE Font Manager"), 0, KLocalizedString(),
-                                       KAboutData::License_GPL, ki18n("(C) Craig Drummond, 2000 - 2009"));
-    about->addAuthor(ki18n("Craig Drummond"), ki18n("Developer and maintainer"), "craig@kde.org");
+    KAboutData *about = new KAboutData(QStringLiteral("fontinst"), QString(), i18n("KDE Font Manager"), QString(), QString(),
+                                       KAboutData::License_GPL, i18n("(C) Craig Drummond, 2000 - 2009"));
+    about->addAuthor(i18n("Craig Drummond"), i18n("Developer and maintainer"), QStringLiteral("craig@kde.org"));
     setAboutData(about);
 
     KConfigGroup cg(&itsConfig, CFG_GROUP);

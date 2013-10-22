@@ -26,7 +26,7 @@
 #include "FontsPackage.h"
 #include <QtCore/QFile>
 #include <KDE/KCmdLineArgs>
-#include <KDE/KAboutData>
+#include <k4aboutdata.h>
 #include <KDE/KApplication>
 #include <KDE/KZip>
 #include <KDE/KTempDir>
@@ -121,8 +121,8 @@ CInstaller::~CInstaller()
 
 }
 
-static KAboutData aboutData("kfontinst", KFI_CATALOGUE, ki18n("Font Installer"), "1.0", ki18n("Simple font installer"),
-                            KAboutData::License_GPL, ki18n("(C) Craig Drummond, 2007"));
+static K4AboutData aboutData("kfontinst", KFI_CATALOGUE, ki18n("Font Installer"), "1.0", ki18n("Simple font installer"),
+                            K4AboutData::License_GPL, ki18n("(C) Craig Drummond, 2007"));
 
 int main(int argc, char **argv)
 {

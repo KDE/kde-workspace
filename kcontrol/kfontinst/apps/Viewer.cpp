@@ -24,7 +24,7 @@
 #include "Viewer.h"
 #include "KfiConstants.h"
 #include <KDE/KCmdLineArgs>
-#include <KDE/KAboutData>
+#include <k4aboutdata.h>
 #include <KDE/KUniqueApplication>
 #include <KDE/KPluginLoader>
 #include <KDE/KPluginFactory>
@@ -143,8 +143,8 @@ class ViewerApplication : public KUniqueApplication
 
 }
 
-static KAboutData aboutData("kfontview", KFI_CATALOGUE, ki18n("Font Viewer"), "1.1", ki18n("Simple font viewer"),
-                            KAboutData::License_GPL, ki18n("(C) Craig Drummond, 2004-2007"));
+static K4AboutData aboutData("kfontview", KFI_CATALOGUE, ki18n("Font Viewer"), "1.1", ki18n("Simple font viewer"),
+                             K4AboutData::License_GPL, ki18n("(C) Craig Drummond, 2004-2007"));
 
 int main(int argc, char **argv)
 {

@@ -40,7 +40,7 @@
 #include <QProgressBar>
 #include <QCloseEvent>
 #include <KDE/KCmdLineArgs>
-#include <KDE/KAboutData>
+#include <k4aboutdata.h>
 #include <KDE/KApplication>
 #include <kdeprintdialog.h>
 
@@ -416,8 +416,8 @@ void CPrinter::closeEvent(QCloseEvent *e)
     slotButtonClicked(0);
 }
 
-static KAboutData aboutData("kfontprint", KFI_CATALOGUE, ki18n("Font Printer"), "1.1", ki18n("Simple font printer"),
-                            KAboutData::License_GPL, ki18n("(C) Craig Drummond, 2007"));
+static K4AboutData aboutData("kfontprint", KFI_CATALOGUE, ki18n("Font Printer"), "1.1", ki18n("Simple font printer"),
+                             K4AboutData::License_GPL, ki18n("(C) Craig Drummond, 2007"));
 
 int main(int argc, char **argv)
 {
