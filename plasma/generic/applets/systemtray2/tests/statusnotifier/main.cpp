@@ -19,13 +19,15 @@
 
 #include <qcommandlineparser.h>
 #include <qcommandlineoption.h>
+
+#include <QApplication>
 #include <QDebug>
 
 #include "statusnotifiertest.h"
 
 int main(int argc, char **argv)
 {
-    QCoreApplication app(argc, argv);
+    QApplication app(argc, argv);
     QCommandLineParser parser;
 
     const QString description = "Statusnotifier test app";

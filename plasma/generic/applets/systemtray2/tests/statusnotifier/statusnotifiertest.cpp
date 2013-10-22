@@ -27,6 +27,9 @@
 
 #include <qcommandlineparser.h>
 
+#include <KLocalizedString>
+#include <KStatusNotifierItem>
+
 #include <QDir>
 #include <QElapsedTimer>
 #include <QFileInfo>
@@ -43,13 +46,26 @@ class StatusNotifierTestPrivate {
 public:
     QString pluginName;
     QTimer* timer;
-    int interval = 500;
+    int interval = 1000;
+
+    KStatusNotifierItem* systemNotifier;
+
 };
 
 StatusNotifierTest::StatusNotifierTest() :
     QObject(0)
 {
     d = new StatusNotifierTestPrivate;
+
+    d->systemNotifier = new KStatusNotifierItem(this);
+    d->systemNotifier->setCategory(KStatusNotifierItem::SystemServices);
+    d->systemNotifier->setIconByName("plasma");
+    d->systemNotifier->setStatus(KStatusNotifierItem::Active);
+    d->systemNotifier->setToolTipTitle(i18nc("tooltip title", "System Service Item"));
+    d->systemNotifier->setTitle(i18nc("tooltip title", "System Service Item"));
+
+
+
     d->timer = new QTimer(this);
     connect(d->timer, &QTimer::timeout, this, &StatusNotifierTest::timeout);
     d->timer->setInterval(d->interval);
@@ -70,7 +86,19 @@ int StatusNotifierTest::runMain()
 void StatusNotifierTest::timeout()
 {
     qDebug() << "Timeout";
-    qApp->quit();
+    //qApp->quit();
+
+    if (d->systemNotifier->status() == KStatusNotifierItem::Passive) {
+        d->systemNotifier->setStatus(KStatusNotifierItem::Active);
+        qDebug() << " Now Active";
+    } else if (d->systemNotifier->status() == KStatusNotifierItem::Active) {
+        d->systemNotifier->setStatus(KStatusNotifierItem::NeedsAttention);
+        qDebug() << " Now NeedsAttention";
+    } else if (d->systemNotifier->status() == KStatusNotifierItem::NeedsAttention) {
+        d->systemNotifier->setStatus(KStatusNotifierItem::Passive);
+        qDebug() << " Now passive";
+    }
+
 }
 
 
