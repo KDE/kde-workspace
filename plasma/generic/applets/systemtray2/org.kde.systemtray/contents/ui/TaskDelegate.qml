@@ -28,17 +28,50 @@ Item {
     id: taskItemContainer
     objectName: "taskItemContainer"
     width: _h
-    height: _h
-    //Rectangle { anchors.fill: parent; color: "orange"; opacity: 0.4; }
-    PlasmaComponents.Label {
-        anchors.fill: parent
-        //text: "task"
+    height: width
+    opacity: status != SystemTray.Task.Passive ? 1 : 0.3
+
+    property bool isShown: status != SystemTray.Task.Passive
+
+    property int taskStatus: status
+
+    onTaskStatusChanged: {
+        //print("STATUSCHANGED");
+        print("new status [" + name + "]: " + taskStatusString())
+
     }
+    //Rectangle { anchors.fill: parent; color: "orange"; opacity: 0.4; }
     PlasmaCore.IconItem {
         anchors.fill: parent
         //visible: source != ""
         source: iconName != "" ? iconName : (typeof(icon) != "undefined" ? icon : "")
     }
+
+//     PlasmaComponents.Label {
+//         anchors.fill: parent
+//         text: taskStatusMnemonic()
+//     }
+    function taskStatusMnemonic() {
+        if (status == SystemTray.Task.Passive) {
+            return "--";
+        } else if (status == SystemTray.Task.Active) {
+            return "o";
+        } else if (status == SystemTray.Task.NeedsAttention) {
+            return "\o/";
+        }
+        return "??";
+    }
+    function taskStatusString() {
+        if (status == SystemTray.Task.Passive) {
+            return "Passive";
+        } else if (status == SystemTray.Task.Active) {
+            return "Active";
+        } else if (status == SystemTray.Task.NeedsAttention) {
+            return "NeedsAttention";
+        }
+        return "Unknown";
+    }
+
     Component.onCompleted: {
         host.rootItem = gridView;
         //print(" taskitem: " + taskItem + " " + iconName);

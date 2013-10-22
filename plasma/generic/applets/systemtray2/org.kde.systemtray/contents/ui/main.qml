@@ -35,11 +35,11 @@ Item {
 //         verticalCenter: parent.verticalCenter
 //     }
 
-    property int minimumWidth: 256 // FIXME: use above
-    property int minimumHeight: 256
+    property int minimumWidth: 999999
+    property int minimumHeight: minimumWidth
 
-    property int _h: 32
-
+    property int _h: 64
+    property int itemSpacing: 2
 
     property Component compactRepresentation: Component {
 
@@ -50,8 +50,6 @@ Item {
 
             }
             function loadNotificationsPlasmoid() {
-                print("------------------ ----------------------- -------------______")
-                print("------------------ ----------------------- -------------______")
                 var plugin = "org.kde.systrayplasmoidtest";
                 plugin = "org.kde.notifications";
                 print("Loading notifications plasmoid: " + plugin);
@@ -79,7 +77,7 @@ Item {
             PlasmaCore.ToolTip {
                 id: arrow_tooltip
                 target: arrow_widget
-                subText: dialog.visible ? i18n("Hide icons") : i18n("Show hidden icons")
+                //subText: dialog.visible ? i18n("Hide icons") : i18n("Show hidden icons")
             }
             Item {
                 id: notificationsContainer
@@ -100,10 +98,10 @@ Item {
                     opacity: 0;
                 }
                 Timer {
-                    interval: 2000
+                    interval: 0
                     running: true
                     onTriggered: {
-                        print(" 0000000000000000000000000000000000000000000000 ")
+                        //print(" 0000000000000000000000000000000000000000000000 ")
                         loadNotificationsPlasmoid();
                     }
                 }
@@ -120,16 +118,18 @@ Item {
                     bottom: parent.bottom
                     left: notificationsContainer.right
                     //leftMargin: spacing
+                    leftMargin: itemSpacing
                     right: arrow_widget.left
                     //verticalCenter: arrow_widget.verticalCenter
                 }
-                cellWidth: _h
-                cellHeight: _h
+                cellWidth: _h + itemSpacing
+                cellHeight: _h + itemSpacing
                 //orientation: Qt.Horizontal
                 interactive: false
                 //spacing: 4
                 //Rectangle { anchors.fill: parent; color: "blue"; opacity: 0.2; }
 
+                //model: host.shownTasks
                 model: host.tasks
 
                 delegate: TaskDelegate {}
@@ -142,7 +142,7 @@ Item {
                 id: arrow_widget
 
                 anchors {
-                    leftMargin: spacing
+                    leftMargin: itemSpacing
                     right: parent.right
                     verticalCenter: notificationsContainer.verticalCenter
                 }
