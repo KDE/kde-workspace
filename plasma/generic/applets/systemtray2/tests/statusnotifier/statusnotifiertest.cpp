@@ -46,7 +46,7 @@ class StatusNotifierTestPrivate {
 public:
     QString pluginName;
     QTimer* timer;
-    int interval = 1000;
+    int interval = 1500;
 
     KStatusNotifierItem* systemNotifier;
 
@@ -66,10 +66,6 @@ StatusNotifierTest::StatusNotifierTest() :
 
 
 
-    d->timer = new QTimer(this);
-    connect(d->timer, &QTimer::timeout, this, &StatusNotifierTest::timeout);
-    d->timer->setInterval(d->interval);
-    d->timer->start();
 }
 
 StatusNotifierTest::~StatusNotifierTest()
@@ -79,15 +75,15 @@ StatusNotifierTest::~StatusNotifierTest()
 
 int StatusNotifierTest::runMain()
 {
-
+    d->timer = new QTimer(this);
+    connect(d->timer, &QTimer::timeout, this, &StatusNotifierTest::timeout);
+    d->timer->setInterval(d->interval);
+    d->timer->start();
     return 0;
 }
 
 void StatusNotifierTest::timeout()
 {
-    qDebug() << "Timeout";
-    //qApp->quit();
-
     if (d->systemNotifier->status() == KStatusNotifierItem::Passive) {
         d->systemNotifier->setStatus(KStatusNotifierItem::Active);
         qDebug() << " Now Active";
@@ -98,10 +94,7 @@ void StatusNotifierTest::timeout()
         d->systemNotifier->setStatus(KStatusNotifierItem::Passive);
         qDebug() << " Now passive";
     }
-
 }
-
-
 
 #include "moc_statusnotifiertest.cpp"
 

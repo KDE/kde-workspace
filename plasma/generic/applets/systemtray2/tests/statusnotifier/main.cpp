@@ -39,7 +39,8 @@ int main(int argc, char **argv)
     parser.setApplicationDescription(description);
 
     StatusNotifierTest test;
+    int ex = test.runMain();
     app.exec();
-    return test.runMain();
+    return ex;
 }
 
