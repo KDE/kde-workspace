@@ -74,17 +74,6 @@ Item {
                 onReleased: PlasmaExtras.ReleasedAnimation { targetItem: arrow_widget }
             }
 
-            PlasmaCore.SvgItem {
-
-                id: arrow_widget
-
-                anchors.centerIn: parent
-                width: arrow_size
-                height: width
-
-                svg: PlasmaCore.Svg { imagePath: "widgets/arrows" }
-                elementId: "up-arrow"
-            }
 
             // Tooltip for arrow -----------------------------------------------------------------------------------------------
             PlasmaCore.ToolTip {
@@ -97,6 +86,7 @@ Item {
 
                 anchors {
                     top: parent.top
+                    //verticalCenter: parent.verticalCenter
                     left: parent.left
                 }
                 height: _h
@@ -107,7 +97,7 @@ Item {
                     border.width: 2;
                     border.color: "black";
                     color: "transparent";
-                    opacity: 0.3;
+                    opacity: 0;
                 }
                 Timer {
                     interval: 2000
@@ -121,20 +111,23 @@ Item {
 
             }
 
-            ListView {
+            GridView {
                 id: gridView
                 objectName: "gridView"
 
                 anchors {
+                    top: notificationsContainer.top
+                    bottom: parent.bottom
                     left: notificationsContainer.right
-                    leftMargin: spacing
-                    right: parent.right
-                    //verticalCenter: parent.verticalCenter
+                    //leftMargin: spacing
+                    right: arrow_widget.left
+                    //verticalCenter: arrow_widget.verticalCenter
                 }
-
-                orientation: Qt.Horizontal
+                cellWidth: _h
+                cellHeight: _h
+                //orientation: Qt.Horizontal
                 interactive: false
-                spacing: 4
+                //spacing: 4
                 //Rectangle { anchors.fill: parent; color: "blue"; opacity: 0.2; }
 
                 model: host.tasks
@@ -144,6 +137,21 @@ Item {
                 //delegate: StatusNotifierItem {}
             }
             property int arrow_size: 48 // size of an icon
+            PlasmaCore.SvgItem {
+
+                id: arrow_widget
+
+                anchors {
+                    leftMargin: spacing
+                    right: parent.right
+                    verticalCenter: notificationsContainer.verticalCenter
+                }
+                width: _h / 2
+                height: width
+
+                svg: PlasmaCore.Svg { imagePath: "widgets/arrows" }
+                elementId: "up-arrow"
+            }
 
         }
 
