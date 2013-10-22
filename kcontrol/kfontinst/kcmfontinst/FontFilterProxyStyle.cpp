@@ -19,7 +19,7 @@
     Boston, MA 02110-1301, USA.
 */
 
-#include <QtGui/QWidget>
+#include <QWidget>
 
 #include "FontFilterProxyStyle.h"
 

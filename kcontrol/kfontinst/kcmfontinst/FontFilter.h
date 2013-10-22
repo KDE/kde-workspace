@@ -25,8 +25,8 @@
  */
 
 #include <KDE/KLineEdit>
-#include <QtGui/QPixmap>
-#include <QtGui/QFontDatabase>
+#include <QPixmap>
+#include <QFontDatabase>
 
 class QLabel;
 class QMenu;

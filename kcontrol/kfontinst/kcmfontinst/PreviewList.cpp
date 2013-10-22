@@ -25,13 +25,13 @@
 #include "FontList.h"
 #include "Fc.h"
 #include "FcEngine.h"
-#include <QtGui/QPainter>
-#include <QtGui/QStyledItemDelegate>
-#include <QtGui/QApplication>
-#include <QtGui/QHeaderView>
-#include <QtGui/QPixmapCache>
-#include <QtGui/QContextMenuEvent>
-#include <QtGui/QX11Info>
+#include <QPainter>
+#include <QStyledItemDelegate>
+#include <QApplication>
+#include <QHeaderView>
+#include <QPixmapCache>
+#include <QContextMenuEvent>
+#include <QX11Info>
 
 namespace KFI
 {

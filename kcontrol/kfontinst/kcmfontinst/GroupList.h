@@ -28,11 +28,11 @@
 #include <KDE/KFileItem>
 #include <KDE/KIO/Job>
 #include <KDE/KDirLister>
-#include <QtCore/QList>
-#include <QtGui/QTreeView>
-#include <QtCore/QAbstractItemModel>
-#include <QtCore/QModelIndex>
-#include <QtCore/QVariant>
+#include <QList>
+#include <QTreeView>
+#include <QAbstractItemModel>
+#include <QModelIndex>
+#include <QVariant>
 #include "FontList.h"
 
 class QDragEnterEvent;

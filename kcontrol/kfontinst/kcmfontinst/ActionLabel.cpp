@@ -23,10 +23,10 @@
 
 #include "ActionLabel.h"
 #include <KDE/KIconLoader>
-#include <QtGui/QLabel>
-#include <QtCore/QTimer>
-#include <QtGui/QPixmap>
-#include <QtGui/QMatrix>
+#include <QLabel>
+#include <QTimer>
+#include <QPixmap>
+#include <QMatrix>
 
 namespace KFI
 {

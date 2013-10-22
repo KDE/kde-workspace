@@ -24,11 +24,11 @@
  * Boston, MA 02110-1301, USA.
  */
 
-#include <QtGui/QImage>
-#include <QtCore/QSize>
-#include <QtGui/QWidget>
-#include <QtGui/QColor>
-#include <QtGui/QPaintEvent>
+#include <QImage>
+#include <QSize>
+#include <QWidget>
+#include <QColor>
+#include <QPaintEvent>
 #include "KfiConstants.h"
 #include "FcEngine.h"
 

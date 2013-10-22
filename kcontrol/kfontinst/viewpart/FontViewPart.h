@@ -27,8 +27,8 @@
 #include <KDE/KParts/ReadOnlyPart>
 #include <KDE/KParts/BrowserExtension>
 #include <KDE/KUrl>
-#include <QtGui/QFrame>
-#include <QtCore/QMap>
+#include <QFrame>
+#include <QMap>
 #include "KfiConstants.h"
 #include "Misc.h"
 #include "FontPreview.h"

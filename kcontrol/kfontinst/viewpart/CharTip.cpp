@@ -35,14 +35,14 @@
 #include <KDE/KLocale>
 #include <KDE/KApplication>
 #include <KDE/KGlobalSettings>
-#include <QtGui/QLabel>
-#include <QtGui/QToolTip>
-#include <QtGui/QPainter>
-#include <QtCore/QTimer>
-#include <QtGui/QPixmap>
-#include <QtGui/QBoxLayout>
-#include <QtCore/QEvent>
-#include <QtGui/QResizeEvent>
+#include <QLabel>
+#include <QToolTip>
+#include <QPainter>
+#include <QTimer>
+#include <QPixmap>
+#include <QBoxLayout>
+#include <QEvent>
+#include <QResizeEvent>
 
 namespace KFI
 {

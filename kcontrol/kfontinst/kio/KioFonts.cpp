@@ -21,8 +21,8 @@
  * Boston, MA 02110-1301, USA.
  */
 
-#include <QtCore/QFile>
-#include <QtCore/QCoreApplication>
+#include <QFile>
+#include <QCoreApplication>
 #include <KDE/KComponentData>
 #include <KDE/KDebug>
 #include <KDE/KMimeType>

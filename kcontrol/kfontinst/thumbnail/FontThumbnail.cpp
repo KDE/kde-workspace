@@ -24,11 +24,11 @@
 #include "FontThumbnail.h"
 #include "KfiConstants.h"
 #include "FcEngine.h"
-#include <QtGui/QImage>
-#include <QtGui/QPixmap>
-#include <QtGui/QApplication>
-#include <QtGui/QPalette>
-#include <QtCore/QFile>
+#include <QImage>
+#include <QPixmap>
+#include <QApplication>
+#include <QPalette>
+#include <QFile>
 #include <KDE/KGlobalSettings>
 #include <KDE/KLocale>
 #include <KDE/KUrl>

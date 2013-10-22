@@ -24,8 +24,8 @@
  * Boston, MA 02110-1301, USA.
  */
 
-#include <QtCore/QLatin1String>
-#include <QtGui/QX11Info>
+#include <QLatin1String>
+#include <QX11Info>
 #include <X11/Xlib.h>
 #include <fixx11h.h>
 

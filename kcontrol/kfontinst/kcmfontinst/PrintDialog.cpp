@@ -22,9 +22,9 @@
  */
 
 #include "PrintDialog.h"
-#include <QtGui/QFrame>
-#include <QtGui/QLabel>
-#include <QtGui/QGridLayout>
+#include <QFrame>
+#include <QLabel>
+#include <QGridLayout>
 #include <KDE/KLocale>
 
 namespace KFI

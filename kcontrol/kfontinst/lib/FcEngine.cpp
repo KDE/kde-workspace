@@ -23,11 +23,11 @@
 
 #include "FcEngine.h"
 
-#include <QtGui/QPainter>
-#include <QtGui/QPixmap>
-#include <QtCore/QFile>
-#include <QtCore/QTextStream>
-#include <QtGui/QX11Info>
+#include <QPainter>
+#include <QPixmap>
+#include <QFile>
+#include <QTextStream>
+#include <QX11Info>
 #include <KDE/KUrl>
 #include <KDE/KConfig>
 #include <KDE/KConfigGroup>

@@ -24,8 +24,8 @@
  * Boston, MA 02110-1301, USA.
  */
 
-#include <QtCore/QAbstractItemModel>
-#include <QtGui/QTreeView>
+#include <QAbstractItemModel>
+#include <QTreeView>
 
 class QContextMenuEvent;
 

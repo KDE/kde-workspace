@@ -37,20 +37,20 @@
 #include <KDE/KPropertiesDialog>
 #include <KDE/KShell>
 #include <KDE/KStandardDirs>
-#include <QtGui/QLabel>
-#include <QtCore/QTimer>
-#include <QtGui/QGridLayout>
-#include <QtCore/QDir>
-#include <QtCore/QFileInfoList>
-#include <QtCore/QFileInfo>
-#include <QtGui/QHeaderView>
-#include <QtCore/QDateTime>
-#include <QtGui/QMenu>
-#include <QtGui/QContextMenuEvent>
-#include <QtGui/QAction>
-#include <QtGui/QApplication>
-#include <QtGui/QDesktopWidget>
-#include <QtCore/QProcess>
+#include <QLabel>
+#include <QTimer>
+#include <QGridLayout>
+#include <QDir>
+#include <QFileInfoList>
+#include <QFileInfo>
+#include <QHeaderView>
+#include <QDateTime>
+#include <QMenu>
+#include <QContextMenuEvent>
+#include <QAction>
+#include <QApplication>
+#include <QDesktopWidget>
+#include <QProcess>
 #if defined USE_POLICYKIT && USE_POLICYKIT==1
 #include <QtDBus/QDBusInterface>
 #endif

@@ -20,7 +20,7 @@
 */
 #ifndef CFONTFILTERPROXYSTYLE_H
 #define CFONTFILTERPROXYSTYLE_H
-#include <QtGui/QStyle>
+#include <QStyle>
 
 namespace KFI
 {

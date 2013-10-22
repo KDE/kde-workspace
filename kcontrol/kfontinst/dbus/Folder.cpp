@@ -21,14 +21,14 @@
  * Boston, MA 02110-1301, USA.
  */
 
-#include <QtCore/QDir>
-#include <QtCore/QFile>
-#include <QtCore/QCoreApplication>
-#include <QtCore/QTextStream>
-#include <QtCore/QProcess>
-#include <QtXml/QDomDocument>
-#include <QtXml/QDomElement>
-#include <QtXml/QDomNode>
+#include <QDir>
+#include <QFile>
+#include <QCoreApplication>
+#include <QTextStream>
+#include <QProcess>
+#include <QDomDocument>
+#include <QDomElement>
+#include <QDomNode>
 #include <KDE/KStandardDirs>
 #include <KDE/KSaveFile>
 #include <KDE/KShell>

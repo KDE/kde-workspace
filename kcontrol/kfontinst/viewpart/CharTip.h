@@ -24,7 +24,7 @@
  * Boston, MA 02110-1301, USA.
  */
 
-#include <QtGui/QFrame>
+#include <QFrame>
 #include "FcEngine.h"
 
 class QLabel;

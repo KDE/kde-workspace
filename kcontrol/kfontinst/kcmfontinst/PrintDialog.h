@@ -25,7 +25,7 @@
  */
 
 #include <KDE/KDialog>
-#include <QtGui/QComboBox>
+#include <QComboBox>
 
 namespace KFI
 {
