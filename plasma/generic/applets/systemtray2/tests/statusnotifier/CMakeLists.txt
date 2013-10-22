@@ -1,13 +1,13 @@
 project("statusnotifiertest")
 
 
-include(ECMMarkAsTest)
+#include(ECMMarkAsTest)
 
 add_executable(statusnotifiertest
     main.cpp
     statusnotifiertest.cpp
 )
-add_test(systemtray2-statusnotifiertest statusnotifiertest)
+#add_test(systemtray2-statusnotifiertest statusnotifiertest)
 
 target_link_libraries(statusnotifiertest
     Qt5::Core
@@ -15,4 +15,4 @@ target_link_libraries(statusnotifiertest
     KF5::KNotifications
     KF5::KI18n
 )
-ecm_mark_as_test(statusnotifiertest)
+#ecm_mark_as_test(statusnotifiertest)
