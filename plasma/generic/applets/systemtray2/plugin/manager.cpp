@@ -78,13 +78,10 @@ QQuickItem* Manager::rootItem() const
     return d->rootItem;
 }
 
-
 void Manager::setRootItem(QQuickItem* item)
 {
     d->rootItem = item;
 }
-
-
 
 QList<Task*> Manager::tasks() const
 {
