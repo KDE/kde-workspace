@@ -119,7 +119,7 @@ enum Response
 static void addIcon(QGridLayout *layout, QFrame *page, const char *iconName, int iconSize)
 {
     QLabel *icon=new QLabel(page);
-    icon->setPixmap(KIcon(iconName).pixmap(iconSize));
+    icon->setPixmap(QIcon::fromTheme(iconName).pixmap(iconSize));
     icon->setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Maximum);
     layout->addWidget(icon, 0, 0);
 }

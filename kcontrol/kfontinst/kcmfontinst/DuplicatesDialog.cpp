@@ -422,14 +422,14 @@ CFontFileListView::CFontFileListView(QWidget *parent)
 
     itsMenu=new QMenu(this);
     if(!Misc::app(KFI_VIEWER).isEmpty())
-        itsMenu->addAction(KIcon("kfontview"), i18n("Open in Font Viewer"),
+        itsMenu->addAction(QIcon::fromTheme("kfontview"), i18n("Open in Font Viewer"),
                            this, SLOT(openViewer()));
-    itsMenu->addAction(KIcon("document-properties"), i18n("Properties"),
+    itsMenu->addAction(QIcon::fromTheme("document-properties"), i18n("Properties"),
                        this, SLOT(properties()));
     itsMenu->addSeparator();
     itsUnMarkAct=itsMenu->addAction(i18n("Unmark for Deletion"),
                                     this, SLOT(unmark()));
-    itsMarkAct=itsMenu->addAction(KIcon("edit-delete"), i18n("Mark for Deletion"),
+    itsMarkAct=itsMenu->addAction(QIcon::fromTheme("edit-delete"), i18n("Mark for Deletion"),
                                   this, SLOT(mark()));
 
     connect(this, SIGNAL(itemSelectionChanged()), SLOT(selectionChanged()));

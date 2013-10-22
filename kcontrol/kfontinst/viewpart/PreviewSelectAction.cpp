@@ -30,7 +30,7 @@ namespace KFI
 {
 
 CPreviewSelectAction::CPreviewSelectAction(QObject *parent, Mode mode)
-                    : KSelectAction(KIcon("character-set"), i18n("Preview Type"), parent),
+                    : KSelectAction(QIcon::fromTheme("character-set"), i18n("Preview Type"), parent),
                       itsNumUnicodeBlocks(0)
 {
     setMode(mode);
