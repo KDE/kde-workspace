@@ -28,6 +28,7 @@
 #include <KDE/KParts/MainWindow>
 
 class QAction;
+class KUrl;
 
 namespace KFI
 {

@@ -41,7 +41,7 @@
 #include <QGroupBox>
 #include <QProcess>
 #include <KDE/KLocale>
-#include <KDE/KIO/NetAccess>
+#include <kio/netaccess.h>
 #include <KDE/KIO/Job>
 #include <KDE/KIO/JobUiDelegate>
 #include <KDE/KGlobal>

@@ -29,6 +29,7 @@
 #include <sys/types.h>
 
 class KTempDir;
+class KUrl;
 
 namespace KFI
 {

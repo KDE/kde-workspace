@@ -32,7 +32,7 @@
 #include <KDE/KTempDir>
 #include <KDE/KMessageBox>
 #include <KDE/KStandardDirs>
-#include <KDE/KIO/NetAccess>
+#include <kio/netaccess.h>
 #include "JobRunner.h"
 #include "CreateParent.h"
 

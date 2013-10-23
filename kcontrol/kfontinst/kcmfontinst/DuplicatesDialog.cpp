@@ -34,6 +34,7 @@
 #include <KDE/KMessageBox>
 #include <KDE/SuProcess>
 #include <KDE/KFileItem>
+#include <KDE/KMimeType>
 #include <KDE/KPropertiesDialog>
 #include <KDE/KShell>
 #include <KDE/KStandardDirs>

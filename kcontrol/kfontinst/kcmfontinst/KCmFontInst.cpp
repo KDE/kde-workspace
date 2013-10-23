@@ -50,7 +50,7 @@
 #include <KDE/KFileDialog>
 #include <KDE/KMessageBox>
 #include <KDE/KIO/Job>
-#include <KDE/KIO/NetAccess>
+#include <kio/netaccess.h>
 #include <KDE/KPushButton>
 #include <KDE/KGlobal>
 #include <KDE/KGuiItem>
@@ -69,6 +69,7 @@
 #include <KDE/KStandardAction>
 #include <KDE/KZip>
 #include <KDE/KNS3/DownloadDialog>
+#include <KAction>
 
 #define CFG_GROUP                  "Main Settings"
 #define CFG_PREVIEW_SPLITTER_SIZES "PreviewSplitterSizes"

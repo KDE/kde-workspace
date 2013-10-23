@@ -26,6 +26,7 @@
 
 #include <KDE/KParts/ReadOnlyPart>
 #include <KDE/KParts/BrowserExtension>
+#include <KDE/KSharedConfig>
 #include <KDE/KUrl>
 #include <QFrame>
 #include <QMap>

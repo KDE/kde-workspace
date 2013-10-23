@@ -90,7 +90,7 @@ class CFontFilter : public KLineEdit
     QFontDatabase::WritingSystem itsCurrentWs;
     QStringList                  itsCurrentFileTypes;
     QPixmap                      itsPixmaps[NUM_CRIT];
-    KAction                      *itsActions[NUM_CRIT];
+    QAction                      *itsActions[NUM_CRIT];
     QActionGroup                 *itsActionGroup;
 };
 

@@ -32,7 +32,7 @@
 #include <KDE/KConfig>
 #include <KDE/KConfigGroup>
 #include <KDE/KGlobalSettings>
-#include <KDE/KIO/NetAccess>
+#include <kio/netaccess.h>
 #include <KDE/KGlobal>
 #include <KDE/KLocale>
 #include <math.h>

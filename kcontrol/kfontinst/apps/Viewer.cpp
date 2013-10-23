@@ -23,6 +23,7 @@
 
 #include "Viewer.h"
 #include "KfiConstants.h"
+#include <KDE/KConfigGroup>
 #include <KDE/KCmdLineArgs>
 #include <k4aboutdata.h>
 #include <KDE/KUniqueApplication>
@@ -36,6 +37,8 @@
 #include <KDE/KActionCollection>
 #include <KDE/KShortcutsDialog>
 #include <KDE/KParts/BrowserExtension>
+#include <KDE/KUrl>
+#include <QAction>
 
 namespace KFI
 {

@@ -33,6 +33,7 @@
 #include <KDE/KSaveFile>
 #include <KDE/KShell>
 #include <KDE/KDebug>
+#include <KDE/KGlobal>
 #include <fontconfig/fontconfig.h>
 #include "Folder.h"
 #include "FcConfig.h"
