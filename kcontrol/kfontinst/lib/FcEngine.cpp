@@ -40,6 +40,7 @@
 #include <X11/Xft/Xft.h>
 #include <X11/extensions/Xrender.h>
 #include "fixx11h.h"
+#include <xcb/xcb_image.h>
 #include "File.h"
 
 //#define KFI_FC_DEBUG
@@ -526,9 +527,22 @@ bool CFcEngine::Xft::drawAllChars(XftFont *xftFont, int fontHeight, int &x, int 
     return rv;
 }
 
+void cleanupXImage(void *data)
+{
+    xcb_image_destroy((xcb_image_t*)data);
+}
+
 QImage CFcEngine::Xft::toImage(int w, int h) const
 {
-    return XftDrawPicture(itsDraw) ? QPixmap::fromX11Pixmap(itsPix.x11).toImage().copy(0, 0, w, h) : QImage();
+    if (!XftDrawPicture(itsDraw)) {
+        return QImage();
+    }
+    xcb_image_t *xImage = xcb_image_get(QX11Info::connection(), itsPix.x11, 0, 0, itsPix.currentW,
+                                        itsPix.currentH, ~0, XCB_IMAGE_FORMAT_Z_PIXMAP);
+    if (!xImage) {
+        return QImage();
+    }
+    return QImage(xImage->data, xImage->width, xImage->height, xImage->stride, QImage::Format_ARGB32_Premultiplied, &cleanupXImage, xImage);
 }
     
 inline int point2Pixel(int point)
