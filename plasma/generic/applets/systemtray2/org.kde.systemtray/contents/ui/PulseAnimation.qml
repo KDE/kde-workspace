@@ -26,7 +26,7 @@ SequentialAnimation {
 
     property Item targetItem
     //property int duration: Animations.normalDuration
-    property int duration: 500
+    property int duration: 1000
 
     // Fast scaling while we're animation == more FPS
     ScriptAction { script: { targetItem.smooth = false } }
@@ -39,17 +39,16 @@ SequentialAnimation {
             target: targetItem
             property: "scale"
             from: 1
-            to: 1.2
-            duration: pulseAnimation.duration
+            to: 1.3
+            duration: pulseAnimation.duration / 2
             easing.type: Easing.InExpo;
         }
         PropertyAnimation {
-            //running: root.active
             target: targetItem
             property: "scale"
-            from: 1.2
+            from: 1.3
             to: 1
-            duration: pulseAnimation.duration
+            duration: pulseAnimation.duration / 2
             easing.type: Easing.OutExpo;
         }
 
