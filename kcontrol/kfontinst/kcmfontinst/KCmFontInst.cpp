@@ -172,7 +172,7 @@ class CProgressBar : public QProgressBar
 int CPushButton::theirHeight=0;
 
 CKCmFontInst::CKCmFontInst(QWidget *parent, const QVariantList&)
-            : KCModule(FontInstallFactory::componentData(), parent),
+            : KCModule(parent),
               itsPreview(NULL),
               itsConfig(KFI_UI_CFG_FILE),
               itsJob(NULL),
