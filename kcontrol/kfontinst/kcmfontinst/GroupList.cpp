@@ -921,13 +921,13 @@ void CGroupListView::contextMenuEvent(QContextMenuEvent *ev)
 
 void CGroupListView::dragEnterEvent(QDragEnterEvent *event)
 {
-    if(event->provides(KFI_FONT_DRAG_MIME))
+    if(event->mimeData()->hasFormat(KFI_FONT_DRAG_MIME))
         event->acceptProposedAction();
 }
 
 void CGroupListView::dragMoveEvent(QDragMoveEvent *event)
 {
-    if(event->provides(KFI_FONT_DRAG_MIME))
+    if(event->mimeData()->hasFormat(KFI_FONT_DRAG_MIME))
     {
         QModelIndex index(indexAt(event->pos()));
 
@@ -979,7 +979,7 @@ void CGroupListView::dropEvent(QDropEvent *event)
 {
     emit info(QString());
     drawHighlighter(QModelIndex());
-    if(event->provides(KFI_FONT_DRAG_MIME))
+    if(event->mimeData()->hasFormat(KFI_FONT_DRAG_MIME))
     {
         event->acceptProposedAction();
 

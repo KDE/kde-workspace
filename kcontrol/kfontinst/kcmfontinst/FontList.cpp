@@ -1969,13 +1969,13 @@ void CFontListView::startDrag(Qt::DropActions supportedActions)
 
 void CFontListView::dragEnterEvent(QDragEnterEvent *event)
 {
-    if(itsAllowDrops && event->provides("text/uri-list")) // "application/x-kde-urilist" ??
+    if(itsAllowDrops && event->mimeData()->hasFormat("text/uri-list")) // "application/x-kde-urilist" ??
         event->acceptProposedAction();
 }
 
 void CFontListView::dropEvent(QDropEvent *event)
 {
-    if(itsAllowDrops && event->provides("text/uri-list"))
+    if(itsAllowDrops && event->mimeData()->hasFormat("text/uri-list"))
     {
         event->acceptProposedAction();
 
