@@ -6,6 +6,7 @@ kde4_add_ui_files(kcm_clock_PART_SRCS dateandtime.ui)
 kde4_add_plugin(kcm_clock ${kcm_clock_PART_SRCS})
 
 target_link_libraries(kcm_clock
+    Qt5::DBus
     KF5::ItemViews
     KF5::KAuth
     KF5::KCMUtils
