@@ -218,7 +218,7 @@ void CFontViewPart::timeout()
     if(!itsInstallButton)
         return;
 
-    bool    isFonts(KFI_KIO_FONTS_PROTOCOL==url().protocol()),
+    bool    isFonts(KFI_KIO_FONTS_PROTOCOL==url().scheme()),
             showFs(false),
             package(false);
     int     fileIndex(-1);
@@ -244,13 +244,13 @@ void CFontViewPart::timeout()
         if(!found)
         {
             // Check if url is "fonts:/<font> if so try fonts:/System/<font>, then fonts:/Personal<font>
-            QStringList pathList(url().path(KUrl::RemoveTrailingSlash).split('/', QString::SkipEmptyParts));
+            QStringList pathList(url().adjusted(QUrl::StripTrailingSlash).path().split('/', QString::SkipEmptyParts));
 
             if(pathList.count()==1)
             {
-                found=KIO::NetAccess::stat(QString("fonts:/"+i18n(KFI_KIO_FONTS_SYS)+'/'+pathList[0]), udsEntry, NULL);
+                found=KIO::NetAccess::stat(QUrl(QString("fonts:/"+i18n(KFI_KIO_FONTS_SYS)+'/'+pathList[0])), udsEntry, NULL);
                 if(!found)
-                    found=KIO::NetAccess::stat(QString("fonts:/"+i18n(KFI_KIO_FONTS_USER)+'/'+pathList[0]), udsEntry, NULL);
+                    found=KIO::NetAccess::stat(QUrl(QString("fonts:/"+i18n(KFI_KIO_FONTS_USER)+'/'+pathList[0])), udsEntry, NULL);
             }
         }
         
@@ -328,7 +328,7 @@ void CFontViewPart::timeout()
     itsInstallButton->setEnabled(false);
 
     if(itsFontDetails.family.isEmpty())
-        emit setWindowCaption(url().prettyUrl());
+        emit setWindowCaption(url().toDisplayString());
     else
         FcInitReinitialize();
 
@@ -362,7 +362,7 @@ void CFontViewPart::previewStatus(bool st)
             checkInstallable();
             if(Misc::app(KFI_PRINTER).isEmpty())
                 printable=false;
-            if(KFI_KIO_FONTS_PROTOCOL==url().protocol())
+            if(KFI_KIO_FONTS_PROTOCOL==url().scheme())
                 printable=!Misc::isHidden(url());
             else if(!FC::decode(url()).family.isEmpty())
                 printable=!Misc::isHidden(FC::getFile(url()));
@@ -403,7 +403,7 @@ void CFontViewPart::install()
         args << "--embed" <<  QString().sprintf("0x%x", (unsigned int)(itsFrame->window()->winId()))
              << "--caption" << KGlobal::caption().toUtf8()
              << "--icon" << "kfontview"
-             << url().prettyUrl();
+             << url().toDisplayString();
 
         connect(itsProc, SIGNAL(finished(int,QProcess::ExitStatus)), SLOT(installlStatus()));
         itsProc->start(Misc::app(KFI_INSTALLER), args);

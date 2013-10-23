@@ -753,7 +753,7 @@ void CKCmFontInst::zipGroup()
 
         if(grp)
         {
-            QString fileName=KFileDialog::getSaveFileName(grp->name(), "application/zip", this, i18n("Export Group"),
+            QString fileName=KFileDialog::getSaveFileName(QUrl::fromLocalFile(grp->name()), QStringLiteral("application/zip"), this, i18n("Export Group"),
                                                           KFileDialog::ConfirmOverwrite);
 
             if(!fileName.isEmpty())
