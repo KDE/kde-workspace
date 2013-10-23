@@ -30,14 +30,10 @@
 #include <KLocalizedString>
 #include <KStatusNotifierItem>
 
-#include <QDir>
-#include <QElapsedTimer>
-#include <QFileInfo>
-#include <QMap>
-#include <QStandardPaths>
 #include <QStringList>
 #include <QTimer>
-#include <QJsonObject>
+
+#include <QPushButton>
 
 
 static QTextStream cout(stdout);
@@ -52,8 +48,8 @@ public:
 
 };
 
-StatusNotifierTest::StatusNotifierTest() :
-    QObject(0)
+StatusNotifierTest::StatusNotifierTest(QWidget* parent) :
+    QDialog(parent)
 {
     d = new StatusNotifierTestPrivate;
 
@@ -62,10 +58,18 @@ StatusNotifierTest::StatusNotifierTest() :
     d->systemNotifier->setIconByName("plasma");
     d->systemNotifier->setStatus(KStatusNotifierItem::Active);
     d->systemNotifier->setToolTipTitle(i18nc("tooltip title", "System Service Item"));
-    d->systemNotifier->setTitle(i18nc("tooltip title", "System Service Item"));
+    d->systemNotifier->setTitle(i18nc("title", "StatusNotifierTest"));
+    d->systemNotifier->setToolTipSubTitle(i18nc("tooltip subtitle", "Some explanation from the beach."));
+
+    setupUi(this);
+
+    connect(updateButton, &QPushButton::clicked, this, &StatusNotifierTest::updateNotifier);
 
 
+    updateUi();
 
+
+    show();
 }
 
 StatusNotifierTest::~StatusNotifierTest()
@@ -73,12 +77,53 @@ StatusNotifierTest::~StatusNotifierTest()
     delete d;
 }
 
+void StatusNotifierTest::updateUi()
+{
+    statusActive->setChecked(d->systemNotifier->status() == KStatusNotifierItem::Active);
+    statusPassive->setChecked(d->systemNotifier->status() == KStatusNotifierItem::Passive);
+    statusNeedsAttention->setChecked(d->systemNotifier->status() == KStatusNotifierItem::NeedsAttention);
+
+    statusActive->setEnabled(!statusAuto->isChecked());
+    statusPassive->setEnabled(!statusAuto->isChecked());
+    statusNeedsAttention->setEnabled(!statusAuto->isChecked());
+
+    iconName->setText(d->systemNotifier->iconName());
+    tooltipText->setText(d->systemNotifier->toolTipTitle());
+    tooltipSubtext->setText(d->systemNotifier->toolTipSubTitle());
+
+}
+
+void StatusNotifierTest::updateNotifier()
+{
+    if (statusAuto->isChecked()) {
+        d->timer->start();
+    } else {
+        d->timer->stop();
+    }
+
+    KStatusNotifierItem::ItemStatus s = KStatusNotifierItem::Passive;
+    if (statusActive->isChecked()) {
+        s = KStatusNotifierItem::Active;
+    } else if (statusNeedsAttention->isChecked()) {
+        s = KStatusNotifierItem::NeedsAttention;
+    }
+    d->systemNotifier->setStatus(s);
+
+    d->systemNotifier->setIconByName(iconName->text());
+
+    d->systemNotifier->setToolTip(iconName->text(), tooltipText->text(), tooltipSubtext->text());
+
+    updateUi();
+}
+
+
+
 int StatusNotifierTest::runMain()
 {
     d->timer = new QTimer(this);
     connect(d->timer, &QTimer::timeout, this, &StatusNotifierTest::timeout);
     d->timer->setInterval(d->interval);
-    d->timer->start();
+    //d->timer->start();
     return 0;
 }
 
@@ -94,6 +139,7 @@ void StatusNotifierTest::timeout()
         d->systemNotifier->setStatus(KStatusNotifierItem::Passive);
         qDebug() << " Now passive";
     }
+    updateUi();
 }
 
 #include "moc_statusnotifiertest.cpp"

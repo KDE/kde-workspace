@@ -20,21 +20,27 @@
 #ifndef STATUSNOTIFIERTEST_H
 #define STATUSNOTIFIERTEST_H
 
+#include <QDialog>
 #include <QObject>
+#include <QWidget>
+
+#include "ui_statusnotifiertest.h"
 
 class StatusNotifierTestPrivate;
 
-class StatusNotifierTest : public QObject
+class StatusNotifierTest : public QDialog, public Ui_StatusNotifierTest
 {
     Q_OBJECT
 
     public:
-        StatusNotifierTest();
+        StatusNotifierTest(QWidget* parent = 0);
         virtual ~StatusNotifierTest();
 
     public Q_SLOTS:
         int runMain();
         void timeout();
+        void updateUi();
+        void updateNotifier();
 
     private:
         StatusNotifierTestPrivate* d;

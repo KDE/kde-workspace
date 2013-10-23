@@ -1,18 +1,21 @@
 project("statusnotifiertest")
 
-
-#include(ECMMarkAsTest)
-
-add_executable(statusnotifiertest
+set(statusnotifiertest_SRCS
     main.cpp
     statusnotifiertest.cpp
 )
-#add_test(systemtray2-statusnotifiertest statusnotifiertest)
+
+qt5_wrap_ui(statusnotifiertest_SRCS statusnotifiertest.ui)
+
+add_executable(statusnotifiertest ${statusnotifiertest_SRCS})
 
 target_link_libraries(statusnotifiertest
+    Qt5::Widgets
     Qt5::Core
     KF5::KService
     KF5::KNotifications
     KF5::KI18n
 )
-#ecm_mark_as_test(statusnotifiertest)
+
+include(ECMMarkAsTest)
+ecm_mark_as_test(statusnotifiertest)
