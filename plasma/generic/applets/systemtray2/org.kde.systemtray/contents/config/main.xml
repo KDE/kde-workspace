@@ -9,6 +9,9 @@
     <entry name="taskPreferences" type="StringList">
       <default></default>
     </entry>
+    <entry name="itemSize" type="int">
+      <default>48</default>
+    </entry>
     <entry name="extraItems" type="StringList">
       <default></default>
     </entry>

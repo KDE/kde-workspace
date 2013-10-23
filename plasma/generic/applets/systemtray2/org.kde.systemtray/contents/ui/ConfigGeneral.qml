@@ -32,9 +32,56 @@ Item {
     implicitWidth: mainColumn.implicitWidth
     implicitHeight: pageColumn.implicitHeight
 
-//     property alias cfg_Test: testConfigField.text
+    property int cfg_itemSize: plasmoid.configuration.itemSize
 //     property alias cfg_BoolTest: testBoolConfigField.checked
 
+    function indexToSize(ix) {
+        var s = 22;
+        if (ix < 1) {
+            s = 16;
+        } else if (ix == 1) {
+            s = 22;
+        } else if (ix == 2) {
+            s = 32;
+        } else if (ix == 3) {
+            s = 48;
+        } else if (ix == 4) {
+            s = 64;
+        } else if (ix == 5) {
+            s = 96;
+        } else if (ix == 6) {
+            s = 128;
+        } else if (ix == 7) {
+            s = 192;
+        } else if (ix == 8) {
+            s = 256;
+        }
+        return s;
+    }
+
+    function sizeToIndex(s) {
+        var ix = 0;
+        if (s < 16) {
+            ix = 0;
+        } else if (s <=22) {
+            ix = 1;
+        } else if (s <=32) {
+            ix = 2;
+        } else if (s <= 48) {
+            ix = 3;
+        } else if (s <= 64) {
+            ix = 4;
+        } else if (s <= 96) {
+            ix = 5;
+        } else if (s <= 128) {
+            ix = 6;
+        } else if (s <=192) {
+            ix = 7;
+        } else if (s <= 256) {
+            ix = 8;
+        }
+        return ix;
+    }
     SystemTray.Host {
         id: host
     }
@@ -45,6 +92,37 @@ Item {
         spacing: theme.defaultFont.pixelSize / 2
         PlasmaExtras.Title {
             text: i18n("SystemTray Settings")
+        }
+        Row {
+            width: parent.width
+            height: itemSizeSlider.height
+            QtControls.Label {
+                id: itemSizeLabel
+                text: i18n("Icon size:")
+                width: parent.width / 4
+            }
+            QtControls.Slider {
+                id: itemSizeSlider
+                width: parent.width / 2
+
+                value: sizeToIndex(cfg_itemSize)
+                minimumValue: 0
+                maximumValue: 8
+                stepSize: 1
+                tickmarksEnabled: true
+                updateValueWhileDragging: true
+                onValueChanged: cfg_itemSize = indexToSize(value);
+
+            }
+            PlasmaCore.IconItem {
+                source: "nepomuk"
+                width: cfg_itemSize
+                height: width
+//                 anchors {
+//                     left: itemSizeSlider.right
+//                     verticalCenter: itemSizeSlider.verticalCenter
+//                 }
+            }
         }
         ListView {
             model: host.categories

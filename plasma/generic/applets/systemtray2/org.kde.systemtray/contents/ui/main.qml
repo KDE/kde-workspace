@@ -44,7 +44,7 @@ Item {
     property int minimumWidth: 300
     property int minimumHeight: minimumWidth
 
-    property int _h: 64
+    property int _h: plasmoid.configuration.itemSize
     property int itemSpacing: 2
 
     property Component compactRepresentation: Component {
