@@ -141,7 +141,6 @@ int main(int argc, char **argv)
 
     if(urls.count())
     {
-        KLocale::setMainCatalog(KFI_CATALOGUE);
 
         KApplication    app;
         QString         opt(args->getOption("embed"));

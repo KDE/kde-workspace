@@ -184,7 +184,6 @@ CKCmFontInst::CKCmFontInst(QWidget *parent, const QVariantList&)
 {
     setButtons(Help);
 
-    KGlobal::locale()->insertCatalog(KFI_CATALOGUE);
     KIconLoader::global()->addAppDir(KFI_NAME);
     KIconLoader::global()->reconfigure(KFI_NAME, KGlobal::dirs());
 

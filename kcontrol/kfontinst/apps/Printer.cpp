@@ -483,7 +483,6 @@ int main(int argc, char **argv)
 
         if(fonts.count())
         {
-            KLocale::setMainCatalog(KFI_CATALOGUE);
             CPrinter(createParent(args->getOption("embed").toInt(0, 16))).print(fonts, size);
 
             return 0;
