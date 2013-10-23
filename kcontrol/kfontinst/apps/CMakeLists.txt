@@ -18,9 +18,28 @@ set_target_properties(kfontinst_bin PROPERTIES OUTPUT_NAME kfontinst)
 set_target_properties(kfontprint_bin PROPERTIES OUTPUT_NAME kfontprint)
 set_target_properties(kfontview_bin PROPERTIES OUTPUT_NAME kfontview)
 
-target_link_libraries(kfontinst_bin KF5::KIOCore KF5::KIOWidgets ${KDE4_KDESU_LIBS} ${X11_X11_LIB} kfontinst)
-target_link_libraries(kfontprint_bin ${X11_X11_LIB} ${KDE4_KDEUI_LIBS} ${FREETYPE_LIBRARIES} kfontinstui kfontinst)
-target_link_libraries(kfontview_bin ${KDE4_KPARTS_LIBS} kfontinstui kfontinst )
+target_link_libraries(kfontinst_bin
+    Qt5::X11Extras
+    KF5::KArchive
+    KF5::KIconThemes
+    KF5::KIOCore
+    KF5::KIOWidgets
+    KF5::XmlGui
+    ${KDE4Support_LIBRARIES}
+    ${X11_X11_LIB}
+    kfontinst
+)
+target_link_libraries(kfontprint_bin
+    Qt5::PrintSupport
+    KF5::KIconThemes
+    KF5::KPrintUtils
+    ${KDE4Support_LIBRARIES}
+    ${X11_X11_LIB}
+    ${FREETYPE_LIBRARIES}
+    kfontinstui
+    kfontinst
+)
+target_link_libraries(kfontview_bin KF5::KParts KF5::XmlGui kfontinstui kfontinst )
 
 install(TARGETS kfontinst_bin ${INSTALL_TARGETS_DEFAULT_ARGS} )
 install(TARGETS kfontprint_bin DESTINATION ${LIBEXEC_INSTALL_DIR} )
