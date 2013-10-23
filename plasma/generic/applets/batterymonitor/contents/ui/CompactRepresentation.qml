@@ -49,9 +49,9 @@ ListView {
         //return (plasmoid.formFactor == PlasmaCore.Types.Vertical || plasmoid.formFactor == PlasmaCore.Types.Horizontal);
     }
 
-    Component.onCompleted: {
-        print("JOOOOOO" + batteries);
-    }
+//     Component.onCompleted: {
+//         print("JOOOOOO" + batteries);
+//     }
 
     delegate: Item {
         id: batteryContainer
@@ -91,11 +91,11 @@ ListView {
             Components.Label {
                 id: batteryLabel
                 width: parent.width
-                height: paintedHeight
+                height: visible ? paintedHeight : 0
                 horizontalAlignment: Text.AlignHCenter
                 text: percent + "%"// FIXME i18nc("battery percentage below battery icon", "%1%", percent)
-                font.pixelSize: Math.max(batteryContainer.iconSize/8, 10)
-                visible: true//!isConstrained()
+                font.pixelSize: Math.max(batteryContainer.iconSize/8, theme.smallestReadableFont.pixelSize)
+                visible: false//!isConstrained()
             }
         }
     }
