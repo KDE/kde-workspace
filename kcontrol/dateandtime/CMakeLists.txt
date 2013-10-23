@@ -14,7 +14,6 @@ target_link_libraries(kcm_clock
     KF5::KIOWidgets
     KF5::Plasma
     ${KDE4Support_LIBRARIES}
-    ${KDE4Attic_LIBRARIES}
 )
 
 install(TARGETS kcm_clock  DESTINATION ${PLUGIN_INSTALL_DIR} )

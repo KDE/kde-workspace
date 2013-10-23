@@ -16,11 +16,12 @@ kservice_desktop_to_json(plasma-dataengine-applicationjobs.desktop)
 
 plasma_add_plugin(plasma_engine_applicationjobs ${kuiserver_engine_SRCS})
 target_link_libraries(plasma_engine_applicationjobs
+  Qt5::DBus
   KF5::KI18n
   KF5::KIOCore
   KF5::Plasma
   KF5::KService
-  ${KDE4Attic_LIBRARIES}
+  ${KDE4Support_LIBRARIES}
 )
 
 install(TARGETS plasma_engine_applicationjobs DESTINATION ${PLUGIN_INSTALL_DIR}/plasma/dataengine)

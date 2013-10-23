@@ -27,7 +27,6 @@ target_link_libraries(systemtrayplugin
     KF5::KIconThemes
     KF5::KIOCore
     KF5::KIOWidgets
-    KF5::KDE4Attic
     ${KDE4Support_LIBRARIES}
     )
 
