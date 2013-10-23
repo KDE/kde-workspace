@@ -73,7 +73,7 @@ Item {
     }
 
     Component.onCompleted: {
-        host.rootItem = gridView;
+        //host.rootItem = gridView;
         //print(" taskitem: " + taskItem + " " + iconName);
         if ((taskItem != undefined)) {
             print( " TASK ITEM CHANGED"  + (taskItem != undefined));

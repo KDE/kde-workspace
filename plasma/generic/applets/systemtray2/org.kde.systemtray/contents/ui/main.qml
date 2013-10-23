@@ -35,7 +35,13 @@ Item {
 //         verticalCenter: parent.verticalCenter
 //     }
 
-    property int minimumWidth: 999999
+//     width: 356
+//     height: 356
+
+    property int implicitWidth: 256
+    property int implicitHeight: 256
+
+    property int minimumWidth: 300
     property int minimumHeight: minimumWidth
 
     property int _h: 64
@@ -45,7 +51,7 @@ Item {
 
         Item {
             SystemTray.Host {
-                id: host
+                id: compacthost
                 rootItem: gridView
 
             }
@@ -53,8 +59,8 @@ Item {
                 var plugin = "org.kde.systrayplasmoidtest";
                 plugin = "org.kde.notifications";
                 print("Loading notifications plasmoid: " + plugin);
-                host.rootItem = gridView;
-                var notificationsPlasmoid = host.notificationsPlasmoid(plugin);
+                compacthost.rootItem = gridView;
+                var notificationsPlasmoid = compacthost.notificationsPlasmoid(plugin);
                 if (notificationsPlasmoid == null) {
                     print("Bah. Failed to load " + plugin);
                     return;
@@ -77,7 +83,7 @@ Item {
             PlasmaCore.ToolTip {
                 id: arrow_tooltip
                 target: arrow_widget
-                //subText: dialog.visible ? i18n("Hide icons") : i18n("Show hidden icons")
+                subText: plasmoid.expanded ? i18n("Hide icons") : i18n("Show hidden icons")
             }
             Item {
                 id: notificationsContainer
@@ -129,8 +135,8 @@ Item {
                 //spacing: 4
                 //Rectangle { anchors.fill: parent; color: "blue"; opacity: 0.2; }
 
-                //model: host.shownTasks
-                model: host.tasks
+                model: compacthost.tasks
+                //model: host.tasks
 
                 delegate: TaskDelegate {}
 
@@ -157,6 +163,27 @@ Item {
 
     }
 
-    Rectangle { color: "blue"; width: 200; height: 48; }
+    //Rectangle { color: "blue"; width: 200; height: 48; }
+    Rectangle { color: "orange"; anchors.fill: parent; opacity: 0.4; }
+    GridView {
+        id: hiddenView
+        objectName: "hiddenView"
+        anchors {
+            fill: parent
+        }
+        cellWidth: _h + itemSpacing
+        cellHeight: _h + itemSpacing
+        //orientation: Qt.Horizontal
+        interactive: false
+        //spacing: 4
+        //Rectangle { anchors.fill: parent; color: "blue"; opacity: 0.2; }
+
+        //model: host.hiddenTasks
+        //model: host.tasks
+
+        delegate: TaskDelegate {}
+
+        //delegate: StatusNotifierItem {}
+    }
 
 }
