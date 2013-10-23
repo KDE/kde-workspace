@@ -93,6 +93,7 @@ static bool sufficientSpace(int y, QPainter *painter, QFont font, const int *siz
     return (y+required)<pageHeight;
 }
 
+#warning needs porting to adjust for QFont changes
 #if defined(Q_WS_X11) || defined(Q_WS_QWS)
 static QString getChars(FT_Face face)
 {
