@@ -32,25 +32,24 @@ Item {
     opacity: status != SystemTray.Task.Passive ? 1 : 0.3
 
     property bool isShown: status != SystemTray.Task.Passive
-
     property int taskStatus: status
 
-    onTaskStatusChanged: {
-        //print("STATUSCHANGED");
-        print("new status [" + name + "]: " + taskStatusString())
-
-    }
-    //Rectangle { anchors.fill: parent; color: "orange"; opacity: 0.4; }
+//     onTaskStatusChanged: {
+//         print("new status [" + name + "]: " + taskStatusString())
+//     }
+//
     PlasmaCore.IconItem {
+        id: itemIcon
         anchors.fill: parent
         //visible: source != ""
         source: iconName != "" ? iconName : (typeof(icon) != "undefined" ? icon : "")
     }
 
-//     PlasmaComponents.Label {
-//         anchors.fill: parent
-//         text: taskStatusMnemonic()
-//     }
+    PulseAnimation {
+        targetItem: itemIcon
+        running: taskStatus == SystemTray.Task.NeedsAttention
+    }
+
     function taskStatusMnemonic() {
         if (status == SystemTray.Task.Passive) {
             return "--";
