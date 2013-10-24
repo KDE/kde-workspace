@@ -130,13 +130,7 @@ void PlasmoidInterface::init()
     Plasma::Package pkg = Plasma::PluginLoader::self()->loadPackage("Plasma/Applet");
     pkg.setPath(m_plugin);
 
-    //use our own custom network access manager that will access Plasma packages and to manage security (i.e. deny access to remote stuff when the proper extension isn't enabled
     QQmlEngine *engine = m_qmlObject->engine();
-    QQmlNetworkAccessManagerFactory *factory = engine->networkAccessManagerFactory();
-    engine->setNetworkAccessManagerFactory(0);
-    delete factory;
-    engine->setNetworkAccessManagerFactory(PackageUrlInterceptor::createPackageAccessManagerFactory(pkg));
-
 
     //m_m_qmlObject->setSource(QUrl::fromLocalFile(m_appletScriptEngine->mainScript()));
     //m_qmlObject->setSource(QUrl("/home/sebas/kf5/install/share/plasma/plasmoids/org.kde.systrayplasmoidtest/contents/ui/main.qml"));
