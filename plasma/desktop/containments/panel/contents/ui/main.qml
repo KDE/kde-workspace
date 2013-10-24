@@ -205,8 +205,9 @@ function addApplet(applet, x, y) {
                 anchors.centerIn: parent
             }
             onXChanged: {
-                //as long as currentLayout.children.count < LayoutManager.order.length means loading is not done yet
-                if (currentLayout.children.count < LayoutManager.order.length || parent !== currentLayout) {
+                if (parent !== currentLayout) {
+                    oldX = x
+                    oldY = y
                     return;
                 }
                 translation.x = oldX - x
@@ -216,7 +217,9 @@ function addApplet(applet, x, y) {
                 oldY = y
             }
             onYChanged: {
-                if (currentLayout.children.count < LayoutManager.order.length || parent !== currentLayout) {
+                if (parent !== currentLayout) {
+                    oldX = x
+                    oldY = y
                     return;
                 }
                 translation.x = oldX - x
