@@ -69,14 +69,7 @@ Pager::Pager(QObject *parent)
 {
     // initialize with a decent default
     m_desktopCount = KWindowSystem::numberOfDesktops();
-}
-
-Pager::~Pager()
-{
-}
-
-void Pager::init()
-{
+    
     m_pagerModel = new PagerModel(this);
 
     createMenu();
@@ -111,6 +104,12 @@ void Pager::init()
     m_currentActivity = act->currentActivity();
 }
 
+Pager::~Pager()
+{
+}
+
+
+
 void Pager::setCurrentDesktop(int desktop)
 {
     if (m_currentDesktop != desktop) {
@@ -140,9 +139,14 @@ void Pager::setOrientation(Qt::Orientation orientation)
 
     m_orientation = orientation;
     emit orientationChanged();
+ 
+    // whenever we switch to/from vertical form factor, swap the rows and columns around
+    if (m_columns != m_rows) {
+        // pass in columns as the new rows
+        recalculateGridSizes(m_columns);
+        recalculateWindowRects();
+    }
 }
-
-void setGeometry(QRectF &geom);
 
 QRectF Pager::geometry() const
 {
@@ -157,6 +161,15 @@ void Pager::setGeometry(const QRectF &geom)
 
     m_geometry = geom;
     emit geometryChanged();
+    
+    // no need to update everything twice (if we are going to flip rows and columns later)
+    if (m_columns == m_rows) {
+        // use m_ignoreNextSizeConstraint to decide whether to try to resize the plasmoid again
+        updateSizes(!m_ignoreNextSizeConstraint);
+        m_ignoreNextSizeConstraint = !m_ignoreNextSizeConstraint;
+
+        recalculateWindowRects();
+    }
 }
 
 /*void Pager::configChanged()
@@ -203,45 +216,7 @@ void Pager::setGeometry(const QRectF &geom)
     }
 }
 
-void Pager::constraintsEvent(Plasma::Constraints constraints)
-{
-    if (constraints & Plasma::SizeConstraint) {
-        // no need to update everything twice (if we are going to flip rows and columns later)
-        if (!(constraints & Plasma::FormFactorConstraint) ||
-             m_verticalFormFactor == (orientation() == Qt::Vertical) ||
-             m_columns == m_rows) {
-            // use m_ignoreNextSizeConstraint to decide whether to try to resize the plasmoid again
-            updateSizes(!m_ignoreNextSizeConstraint);
-            m_ignoreNextSizeConstraint = !m_ignoreNextSizeConstraint;
-
-            recalculateWindowRects();
-        }
-        else {
-            update();
-        }
-    }
-
-    if (constraints & Plasma::FormFactorConstraint) {
-        if (m_verticalFormFactor != (orientation() == Qt::Vertical)) {
-            m_verticalFormFactor = (orientation() == Qt::Vertical);
-            // whenever we switch to/from vertical form factor, swap the rows and columns around
-            if (m_columns != m_rows) {
-                // pass in columns as the new rows
-                recalculateGridSizes(m_columns);
-                recalculateWindowRects();
-                update();
-            }
-        }
-
-        if (orientation() == Plasma::Horizontal) {
-            setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Expanding);
-        } else if (orientation() == Qt::Vertical) {
-            setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
-        } else {
-            setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-        }
-    }
-}*/
+*/
 
 void Pager::createMenu()
 {

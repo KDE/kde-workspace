@@ -54,7 +54,6 @@ class Pager : public QObject
         Pager(QObject *parent = 0);
         ~Pager();
 
-        void init();
         //void constraintsEvent(Plasma::Constraints);
         virtual QList<QAction*> contextualActions();
 

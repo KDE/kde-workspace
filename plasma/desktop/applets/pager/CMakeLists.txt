@@ -19,4 +19,4 @@ target_link_libraries(pagerplugin
                       taskmanager)
 
 install(TARGETS pagerplugin DESTINATION ${QML_INSTALL_DIR}/org/kde/plasma/private/pager)
-
+install(FILES qmldir DESTINATION ${QML_INSTALL_DIR}/org/kde/plasma/private/pager)
