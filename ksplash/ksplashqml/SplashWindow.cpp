@@ -20,35 +20,35 @@
 #include "SplashWindow.h"
 
 #include <QApplication>
-#include <QDeclarativeContext>
-#include <QGraphicsObject>
+#include <QQmlContext>
+#include <QQuickItem>
 #include <QKeyEvent>
 #include <QMouseEvent>
 #include <QTimer>
-
-#include "SystemInfo.h"
+#include <QStandardPaths>
 
 SplashWindow::SplashWindow(bool testing)
-    : QDeclarativeView(),
+    : QQuickView(),
       m_stage(0),
       m_testing(testing)
 {
-    setWindowFlags(
-            Qt::FramelessWindowHint |
-            Qt::WindowStaysOnTopHint
-        );
+    setFlags(
+        Qt::FramelessWindowHint |
+        Qt::WindowStaysOnTopHint
+    );
 
     if (m_testing) {
         setWindowState(Qt::WindowFullScreen);
     } else {
-        setWindowFlags(Qt::X11BypassWindowManagerHint);
+        setFlags(Qt::BypassWindowManagerHint);
     }
 
-    rootContext()->setContextProperty("screenSize", size());
-    setSource(QUrl(themeDir(QApplication::arguments().at(1)) + "/main.qml"));
-    setStyleSheet("background: #000000; border: none");
-    setAttribute(Qt::WA_OpaquePaintEvent);
-    setAttribute(Qt::WA_NoSystemBackground);
+    QString themePath = QStandardPaths::locate(QStandardPaths::GenericDataLocation,
+                                               QStringLiteral("ksplash/Themes/") + QApplication::arguments().at(1),
+                                               QStandardPaths::LocateDirectory);
+
+    rootContext()->setContextProperty(QStringLiteral("screenSize"), size());
+    setSource(QUrl(themePath + QStringLiteral("/main.qml")));
     //be sure it will be eventually closed
     //FIXME: should never be stuck
     QTimer::singleShot(30000, this, SLOT(close()));
@@ -64,13 +64,12 @@ void SplashWindow::setStage(int stage)
 void SplashWindow::resizeEvent(QResizeEvent *event)
 {
     Q_UNUSED(event)
-    rootContext()->setContextProperty("screenSize", size());
-    centerOn(rootObject());
+    rootContext()->setContextProperty(QStringLiteral("screenSize"), size());
 }
 
 void SplashWindow::keyPressEvent(QKeyEvent *event)
 {
-    QDeclarativeView::keyPressEvent(event);
+    QQuickView::keyPressEvent(event);
     if (m_testing && !event->isAccepted() && event->key() == Qt::Key_Escape) {
         close();
     }
@@ -78,7 +77,7 @@ void SplashWindow::keyPressEvent(QKeyEvent *event)
 
 void SplashWindow::mousePressEvent(QMouseEvent *event)
 {
-    QDeclarativeView::mousePressEvent(event);
+    QQuickView::mousePressEvent(event);
     if (m_testing && !event->isAccepted()) {
         close();
     }

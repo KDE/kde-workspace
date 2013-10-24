@@ -17,11 +17,10 @@
  *   51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
+
 #include "SplashApp.h"
 
 #include <iostream>
-#include <unistd.h>
-#include <X11/Xlib.h>
 #include <unistd.h>
 
 int main(int argc, char **argv)
@@ -59,9 +58,7 @@ int main(int argc, char **argv)
         close(2);
     }
 
-    Display * display = XOpenDisplay(NULL);
-
-    SplashApp app(display, argc, argv);
+    SplashApp app(argc, argv);
 
     return app.exec();
 }

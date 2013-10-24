@@ -1,5 +1,6 @@
 /*
  *   Copyright (C) 2010 Ivan Cukic <ivan.cukic(at)kde.org>
+ *   Copyright (C) 2013 Martin Klapetek <mklapetek(at)kde.org>
  *
  *   This program is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License version 2,
@@ -24,36 +25,32 @@
 #include <QApplication>
 #include <QBasicTimer>
 
-#include <X11/Xlib.h>
-
 class SplashWindow;
 
-class SplashApp: public QApplication {
+class SplashApp: public QApplication
+{
     Q_OBJECT
+    Q_CLASSINFO("D-Bus Interface", "org.kde.KSplash")
 
 public:
-    explicit SplashApp(Display * display, int &argc, char ** argv);
+    explicit SplashApp(int &argc, char ** argv);
     virtual ~SplashApp();
 
-    Display * display() const;
-
-    bool x11EventFilter(XEvent * xe);
-    int x11ProcessEvent(XEvent * xe);
+public Q_SLOTS:
+    Q_SCRIPTABLE void setStage(const QString &messgae);
 
 protected:
-    void timerEvent(QTimerEvent * event);
+    void timerEvent(QTimerEvent *event);
     void setStage(int stage);
 
 private:
-    Display * m_display;
     int m_stage;
-    Atom m_kde_splash_progress;
     QList<SplashWindow *> m_windows;
     bool m_testing;
     QBasicTimer m_timer;
     QDesktopWidget *m_desktop;
 
-private slots:
+private Q_SLOTS:
     void screenGeometryChanged(int newCount);
 };
 

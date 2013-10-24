@@ -20,13 +20,13 @@
 #ifndef SPLASH_WINDOW_H_
 #define SPLASH_WINDOW_H_
 
-#include <QDeclarativeView>
+#include <QQuickView>
 
 class QResizeEvent;
 class QMouseEvent;
 class QKeyEvent;
 
-class SplashWindow: public QDeclarativeView
+class SplashWindow: public QQuickView
 {
 public:
     SplashWindow(bool testing);

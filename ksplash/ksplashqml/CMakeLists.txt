@@ -8,13 +8,15 @@ set(ksplashqml_SRCS
     SplashWindow.cpp
    )
 
-kde4_add_executable(ksplashqml ${ksplashqml_SRCS})
+add_executable(ksplashqml ${ksplashqml_SRCS})
 
 target_link_libraries(ksplashqml
-   ${X11_LIBRARIES}
-   ${QT_QTCORE_LIBRARY}
-   ${QT_QTDECLARATIVE_LIBRARY}
-   ${QT_QTGUI_LIBRARY}
+    Qt5::Core
+    Qt5::Quick
+    Qt5::Widgets
+    Qt5::DBus
    )
 
 install(TARGETS ksplashqml ${INSTALL_TARGETS_DEFAULT_ARGS})
+install(FILES org.kde.KSplash.xml DESTINATION ${DBUS_INTERFACES_INSTALL_DIR})
+

@@ -1,5 +1,6 @@
 /*
  *   Copyright (C) 2010 Ivan Cukic <ivan.cukic(at)kde.org>
+ *   Copyright (C) 2013 Martin Klapetek <mklapetek(at)kde.org>
  *
  *   This program is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License version 2,
@@ -23,46 +24,41 @@
 #include <QDesktopWidget>
 #include <QPixmap>
 #include <QCursor>
+#include <QDBusConnection>
 
 #define TEST_STEP_INTERVAL 2000
 
-SplashApp::SplashApp(Display * display, int &argc, char ** argv)
-    : QApplication(display, argc, argv),
-      m_display(display), m_stage(0),
+SplashApp::SplashApp(int &argc, char ** argv)
+    : QApplication(argc, argv),
+      m_stage(0),
       m_testing(false)
 {
-    m_kde_splash_progress = XInternAtom(m_display, "_KDE_SPLASH_PROGRESS", False);
-    m_testing = arguments().contains("--test");
+    m_testing = arguments().contains(QStringLiteral("--test"));
 
     m_desktop = QApplication::desktop();
     screenGeometryChanged(m_desktop->screenCount());
 
     setStage(1);
 
-
     QPixmap cursor(32, 32);
     cursor.fill(QColor(0, 0, 0, 0));
     setOverrideCursor(QCursor(cursor));
 
-
-    XSelectInput(display, DefaultRootWindow(display), SubstructureNotifyMask);
-
     if (m_testing) {
         m_timer.start(TEST_STEP_INTERVAL, this);
     }
-    
+
     connect(m_desktop, SIGNAL(screenCountChanged(int)), this, SLOT(screenGeometryChanged(int)));
     connect(m_desktop, SIGNAL(workAreaResized(int)), this, SLOT(screenGeometryChanged(int)));
+
+    QDBusConnection dbus = QDBusConnection::sessionBus();
+    dbus.registerObject(QStringLiteral("/KSplash"), this, QDBusConnection::ExportScriptableSlots);
+    dbus.registerService(QStringLiteral("org.kde.KSplash"));
 }
 
 SplashApp::~SplashApp()
 {
     qDeleteAll(m_windows);
-}
-
-Display * SplashApp::display() const
-{
-    return m_display;
 }
 
 void SplashApp::timerEvent(QTimerEvent * event)
@@ -76,42 +72,22 @@ void SplashApp::timerEvent(QTimerEvent * event)
     }
 }
 
-bool SplashApp::x11EventFilter(XEvent * xe)
+void SplashApp::setStage(const QString &stage)
 {
-    char * message;
-    switch (xe->type) {
-        case ClientMessage:
-            if (xe->xclient.message_type == m_kde_splash_progress) {
-                message = xe->xclient.data.b;
-
-                int stage = -1;
-
-                if (strcmp(message, "initial") == 0 && m_stage < 0)
-                    stage = 0; // not actually used
-                else if (strcmp(message, "kded") == 0 && m_stage < 1)
-                    stage = 1;
-                else if (strcmp(message, "confupdate") == 0 && m_stage < 2)
-                    stage = 2;
-                else if (strcmp(message, "kcminit") == 0 && m_stage < 3)
-                    stage = 3;
-                else if (strcmp(message, "ksmserver") == 0 && m_stage < 4)
-                    stage = 4;
-                else if (strcmp(message, "wm") == 0 && m_stage < 5)
-                    stage = 5;
-                else if (strcmp(message, "desktop") == 0 && m_stage < 6)
-                    stage = 6;
-
-                setStage(stage);
-            }
-    }
-    return false;
-
-}
-
-int SplashApp::x11ProcessEvent(XEvent * xe)
-{
-    Q_UNUSED(xe)
-    return 0;
+    if (stage == QLatin1String("initial") && m_stage < 0)
+        setStage(0); // not actually used
+    else if (stage == QLatin1String("kded") && m_stage < 1)
+        setStage(1);
+    else if (stage == QLatin1String("confupdate") && m_stage < 2)
+        setStage(2);
+    else if (stage == QLatin1String("kcminit") && m_stage < 3)
+        setStage(3);
+    else if (stage == QLatin1String("ksmserver") && m_stage < 4)
+        setStage(4);
+    else if (stage == QLatin1String("wm") && m_stage < 5)
+        setStage(5);
+    else if (stage == QLatin1String("desktop") && m_stage < 6)
+        setStage(6);
 }
 
 void SplashApp::setStage(int stage)
