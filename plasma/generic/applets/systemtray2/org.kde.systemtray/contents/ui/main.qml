@@ -47,127 +47,19 @@ Item {
     property int _h: plasmoid.configuration.itemSize
     property int itemSpacing: 2
 
-    property Component compactRepresentation: Component {
-
-        Item {
-            SystemTray.Host {
-                id: compacthost
-                rootItem: gridView
-
-            }
-            function loadNotificationsPlasmoid() {
-                var plugin = "org.kde.systrayplasmoidtest";
-                plugin = "org.kde.notifications";
-                print("Loading notifications plasmoid: " + plugin);
-                compacthost.rootItem = gridView;
-                var notificationsPlasmoid = compacthost.notificationsPlasmoid(plugin);
-                if (notificationsPlasmoid == null) {
-                    print("Bah. Failed to load " + plugin);
-                    return;
-                }
-                notificationsPlasmoid.parent = notificationsContainer;
-                notificationsPlasmoid.anchors.fill = notificationsContainer;
-            }
-            function togglePopup() {
-                plasmoid.expanded = !plasmoid.expanded;
-            }
-            MouseArea {
-                anchors.fill: parent
-                onClicked: togglePopup()
-                onPressed: PlasmaExtras.PressedAnimation { targetItem: arrow_widget }
-                onReleased: PlasmaExtras.ReleasedAnimation { targetItem: arrow_widget }
-            }
-
-
-            // Tooltip for arrow -----------------------------------------------------------------------------------------------
-            PlasmaCore.ToolTip {
-                id: arrow_tooltip
-                target: arrow_widget
-                subText: plasmoid.expanded ? i18n("Hide icons") : i18n("Show hidden icons")
-            }
-            Item {
-                id: notificationsContainer
-
-                anchors {
-                    top: parent.top
-                    //verticalCenter: parent.verticalCenter
-                    left: parent.left
-                }
-                height: _h
-                width: _h
-
-                Rectangle {
-                    anchors.fill: parent;
-                    border.width: 2;
-                    border.color: "black";
-                    color: "transparent";
-                    opacity: 0;
-                }
-                Timer {
-                    interval: 0
-                    running: true
-                    onTriggered: {
-                        //print(" 0000000000000000000000000000000000000000000000 ")
-                        loadNotificationsPlasmoid();
-                    }
-                }
-
-
-            }
-
-            GridView {
-                id: gridView
-                objectName: "gridView"
-
-                anchors {
-                    top: notificationsContainer.top
-                    bottom: parent.bottom
-                    left: notificationsContainer.right
-                    //leftMargin: spacing
-                    leftMargin: itemSpacing
-                    right: arrow_widget.left
-                    //verticalCenter: arrow_widget.verticalCenter
-                }
-                cellWidth: _h + itemSpacing
-                cellHeight: _h + itemSpacing
-                //orientation: Qt.Horizontal
-                interactive: false
-                //spacing: 4
-                //Rectangle { anchors.fill: parent; color: "blue"; opacity: 0.2; }
-
-                model: compacthost.tasks
-                //model: host.tasks
-
-                delegate: TaskDelegate {}
-
-                //delegate: StatusNotifierItem {}
-            }
-            property int arrow_size: 48 // size of an icon
-            PlasmaCore.SvgItem {
-
-                id: arrow_widget
-
-                anchors {
-                    leftMargin: itemSpacing
-                    right: parent.right
-                    verticalCenter: notificationsContainer.verticalCenter
-                }
-                width: _h / 2
-                height: width
-
-                svg: PlasmaCore.Svg { imagePath: "widgets/arrows" }
-                elementId: "up-arrow"
-            }
-
-        }
-
+    property Component compactRepresentation: CompactRepresentation {
+        systrayhost: host
     }
 
     //Rectangle { color: "blue"; width: 200; height: 48; }
-    Rectangle { color: "orange"; anchors.fill: parent; opacity: 0.4; }
+    SystemTray.Host {
+        id: host
+        rootItem: hiddenView
+    }
     GridView {
         id: hiddenView
         objectName: "hiddenView"
+
         anchors {
             fill: parent
         }
@@ -178,12 +70,13 @@ Item {
         //spacing: 4
         //Rectangle { anchors.fill: parent; color: "blue"; opacity: 0.2; }
 
-        //model: host.hiddenTasks
+        model: host.hiddenTasks
         //model: host.tasks
 
         delegate: TaskDelegate {}
 
         //delegate: StatusNotifierItem {}
+        Rectangle { color: "blue"; anchors.fill: parent; opacity: 0.2; }
     }
 
 }

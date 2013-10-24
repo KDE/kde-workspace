@@ -43,6 +43,7 @@ SequentialAnimation {
             duration: pulseAnimation.duration / 2
             easing.type: Easing.InExpo;
         }
+
         PropertyAnimation {
             target: targetItem
             property: "scale"
@@ -51,7 +52,6 @@ SequentialAnimation {
             duration: pulseAnimation.duration / 2
             easing.type: Easing.OutExpo;
         }
-
     }
 
     ScriptAction { script: targetItem.smooth = true }
