@@ -63,7 +63,6 @@ Pager::Pager(QObject *parent)
       m_removeDesktopAction(0),
       m_showWindowIcons(false),
       m_desktopDown(false),
-      m_ignoreNextSizeConstraint(false),
       m_hideWhenSingleDesktop(false),
       m_desktopWidget(QApplication::desktop())
 {
@@ -148,25 +147,23 @@ void Pager::setOrientation(Qt::Orientation orientation)
     }
 }
 
-QRectF Pager::geometry() const
+QSizeF Pager::size() const
 {
-    return m_geometry;
+    return m_size;
 }
 
-void Pager::setGeometry(const QRectF &geom)
+void Pager::setSize(const QSizeF &size)
 {
-    if (m_geometry == geom) {
+    if (m_size == size) {
         return;
     }
 
-    m_geometry = geom;
-    emit geometryChanged();
+    m_size = size;
+    emit sizeChanged();
     
     // no need to update everything twice (if we are going to flip rows and columns later)
     if (m_columns == m_rows) {
-        // use m_ignoreNextSizeConstraint to decide whether to try to resize the plasmoid again
-        updateSizes(!m_ignoreNextSizeConstraint);
-        m_ignoreNextSizeConstraint = !m_ignoreNextSizeConstraint;
+        updateSizes();
 
         recalculateWindowRects();
     }
@@ -306,11 +303,11 @@ void Pager::updateSizes(bool allowResize /* = true */)
 
     if (orientation() == Qt::Vertical) {
         // work out the preferred size based on the width of the geometry
-        preferredItemWidth = (geometry().width() - leftMargin - rightMargin -
+        preferredItemWidth = (m_size.width() - leftMargin - rightMargin -
                               padding * (m_columns - 1)) / m_columns;
         preferredItemHeight = preferredItemWidth / ratio;
         // make sure items of the new size actually fit in the current geometry
-        itemHeight = (geometry().height() - topMargin - bottomMargin -
+        itemHeight = (m_size.height() - topMargin - bottomMargin -
                       padding * (m_rows - 1)) / m_rows;
         if (itemHeight > preferredItemHeight) {
             itemHeight = preferredItemHeight;
@@ -318,7 +315,7 @@ void Pager::updateSizes(bool allowResize /* = true */)
         itemWidth = itemHeight * ratio;
     } else {
         // work out the preferred size based on the height of the geometry
-        preferredItemHeight = (geometry().height() - topMargin - bottomMargin -
+        preferredItemHeight = (m_size.height() - topMargin - bottomMargin -
                                padding * (m_rows - 1)) / m_rows;
         preferredItemWidth = preferredItemHeight * ratio;
 
@@ -334,7 +331,7 @@ void Pager::updateSizes(bool allowResize /* = true */)
             }
         }
 
-        itemWidth = (geometry().width() - leftMargin - rightMargin -
+        itemWidth = (m_size.width() - leftMargin - rightMargin -
                      padding * (m_columns - 1)) / m_columns;
         if (itemWidth > preferredItemWidth) {
             itemWidth = preferredItemWidth;
@@ -363,8 +360,8 @@ void Pager::updateSizes(bool allowResize /* = true */)
     // or the height has changed (or the width has changed in a vertical panel)
     const Qt::Orientation f = orientation();
     if (allowResize ||
-        (f != Qt::Vertical && geometry().height() != m_size.height()) ||
-        (f == Qt::Vertical && geometry().width()  != m_size.width())) {
+        (f != Qt::Vertical && m_size.height() != m_size.height()) ||
+        (f == Qt::Vertical && m_size.width()  != m_size.width())) {
 
         // this new size will have the same height/width as the horizontal/vertical panel has given it
         QSizeF preferred;
@@ -378,8 +375,6 @@ void Pager::updateSizes(bool allowResize /* = true */)
         }
 
     }
-
-    m_size = geometry().size();
 }
 
 void Pager::recalculateWindowRects()
@@ -487,7 +482,7 @@ void Pager::desktopNamesChanged()
 void Pager::windowChanged(WId id, const unsigned long* dirty)
 {
     Q_UNUSED(id)
-
+qWarning()<<"WWWWWWWWWWWWWWWWWW"<<id;
     if (dirty[NETWinInfo::PROTOCOLS] & (NET::WMGeometry | NET::WMDesktop) ||
         dirty[NETWinInfo::PROTOCOLS2] & NET::WM2Activities) {
         startTimer();

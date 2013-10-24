@@ -48,7 +48,7 @@ class Pager : public QObject
     Q_PROPERTY(bool showDesktopName READ showDesktopName NOTIFY showDesktopTextChanged)
     Q_PROPERTY(bool showDesktopNumber READ showDesktopNumber NOTIFY showDesktopTextChanged)
     Q_PROPERTY(Qt::Orientation orientation READ orientation WRITE setOrientation NOTIFY orientationChanged)
-    Q_PROPERTY(QRectF geometry READ geometry WRITE setGeometry NOTIFY geometryChanged)
+    Q_PROPERTY(QSizeF size READ size WRITE setSize NOTIFY sizeChanged)
 
     public:
         Pager(QObject *parent = 0);
@@ -71,8 +71,8 @@ class Pager : public QObject
         Qt::Orientation orientation() const;
         void setOrientation(Qt::Orientation orientation);
 
-        QRectF geometry() const;
-        void setGeometry(const QRectF &geom);
+        QSizeF size() const;
+        void setSize(const QSizeF &size);
 
         Q_INVOKABLE void moveWindow(int, double, double, int, int);
         Q_INVOKABLE void changeDesktop(int desktopId);
@@ -82,7 +82,7 @@ class Pager : public QObject
         void showWindowIconsChanged();
         void showDesktopTextChanged();
         void orientationChanged();
-        void geometryChanged();
+        void sizeChanged();
 
     public Q_SLOTS:
         void recalculateGridSizes(int rows);
@@ -135,7 +135,6 @@ class Pager : public QObject
         qreal m_heightScaleFactor;
         QSizeF m_size;
         Qt::Orientation m_orientation;
-        QRectF m_geometry;
 
         //list of info about animations for each desktop
         QList<QAction*> m_actions;
@@ -144,7 +143,6 @@ class Pager : public QObject
 
         bool m_showWindowIcons;
         bool m_desktopDown;
-        bool m_ignoreNextSizeConstraint;
         bool m_hideWhenSingleDesktop;
 
         QDesktopWidget *m_desktopWidget;

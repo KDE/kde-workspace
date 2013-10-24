@@ -81,7 +81,7 @@ Item {
     Pager {
         id: pager
         orientation: plasmoid.formFactor == PlasmaCore.Types.Vertical ? Qt.Vertical : Qt.Horizontal
-        geometry: Qt.rect(0, 0, root.width, root.height)
+        size: Qt.size(root.width, root.height)
     }
 
     Timer {
