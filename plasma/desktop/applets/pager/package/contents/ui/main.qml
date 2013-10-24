@@ -82,6 +82,8 @@ Item {
         id: pager
         orientation: plasmoid.formFactor == PlasmaCore.Types.Vertical ? Qt.Vertical : Qt.Horizontal
         size: Qt.size(root.width, root.height)
+        showWindowIcons: plasmoid.configuration.showWindowIcons
+        currentDesktopSelected: plasmoid.configuration.currentDesktopSelected
     }
 
     Timer {

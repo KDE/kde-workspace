@@ -63,7 +63,6 @@ Pager::Pager(QObject *parent)
       m_removeDesktopAction(0),
       m_showWindowIcons(false),
       m_desktopDown(false),
-      m_hideWhenSingleDesktop(false),
       m_desktopWidget(QApplication::desktop())
 {
     // initialize with a decent default
@@ -167,6 +166,21 @@ void Pager::setSize(const QSizeF &size)
 
         recalculateWindowRects();
     }
+}
+
+Pager::CurrentDesktopSelected Pager::currentDesktopSelected() const
+{
+    return m_currentDesktopSelected;
+}
+
+void Pager::setCurrentDesktopSelected(CurrentDesktopSelected cur)
+{
+    if (m_currentDesktopSelected == cur) {
+        return;
+    }
+
+    m_currentDesktopSelected = cur;
+    emit currentDesktopSelectedChanged();
 }
 
 /*void Pager::configChanged()
@@ -277,7 +291,7 @@ void Pager::recalculateGridSizes(int rows)
     updateSizes();
 }
 
-void Pager::updateSizes(bool allowResize /* = true */)
+void Pager::updateSizes()
 {
     int padding = 2; // Space between miniatures of desktops
     int textMargin = 3; // Space between name of desktop and border
@@ -354,26 +368,6 @@ void Pager::updateSizes(bool allowResize /* = true */)
 
         QString name = KWindowSystem::desktopName(i + 1);
         m_pagerModel->appendDesktopRect(itemRect, name);
-    }
-
-    // do not try to resize unless the caller has allowed it,
-    // or the height has changed (or the width has changed in a vertical panel)
-    const Qt::Orientation f = orientation();
-    if (allowResize ||
-        (f != Qt::Vertical && m_size.height() != m_size.height()) ||
-        (f == Qt::Vertical && m_size.width()  != m_size.width())) {
-
-        // this new size will have the same height/width as the horizontal/vertical panel has given it
-        QSizeF preferred;
-        if (m_hideWhenSingleDesktop && m_desktopCount == 1 && (f == Qt::Vertical || f == Qt::Horizontal)) {
-            const bool isVertical = f == Qt::Vertical;
-            preferred = QSizeF(isVertical ? m_size.width() : 0,
-                               isVertical ? 0 : m_size.height());
-        } else {
-            preferred = QSizeF(ceil(m_columns * preferredItemWidth + padding * (m_columns - 1) + leftMargin + rightMargin),
-                        ceil(m_rows * preferredItemHeight + padding * (m_rows - 1) + topMargin + bottomMargin));
-        }
-
     }
 }
 

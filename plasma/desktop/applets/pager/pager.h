@@ -49,8 +49,16 @@ class Pager : public QObject
     Q_PROPERTY(bool showDesktopNumber READ showDesktopNumber NOTIFY showDesktopTextChanged)
     Q_PROPERTY(Qt::Orientation orientation READ orientation WRITE setOrientation NOTIFY orientationChanged)
     Q_PROPERTY(QSizeF size READ size WRITE setSize NOTIFY sizeChanged)
+    Q_PROPERTY(Pager::CurrentDesktopSelected currentDesktopSelected READ currentDesktopSelected WRITE setCurrentDesktopSelected NOTIFY currentDesktopSelectedChanged)
 
     public:
+        enum CurrentDesktopSelected {
+            DoNothing,
+            ShowDesktop,
+            ShowDashboard
+        };
+        Q_ENUMS(CurrentDesktopSelected)
+
         Pager(QObject *parent = 0);
         ~Pager();
 
@@ -74,6 +82,9 @@ class Pager : public QObject
         QSizeF size() const;
         void setSize(const QSizeF &size);
 
+        CurrentDesktopSelected currentDesktopSelected() const;
+        void setCurrentDesktopSelected(CurrentDesktopSelected cur);
+
         Q_INVOKABLE void moveWindow(int, double, double, int, int);
         Q_INVOKABLE void changeDesktop(int desktopId);
 
@@ -83,10 +94,11 @@ class Pager : public QObject
         void showDesktopTextChanged();
         void orientationChanged();
         void sizeChanged();
+        void currentDesktopSelectedChanged();
 
     public Q_SLOTS:
         void recalculateGridSizes(int rows);
-        void updateSizes(bool allowResize = true);
+        void updateSizes();
         void recalculateWindowRects();
 
     protected Q_SLOTS:
@@ -118,11 +130,6 @@ class Pager : public QObject
             None
         };
 
-        enum CurrentDesktopSelected {
-            DoNothing,
-            ShowDesktop,
-            ShowDashboard
-        };
 
         DisplayedText m_displayedText;
         CurrentDesktopSelected m_currentDesktopSelected;
@@ -143,7 +150,6 @@ class Pager : public QObject
 
         bool m_showWindowIcons;
         bool m_desktopDown;
-        bool m_hideWhenSingleDesktop;
 
         QDesktopWidget *m_desktopWidget;
     };
