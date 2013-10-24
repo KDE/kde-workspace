@@ -63,9 +63,7 @@ Item {
             }
             hoverEnabled: true
             onClicked: {
-                if (!plasmoid.userConfiguring) {
-                    plasmoid.action("configure").trigger()
-                }
+                plasmoid.action("configure").trigger()
             }
             PlasmaCore.IconItem {
                 anchors.fill: parent
