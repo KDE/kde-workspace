@@ -44,6 +44,8 @@ class HostPrivate {
 public:
     Host *q;
     QList<SystemTray::Task*> tasks;
+    QList<SystemTray::Task*> shownTasks;
+    QList<SystemTray::Task*> hiddenTasks;
     PlasmoidInterface* notificationsPlasmoid = 0;
     QStringList categories;
 };
@@ -93,29 +95,45 @@ void Host::setRootItem(QQuickItem* rootItem)
     s_manager->setRootItem(rootItem);
 }
 
+QQmlListProperty<SystemTray::Task> Host::tasks()
+{
+    if (s_manager) {
+        // We need to keep a reference to the list we're passing to the runtime
+        d->tasks = s_manager->tasks();
+        QQmlListProperty<SystemTray::Task> l(this, d->tasks);
+        return l;
+    }
+    QQmlListProperty<SystemTray::Task> l;
+    return l;
+}
+
 QQmlListProperty<SystemTray::Task> Host::hiddenTasks()
 {
-    QList<SystemTray::Task*> allTasks = s_manager->tasks();
-    QList<SystemTray::Task*> shownTasks;
-    foreach (SystemTray::Task *task, allTasks) {
-        if (!task->shown()) {
-            shownTasks.append(task);
+    d->hiddenTasks.clear();
+    if (s_manager) {
+        QList<SystemTray::Task*> allTasks = s_manager->tasks();
+        foreach (SystemTray::Task *task, allTasks) {
+            if (task->shown() || task->status() == SystemTray::Task::Passive) {
+                d->hiddenTasks.append(task);
+            }
         }
     }
-    QQmlListProperty<SystemTray::Task> l(this, shownTasks);
+    QQmlListProperty<SystemTray::Task> l(this, d->hiddenTasks);
     return l;
 }
 
 QQmlListProperty< Task > Host::shownTasks()
 {
-    QList<SystemTray::Task*> allTasks = s_manager->tasks();
-    QList<SystemTray::Task*> shownTasks;
-    foreach (SystemTray::Task *task, allTasks) {
-        if (task->shown()) {
-            shownTasks.append(task);
+    d->shownTasks.clear();
+    if (s_manager) {
+        QList<SystemTray::Task*> allTasks = s_manager->tasks();
+        foreach (SystemTray::Task *task, allTasks) {
+            if (task->shown() && task->status() != SystemTray::Task::Passive) {
+                d->shownTasks.append(task);
+            }
         }
     }
-    QQmlListProperty<SystemTray::Task> l(this, shownTasks);
+    QQmlListProperty<SystemTray::Task> l(this, d->shownTasks);
     return l;
 }
 
@@ -146,24 +164,7 @@ QStringList Host::categories() const
     qDebug() << "ST " << cats;
     return cats;
 }
-/*
-        UnknownCategory = 0,
-        ApplicationStatus = 1,
-        Communications = 2,
-        SystemServices = 3,
-        Hardware = 4
-*/
-QQmlListProperty<SystemTray::Task> Host::tasks()
-{
-    if (s_manager) {
-        // We need to keep a reference to the list we're passing to the runtime
-        d->tasks = s_manager->tasks();
-        QQmlListProperty<SystemTray::Task> l(this, d->tasks);
-        return l;
-    }
-    QQmlListProperty<SystemTray::Task> l;
-    return l;
-}
+
 
 } // namespace
 
