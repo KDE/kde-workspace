@@ -82,6 +82,8 @@ int ClockHelper::ntp( const QStringList& ntpServers, bool ntpEnabled,
     proc << ntpUtility << timeServer;
     if ( proc.execute() != 0 ) {
       ret |= NTPError;
+    } else {
+      toHwclock();
     }
   } else if( ntpEnabled ) {
     ret |= NTPError;
@@ -100,10 +102,7 @@ int ClockHelper::date( const QString& newdate, const QString& olddate )
         return DateError;
     }
 
-    QString hwclock = KStandardDirs::findExe("hwclock", exePath);
-    if (!hwclock.isEmpty()) {
-        KProcess::execute(hwclock, QStringList() << "--systohc");
-    }
+    toHwclock();
     return 0;
 }
 
@@ -213,6 +212,14 @@ int ClockHelper::tzreset()
         tzset();
 #endif // !USE SOLARIS
     return 0;
+}
+
+void ClockHelper::toHwclock()
+{
+  QString hwclock = KStandardDirs::findExe("hwclock", exePath);
+  if (!hwclock.isEmpty()) {
+    KProcess::execute(hwclock, QStringList() << "--systohc");
+  }
 }
 
 ActionReply ClockHelper::save(const QVariantMap &args)

@@ -47,6 +47,8 @@ class ClockHelper : public QObject
         int date(const QString& newdate, const QString& olddate);
         int tz(const QString& selectedzone);
         int tzreset();
+
+        void toHwclock();
 };
 
 #endif // CLOCK_HELPER_H
