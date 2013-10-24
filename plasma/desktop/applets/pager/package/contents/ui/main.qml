@@ -84,6 +84,7 @@ Item {
         size: Qt.size(root.width, root.height)
         showWindowIcons: plasmoid.configuration.showWindowIcons
         currentDesktopSelected: plasmoid.configuration.currentDesktopSelected
+        displayedText: plasmoid.configuration.displayedText
     }
 
     Timer {

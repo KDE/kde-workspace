@@ -44,21 +44,31 @@ class Pager : public QObject
     Q_OBJECT
     Q_PROPERTY(QObject* model READ model CONSTANT)
     Q_PROPERTY(int currentDesktop READ currentDesktop NOTIFY currentDesktopChanged)
-    Q_PROPERTY(bool showWindowIcons READ showWindowIcons NOTIFY showWindowIconsChanged)
+    Q_PROPERTY(bool showWindowIcons READ showWindowIcons WRITE setShowWindowIcons NOTIFY showWindowIconsChanged)
+    //TODO: remove
     Q_PROPERTY(bool showDesktopName READ showDesktopName NOTIFY showDesktopTextChanged)
+    //TODO: remove
     Q_PROPERTY(bool showDesktopNumber READ showDesktopNumber NOTIFY showDesktopTextChanged)
     Q_PROPERTY(Qt::Orientation orientation READ orientation WRITE setOrientation NOTIFY orientationChanged)
     Q_PROPERTY(QSizeF size READ size WRITE setSize NOTIFY sizeChanged)
     Q_PROPERTY(Pager::CurrentDesktopSelected currentDesktopSelected READ currentDesktopSelected WRITE setCurrentDesktopSelected NOTIFY currentDesktopSelectedChanged)
+    Q_PROPERTY(Pager::DisplayedText displayedText READ displayedText WRITE setDisplayedText NOTIFY displayedTextChanged)
 
     public:
         enum CurrentDesktopSelected {
-            DoNothing,
+            DoNothing = 0,
             ShowDesktop,
             ShowDashboard
         };
         Q_ENUMS(CurrentDesktopSelected)
 
+        enum DisplayedText {
+            Number = 0,
+            Name,
+            None
+        };
+        Q_ENUMS(DisplayedText)
+        
         Pager(QObject *parent = 0);
         ~Pager();
 
@@ -85,6 +95,9 @@ class Pager : public QObject
         CurrentDesktopSelected currentDesktopSelected() const;
         void setCurrentDesktopSelected(CurrentDesktopSelected cur);
 
+        DisplayedText displayedText() const;
+        void setDisplayedText(DisplayedText disp);
+
         Q_INVOKABLE void moveWindow(int, double, double, int, int);
         Q_INVOKABLE void changeDesktop(int desktopId);
 
@@ -95,6 +108,7 @@ class Pager : public QObject
         void orientationChanged();
         void sizeChanged();
         void currentDesktopSelectedChanged();
+        void displayedTextChanged();
 
     public Q_SLOTS:
         void recalculateGridSizes(int rows);
@@ -124,11 +138,6 @@ class Pager : public QObject
         PagerModel *m_pagerModel;
 
         QTimer* m_timer;
-        enum DisplayedText {
-            Number,
-            Name,
-            None
-        };
 
 
         DisplayedText m_displayedText;

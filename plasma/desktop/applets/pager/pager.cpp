@@ -183,51 +183,20 @@ void Pager::setCurrentDesktopSelected(CurrentDesktopSelected cur)
     emit currentDesktopSelectedChanged();
 }
 
-/*void Pager::configChanged()
+Pager::DisplayedText Pager::displayedText() const
 {
-    KConfigGroup cg = config();
-    bool changed = false;
-
-    const DisplayedText displayedText = (DisplayedText) cg.readEntry("displayedText", (int) m_displayedText);
-    if (displayedText != m_displayedText) {
-        m_displayedText = displayedText;
-        changed = true;
-        emit showDesktopTextChanged();
-    }
-
-    const bool showWindowIcons = cg.readEntry("showWindowIcons", m_showWindowIcons);
-    if (showWindowIcons != m_showWindowIcons) {
-        setShowWindowIcons(showWindowIcons);
-        changed = true;
-    }
-
-    const bool hideWhenSingleDesktop = cg.readEntry("hideWhenSingleDesktop", false);
-    if (hideWhenSingleDesktop != m_hideWhenSingleDesktop) {
-        m_hideWhenSingleDesktop = hideWhenSingleDesktop;
-        changed = true;
-    }
-
-    const CurrentDesktopSelected currentDesktopSelected = static_cast<CurrentDesktopSelected>(cg.readEntry("currentDesktopSelected",
-                                                                                                           static_cast<int>(m_currentDesktopSelected)));
-    if (currentDesktopSelected != m_currentDesktopSelected) {
-        m_currentDesktopSelected = currentDesktopSelected;
-        changed = true;
-    }
-
-    int rows = m_rows;
-#ifdef Q_WS_X11
-    unsigned long properties[] = {0, NET::WM2DesktopLayout };
-    NETRootInfo info(QX11Info::display(), properties, 2);
-    rows = info.desktopLayoutColumnsRows().height();
-#endif
-
-    if (changed || rows != m_rows) {
-        recalculateGridSizes(rows);
-        recalculateWindowRects();
-    }
+    return m_displayedText;
 }
 
-*/
+void Pager::setDisplayedText(Pager::DisplayedText disp)
+{
+    if (m_displayedText == disp) {
+        return;
+    }
+
+    m_displayedText = disp;
+    emit displayedTextChanged();
+}
 
 void Pager::createMenu()
 {
@@ -476,7 +445,7 @@ void Pager::desktopNamesChanged()
 void Pager::windowChanged(WId id, const unsigned long* dirty)
 {
     Q_UNUSED(id)
-qWarning()<<"WWWWWWWWWWWWWWWWWW"<<id;
+
     if (dirty[NETWinInfo::PROTOCOLS] & (NET::WMGeometry | NET::WMDesktop) ||
         dirty[NETWinInfo::PROTOCOLS2] & NET::WM2Activities) {
         startTimer();
@@ -581,4 +550,4 @@ QRect Pager::fixViewportPosition( const QRect& r )
 
 
 
-#include "pager.moc"
+#include "moc_pager.cpp"
