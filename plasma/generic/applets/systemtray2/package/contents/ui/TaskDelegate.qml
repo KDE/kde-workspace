@@ -29,15 +29,8 @@ Item {
     objectName: "taskItemContainer"
     width: _h
     height: width
-    opacity: status != SystemTray.Task.Passive ? 1 : 0.3
+//     opacity: status != SystemTray.Task.Passive ? 1 : 0.3
 
-    property bool isShown: status != SystemTray.Task.Passive
-    property int taskStatus: status
-
-//     onTaskStatusChanged: {
-//         print("new status [" + name + "]: " + taskStatusString())
-//     }
-//
     PlasmaCore.IconItem {
         id: itemIcon
         anchors.fill: parent
@@ -47,7 +40,7 @@ Item {
 
     PulseAnimation {
         targetItem: itemIcon
-        running: taskStatus == SystemTray.Task.NeedsAttention
+        running: status == SystemTray.Task.NeedsAttention
     }
 
     function taskStatusMnemonic() {
@@ -75,7 +68,7 @@ Item {
         //host.rootItem = gridView;
         //print(" taskitem: " + taskItem + " " + iconName);
         if ((taskItem != undefined)) {
-            print( " TASK ITEM CHANGED"  + (taskItem != undefined));
+            //print( " TASK ITEM CHANGED"  + (taskItem != undefined));
             taskItem.parent = taskItemContainer;
             taskItem.anchors.fill = taskItem.parent;
         }

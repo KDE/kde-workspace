@@ -56,27 +56,23 @@ Item {
         id: host
         rootItem: hiddenView
     }
-    GridView {
+    ListView {
         id: hiddenView
         objectName: "hiddenView"
 
         anchors {
             fill: parent
         }
-        cellWidth: _h + itemSpacing
-        cellHeight: _h + itemSpacing
+//         cellWidth: _h + itemSpacing
+//         cellHeight: _h + itemSpacing
         //orientation: Qt.Horizontal
         interactive: false
-        //spacing: 4
+        spacing: 4
         //Rectangle { anchors.fill: parent; color: "blue"; opacity: 0.2; }
 
         model: host.hiddenTasks
-        //model: host.tasks
 
         delegate: TaskDelegate {}
-
-        //delegate: StatusNotifierItem {}
-        Rectangle { color: "blue"; anchors.fill: parent; opacity: 0.2; }
     }
 
 }

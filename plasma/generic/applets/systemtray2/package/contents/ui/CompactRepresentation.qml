@@ -28,12 +28,7 @@ import org.kde.private.systemtray 2.0 as SystemTray
 Item {
 
     property QtObject systrayhost: undefined
-    //property alias systrayhost: compact
-//     SystemTray.Host {
-//         id: systrayhost
-//         rootItem: gridView
-//
-//     }
+
     function loadNotificationsPlasmoid() {
         var plugin = "org.kde.systrayplasmoidtest";
         plugin = "org.kde.notifications";
@@ -47,33 +42,35 @@ Item {
         notificationsPlasmoid.parent = notificationsContainer;
         notificationsPlasmoid.anchors.fill = notificationsContainer;
     }
+
     function togglePopup() {
         plasmoid.expanded = !plasmoid.expanded;
     }
+
     MouseArea {
         anchors.fill: parent
         onClicked: togglePopup()
-        onPressed: PlasmaExtras.PressedAnimation { targetItem: arrow_widget }
-        onReleased: PlasmaExtras.ReleasedAnimation { targetItem: arrow_widget }
+        onPressed: PlasmaExtras.PressedAnimation { targetItem: arrow }
+        onReleased: PlasmaExtras.ReleasedAnimation { targetItem: arrow }
     }
 
     // Tooltip for arrow --------------------------------
     PlasmaCore.ToolTip {
         id: arrow_tooltip
-        target: arrow_widget
+        target: arrow
         subText: plasmoid.expanded ? i18n("Hide icons") : i18n("Show hidden icons")
     }
+
     Item {
         id: notificationsContainer
 
         anchors {
             top: parent.top
-            //verticalCenter: parent.verticalCenter
             left: parent.left
         }
         height: _h
         width: _h
-
+        /*
         Rectangle {
             anchors.fill: parent;
             border.width: 2;
@@ -81,16 +78,14 @@ Item {
             color: "transparent";
             opacity: 0;
         }
+        */
         Timer {
             interval: 0
             running: true
             onTriggered: {
-                //print(" 0000000000000000000000000000000000000000000000 ")
                 loadNotificationsPlasmoid();
             }
         }
-
-
     }
 
     GridView {
@@ -101,29 +96,21 @@ Item {
             top: notificationsContainer.top
             bottom: parent.bottom
             left: notificationsContainer.right
-            //leftMargin: spacing
             leftMargin: itemSpacing
-            right: arrow_widget.left
-            //verticalCenter: arrow_widget.verticalCenter
+            right: arrow.left
         }
         cellWidth: _h + itemSpacing
         cellHeight: _h + itemSpacing
-        //orientation: Qt.Horizontal
         interactive: false
-        //spacing: 4
-        //Rectangle { anchors.fill: parent; color: "blue"; opacity: 0.2; }
 
         model: systrayhost.shownTasks
-        //model: systrayhost.tasks
 
         delegate: TaskDelegate {}
-
-        //delegate: StatusNotifierItem {}
     }
-    property int arrow_size: 48 // size of an icon
+
     PlasmaCore.SvgItem {
 
-        id: arrow_widget
+        id: arrow
 
         anchors {
             leftMargin: itemSpacing
@@ -136,5 +123,4 @@ Item {
         svg: PlasmaCore.Svg { imagePath: "widgets/arrows" }
         elementId: "up-arrow"
     }
-
 }
