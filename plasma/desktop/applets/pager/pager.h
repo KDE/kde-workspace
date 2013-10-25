@@ -149,8 +149,9 @@ class Pager : public QObject
         QAction *m_addDesktopAction;
         QAction *m_removeDesktopAction;
 
-        bool m_showWindowIcons;
-        bool m_desktopDown;
+        bool m_showWindowIcons : 1;
+        bool m_desktopDown : 1;
+        bool m_validSizes : 1;
 
         QDesktopWidget *m_desktopWidget;
     };

@@ -63,6 +63,7 @@ Pager::Pager(QObject *parent)
       m_removeDesktopAction(0),
       m_showWindowIcons(false),
       m_desktopDown(false),
+      m_validSizes(false),
       m_desktopWidget(QApplication::desktop())
 {
     // initialize with a decent default
@@ -160,11 +161,11 @@ void Pager::setSize(const QSizeF &size)
     m_size = size;
     emit sizeChanged();
     
+    m_validSizes = false;
+
     // no need to update everything twice (if we are going to flip rows and columns later)
     if (m_columns == m_rows) {
-        updateSizes();
-
-        recalculateWindowRects();
+        startTimer();
     }
 }
 
@@ -338,10 +339,16 @@ void Pager::updateSizes()
         QString name = KWindowSystem::desktopName(i + 1);
         m_pagerModel->appendDesktopRect(itemRect, name);
     }
+
+    m_validSizes = true;
 }
 
 void Pager::recalculateWindowRects()
 {
+    if (!m_validSizes) {
+        updateSizes();
+    }
+
     QList<WId> windows = KWindowSystem::stackingOrder();
     m_pagerModel->clearWindowRects();
 
@@ -438,7 +445,7 @@ void Pager::numberOfDesktopsChanged(int num)
 void Pager::desktopNamesChanged()
 {
     m_pagerModel->clearDesktopRects();
-    updateSizes();
+    m_validSizes = false;
     startTimer();
 }
 
@@ -455,7 +462,7 @@ void Pager::windowChanged(WId id, const unsigned long* dirty)
 void Pager::desktopsSizeChanged()
 {
     m_pagerModel->clearDesktopRects();
-    updateSizes();
+    m_validSizes = false;
     startTimer();
 }
 
