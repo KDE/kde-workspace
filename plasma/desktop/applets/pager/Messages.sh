@@ -1,4 +1,3 @@
 #! /usr/bin/env bash
-$EXTRACTRC *.ui >> rc.cpp
-$XGETTEXT *.cpp -o $podir/plasma_applet_pager.pot
+$XGETTEXT `find . -name \*.js -o -name \*.qml -o -name \*.cpp` -o $podir/plasma_applet_org.kde.pager.pot
 rm -f rc.cpp
