@@ -161,8 +161,8 @@ Item {
 
                 PlasmaComponents.Label {
                     id: desktopText
-                    text: pager.showDesktopName ? desktop.desktopName
-                                                : (pager.showDesktopNumber ? desktop.desktopId+1 : "")
+                    text: pager.displayedText == Pager.Name ? desktop.desktopName
+                                                : (pager.displayedText == Pager.Number ? desktop.desktopId+1 : "")
                 }
 
                 Repeater {

@@ -45,10 +45,6 @@ class Pager : public QObject
     Q_PROPERTY(QObject* model READ model CONSTANT)
     Q_PROPERTY(int currentDesktop READ currentDesktop NOTIFY currentDesktopChanged)
     Q_PROPERTY(bool showWindowIcons READ showWindowIcons WRITE setShowWindowIcons NOTIFY showWindowIconsChanged)
-    //TODO: remove
-    Q_PROPERTY(bool showDesktopName READ showDesktopName NOTIFY showDesktopTextChanged)
-    //TODO: remove
-    Q_PROPERTY(bool showDesktopNumber READ showDesktopNumber NOTIFY showDesktopTextChanged)
     Q_PROPERTY(Qt::Orientation orientation READ orientation WRITE setOrientation NOTIFY orientationChanged)
     Q_PROPERTY(QSizeF size READ size WRITE setSize NOTIFY sizeChanged)
     Q_PROPERTY(Pager::CurrentDesktopSelected currentDesktopSelected READ currentDesktopSelected WRITE setCurrentDesktopSelected NOTIFY currentDesktopSelectedChanged)
@@ -83,9 +79,6 @@ class Pager : public QObject
         bool showWindowIcons() const { return m_showWindowIcons; }
         void setShowWindowIcons(bool show);
 
-        bool showDesktopName() const { return m_displayedText == Name; }
-        bool showDesktopNumber() const { return m_displayedText == Number; }
-
         Qt::Orientation orientation() const;
         void setOrientation(Qt::Orientation orientation);
 
@@ -104,7 +97,6 @@ class Pager : public QObject
     Q_SIGNALS:
         void currentDesktopChanged();
         void showWindowIconsChanged();
-        void showDesktopTextChanged();
         void orientationChanged();
         void sizeChanged();
         void currentDesktopSelectedChanged();
