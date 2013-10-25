@@ -73,12 +73,22 @@ Item {
         id: currentDesktopSelectedGroup
     }
 
-    Layouts.ColumnLayout {
+    Layouts.GridLayout {
+        columns: 2
+        QtControls.Label {
+            text: i18n("Display Text:")
+            Layouts.Layout.alignment: Qt.AlignVCenter|Qt.AlignRight
+        }
         QtControls.RadioButton {
             id: desktopNumberRadio
             exclusiveGroup: displayedTextGroup
             text: i18n("Desktop number")
             onCheckedChanged: if (checked) cfg_displayedText = 0;
+        }
+        Item {
+            width: 2
+            height: 2
+            Layouts.Layout.rowSpan: 2
         }
         QtControls.RadioButton {
             id: desktopNameRadio
@@ -93,16 +103,28 @@ Item {
             onCheckedChanged: if (checked) cfg_displayedText = 2;
         }
 
+        QtControls.Label {
+            text: i18n("Display icons:")
+            Layouts.Layout.alignment: Qt.AlignVCenter|Qt.AlignRight
+        }
         QtControls.CheckBox {
             id: showRecentlyInstalledCheckbox
-            text: i18n("Display icons")
         }
 
+        QtControls.Label {
+            text: i18n("Selecting current desktop:")
+            Layouts.Layout.alignment: Qt.AlignVCenter|Qt.AlignRight
+        }
         QtControls.RadioButton {
             id: doesNothingRadio
             exclusiveGroup: currentDesktopSelectedGroup
             text: i18n("Does nothing")
             onCheckedChanged: if (checked) cfg_currentDesktopSelected = 0;
+        }
+        Item {
+            width: 2
+            height: 2
+            Layouts.Layout.rowSpan: 2
         }
         QtControls.RadioButton {
             id: showsDesktopRadio
