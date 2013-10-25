@@ -1,19 +1,22 @@
-project(plasma-pager)
+plasma_install_package(package org.kde.pager)
 
 set(pager_SRCS
-    model.cpp
-    pager.cpp)
+    plugin/model.cpp
+    plugin/pager.cpp
+    plugin/pagerplugin.cpp)
 
-kde4_add_ui_files(pager_SRCS pagerConfig.ui)
-kde4_add_plugin(plasma_applet_pager ${pager_SRCS})
-target_link_libraries(plasma_applet_pager
-                      KIOCore
-                      ${KDE4_PLASMA_LIBS}
-                      ${KDE4_KCMUTILS_LIBRARY}
-                      ${KACTIVITIES_LIBRARY}
-                      ${QT_QTDECLARATIVE_LIBRARY}
+qt4_automoc(${pager_SRCS})
+    
+add_library(pagerplugin SHARED ${pager_SRCS})
+
+target_link_libraries(pagerplugin
+                      KF5::KIOCore
+                      KF5::KWindowSystem
+                      KF5::KActivities
+                      ${QT_QTCORE_LIBRARY}
+                      ${Qt5Qml_LIBRARIES}
+                      ${Qt5Quick_LIBRARIES}
                       taskmanager)
 
-install(TARGETS plasma_applet_pager DESTINATION ${PLUGIN_INSTALL_DIR})
-install(FILES plasma-pager-default.desktop DESTINATION ${SERVICES_INSTALL_DIR})
-install(DIRECTORY package/ DESTINATION ${DATA_INSTALL_DIR}/plasma/packages/org.kde.pager)
+install(TARGETS pagerplugin DESTINATION ${QML_INSTALL_DIR}/org/kde/plasma/private/pager)
+install(FILES plugin/qmldir DESTINATION ${QML_INSTALL_DIR}/org/kde/plasma/private/pager)

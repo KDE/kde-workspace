@@ -27,7 +27,6 @@
 #include <Plasma/Applet>
 
 #include "model.h"
-#include "ui_pagerConfig.h"
 
 class QDesktopWidget;
 
@@ -37,31 +36,42 @@ class KCModuleProxy;
 
 namespace Plasma
 {
-    class DeclarativeWidget;
     class FrameSvg;
 }
 
-class Pager : public Plasma::Applet
+class Pager : public QObject
 {
     Q_OBJECT
     Q_PROPERTY(QObject* model READ model CONSTANT)
-    Q_PROPERTY(QVariantMap style READ style NOTIFY styleChanged)
     Q_PROPERTY(int currentDesktop READ currentDesktop NOTIFY currentDesktopChanged)
-    Q_PROPERTY(bool showWindowIcons READ showWindowIcons NOTIFY showWindowIconsChanged)
-    Q_PROPERTY(bool showDesktopName READ showDesktopName NOTIFY showDesktopTextChanged)
-    Q_PROPERTY(bool showDesktopNumber READ showDesktopNumber NOTIFY showDesktopTextChanged)
+    Q_PROPERTY(bool showWindowIcons READ showWindowIcons WRITE setShowWindowIcons NOTIFY showWindowIconsChanged)
+    Q_PROPERTY(Qt::Orientation orientation READ orientation WRITE setOrientation NOTIFY orientationChanged)
+    Q_PROPERTY(QSizeF size READ size WRITE setSize NOTIFY sizeChanged)
+    Q_PROPERTY(Pager::CurrentDesktopSelected currentDesktopSelected READ currentDesktopSelected WRITE setCurrentDesktopSelected NOTIFY currentDesktopSelectedChanged)
+    Q_PROPERTY(Pager::DisplayedText displayedText READ displayedText WRITE setDisplayedText NOTIFY displayedTextChanged)
 
     public:
-        Pager(QObject *parent, const QVariantList &args);
+        enum CurrentDesktopSelected {
+            DoNothing = 0,
+            ShowDesktop,
+            ShowDashboard
+        };
+        Q_ENUMS(CurrentDesktopSelected)
+
+        enum DisplayedText {
+            Number = 0,
+            Name,
+            None
+        };
+        Q_ENUMS(DisplayedText)
+        
+        Pager(QObject *parent = 0);
         ~Pager();
 
-        void init();
-        void constraintsEvent(Plasma::Constraints);
+        //void constraintsEvent(Plasma::Constraints);
         virtual QList<QAction*> contextualActions();
 
         QObject *model() const { return m_pagerModel; }
-
-        QVariantMap style() const { return m_pagerStyle; }
 
         int currentDesktop() const { return m_currentDesktop; }
         void setCurrentDesktop(int desktop);
@@ -69,32 +79,35 @@ class Pager : public Plasma::Applet
         bool showWindowIcons() const { return m_showWindowIcons; }
         void setShowWindowIcons(bool show);
 
-        bool showDesktopName() const { return m_displayedText == Name; }
-        bool showDesktopNumber() const { return m_displayedText == Number; }
+        Qt::Orientation orientation() const;
+        void setOrientation(Qt::Orientation orientation);
+
+        QSizeF size() const;
+        void setSize(const QSizeF &size);
+
+        CurrentDesktopSelected currentDesktopSelected() const;
+        void setCurrentDesktopSelected(CurrentDesktopSelected cur);
+
+        DisplayedText displayedText() const;
+        void setDisplayedText(DisplayedText disp);
 
         Q_INVOKABLE void moveWindow(int, double, double, int, int);
         Q_INVOKABLE void changeDesktop(int desktopId);
-        Q_INVOKABLE QPixmap shadowText(const QString& text);
-        Q_INVOKABLE void updateToolTip(int hoverDesktopId);
-        Q_INVOKABLE void dropMimeData(QObject* mime, int desktop);
 
     Q_SIGNALS:
-        void styleChanged();
         void currentDesktopChanged();
         void showWindowIconsChanged();
-        void showDesktopTextChanged();
+        void orientationChanged();
+        void sizeChanged();
+        void currentDesktopSelectedChanged();
+        void displayedTextChanged();
 
     public Q_SLOTS:
         void recalculateGridSizes(int rows);
-        void updateSizes(bool allowResize = true);
+        void updateSizes();
         void recalculateWindowRects();
-        void themeRefresh();
-        void configChanged();
 
     protected Q_SLOTS:
-        virtual void wheelEvent(QGraphicsSceneWheelEvent *);
-
-        void configAccepted();
         void currentDesktopChanged(int desktop);
         void currentActivityChanged(const QString &activity);
         void desktopsSizeChanged();
@@ -110,35 +123,14 @@ class Pager : public Plasma::Applet
 
     protected:
         void createMenu();
-        KColorScheme *plasmaColorTheme();
         QRect fixViewportPosition( const QRect& r );
-        void createConfigurationInterface(KConfigDialog *parent);
 
     private:
-        void updatePagerStyle();
-        void initDeclarativeUI();
-        QRectF mapToDeclarativeUI(const QRectF &rect) const;
 
-        Plasma::DeclarativeWidget *m_declarativeWidget;
         PagerModel *m_pagerModel;
-        QVariantMap m_pagerStyle;
-
-        // Used just to get the margins
-        Plasma::FrameSvg *m_dummy;
 
         QTimer* m_timer;
-        Ui::pagerConfig ui;
-        enum DisplayedText {
-            Number,
-            Name,
-            None
-        };
 
-        enum CurrentDesktopSelected {
-            DoNothing,
-            ShowDesktop,
-            ShowDashboard
-        };
 
         DisplayedText m_displayedText;
         CurrentDesktopSelected m_currentDesktopSelected;
@@ -150,25 +142,18 @@ class Pager : public Plasma::Applet
         qreal m_widthScaleFactor;
         qreal m_heightScaleFactor;
         QSizeF m_size;
+        Qt::Orientation m_orientation;
 
         //list of info about animations for each desktop
         QList<QAction*> m_actions;
         QAction *m_addDesktopAction;
         QAction *m_removeDesktopAction;
-        KColorScheme *m_plasmaColorTheme;
 
-        bool m_showWindowIcons;
-        bool m_desktopDown;
-        bool m_verticalFormFactor;
-        bool m_ignoreNextSizeConstraint;
-        bool m_hideWhenSingleDesktop;
-
-        //embedded KCM module in the configuratoin dialog
-        KCModuleProxy *m_configureDesktopsWidget;
+        bool m_showWindowIcons : 1;
+        bool m_desktopDown : 1;
+        bool m_validSizes : 1;
 
         QDesktopWidget *m_desktopWidget;
     };
-
-K_EXPORT_PLASMA_APPLET(pager, Pager)
 
 #endif

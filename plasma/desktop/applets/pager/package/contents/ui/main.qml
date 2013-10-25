@@ -15,10 +15,12 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import QtQuick 1.1
-import org.kde.plasma.core 0.1 as PlasmaCore
-import org.kde.qtextracomponents 0.1 as QtExtraComponents
-import org.kde.draganddrop 1.0
+import QtQuick 2.0
+import org.kde.plasma.core 2.0 as PlasmaCore
+import org.kde.plasma.components 2.0 as PlasmaComponents
+import org.kde.qtextracomponents 2.0 as QtExtraComponents
+import org.kde.draganddrop 2.0
+import org.kde.plasma.private.pager 2.0
 import "utils.js" as Utils
 
 Item {
@@ -34,6 +36,56 @@ Item {
 
     anchors.fill: parent
     visible: repeater.count > 1
+
+    property color windowActiveOnActiveDesktopColor: theme.textColor
+    property color windowInactiveOnActiveDesktopColor: theme.textColor
+    property color windowActiveColor: theme.textColor
+    property color windowActiveBorderColor: theme.textColor
+    property color windowInactiveColor: theme.textColor
+    property color windowInactiveBorderColor: theme.textColor
+
+    Connections {
+        target: theme
+        onThemeChanged: {
+            windowActiveOnActiveDesktopColor = theme.textColor
+            windowActiveOnActiveDesktopColor.a = 0.6
+            windowActiveColor = theme.textColor
+            windowActiveColor.a = 0.5;
+            windowActiveBorderColor = theme.textColor
+            //windowActiveBorderColor = 1
+
+            windowInactiveOnActiveDesktopColor = theme.textColor
+            windowInactiveOnActiveDesktopColor.a = 0.35;
+            windowInactiveColor = theme.textColor
+            windowInactiveColor.a = 0.17;
+            windowInactiveBorderColor = theme.textColor
+            windowInactiveBorderColor.a = 0.5
+        }
+    }
+    Component.onCompleted: {
+            windowActiveOnActiveDesktopColor = theme.textColor
+            windowActiveOnActiveDesktopColor.a = 0.6
+            windowActiveColor = theme.textColor
+            windowActiveColor.a = 0.5;
+            windowActiveBorderColor = theme.textColor
+            //windowActiveBorderColor = 1
+
+            windowInactiveOnActiveDesktopColor = theme.textColor
+            windowInactiveOnActiveDesktopColor.a = 0.35;
+            windowInactiveColor = theme.textColor
+            windowInactiveColor.a = 0.17;
+            windowInactiveBorderColor = theme.textColor
+            windowInactiveBorderColor.a = 0.5
+    }
+
+    Pager {
+        id: pager
+        orientation: plasmoid.formFactor == PlasmaCore.Types.Vertical ? Qt.Vertical : Qt.Horizontal
+        size: Qt.size(root.width, root.height)
+        showWindowIcons: plasmoid.configuration.showWindowIcons
+        currentDesktopSelected: plasmoid.configuration.currentDesktopSelected
+        displayedText: plasmoid.configuration.displayedText
+    }
 
     Timer {
         id: dragTimer
@@ -107,14 +159,12 @@ Item {
                 height: desktop.height - 2
                 clip: true
 
-                QtExtraComponents.QPixmapItem {
+                PlasmaComponents.Label {
                     id: desktopText
-                    property string text: pager.showDesktopName ? desktop.desktopName
-                                                                : (pager.showDesktopNumber ? desktop.desktopId+1 : "")
                     anchors.centerIn: parent
-                    height: nativeHeight
-                    width: nativeWidth
-                    pixmap: pager.shadowText(text)
+                    text: pager.displayedText == Pager.Name ? desktop.desktopName
+                                                : (pager.displayedText == Pager.Number ? desktop.desktopId+1 : "")
+                    
                 }
 
                 Repeater {
@@ -133,20 +183,20 @@ Item {
                         color: {
                             if (desktop.active) {
                                 if (model.active)
-                                    return pager.style.windowActiveOnActiveDesktopColor;
+                                    return windowActiveOnActiveDesktopColor;
                                 else
-                                    return pager.style.windowInactiveOnActiveDesktopColor;
+                                    return windowInactiveOnActiveDesktopColor;
                             } else {
                                 if (model.active)
-                                    return pager.style.windowActiveColor;
+                                    return windowActiveColor;
                                 else
-                                    return pager.style.windowInactiveColor;
+                                    return windowInactiveColor;
                             }
                         }
 
                         border.width: 1
-                        border.color: model.active ? pager.style.windowActiveBorderColor
-                                                   : pager.style.windowInactiveBorderColor
+                        border.color: model.active ? windowActiveBorderColor
+                                                   : windowInactiveBorderColor
 
                         QtExtraComponents.QPixmapItem {
                             id: icon

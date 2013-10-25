@@ -22,30 +22,23 @@
 
 #include <math.h>
 
+#include <QApplication>
 #include <QFont>
 #include <QTimer>
 #include <QX11Info>
 #include <QDBusInterface>
 #include <QTextDocument>
 #include <QDesktopWidget>
-#include <QtGui/QGraphicsLinearLayout>
-#include <QtDeclarative/QDeclarativeEngine>
-#include <QtDeclarative/QDeclarativeContext>
 
 #include <KCModuleInfo>
 #include <KCModuleProxy>
 #include <KColorScheme>
-#include <KConfigDialog>
 #include <KGlobalSettings>
 #include <KIconLoader>
 #include <KWindowSystem>
 #include <NETRootInfo>
 
 #include <Plasma/FrameSvg>
-#include <Plasma/PaintUtils>
-#include <Plasma/Theme>
-#include <Plasma/ToolTipManager>
-#include <Plasma/DeclarativeWidget>
 #include <Plasma/Package>
 
 #include <KActivities/Consumer>
@@ -58,54 +51,27 @@ const int MAXDESKTOPS = 20;
 // random(), find a less magic one if you can. -sreich
 const qreal MAX_TEXT_WIDTH = 800;
 
-Pager::Pager(QObject *parent, const QVariantList &args)
-    : Plasma::Applet(parent, args),
+Pager::Pager(QObject *parent)
+    : QObject(parent),
       m_displayedText(None),
       m_currentDesktopSelected(DoNothing),
       m_rows(2),
       m_columns(0),
       m_currentDesktop(0),
+      m_orientation(Qt::Horizontal),
       m_addDesktopAction(0),
       m_removeDesktopAction(0),
-      m_plasmaColorTheme(0),
       m_showWindowIcons(false),
       m_desktopDown(false),
-      m_verticalFormFactor(false),
-      m_ignoreNextSizeConstraint(false),
-      m_hideWhenSingleDesktop(false),
-      m_configureDesktopsWidget(0),
-      m_desktopWidget(qApp->desktop())
+      m_validSizes(false),
+      m_desktopWidget(QApplication::desktop())
 {
-    setAcceptsHoverEvents(true);
-    setAcceptDrops(true);
-    setHasConfigurationInterface(true);
-    setAspectRatioMode(Plasma::IgnoreAspectRatio);
-
-    m_dummy = new Plasma::FrameSvg(this);
-    m_dummy->setImagePath("widgets/pager");
-
     // initialize with a decent default
     m_desktopCount = KWindowSystem::numberOfDesktops();
-    m_size = QSizeF(176, 88);
-    resize(m_size);
-}
-
-Pager::~Pager()
-{
-    delete m_plasmaColorTheme;
-}
-
-void Pager::init()
-{
+    
     m_pagerModel = new PagerModel(this);
 
-    updatePagerStyle();
-    initDeclarativeUI();
     createMenu();
-
-    m_verticalFormFactor = (formFactor() == Plasma::Vertical);
-
-    configChanged();
 
     m_timer = new QTimer(this);
     m_timer->setSingleShot(true);
@@ -128,8 +94,6 @@ void Pager::init()
     dbus.connect(QString(), "/KWin", "org.kde.KWin", "reloadConfig",
                  this, SLOT(configChanged()));
 
-    connect(Plasma::Theme::defaultTheme(), SIGNAL(themeChanged()), this, SLOT(themeRefresh()));
-
     recalculateGridSizes(m_rows);
 
     setCurrentDesktop(KWindowSystem::currentDesktop());
@@ -139,57 +103,11 @@ void Pager::init()
     m_currentActivity = act->currentActivity();
 }
 
-void Pager::updatePagerStyle()
+Pager::~Pager()
 {
-    m_pagerStyle["font"] = KGlobalSettings::taskbarFont();
-
-    // Desktop background
-    QColor defaultTextColor = Plasma::Theme::defaultTheme()->color(Plasma::Theme::TextColor);
-    m_pagerStyle["textColor"] = QString("#%1").arg(defaultTextColor.rgba(), 0, 16);
-    defaultTextColor.setAlpha(64);
-
-    // Inactive windows
-    QColor drawingColor = plasmaColorTheme()->foreground(KColorScheme::InactiveText).color();
-    drawingColor.setAlpha(45);
-    m_pagerStyle["windowInactiveColor"] = QString("#%1").arg(drawingColor.rgba(), 0, 16);
-
-    // Inactive windows Active desktop
-    drawingColor.setAlpha(90);
-    m_pagerStyle["windowInactiveOnActiveDesktopColor"] = QString("#%1").arg(drawingColor.rgba(), 0, 16);
-
-    // Inactive window borders
-    drawingColor = defaultTextColor;
-    drawingColor.setAlpha(130);
-    m_pagerStyle["windowInactiveBorderColor"] = QString("#%1").arg(drawingColor.rgba(), 0, 16);
-
-    // Active window borders
-    m_pagerStyle["windowActiveBorderColor"] = QString("#%1").arg(defaultTextColor.rgba(), 0, 16);
-
-    // Active windows
-    drawingColor.setAlpha(130);
-    m_pagerStyle["windowActiveColor"] = QString("#%1").arg(drawingColor.rgba(), 0, 16);
-
-    // Active windows Active desktop
-    drawingColor.setAlpha(155);
-    m_pagerStyle["windowActiveOnActiveDesktopColor"] = QString("#%1").arg(drawingColor.rgba(), 0, 16);
-
-    emit styleChanged();
 }
 
-void Pager::initDeclarativeUI()
-{
-    QGraphicsLinearLayout *layout = new QGraphicsLinearLayout(this);
-    m_declarativeWidget = new Plasma::DeclarativeWidget(this);
-    m_declarativeWidget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
-    m_declarativeWidget->engine()->rootContext()->setContextProperty("pager", this);
-
-    Plasma::PackageStructure::Ptr structure = Plasma::PackageStructure::load("Plasma/Generic");
-    Plasma::Package package(QString(), "org.kde.pager", structure);
-    m_declarativeWidget->setQmlPath(package.filePath("mainscript"));
-    layout->addItem(m_declarativeWidget);
-    setLayout(layout);
-}
 
 void Pager::setCurrentDesktop(int desktop)
 {
@@ -207,98 +125,78 @@ void Pager::setShowWindowIcons(bool show)
     }
 }
 
-void Pager::configChanged()
+Qt::Orientation Pager::orientation() const
 {
-    KConfigGroup cg = config();
-    bool changed = false;
+    return m_orientation;
+}
 
-    const DisplayedText displayedText = (DisplayedText) cg.readEntry("displayedText", (int) m_displayedText);
-    if (displayedText != m_displayedText) {
-        m_displayedText = displayedText;
-        changed = true;
-        emit showDesktopTextChanged();
+void Pager::setOrientation(Qt::Orientation orientation)
+{
+    if (m_orientation == orientation) {
+        return;
     }
 
-    const bool showWindowIcons = cg.readEntry("showWindowIcons", m_showWindowIcons);
-    if (showWindowIcons != m_showWindowIcons) {
-        setShowWindowIcons(showWindowIcons);
-        changed = true;
-    }
-
-    const bool hideWhenSingleDesktop = cg.readEntry("hideWhenSingleDesktop", false);
-    if (hideWhenSingleDesktop != m_hideWhenSingleDesktop) {
-        m_hideWhenSingleDesktop = hideWhenSingleDesktop;
-        changed = true;
-    }
-
-    const CurrentDesktopSelected currentDesktopSelected = static_cast<CurrentDesktopSelected>(cg.readEntry("currentDesktopSelected",
-                                                                                                           static_cast<int>(m_currentDesktopSelected)));
-    if (currentDesktopSelected != m_currentDesktopSelected) {
-        m_currentDesktopSelected = currentDesktopSelected;
-        changed = true;
-    }
-
-    int rows = m_rows;
-#ifdef Q_WS_X11
-    unsigned long properties[] = {0, NET::WM2DesktopLayout };
-    NETRootInfo info(QX11Info::display(), properties, 2);
-    rows = info.desktopLayoutColumnsRows().height();
-#endif
-
-    if (changed || rows != m_rows) {
-        recalculateGridSizes(rows);
+    m_orientation = orientation;
+    emit orientationChanged();
+ 
+    // whenever we switch to/from vertical form factor, swap the rows and columns around
+    if (m_columns != m_rows) {
+        // pass in columns as the new rows
+        recalculateGridSizes(m_columns);
         recalculateWindowRects();
     }
 }
 
-void Pager::constraintsEvent(Plasma::Constraints constraints)
+QSizeF Pager::size() const
 {
-    if (constraints & Plasma::SizeConstraint) {
-        // no need to update everything twice (if we are going to flip rows and columns later)
-        if (!(constraints & Plasma::FormFactorConstraint) ||
-             m_verticalFormFactor == (formFactor() == Plasma::Vertical) ||
-             m_columns == m_rows) {
-            // use m_ignoreNextSizeConstraint to decide whether to try to resize the plasmoid again
-            updateSizes(!m_ignoreNextSizeConstraint);
-            m_ignoreNextSizeConstraint = !m_ignoreNextSizeConstraint;
+    return m_size;
+}
 
-            recalculateWindowRects();
-        }
-        else {
-            update();
-        }
+void Pager::setSize(const QSizeF &size)
+{
+    if (m_size == size) {
+        return;
     }
 
-    if (constraints & Plasma::FormFactorConstraint) {
-        if (m_verticalFormFactor != (formFactor() == Plasma::Vertical)) {
-            m_verticalFormFactor = (formFactor() == Plasma::Vertical);
-            // whenever we switch to/from vertical form factor, swap the rows and columns around
-            if (m_columns != m_rows) {
-                // pass in columns as the new rows
-                recalculateGridSizes(m_columns);
-                recalculateWindowRects();
-                update();
-            }
-        }
+    m_size = size;
+    emit sizeChanged();
+    
+    m_validSizes = false;
 
-        if (formFactor() == Plasma::Horizontal) {
-            setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Expanding);
-        } else if (formFactor() == Plasma::Vertical) {
-            setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
-        } else {
-            setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-        }
+    // no need to update everything twice (if we are going to flip rows and columns later)
+    if (m_columns == m_rows) {
+        startTimer();
     }
 }
 
-KColorScheme *Pager::plasmaColorTheme()
+Pager::CurrentDesktopSelected Pager::currentDesktopSelected() const
 {
-    if (!m_plasmaColorTheme) {
-        m_plasmaColorTheme = new KColorScheme(QPalette::Active, KColorScheme::View,
-                                    Plasma::Theme::defaultTheme()->colorScheme());
+    return m_currentDesktopSelected;
+}
+
+void Pager::setCurrentDesktopSelected(CurrentDesktopSelected cur)
+{
+    if (m_currentDesktopSelected == cur) {
+        return;
     }
 
-    return m_plasmaColorTheme;
+    m_currentDesktopSelected = cur;
+    emit currentDesktopSelectedChanged();
+}
+
+Pager::DisplayedText Pager::displayedText() const
+{
+    return m_displayedText;
+}
+
+void Pager::setDisplayedText(Pager::DisplayedText disp)
+{
+    if (m_displayedText == disp) {
+        return;
+    }
+
+    m_displayedText = disp;
+    emit displayedTextChanged();
 }
 
 void Pager::createMenu()
@@ -341,60 +239,6 @@ void Pager::slotRemoveDesktop()
 }
 #endif
 
-void Pager::createConfigurationInterface(KConfigDialog *parent)
-{
-    QWidget *widget = new QWidget();
-    ui.setupUi(widget);
-    m_configureDesktopsWidget = new KCModuleProxy("desktop");
-
-    parent->addPage(widget, i18n("General"), icon());
-    parent->addPage(m_configureDesktopsWidget, m_configureDesktopsWidget->moduleInfo().moduleName(),
-                    m_configureDesktopsWidget->moduleInfo().icon());
-
-    connect(parent, SIGNAL(okClicked()), this, SLOT(configAccepted()));
-    connect(parent, SIGNAL(applyClicked()), this, SLOT(configAccepted()));
-
-    switch (m_displayedText){
-        case Number:
-            ui. desktopNumberRadioButton->setChecked(true);
-            break;
-
-        case Name:
-            ui.desktopNameRadioButton->setChecked(true);
-            break;
-
-        case None:
-            ui.displayNoneRadioButton->setChecked(true);
-            break;
-    }
-
-    ui.showWindowIconsCheckBox->setChecked(m_showWindowIcons);
-
-    switch (m_currentDesktopSelected){
-        case DoNothing:
-            ui.doNothingRadioButton->setChecked(true);
-            break;
-
-        case ShowDesktop:
-            ui.showDesktopRadioButton->setChecked(true);
-            break;
-
-        case ShowDashboard:
-            ui.showDashboardRadioButton->setChecked(true);
-            break;
-    }
-
-    connect(ui.desktopNumberRadioButton, SIGNAL(toggled(bool)), parent, SLOT(settingsModified()));
-    connect(ui.desktopNameRadioButton, SIGNAL(toggled(bool)), parent, SLOT(settingsModified()));
-    connect(ui.displayNoneRadioButton, SIGNAL(toggled(bool)), parent, SLOT(settingsModified()));
-    connect(ui.showWindowIconsCheckBox, SIGNAL(toggled(bool)), parent, SLOT(settingsModified()));
-    connect(ui.doNothingRadioButton, SIGNAL(toggled(bool)), parent, SLOT(settingsModified()));
-    connect(ui.showDesktopRadioButton, SIGNAL(toggled(bool)), parent, SLOT(settingsModified()));
-    connect(ui.showDashboardRadioButton, SIGNAL(toggled(bool)), parent, SLOT(settingsModified()));
-
-    connect(m_configureDesktopsWidget, SIGNAL(changed(bool)), parent, SLOT(settingsModified()));
-}
-
 void Pager::recalculateGridSizes(int rows)
 {
     // recalculate the number of rows and columns in the grid
@@ -417,13 +261,7 @@ void Pager::recalculateGridSizes(int rows)
     updateSizes();
 }
 
-QRectF Pager::mapToDeclarativeUI(const QRectF &rect) const
-{
-    QPointF p = mapToItem(m_declarativeWidget, rect.x(), rect.y());
-    return QRectF(p, rect.size());
-}
-
-void Pager::updateSizes(bool allowResize /* = true */)
+void Pager::updateSizes()
 {
     int padding = 2; // Space between miniatures of desktops
     int textMargin = 3; // Space between name of desktop and border
@@ -441,44 +279,19 @@ void Pager::updateSizes(bool allowResize /* = true */)
     qreal ratio = (qreal) totalRect.width() /
                   (qreal) totalRect.height();
 
-    // calculate the margins
-    if (formFactor() == Plasma::Vertical || formFactor() == Plasma::Horizontal) {
-        m_dummy->getMargins(leftMargin, topMargin, rightMargin, bottomMargin);
-
-        if (formFactor() == Plasma::Vertical) {
-            qreal optimalSize = (geometry().width() -
-                                 KIconLoader::SizeSmall * ratio * m_columns -
-                                 padding * (m_columns - 1)) / 2;
-
-            if (optimalSize < leftMargin || optimalSize < rightMargin) {
-                leftMargin = rightMargin = qMax(qreal(0), optimalSize);
-            }
-        } else if (formFactor() == Plasma::Horizontal) {
-            qreal optimalSize = (geometry().height() -
-                                 KIconLoader::SizeSmall * m_rows -
-                                 padding * (m_rows - 1)) / 2;
-
-            if (optimalSize < topMargin || optimalSize < bottomMargin) {
-                topMargin = bottomMargin = qMax(qreal(0), optimalSize);
-            }
-        }
-    } else {
-        getContentsMargins(&leftMargin, &topMargin, &rightMargin, &bottomMargin);
-    }
-
 
     qreal itemHeight;
     qreal itemWidth;
     qreal preferredItemHeight;
     qreal preferredItemWidth;
 
-    if (formFactor() == Plasma::Vertical) {
+    if (orientation() == Qt::Vertical) {
         // work out the preferred size based on the width of the geometry
-        preferredItemWidth = (geometry().width() - leftMargin - rightMargin -
+        preferredItemWidth = (m_size.width() - leftMargin - rightMargin -
                               padding * (m_columns - 1)) / m_columns;
         preferredItemHeight = preferredItemWidth / ratio;
         // make sure items of the new size actually fit in the current geometry
-        itemHeight = (geometry().height() - topMargin - bottomMargin -
+        itemHeight = (m_size.height() - topMargin - bottomMargin -
                       padding * (m_rows - 1)) / m_rows;
         if (itemHeight > preferredItemHeight) {
             itemHeight = preferredItemHeight;
@@ -486,7 +299,7 @@ void Pager::updateSizes(bool allowResize /* = true */)
         itemWidth = itemHeight * ratio;
     } else {
         // work out the preferred size based on the height of the geometry
-        preferredItemHeight = (geometry().height() - topMargin - bottomMargin -
+        preferredItemHeight = (m_size.height() - topMargin - bottomMargin -
                                padding * (m_rows - 1)) / m_rows;
         preferredItemWidth = preferredItemHeight * ratio;
 
@@ -502,7 +315,7 @@ void Pager::updateSizes(bool allowResize /* = true */)
             }
         }
 
-        itemWidth = (geometry().width() - leftMargin - rightMargin -
+        itemWidth = (m_size.width() - leftMargin - rightMargin -
                      padding * (m_columns - 1)) / m_columns;
         if (itemWidth > preferredItemWidth) {
             itemWidth = preferredItemWidth;
@@ -524,37 +337,18 @@ void Pager::updateSizes(bool allowResize /* = true */)
         itemRect.moveTop(topMargin + (i / m_columns) * (itemHeight + padding));
 
         QString name = KWindowSystem::desktopName(i + 1);
-        m_pagerModel->appendDesktopRect(mapToDeclarativeUI(itemRect), name);
+        m_pagerModel->appendDesktopRect(itemRect, name);
     }
 
-    // do not try to resize unless the caller has allowed it,
-    // or the height has changed (or the width has changed in a vertical panel)
-    const Plasma::FormFactor f = formFactor();
-    if (allowResize ||
-        (f != Plasma::Vertical && contentsRect().height() != m_size.height()) ||
-        (f == Plasma::Vertical && contentsRect().width()  != m_size.width())) {
-
-        // this new size will have the same height/width as the horizontal/vertical panel has given it
-        QSizeF preferred;
-        if (m_hideWhenSingleDesktop && m_desktopCount == 1 && (f == Plasma::Vertical || f == Plasma::Horizontal)) {
-            const bool isVertical = f == Plasma::Vertical;
-            preferred = QSizeF(isVertical ? m_size.width() : 0,
-                               isVertical ? 0 : m_size.height());
-        } else {
-            preferred = QSizeF(ceil(m_columns * preferredItemWidth + padding * (m_columns - 1) + leftMargin + rightMargin),
-                        ceil(m_rows * preferredItemHeight + padding * (m_rows - 1) + topMargin + bottomMargin));
-        }
-
-        setPreferredSize(preferred);
-        emit sizeHintChanged(Qt::PreferredSize);
-    }
-
-    m_size = contentsRect().size();
-    layout()->activate();
+    m_validSizes = true;
 }
 
 void Pager::recalculateWindowRects()
 {
+    if (!m_validSizes) {
+        updateSizes();
+    }
+
     QList<WId> windows = KWindowSystem::stackingOrder();
     m_pagerModel->clearWindowRects();
 
@@ -611,41 +405,6 @@ void Pager::recalculateWindowRects()
             m_pagerModel->appendWindowRect(i, window, windowRect, active, icon, info.visibleName());
         }
     }
-
-    update();
-}
-
-void Pager::configAccepted()
-{
-    // only write the config here, it will be loaded in by configChanged(),
-    // which is called after this when the config dialog is accepted
-    KConfigGroup cg = config();
-
-    DisplayedText displayedText;
-    if (ui.desktopNumberRadioButton->isChecked()) {
-        displayedText = Number;
-    } else if (ui.desktopNameRadioButton->isChecked()) {
-        displayedText = Name;
-    } else {
-        displayedText = None;
-    }
-    cg.writeEntry("displayedText", (int) displayedText);
-
-    cg.writeEntry("showWindowIcons", ui.showWindowIconsCheckBox->isChecked());
-
-    CurrentDesktopSelected currentDesktopSelected;
-    if (ui.doNothingRadioButton->isChecked()) {
-        currentDesktopSelected = DoNothing;
-    } else if (ui.showDesktopRadioButton->isChecked()) {
-        currentDesktopSelected = ShowDesktop;
-    } else {
-        currentDesktopSelected = ShowDashboard;
-    }
-    cg.writeEntry("currentDesktopSelected", (int) currentDesktopSelected);
-
-    m_configureDesktopsWidget->save();
-
-    emit configNeedsSaving();
 }
 
 void Pager::currentDesktopChanged(int desktop)
@@ -686,7 +445,7 @@ void Pager::numberOfDesktopsChanged(int num)
 void Pager::desktopNamesChanged()
 {
     m_pagerModel->clearDesktopRects();
-    updateSizes();
+    m_validSizes = false;
     startTimer();
 }
 
@@ -703,7 +462,7 @@ void Pager::windowChanged(WId id, const unsigned long* dirty)
 void Pager::desktopsSizeChanged()
 {
     m_pagerModel->clearDesktopRects();
-    updateSizes();
+    m_validSizes = false;
     startTimer();
 }
 
@@ -719,24 +478,6 @@ void Pager::startTimerFast()
     if (!m_timer->isActive()) {
         m_timer->start(FAST_UPDATE_DELAY);
     }
-}
-
-void Pager::wheelEvent(QGraphicsSceneWheelEvent *e)
-{
-    int newDesk;
-    int desktops = KWindowSystem::numberOfDesktops();
-
-    if (e->delta() < 0) {
-        newDesk = m_currentDesktop % desktops + 1;
-    } else {
-        newDesk = (desktops + m_currentDesktop - 2) % desktops + 1;
-    }
-
-    KWindowSystem::setCurrentDesktop(newDesk);
-    setCurrentDesktop(newDesk);
-    update();
-
-    Applet::wheelEvent(e);
 }
 
 void Pager::moveWindow(int window, double x, double y, int targetDesktop, int sourceDesktop)
@@ -797,17 +538,6 @@ void Pager::changeDesktop(int newDesktop)
     }
 }
 
-QPixmap Pager::shadowText(const QString &text)
-{
-    QColor textColor = Plasma::Theme::defaultTheme()->color(Plasma::Theme::TextColor);
-
-    return Plasma::PaintUtils::shadowText(text,
-                                          KGlobalSettings::smallestReadableFont(),
-                                          textColor,
-                                          textColor.value() < 128 ? Qt::white : Qt::black,
-                                          QPoint(0, 0), 2);
-}
-
 // KWindowSystem does not translate position when mapping viewports
 // to virtual desktops (it'd probably break more things than fix),
 // so the offscreen coordinates need to be fixed
@@ -825,79 +555,6 @@ QRect Pager::fixViewportPosition( const QRect& r )
     return QRect( x - r.width() / 2, y - r.height() / 2, r.width(), r.height());
 }
 
-void Pager::themeRefresh()
-{
-    delete m_plasmaColorTheme;
-    m_plasmaColorTheme = 0;
-    updatePagerStyle();
-    update();
-}
 
-void Pager::updateToolTip(int hoverDesktopId)
-{
-    Plasma::ToolTipContent data;
-    QString subtext;
-    int taskCounter = 0;
-    int displayedTaskCounter = 0;
-    WindowModel *windows = m_pagerModel->windowsAt(hoverDesktopId);
 
-    for (; taskCounter < windows->rowCount(); taskCounter++) {
-        WId id = windows->idAt(taskCounter);
-        QString visibleName = windows->visibleNameAt(taskCounter);
-
-        bool active = (id == KWindowSystem::activeWindow());
-        if (taskCounter < 4 || active) {
-            // prefer to use the System Settings specified Small icon (usually 16x16)
-            // TODO: should we actually be using Small for this? or Panel, Toolbar, etc?
-            int iconSize = KIconLoader::global()->currentSize(KIconLoader::Small);
-            QPixmap icon = KWindowSystem::icon(id, iconSize, iconSize, true);
-            if (icon.isNull()) {
-                 subtext += "<br />&bull;" + Qt::escape(visibleName);
-            } else {
-                data.addResource(Plasma::ToolTipContent::ImageResource,
-                                 QUrl("wicon://" + QString::number(taskCounter)),
-                                 QVariant(icon));
-                subtext += "<br /><img src=\"wicon://" + QString::number(taskCounter)
-                           + "\"/>&nbsp;";
-            }
-
-            QFontMetricsF metrics(KGlobalSettings::taskbarFont());
-            const QString combined = (active ? "<u>" : "")
-                                     + Qt::escape(visibleName).replace(' ', "&nbsp;")
-                                     + (active ? "</u>" : "");
-            // elide text that is too long
-            subtext += metrics.elidedText(combined, Qt::ElideMiddle,
-                                          MAX_TEXT_WIDTH, Qt::TextShowMnemonic);
-            displayedTaskCounter++;
-        }
-    }
-
-    if (taskCounter) {
-        subtext.prepend(i18np("One window:", "%1 windows:", taskCounter));
-    }
-
-    if (taskCounter - displayedTaskCounter > 0) {
-        subtext.append("<br>&bull; <i>" + i18np("and 1 other", "and %1 others",
-                       taskCounter - displayedTaskCounter) + "</i>");
-    }
-
-    data.setMainText(KWindowSystem::desktopName(hoverDesktopId + 1));
-    data.setSubText(subtext);
-    Plasma::ToolTipManager::self()->setContent(this, data);
-}
-
-void Pager::dropMimeData(QObject* mime, int desktop)
-{
-    QMimeData* mimeData = qobject_cast<QMimeData*>(mime);
-    if (!mimeData)
-        return;
-    bool ok;
-    QList<WId> ids = TaskManager::Task::idsFromMimeData(mimeData, &ok);
-    if (ok) {
-        foreach (const WId &id, ids) {
-            KWindowSystem::setOnDesktop(id, desktop + 1);
-        }
-    }
-}
-
-#include "pager.moc"
+#include "moc_pager.cpp"
