@@ -77,6 +77,10 @@ public:
     QString getLayoutName() const {
     	return keyboardLayout.getLayoutName();
     }
+
+    float getScaleFactor(){
+        return scaleFactor;
+    }
 };
 
 #endif // KBPREVIEWFRAME_H 

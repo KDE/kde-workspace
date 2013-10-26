@@ -24,7 +24,7 @@
 #include <QtGui/QVBoxLayout>
 #include <QtGui/QPushButton>
 #include <QtGui/QComboBox>
-
+#include <QDebug>
 
 #include <KLocale>
 
@@ -35,8 +35,7 @@ KeyboardPainter::KeyboardPainter():
     exitButton(new QPushButton(i18n("Close"), this)),
     levelBox(new QComboBox(this))
 {
-    kbDialog->setFixedSize( 1100, 490 );
-    kbframe->setFixedSize( 1100, 490 );
+    kbframe->setFixedSize(1100,490);
     exitButton->setFixedSize( 120, 30 );
     levelBox->setFixedSize( 360, 30 );
 
@@ -60,9 +59,9 @@ KeyboardPainter::KeyboardPainter():
 void KeyboardPainter::generateKeyboardLayout(const QString& layout, const QString& variant, const QString& model, const QString& title)
 {
     kbframe->generateKeyboardLayout(layout, variant, model);
-    kbDialog->setFixedSize(getWidth(), getHeight());
-    kbframe->setFixedSize(getWidth(), getHeight());
-
+    kbframe->setFixedSize(getWidth(),getHeight());
+    kbDialog->setFixedSize(getWidth(),getWidth());
+    qDebug()<<kbframe->size()<<kbDialog->size();
     setWindowTitle(title);
 
     int level = kbframe->getLevel();
@@ -84,13 +83,16 @@ void KeyboardPainter::levelChanged(int l_id){
 
 int KeyboardPainter::getHeight(){
    int height = kbframe->getHeight();
-   height = 2.5 * height + 50;
+   qDebug()<<"scaleFactor"<<kbframe->getScaleFactor()<<"height"<<height;
+   height = kbframe->getScaleFactor() * height + 50;
    return height;
 }
 
 int KeyboardPainter::getWidth(){
    int width = kbframe->getWidth();
-   width = 2.5 * width + 20;
+
+   qDebug()<<"scaleFactor"<<kbframe->getScaleFactor()<<"width"<<width;
+   width = kbframe->getScaleFactor() * width + 20;
    return width;
 }
 

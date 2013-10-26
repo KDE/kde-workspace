@@ -57,15 +57,27 @@ void GShape::display(){
 double GShape::size(int vertical) const{
     if( !cordii.isEmpty() ){
         if(vertical == 0){
-            if (approx.x() == 0 && approx.y() == 0)
-                return cordii[0].x();
+            if (approx.x() == 0 && approx.y() == 0){
+                int max = 0;
+                for (int i = 0; i < cordi_count; i++){
+                    if(max < cordii[i].x())
+                        max = cordii[i].x();
+                }
+                return max;
+            }
             else
                 return approx.x();
         }
 
         else
-            if (approx.x() == 0 && approx.y() == 0)
-                return cordii[0].y();
+            if (approx.x() == 0 && approx.y() == 0){
+                int max = 0;
+                for (int i = 0; i < cordi_count; i++){
+                    if(max < cordii[i].y())
+                        max = cordii[i].y();
+                }
+                return max;
+            }
             else
                 return approx.y();
     }

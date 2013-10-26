@@ -31,6 +31,8 @@
 #include <QHelpEvent>
 #include <math.h>
 #include <QtGui/QMessageBox>
+#include <QRect>
+#include <QtGui/QDesktopWidget>
 
 #include <KApplication>
 #include <KLocale>
@@ -54,6 +56,7 @@ KbPreviewFrame::KbPreviewFrame(QWidget *parent) :
      setFrameStyle( QFrame::Box );
      setFrameShadow(QFrame::Sunken);
      setMouseTracking(true);
+     scaleFactor = 1;
      l_id = 0;
 }
 
@@ -70,7 +73,16 @@ int KbPreviewFrame::getHeight() const { return geometry.height; }
 void KbPreviewFrame::drawKeySymbols(QPainter &painter, QPoint temp[], const GShape& s, const QString& name)
 {
     int keyindex = keyboardLayout.findKey(name);
-    int sz = 20;
+    int szx = scaleFactor*s.size(0)/2 < 20 ? scaleFactor*s.size(0)/3 : 20;
+    int szy = scaleFactor*s.size(1)/2 < 20 ? scaleFactor*s.size(1)/3 : 20;
+    QFont kbfont;
+    if(szx > szy)
+        kbfont.setPointSize(szy/2 < 9 ? szy : 9);
+    else
+        kbfont.setPointSize(szx/2 < 9 ? sz/2 : 9);
+
+    painter.setFont(kbfont);
+
     int cordinate[] = {0, 3, 1, 2};
     float tooltipX = 0, toolTipY = 0;
     QString tip;
@@ -86,7 +98,7 @@ void KbPreviewFrame::drawKeySymbols(QPainter &painter, QPoint temp[], const GSha
                 QColor txtColor = txt[0] == -1 ? unknownSymbolColor : color[level];
 
                 painter.setPen(txtColor);
-                painter.drawText(temp[cordinate[level]].x()+xOffset[level], temp[cordinate[level]].y()+yOffset[level], sz, sz, Qt::AlignTop, txt);
+                painter.drawText(temp[cordinate[level]].x()+xOffset[level], temp[cordinate[level]].y()+yOffset[level], szx, szy, Qt::AlignTop, txt);
 
                 QString currentSymbol = key.getSymbol(keyLevel[l_id][level]);
                 currentSymbol = currentSymbol.size() < 3 ? currentSymbol.append("\t") : currentSymbol;
@@ -258,8 +270,6 @@ void KbPreviewFrame::paintEvent(QPaintEvent *)
 
         painter.setPen("#EDEEF2");
 
-        scaleFactor = 2.5;
-
         painter.drawRect(strtx, strty, scaleFactor*endx+60, scaleFactor*endy+60);
 
         painter.setPen(Qt::black);
@@ -312,6 +322,16 @@ void KbPreviewFrame::paintEvent(QPaintEvent *)
 void KbPreviewFrame::generateKeyboardLayout(const QString& layout, const QString& layoutVariant, const QString& model)
 {
     geometry = grammar::parseGeometry(model);
+    int endx = geometry.getWidth(), endy = geometry.getHeight();
+    int screenWidth = QApplication::desktop()->screenGeometry().width();
+
+    scaleFactor = 2.5;
+
+    while (scaleFactor*endx > screenWidth)
+        scaleFactor -= 0.2;
+
+    setFixedSize(scaleFactor*endx+60, scaleFactor*endy+60);
+    qDebug()<<screenWidth<<":"<<scaleFactor<<scaleFactor*endx+60<<scaleFactor*endy+60;
     keyboardLayout = grammar::parseSymbols(layout, layoutVariant);
 }
 
