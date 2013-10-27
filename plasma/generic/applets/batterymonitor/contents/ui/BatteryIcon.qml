@@ -26,8 +26,6 @@ Item {
     property int percent
     property bool pluggedIn
 
-    property bool animate // Pulse when battery is low
-
     PlasmaCore.Svg {
         id: svg
         imagePath: "icons/battery"
@@ -38,29 +36,6 @@ Item {
         anchors.fill: parent
         svg: svg
         elementId: "Battery"
-    }
-
-    SequentialAnimation {
-      running: percent <= 5 && !pluggedIn && animate
-      alwaysRunToEnd: true
-      loops: Animation.Infinite
-
-      NumberAnimation {
-          target: batterySvg
-          properties: "opacity"
-          from: 1.0
-          to: 0.2
-          duration: 750
-          easing.type: Easing.InCubic
-      }
-      NumberAnimation {
-          target: batterySvg
-          properties: "opacity"
-          from: 0.2
-          to: 1.0
-          duration: 750
-          easing.type: Easing.OutCubic
-      }
     }
 
     PlasmaCore.SvgItem {
