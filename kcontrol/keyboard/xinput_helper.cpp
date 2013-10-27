@@ -73,6 +73,7 @@ bool XInputEventNotifier::processOtherEvents(XEvent* event)
 	}
 	else if( newDeviceType == DEVICE_POINTER ) {
 		emit(newPointerDevice());
+		emit(newKeyboardDevice());	// arghhh, looks like X resets xkb map even when only pointer device is connected
 	}
 	return true;
 }
