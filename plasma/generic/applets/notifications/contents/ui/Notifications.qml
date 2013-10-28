@@ -62,7 +62,9 @@ Column {
                 "configurable": configurable,
                 "appRealName": appRealName,
                 "actions" : actions}
+        notificationsModel.inserting = true;
         notificationsModel.insert(0, notification);
+        notificationsModel.inserting = false;
         if (plasmoid.popupShowing) {
             return
         }
@@ -108,6 +110,7 @@ Column {
 
     ListModel {
         id: notificationsModel
+        property bool inserting: false;
     }
     ListModel {
         id: allApplicationsModel

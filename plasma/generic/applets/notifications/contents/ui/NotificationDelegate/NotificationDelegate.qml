@@ -44,7 +44,8 @@ PlasmaComponents.ListItem {
         repeat: false
         running: !idleTimeSource.idle
         onTriggered: {
-            notificationsModel.remove(index)
+            if (!notificationsModel.inserting)
+                notificationsModel.remove(index)
         }
     }
 
