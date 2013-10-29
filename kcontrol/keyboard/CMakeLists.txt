@@ -46,7 +46,7 @@ target_link_libraries(kded_keyboard
     KF5::KWindowSystem
     KF5::Plasma
     KF5::XmlGui
-    ${KDE4Support_LIBRARIES}
+    KF5::KDE4Support
     ${X11_LIBRARIES}
     ${X11_Xkbfile_LIB}
  )
@@ -105,7 +105,7 @@ target_link_libraries(keyboard_layout_widget
     KF5::KI18n
     KF5::KService
     KF5::Plasma
-    ${KDE4Support_LIBRARIES}
+    KF5::KDE4Support
     ${X11_LIBRARIES}
     ${X11_Xkbfile_LIB}
 )
@@ -155,7 +155,7 @@ target_link_libraries(kcm_keyboard
     KF5::KWindowSystem
     KF5::Plasma
     KF5::XmlGui
-    ${KDE4Support_LIBRARIES}
+    KF5::KDE4Support
     ${X11_Xkbfile_LIB}
     ${X11_LIBRARIES}
     ${text_paint_LIB}

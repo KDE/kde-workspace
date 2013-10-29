@@ -25,7 +25,7 @@ target_link_libraries(kfontinst_bin
     KF5::KIOCore
     KF5::KIOWidgets
     KF5::XmlGui
-    ${KDE4Support_LIBRARIES}
+    KF5::KDE4Support
     ${X11_X11_LIB}
     kfontinst
 )
@@ -33,7 +33,7 @@ target_link_libraries(kfontprint_bin
     Qt5::PrintSupport
     KF5::KIconThemes
     KF5::KPrintUtils
-    ${KDE4Support_LIBRARIES}
+    KF5::KDE4Support
     ${X11_X11_LIB}
     ${FREETYPE_LIBRARIES}
     kfontinstui

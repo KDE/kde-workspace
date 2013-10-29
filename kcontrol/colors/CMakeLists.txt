@@ -13,7 +13,7 @@ target_link_libraries(kcm_colors
     KF5::KI18n
     Qt5::DBus
     ${KDE4_KNEWSTUFF3_LIBS}
-    ${KDE4Support_LIBRARIES}
+    KF5::KDE4Support
     ${X11_LIBRARIES})
 
 install(TARGETS kcm_colors  DESTINATION ${PLUGIN_INSTALL_DIR})

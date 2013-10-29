@@ -17,7 +17,7 @@ qt5_add_dbus_interface(kcm_fonts_PART_SRCS ${klauncher_xml} klauncher_iface)
 kde4_add_plugin(kcm_fonts ${kcm_fonts_PART_SRCS})
 
 
-target_link_libraries(kcm_fonts Qt5::DBus Qt5::Xml KF5::KCMUtils KF5::KI18n ${KDE4Support_LIBRARIES} ${FREETYPE_LIBRARIES})
+target_link_libraries(kcm_fonts Qt5::DBus Qt5::Xml KF5::KCMUtils KF5::KI18n KF5::KDE4Support ${FREETYPE_LIBRARIES})
 
 if(Q_WS_X11)
     if(FONTCONFIG_FOUND)

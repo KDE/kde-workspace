@@ -62,7 +62,7 @@ target_link_libraries(plasma_applet_systemtray
     ${Solid_LIBRARIES}
     ${KWindowSystem_LIBRARIES}
     KIOCore
-    ${KDE4Support_LIBRARIES}
+    KF5::KDE4Support
     ${X11_LIBRARIES}
     ${X11_Xrender_LIB}
     ${X11_Xfixes_LIB}

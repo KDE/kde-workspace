@@ -12,7 +12,7 @@ kde4_add_plugin(kcm_display ${kcm_display_PART_SRCS})
 target_link_libraries(kcm_display
     KF5::KCMUtils
     KF5::KI18n
-    ${KDE4Support_LIBRARIES}
+    KF5::KDE4Support
 )
 
 install(TARGETS kcm_display  DESTINATION ${PLUGIN_INSTALL_DIR} )

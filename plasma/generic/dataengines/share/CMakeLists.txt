@@ -12,7 +12,7 @@ target_link_libraries(plasma_engine_share
                       ${Plasma_LIBRARIES}
                       KIOCore
                       ${KDE4_KROSSCORE_LIBS}
-                      ${KDE4Support_LIBRARIES}
+                      KF5::KDE4Support
 )
 
 install(TARGETS plasma_engine_share

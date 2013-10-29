@@ -6,7 +6,7 @@ target_link_libraries(kcm_standard_actions
     KF5::KCMUtils
     KF5::KI18n
     KF5::XmlGui
-    ${KDE4Support_LIBRARIES}
+    KF5::KDE4Support
 )
 
 install(TARGETS kcm_standard_actions DESTINATION ${PLUGIN_INSTALL_DIR})

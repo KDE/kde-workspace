@@ -14,7 +14,7 @@ target_link_libraries(kcm_desktoptheme ${X11_LIBRARIES}
     KF5::KIOCore
     KF5::KIOWidgets
     ${KDE4_KNEWSTUFF3_LIBS}
-    ${KDE4Support_LIBRARIES}
+    KF5::KDE4Support
 )
 
 install(TARGETS kcm_desktoptheme DESTINATION ${PLUGIN_INSTALL_DIR} )

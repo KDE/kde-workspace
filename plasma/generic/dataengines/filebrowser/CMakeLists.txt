@@ -9,7 +9,7 @@ target_link_libraries(plasma_engine_filebrowser
     ${Plasma_LIBRARIES}
     KF5::KService
     KF5::KIOCore
-    ${KDE4Support_LIBRARIES}
+    KF5::KDE4Support
 )
 
 install(TARGETS plasma_engine_filebrowser DESTINATION ${PLUGIN_INSTALL_DIR}/plasma/dataengine)

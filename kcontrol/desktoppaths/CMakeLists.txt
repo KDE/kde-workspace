@@ -9,7 +9,7 @@ target_link_libraries(kcm_desktoppaths
     KF5::KI18n
     KF5::KIOCore
     KF5::KIOWidgets
-    ${KDE4Support_LIBRARIES}
+    KF5::KDE4Support
 )
 
 install(TARGETS kcm_desktoppaths DESTINATION ${PLUGIN_INSTALL_DIR})

@@ -34,7 +34,7 @@ target_link_libraries(plasma_engine_statusnotifieritem
     KF5::Plasma
     KF5::KIconThemes
     ${DBusMenuQt_LIBRARIES}
-    ${KDE4Support_LIBRARIES}
+    KF5::KDE4Support
 )
 
 install(TARGETS plasma_engine_statusnotifieritem DESTINATION ${PLUGIN_INSTALL_DIR}/plasma/dataengine)

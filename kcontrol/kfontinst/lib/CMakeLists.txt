@@ -6,7 +6,7 @@ target_link_libraries(kfontinst
     Qt5::Xml
     Qt5::DBus
     KF5::KI18n
-    ${KDE4Support_LIBRARIES}
+    KF5::KDE4Support
     ${FREETYPE_LIBRARIES}
     ${FONTCONFIG_LIBRARIES}
     ${XCB_XCB_LIBRARY}

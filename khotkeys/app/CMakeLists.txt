@@ -11,7 +11,7 @@ target_link_libraries(kded_khotkeys
     khotkeysprivate
     kworkspace
     KF5::KDBusAddons
-    ${KDE4Support_LIBRARIES})
+    KF5::KDE4Support)
 
 # I'm not sure if this is needed anymore. Check it
 if(X11_XTest_FOUND)

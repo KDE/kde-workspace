@@ -21,7 +21,7 @@ target_link_libraries(plasma_engine_applicationjobs
   KF5::KIOCore
   KF5::Plasma
   KF5::KService
-  ${KDE4Support_LIBRARIES}
+  KF5::KDE4Support
 )
 
 install(TARGETS plasma_engine_applicationjobs DESTINATION ${PLUGIN_INSTALL_DIR}/plasma/dataengine)

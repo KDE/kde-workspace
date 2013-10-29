@@ -31,7 +31,7 @@ target_link_libraries(kdeinit_kmenuedit
     KF5::SonnetCore
     KF5::SonnetUi
     KF5::XmlGui
-    ${KDE4Support_LIBRARIES}
+    KF5::KDE4Support
 )
 
 install(TARGETS kdeinit_kmenuedit  DESTINATION ${LIB_INSTALL_DIR} )

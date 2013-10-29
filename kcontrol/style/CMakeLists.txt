@@ -24,7 +24,7 @@ target_link_libraries(kcm_style
     KF5::KNotifications
     KF5::Plasma
     ${X11_LIBRARIES}
-    ${KDE4Support_LIBRARIES} ${KDE4_KNEWSTUFF3_LIBS})
+    KF5::KDE4Support ${KDE4_KNEWSTUFF3_LIBS})
 if(NOT WIN32)
     target_link_libraries(kcm_style kdecorations)
 endif(NOT WIN32)

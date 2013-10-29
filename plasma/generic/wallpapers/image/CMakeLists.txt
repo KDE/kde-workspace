@@ -21,7 +21,7 @@ target_link_libraries(plasma_wallpaper_imageplugin
     KF5::KIOCore
     ${KDE4_KIO_LIBS} # KFileDialog
 	 ${KDE4_KNEWSTUFF3_LIBS}
-         ${KDE4Support_LIBRARIES}
+         KF5::KDE4Support
          )
 
 install(TARGETS plasma_wallpaper_imageplugin DESTINATION ${QML_INSTALL_DIR}/org/kde/plasma/wallpapers/image)

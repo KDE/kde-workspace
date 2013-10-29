@@ -13,7 +13,7 @@ target_link_libraries(plasma_engine_time
     Qt5::DBus
     KF5::Solid
     ${Plasma_LIBRARIES}
-    ${KDE4Support_LIBRARIES}
+    KF5::KDE4Support
     KF5::KI18n
     KF5::KService
 )
