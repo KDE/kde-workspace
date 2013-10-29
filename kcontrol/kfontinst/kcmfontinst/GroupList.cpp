@@ -178,16 +178,16 @@ bool CGroupListItem::addFamilies(QDomElement &elem)
 
 void CGroupListItem::save(QTextStream &str)
 {
-    str << " <"GROUP_TAG" "NAME_ATTR"=\"" << Misc::encodeText(itsName, str) << "\">" << endl;
+    str << " <" GROUP_TAG " " NAME_ATTR "=\"" << Misc::encodeText(itsName, str) << "\">" << endl;
     if(itsFamilies.count())
     {
         QSet<QString>::ConstIterator it(itsFamilies.begin()),
                                      end(itsFamilies.end());
 
         for(; it!=end; ++it)
-            str << "  <"FAMILY_TAG">" << Misc::encodeText(*it, str) << "</"FAMILY_TAG">" << endl;
+            str << "  <" FAMILY_TAG ">" << Misc::encodeText(*it, str) << "</" FAMILY_TAG ">" << endl;
     }
-    str << " </"GROUP_TAG">" << endl;
+    str << " </" GROUP_TAG ">" << endl;
 }
 
 CGroupList::CGroupList(QWidget *parent)
@@ -494,7 +494,7 @@ bool CGroupList::save(const QString &fileName, CGroupListItem *grp)
     {
         QTextStream str(&file);
 
-        str << "<"GROUPS_DOC">" << endl;
+        str << "<" GROUPS_DOC ">" << endl;
 
         if(grp)
             grp->save(str);
@@ -507,7 +507,7 @@ bool CGroupList::save(const QString &fileName, CGroupListItem *grp)
                 if((*it)->isCustom())
                     (*it)->save(str);
         }
-        str << "</"GROUPS_DOC">" << endl;
+        str << "</" GROUPS_DOC ">" << endl;
         itsModified=false;
         return file.finalize();
     }
