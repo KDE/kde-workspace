@@ -108,7 +108,7 @@ QString Style::toXml(bool disabled, const QString &family, QTextStream &s) const
 
     if(files.count()>0)
     {
-        QString str("  <"FONT_TAG" ");
+        QString str("  <" FONT_TAG " ");
         int     weight,
                 width,
                 slant;
@@ -141,8 +141,8 @@ QString Style::toXml(bool disabled, const QString &family, QTextStream &s) const
 
             str+=">\n";
             for(; it!=end; ++it)
-                str+="   <"FILE_TAG" "+(*it)+"/>\n";
-            str+="  </"FONT_TAG">";
+                str+="   <" FILE_TAG " "+(*it)+"/>\n";
+            str+="  </" FONT_TAG ">";
         }
 
         return str;

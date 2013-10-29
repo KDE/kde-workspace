@@ -74,7 +74,7 @@ void Family::toXml(bool disabled, QTextStream &s) const
     if(entries.count()>0)
     {
         if(!disabled)
-            s << " <"FAMILY_TAG" "NAME_ATTR"=\"" << KFI::Misc::encodeText(itsName, s) << "\">\n";
+            s << " <" FAMILY_TAG " " NAME_ATTR "=\"" << KFI::Misc::encodeText(itsName, s) << "\">\n";
 
         QStringList::ConstIterator it(entries.begin()),
                                    end(entries.end());
@@ -83,7 +83,7 @@ void Family::toXml(bool disabled, QTextStream &s) const
             s << *it << endl;
 
         if(!disabled)
-            s << " </"FAMILY_TAG">" << endl;
+            s << " </" FAMILY_TAG ">" << endl;
     }
 }
 

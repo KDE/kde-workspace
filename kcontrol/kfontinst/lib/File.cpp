@@ -59,10 +59,10 @@ QString File::toXml(bool disabled, QTextStream &s) const
         QString str(PATH_ATTR"=\""+KFI::Misc::encodeText(KFI::Misc::contractHome(itsPath), s)+"\"");
 
         if(!itsFoundry.isEmpty() && QString::fromLatin1("unknown")!=itsFoundry)
-            str+=" "FOUNDRY_ATTR"=\""+KFI::Misc::encodeText(itsFoundry, s)+"\"";
+            str+=" " FOUNDRY_ATTR "=\""+KFI::Misc::encodeText(itsFoundry, s)+"\"";
 
         if(itsIndex>0)
-            str+=" "FACE_ATTR"=\""+QString::number(itsIndex)+"\"";
+            str+=" " FACE_ATTR "=\""+QString::number(itsIndex)+"\"";
 
         return str;
     }
