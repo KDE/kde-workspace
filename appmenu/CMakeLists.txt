@@ -3,7 +3,7 @@ include_directories(
     ${CMAKE_BINARY_DIR}
     )
 
-include_directories(${DBusMenuQt5_INCLUDE_DIR})
+include_directories(${dbusmenu-qt5_INCLUDE_DIRS})
 
 remove_definitions(-DQT_NO_CAST_FROM_ASCII -DQT_STRICT_ITERATORS -DQT_NO_CAST_FROM_BYTEARRAY -DQT_NO_KEYWORDS)
 
@@ -37,7 +37,7 @@ target_link_libraries(kded_appmenu
     KF5::WindowSystem
     KF5::KDE4Support
     ${X11_LIBRARIES}
-    ${DBusMenuQt5_LIBRARY}
+    dbusmenu-qt5
 )
 
 install(TARGETS kded_appmenu  DESTINATION ${PLUGIN_INSTALL_DIR} )

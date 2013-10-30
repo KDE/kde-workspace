@@ -64,11 +64,11 @@ set_package_properties(ZLIB PROPERTIES DESCRIPTION "Support for gzip compressed 
                        TYPE REQUIRED
                       )
 
-find_package(DBusMenuQt5)
-set_package_properties(DBusMenuQt5 PROPERTIES DESCRIPTION "Support for notification area menus via the DBusMenu protocol"
-                        URL "https://launchpad.net/libdbusmenu-qt"
-			TYPE OPTIONAL
-                       )
+find_package(dbusmenu-qt5 CONFIG)
+set_package_properties(dbusmenu-qt5 PROPERTIES DESCRIPTION "Support for notification area menus via the DBusMenu protocol"
+                       URL "https://launchpad.net/libdbusmenu-qt"
+                       TYPE OPTIONAL
+                      )
 
 find_package(QImageBlitz)
 set_package_properties(QImageBlitz PROPERTIES DESCRIPTION "An image effects library"
