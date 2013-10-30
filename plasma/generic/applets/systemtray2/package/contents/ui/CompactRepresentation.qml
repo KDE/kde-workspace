@@ -27,6 +27,13 @@ import org.kde.private.systemtray 2.0 as SystemTray
 
 Item {
 
+    // TODO: vertical formfactor
+    property int minimumWidth: (1.5 + systrayhost.shownTasks.length) * (plasmoid.configuration.itemSize + itemSpacing) + (2 * itemSpacing)
+    property int maximumWidth: minimumWidth
+
+    property bool fillWidth: !vertical
+    property bool fillHeight: vertical
+
     property QtObject systrayhost: undefined
 
     function loadNotificationsPlasmoid() {
@@ -52,6 +59,15 @@ Item {
         onClicked: togglePopup()
         onPressed: PlasmaExtras.PressedAnimation { targetItem: arrow }
         onReleased: PlasmaExtras.ReleasedAnimation { targetItem: arrow }
+    }
+
+    Rectangle {
+        anchors.fill: parent;
+        border.width: 2;
+        border.color: "black";
+        color: "orange";
+        visible: false
+        opacity: 0.4;
     }
 
     // Tooltip for arrow --------------------------------

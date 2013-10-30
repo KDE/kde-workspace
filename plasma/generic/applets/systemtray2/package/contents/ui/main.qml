@@ -38,11 +38,20 @@ Item {
 //     width: 356
 //     height: 356
 
-    property int implicitWidth: 256
+    property bool vertical: (plasmoid.formFactor == PlasmaCore.Types.Vertical)
+
+    property bool fillWidth: !vertical
+    property bool fillHeight: vertical
+
+//
+    property int preferredWidth: 100
+    property int preferredHeight: plasmoid.configuration.itemSize
+
+    property int implicitWidth: 100
     property int implicitHeight: 256
 
-    property int minimumWidth: 300
-    property int minimumHeight: minimumWidth
+    property int minimumWidth: 1000
+    property int minimumHeight: 1000
 
     property int _h: plasmoid.configuration.itemSize
     property int itemSpacing: 2
@@ -66,7 +75,7 @@ Item {
 //         cellWidth: _h + itemSpacing
 //         cellHeight: _h + itemSpacing
         //orientation: Qt.Horizontal
-        interactive: false
+        //interactive: false
         spacing: 4
         //Rectangle { anchors.fill: parent; color: "blue"; opacity: 0.2; }
 
