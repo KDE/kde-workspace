@@ -228,9 +228,7 @@ void CalculatorRunner::match(Plasma::RunnerContext &context)
         cmd.remove(0, cmd.indexOf('=') + 1);
     } else if (cmd.endsWith('=')) {
         cmd.chop(1);
-    }
-
-    if (!toHex && cmd.contains(m_regExp)) {
+    } else if (cmd.contains(m_regExp)) {
         // not just numbers and symbols, so we return
         return;
     }
