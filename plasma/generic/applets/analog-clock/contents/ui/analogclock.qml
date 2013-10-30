@@ -22,7 +22,7 @@
 import QtQuick 2.0
 
 import org.kde.plasma.core 2.0 as PlasmaCore
-import "logic.js" as Logic
+import "plasmapackage:/code/logic.js" as Logic
 
 Item {
     id: analogclock
