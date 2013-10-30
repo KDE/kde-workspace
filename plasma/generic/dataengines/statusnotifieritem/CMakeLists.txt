@@ -1,7 +1,7 @@
 project(plasma-statusnotifieritem_engine)
 
 include_directories(${KDEBASE_WORKSPACE_SOURCE_DIR}/statusnotifierwatcher)
-include_directories(${DBusMenuQt_INCLUDE_DIR})
+include_directories(${DBusMenuQt5_INCLUDE_DIR})
 
 
 # We add our source code here
@@ -33,7 +33,7 @@ target_link_libraries(plasma_engine_statusnotifieritem
     KF5::KService
     KF5::Plasma
     KF5::KIconThemes
-    ${DBusMenuQt_LIBRARIES}
+    ${DBusMenuQt5_LIBRARIES}
     KF5::KDE4Support
 )
 
