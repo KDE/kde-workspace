@@ -10,7 +10,7 @@
       <default></default>
     </entry>
     <entry name="itemSize" type="int">
-      <default>48</default>
+      <default>22</default>
     </entry>
     <entry name="extraItems" type="StringList">
       <default></default>
