@@ -80,15 +80,18 @@ function restore()
 
 function save()
 {
-    var configString = String()
+    var configString = String();
 
     for (var _id in itemsConfig) {
-        var rect = itemsConfig[_id]
-        configString += _id.replace(":", "%3A") + ":" + rect.x + "," + rect.y + "," + rect.width + "," + rect.height + "," + rect.rotation + ";"
+        var rect = itemsConfig[_id];
+        var idstring = _id.replace(":", "%3A");
+        if (idstring != "undefined") {
+            configString +=  idstring + ":" + rect.x + "," + rect.y + "," + rect.width + "," + rect.height + "," + rect.rotation + ";";
+        }
     }
 
-    print("saving "+configString)
-    plasmoid.writeConfig("ItemsGeometries", configString)
+    print("saving "+configString);
+    plasmoid.writeConfig("ItemsGeometries", configString);
 }
 
 function resetPositions()
