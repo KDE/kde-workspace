@@ -1,5 +1,5 @@
 # if(${KDE_PLATFORM_PROFILE} STREQUAL "Desktop")
-#    add_subdirectory(activitybar)
+   plasma_install_package(activitybar activitybar)
    add_subdirectory(icon)
 #    add_subdirectory(lock_logout)
 #    add_subdirectory(panelspacer)

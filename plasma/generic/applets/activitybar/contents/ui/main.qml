@@ -16,16 +16,14 @@
  *
  ***********************************************************************/
 
-import QtQuick 1.1
-import org.kde.plasma.core 0.1 as PlasmaCore
-import org.kde.plasma.components 0.1 as PlasmaComponents
+import QtQuick 2.0
+import org.kde.plasma.core 2.0 as PlasmaCore
+import org.kde.plasma.components 2.0 as PlasmaComponents
 
 Item {
 
     property int minimumWidth: tabBar.implicitWidth
     property int minimumHeight: tabBar.implicitHeight
-
-    anchors.fill: parent
 
     PlasmaCore.DataSource {
         id: activitySource
@@ -37,8 +35,9 @@ Item {
         id: tabBar
         anchors.fill: parent
         rotation: {
-            if (plasmoid.formFactor == Vertical) {
-                return (plasmoid.location == LeftEdge) ? 270 : 90;
+            //TODO:  Remove this ugly hack.
+            if (plasmoid.formFactor == PlasmaCore.Types.Vertical) {
+                return (plasmoid.location == PlasmaCore.Types.LeftEdge) ? 270 : 90;
             } else {
                 return 0;
             }
@@ -70,7 +69,7 @@ Item {
     }
 
     function setup() {
-        plasmoid.aspectRatioMode = IgnoreAspectRatio;
+        plasmoid.aspectRatioMode = PlasmaCore.Types.IgnoreAspectRatio;
         for (var i = 0; i < activitySource.sources.length; i++) {
             if (activitySource.sources[i] != "Status") {
                 activitySource.connectSource(activitySource.sources[i]);
