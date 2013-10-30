@@ -150,29 +150,6 @@ Item {
                 }
             }
 
-            /* // These should come from plugins
-            ActionDelegate {
-                label: i18n("Activities")
-                actionIcon: "preferences-activities"
-                objectName: "lock screen"
-                onTriggered: showActivities();
-            }
-
-            ActionDelegate {
-                label: i18n("Shortcut Settings")
-                actionIcon: "configure-shortcuts"
-                objectName: "shortcut settings"
-                onTriggered: containmentSettings();
-            }
-            */
-
-            ActionDelegate {
-                label: i18n("Lock Screen")
-                actionIcon: "system-lock-screen"
-                objectName: "lock screen"
-                onTriggered: lockScreen();
-            }
-
             ActionDelegate {
                 label: i18n("Leave")
                 actionIcon: "system-shutdown"
