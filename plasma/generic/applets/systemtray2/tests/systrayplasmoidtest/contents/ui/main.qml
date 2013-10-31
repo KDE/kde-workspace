@@ -25,23 +25,62 @@ Item {
     id: taskRoot
     objectName: "systemtrayplasmoid"
 
-    width: 48
-    height: 48
-    property int minimumWidth: 64
-    property int minimumHeight: 64
+//     width: 48
+//     height: 48
+    property bool vertical: (plasmoid.formFactor == PlasmaCore.Types.Vertical)
+
+    property bool fillWidth: !vertical
+    property bool fillHeight: vertical
+
+    property int preferredWidth: 100
+    property int preferredHeight: 22
+
+    property int implicitWidth: 100
+    property int implicitHeight: 256
+
+    property int minimumWidth: 100
+    property int minimumHeight: 100
 
     //Rectangle { anchors.fill: parent; color: "orange"; opacity: 0.8; }
     property Component compactRepresentation: Component {
-        PlasmaCore.IconItem {
-            //anchors.fill: parent
-            source: "preferences-desktop-notification"
+        Rectangle {
+            property bool fillWidth: !vertical
+            property bool fillHeight: vertical
+
+//             property int preferredWidth: 100
+//             property int preferredHeight: 22
+
+//             property int implicitWidth: 100
+//             property int implicitHeight: 256
+            //anchors.fill: parent;
+            border.width: 2;
+            border.color: "black";
+            color: "green";
+            opacity: 0.4;
+
+            PlasmaCore.IconItem {
+                //anchors.fill: parent
+                source: "plasma"
+            }
+            MouseArea {
+                anchors.fill: parent
+                onClicked: plasmoid.expanded = !plasmoid.expanded
+            }
         }
     }
 
 
-    PlasmaCore.IconItem {
-        anchors.fill: parent
-        source: "preferences-system-windows-move"
+    Rectangle {
+        anchors.fill: parent;
+        border.width: 2;
+        border.color: "black";
+        color: "blue";
+        opacity: 0.4;
+
+        PlasmaCore.IconItem {
+            anchors.fill: parent
+            source: "konqueror"
+        }
     }
 
     Component.onCompleted: {

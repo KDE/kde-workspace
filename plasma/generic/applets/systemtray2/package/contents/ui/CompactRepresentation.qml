@@ -63,10 +63,10 @@ Item {
 
     Rectangle {
         anchors.fill: parent;
-        border.width: 2;
+        border.width: 1;
         border.color: "black";
-        color: "orange";
-        visible: false
+        color: "green";
+        visible: root.debug;
         opacity: 0.4;
     }
 

@@ -27,57 +27,58 @@ import org.kde.private.systemtray 2.0 as SystemTray
 Item {
     id: root
     objectName: "SystemTrayRootItem"
-//     width: 256
-//     height: 32
-//     anchors {
-//         left: parent.left
-//         right: parent.right
-//         verticalCenter: parent.verticalCenter
-//     }
-
-//     width: 356
-//     height: 356
 
     property bool vertical: (plasmoid.formFactor == PlasmaCore.Types.Vertical)
 
-    property bool fillWidth: !vertical
-    property bool fillHeight: vertical
-
-//
-    property int preferredWidth: 100
-    property int preferredHeight: plasmoid.configuration.itemSize
-
-    property int implicitWidth: 100
-    property int implicitHeight: 256
-
-    property int minimumWidth: 1000
-    property int minimumHeight: 1000
+    property int minimumWidth: 200
+    property int minimumHeight: 200
 
     property int _h: plasmoid.configuration.itemSize
     property int itemSpacing: 2
+
+    property bool debug: plasmoid.configuration.debug
 
     property Component compactRepresentation: CompactRepresentation {
         systrayhost: host
     }
 
-    //Rectangle { color: "blue"; width: 200; height: 48; }
+    Rectangle {
+        anchors.fill: parent;
+        border.width: 2;
+        border.color: "black";
+        color: "blue";
+        visible: root.debug;
+        opacity: 0.4;
+    }
     SystemTray.Host {
         id: host
         rootItem: hiddenView
     }
+
+    /* This mechanism hides inactive items until the layout figures out that it has to
+     * collapse the Plasmoid.
+     *
+     * It also takes care of delaying the loading of hidden items (they're hidden, and
+     * can be loaded later as to not block other, visible components from loading). It
+     * does so by simply pushing them out of the viewport, which means the ListView won't
+     * render the TaskDelegates until then.
+     */
+    Item {
+        id: loadingItem
+        anchors.fill: parent
+    }
+
     ListView {
         id: hiddenView
         objectName: "hiddenView"
 
         anchors {
-            fill: parent
+            top: (loadingItem.visible && !plasmoid.expanded) ? loadingItem.bottom : parent.top
+            left: parent.left
+            right: parent.right
+            bottom: parent.bottom
         }
-//         cellWidth: _h + itemSpacing
-//         cellHeight: _h + itemSpacing
-        //orientation: Qt.Horizontal
-        //interactive: false
         spacing: 4
-        //Rectangle { anchors.fill: parent; color: "blue"; opacity: 0.2; }
 
         model: host.hiddenTasks
 

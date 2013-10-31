@@ -12,6 +12,9 @@
     <entry name="itemSize" type="int">
       <default>22</default>
     </entry>
+    <entry name="debug" type="bool">
+      <default>false</default>
+    </entry>
     <entry name="extraItems" type="StringList">
       <default></default>
     </entry>

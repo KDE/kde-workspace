@@ -33,6 +33,7 @@ Item {
     implicitHeight: pageColumn.implicitHeight
 
     property int cfg_itemSize: plasmoid.configuration.itemSize
+    property alias cfg_debug: debugCheck.checked
 //     property alias cfg_BoolTest: testBoolConfigField.checked
 
     function indexToSize(ix) {
@@ -93,6 +94,11 @@ Item {
         PlasmaExtras.Title {
             text: i18n("SystemTray Settings")
         }
+        QtControls.CheckBox {
+            id: debugCheck
+            text: "Visual Debugging"
+        }
+
         Row {
             width: parent.width
             height: itemSizeSlider.height

@@ -98,7 +98,7 @@ PlasmoidInterface::PlasmoidInterface(const QString &plugin, QQuickItem *parent)
     m_collapseTimer = new QTimer(this);
     m_collapseTimer->setSingleShot(true);
     connect(m_collapseTimer, &QTimer::timeout, this, &PlasmoidInterface::compactRepresentationCheck);
-    m_collapseTimer->start(100);
+    m_collapseTimer->start(10);
 
     init();
 }
@@ -772,7 +772,7 @@ void PlasmoidInterface::geometryChanged(const QRectF &newGeometry, const QRectF 
 
 void PlasmoidInterface::compactRepresentationCheck()
 {
-    init();
+    //init();
     if (width() <= 0 || height() <= 0 || !m_qmlObject->rootObject()) {
         return;
     }
