@@ -20,6 +20,7 @@ target_link_libraries(plasma_engine_activities
                       KF5::KActivities
                       KF5::KI18n
                       KF5::KService
+                      Qt5::DBus
                       )
 
 install(TARGETS plasma_engine_activities

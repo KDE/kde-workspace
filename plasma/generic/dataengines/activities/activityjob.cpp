@@ -18,7 +18,7 @@
 
 #include "activityjob.h"
 
-#include <KActivities/Controller>
+#include <kactivities/controller.h>
 #include <QDebug>
 #include <KLocalizedString>
 

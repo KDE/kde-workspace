@@ -21,8 +21,8 @@
 #include "activityservice.h"
 #include "ActivityRankingInterface.h"
 
-#include <KActivities/Controller>
-#include <KActivities/Info>
+#include <kactivities/controller.h>
+#include <kactivities/info.h>
 
 #include <QApplication>
 #include <QDBusServiceWatcher>
