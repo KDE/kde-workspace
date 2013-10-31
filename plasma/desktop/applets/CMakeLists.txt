@@ -4,7 +4,9 @@ plasma_install_package(trash org.kde.trash plasma/plasmoids applet)
 
 if(NOT WIN32)
    # tasks and windowlist depend on libs/taskmanager
+if (KActivities_FOUND)
    add_subdirectory(taskmanager)
+endif ()
    plasma_install_package(window-list org.kde.windowlist plasma/plasmoids applet)
 
    add_subdirectory(pager)

@@ -16,6 +16,7 @@ target_link_libraries(pagerplugin
                       ${QT_QTCORE_LIBRARY}
                       ${Qt5Qml_LIBRARIES}
                       ${Qt5Quick_LIBRARIES}
+                      ${Qt5DBus_LIBRARIES}
                       taskmanager)
 
 install(TARGETS pagerplugin DESTINATION ${QML_INSTALL_DIR}/org/kde/plasma/private/pager)
