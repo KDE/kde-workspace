@@ -30,8 +30,8 @@ Item {
 
     property bool vertical: (plasmoid.formFactor == PlasmaCore.Types.Vertical)
 
-    property int minimumWidth: 200
-    property int minimumHeight: 200
+    property int minimumWidth: 200 // just needs to run out of space in the panel ...
+    property int minimumHeight: 200 // ... but not too big to screw up initial layouts
 
     property int _h: plasmoid.configuration.itemSize
     property int itemSpacing: 2
@@ -48,7 +48,7 @@ Item {
         border.color: "black";
         color: "blue";
         visible: root.debug;
-        opacity: 0.4;
+        opacity: 0.2;
     }
     SystemTray.Host {
         id: host
@@ -66,6 +66,12 @@ Item {
     Item {
         id: loadingItem
         anchors.fill: parent
+        anchors.margins: height
+        Timer {
+            running: true
+            interval: 4000
+            onTriggered: loadingItem.visible = false
+        }
     }
 
     ListView {

@@ -26,9 +26,11 @@ import org.kde.private.systemtray 2.0 as SystemTray
 
 
 Item {
+    id: compactRepresenation
 
     // TODO: vertical formfactor
-    property int minimumWidth: (1.5 + systrayhost.shownTasks.length) * (plasmoid.configuration.itemSize + itemSpacing) + (2 * itemSpacing)
+    //property int minimumWidth: (1.5 + systrayhost.shownTasks.length) * (plasmoid.configuration.itemSize + itemSpacing) + (2 * itemSpacing)
+    property int minimumWidth: computeDimension()
     property int maximumWidth: minimumWidth
 
     property bool fillWidth: !vertical
@@ -36,10 +38,19 @@ Item {
 
     property QtObject systrayhost: undefined
 
+    function computeDimension() {
+        var dim = 0;
+
+        // systray tasks + notifications widget
+        var x = vertical ? compactRepresenation.width : compactRepresenation.height
+        dim = (systrayhost.shownTasks.length + 1) * (x + itemSpacing);
+        dim = dim + arrow.width + itemSpacing + itemSpacing;
+
+        return dim;
+    }
+
     function loadNotificationsPlasmoid() {
-        var plugin = "org.kde.systrayplasmoidtest";
-        plugin = "org.kde.notifications";
-        print("Loading notifications plasmoid: " + plugin);
+        var plugin = "org.kde.notifications";
         systrayhost.rootItem = gridView;
         var notificationsPlasmoid = systrayhost.notificationsPlasmoid(plugin);
         if (notificationsPlasmoid == null) {
@@ -67,7 +78,7 @@ Item {
         border.color: "black";
         color: "green";
         visible: root.debug;
-        opacity: 0.4;
+        opacity: 0.2;
     }
 
     // Tooltip for arrow --------------------------------
@@ -84,17 +95,17 @@ Item {
             top: parent.top
             left: parent.left
         }
-        height: _h
-        width: _h
-        /*
+        height: gridView.cellWidth
+        width: gridView.cellHeight
+
         Rectangle {
             anchors.fill: parent;
             border.width: 2;
             border.color: "black";
             color: "transparent";
-            opacity: 0;
+            opacity: plasmoid.configuration.debug ? 0.6 : 0;
         }
-        */
+
         Timer {
             interval: 0
             running: true
@@ -112,11 +123,11 @@ Item {
             top: notificationsContainer.top
             bottom: parent.bottom
             left: notificationsContainer.right
-            leftMargin: itemSpacing
+            leftMargin: root.vertical ? 0 : itemSpacing
             right: arrow.left
         }
-        cellWidth: _h + itemSpacing
-        cellHeight: _h + itemSpacing
+        cellWidth: root.vertical ? parent.width : parent.height
+        cellHeight: cellWidth
         interactive: false
 
         model: systrayhost.shownTasks

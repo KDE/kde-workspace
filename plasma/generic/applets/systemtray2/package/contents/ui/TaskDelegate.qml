@@ -27,22 +27,42 @@ import org.kde.private.systemtray 2.0 as SystemTray
 Item {
     id: taskItemContainer
     objectName: "taskItemContainer"
-    width: _h
-    height: width
-//     opacity: status != SystemTray.Task.Passive ? 1 : 0.3
+
+    // FIXME: the applet itself is anchored here, but we want to center it,
+    // yet keep the whole cell mouse-interactive
+    width: gridView.cellWidth
+    height: gridView.cellHeight
+    // basically, this:
+//     width: _h
+//     height: width
+    //anchors.centerIn: parent
+
+    Rectangle {
+        anchors.fill: parent;
+        border.width: 1;
+        border.color: "violet";
+        color: "pink";
+        visible: root.debug;
+        opacity: 0.5;
+    }
 
     PlasmaCore.IconItem {
         id: itemIcon
-        anchors.fill: parent
+        width: _h
+        height: width
+        anchors {
+            centerIn: taskItemContainer
+        }
         //visible: source != ""
         source: iconName != "" ? iconName : (typeof(icon) != "undefined" ? icon : "")
     }
 
     PulseAnimation {
-        targetItem: itemIcon
+        targetItem: taskItemContainer
         running: status == SystemTray.Task.NeedsAttention
     }
 
+    // just for debugging purposes
     function taskStatusMnemonic() {
         if (status == SystemTray.Task.Passive) {
             return "--";
