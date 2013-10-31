@@ -41,7 +41,7 @@
 #include <Plasma/FrameSvg>
 #include <Plasma/Package>
 
-#include <KActivities/Consumer>
+#include <kactivities/consumer.h>
 
 #include <taskmanager/task.h>
 
