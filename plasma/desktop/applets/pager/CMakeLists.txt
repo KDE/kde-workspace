@@ -12,6 +12,7 @@ add_library(pagerplugin SHARED ${pager_SRCS})
 target_link_libraries(pagerplugin
                       KF5::KIOCore
                       KF5::KWindowSystem
+                      KF5::Plasma 
                       KF5::KActivities
                       ${QT_QTCORE_LIBRARY}
                       ${Qt5Qml_LIBRARIES}
