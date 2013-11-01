@@ -9,7 +9,7 @@ kservice_desktop_to_json(plasma-dataengine-dict.desktop)
 plasma_add_plugin(plasma_engine_dict ${dict_engine_SRCS})
 
 target_link_libraries (plasma_engine_dict
-  ${Plasma_LIBRARIES}
+  KF5::Plasma
   KF5::KService
   ${QT_QTNETWORK_LIBRARY}
 )

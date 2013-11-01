@@ -10,7 +10,7 @@ kservice_desktop_to_json(plasma-dataengine-apps.desktop)
 plasma_add_plugin(plasma_engine_apps ${apps_engine_SRCS})
 
 target_link_libraries(plasma_engine_apps
-    ${Plasma_LIBRARIES}
+    KF5::Plasma
     KF5::KService
     KF5::KIOCore
     KF5::KIOWidgets

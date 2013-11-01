@@ -8,8 +8,8 @@ set(share_engine_SRCS
 
 plasma_add_plugin(plasma_engine_share ${share_engine_SRCS})
 target_link_libraries(plasma_engine_share
-                      ${KCore_LIBRARIES}
-                      ${Plasma_LIBRARIES}
+                      KF5::KCore
+                      KF5::Plasma
                       KIOCore
                       ${KDE4_KROSSCORE_LIBS}
                       KF5::KDE4Support
@@ -37,7 +37,7 @@ add_subdirectory(backends)
 plasma_add_plugin(plasma_packagestructure_share
         ${sharepackage_SRCS})
 target_link_libraries(plasma_packagestructure_share
-        ${Plasma_LIBRARIES})
+        KF5::Plasma)
 
 install(TARGETS plasma_packagestructure_share
                  DESTINATION ${PLUGIN_INSTALL_DIR}/plasma/packagestructure)

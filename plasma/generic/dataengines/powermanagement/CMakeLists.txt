@@ -16,7 +16,7 @@ plasma_add_plugin(plasma_engine_powermanagement ${powermanagement_engine_SRCS})
 
 target_link_libraries(plasma_engine_powermanagement
     KF5::Solid
-    ${Plasma_LIBRARIES}
+    KF5::Plasma
     KF5::KIdleTime
     KF5::KCoreAddons
     KF5::KI18n

@@ -12,7 +12,7 @@ plasma_add_plugin(plasma_engine_time ${time_engine_SRCS})
 target_link_libraries(plasma_engine_time
     Qt5::DBus
     KF5::Solid
-    ${Plasma_LIBRARIES}
+    KF5::Plasma
     KF5::KDE4Support
     KF5::KI18n
     KF5::KService
