@@ -49,7 +49,7 @@ add_definitions(-DQT_DISABLE_DEPRECATED_BEFORE=0)
 
 
 # Load the frameworks we need
-find_package(KF5 MODULE REQUIRED
+find_package(KF5 CONFIG REQUIRED
     KIdleTime ItemModels KWidgetsAddons KWindowSystem KCodecs KArchive KCoreAddons Solid ThreadWeaver
     KConfig KAuth KJS KWallet KDBusAddons Sonnet
     KI18n KGuiAddons KService KConfigWidgets ItemViews KNotifications KIconThemes KStyle KCompletion KJobWidgets KTextWidgets XmlGui KCrash
