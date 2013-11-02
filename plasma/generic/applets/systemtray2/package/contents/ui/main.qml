@@ -80,15 +80,16 @@ Item {
 
         anchors {
             top: (loadingItem.visible && !plasmoid.expanded) ? loadingItem.bottom : parent.top
+            bottom: (loadingItem.visible && !plasmoid.expanded) ? undefined : parent.bottom
             left: parent.left
             right: parent.right
-            bottom: parent.bottom
+            //bottom: parent.bottom
         }
         spacing: 4
 
         model: host.hiddenTasks
 
-        delegate: TaskDelegate {}
+        delegate: TaskListDelegate {}
     }
 
 }

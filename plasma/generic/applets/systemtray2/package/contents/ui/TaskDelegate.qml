@@ -20,6 +20,7 @@
 import QtQuick 2.0
 import org.kde.plasma.core 2.0 as PlasmaCore
 import org.kde.plasma.components 2.0 as PlasmaComponents
+import org.kde.plasma.extras 2.0 as PlasmaExtras
 
 import org.kde.private.systemtray 2.0 as SystemTray
 
@@ -28,14 +29,9 @@ Item {
     id: taskItemContainer
     objectName: "taskItemContainer"
 
-    // FIXME: the applet itself is anchored here, but we want to center it,
-    // yet keep the whole cell mouse-interactive
     width: gridView.cellWidth
     height: gridView.cellHeight
-    // basically, this:
-//     width: _h
-//     height: width
-    //anchors.centerIn: parent
+    property int taskStatus: status
 
     Rectangle {
         anchors.fill: parent;
@@ -48,10 +44,11 @@ Item {
 
     PlasmaCore.IconItem {
         id: itemIcon
-        width: _h
-        height: width
+        width: parent.height
+        height: parent.height
         anchors {
-            centerIn: taskItemContainer
+            left: parent.left
+            verticalCenter: parent.verticalCenter
         }
         //visible: source != ""
         source: iconName != "" ? iconName : (typeof(icon) != "undefined" ? icon : "")
@@ -62,6 +59,9 @@ Item {
         running: status == SystemTray.Task.NeedsAttention
     }
 
+    onTaskStatusChanged: {
+        print("ST2 status changed to " + taskStatusString());
+    }
     // just for debugging purposes
     function taskStatusMnemonic() {
         if (status == SystemTray.Task.Passive) {
@@ -86,7 +86,7 @@ Item {
 
     Component.onCompleted: {
         //host.rootItem = gridView;
-        //print(" taskitem: " + taskItem + " " + iconName);
+        print(" ST2 taskitem created: " + taskItem + " " + iconName);
         if ((taskItem != undefined)) {
             //print( " TASK ITEM CHANGED"  + (taskItem != undefined));
             taskItem.parent = taskItemContainer;

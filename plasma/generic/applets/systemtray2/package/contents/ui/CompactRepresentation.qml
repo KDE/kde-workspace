@@ -118,6 +118,7 @@ Item {
     GridView {
         id: gridView
         objectName: "gridView"
+        flow: !root.vertical ? GridView.LeftToRight : GridView.TopToBottom
 
         anchors {
             top: notificationsContainer.top
@@ -126,7 +127,19 @@ Item {
             leftMargin: root.vertical ? 0 : itemSpacing
             right: arrow.left
         }
-        cellWidth: root.vertical ? parent.width : parent.height
+        cellWidth: root.vertical ? parent.width / gridRows() : parent.height / gridRows()
+
+        function gridRows() {
+            var r = 0;
+            if (root.vertical) {
+                r = Math.floor(parent.width / plasmoid.configuration.itemSize);
+            } else {
+                r = Math.floor(parent.height / plasmoid.configuration.itemSize);
+            }
+            print("ST2 ROW: ::::::: " + r);
+            return Math.max(1, r);
+
+        }
         cellHeight: cellWidth
         interactive: false
 
