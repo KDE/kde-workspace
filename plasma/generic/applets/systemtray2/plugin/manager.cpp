@@ -91,15 +91,26 @@ QList<Task*> Manager::tasks() const
 void Manager::addTask(Task *task)
 {
     connect(task, SIGNAL(destroyed(SystemTray::Task*)), this, SLOT(removeTask(SystemTray::Task*)));
-    connect(task, SIGNAL(changedStatus()), this, SIGNAL(taskStatusChanged()));
+    connect(task, SIGNAL(changedStatus()), this, SLOT(slotTaskStatusChanged()));
 
-    //qDebug() << task->name() << "(" << task->taskId() << ")";
+    qDebug() << "ST2" << task->name() << "(" << task->taskId() << ")";
 
     d->tasks.append(task);
     emit taskAdded(task);
     emit tasksChanged();
 }
 
+void Manager::slotTaskStatusChanged()
+{
+    Task* task = qobject_cast<Task*>(sender());
+
+    if (task) {
+        qDebug() << "ST2 emit taskStatusChanged(task);";
+        emit taskStatusChanged(task);
+    } else {
+        qDebug() << "ST2 changed, but invalid cast";
+    }
+}
 void Manager::removeTask(Task *task)
 {
     d->tasks.removeAll(task);

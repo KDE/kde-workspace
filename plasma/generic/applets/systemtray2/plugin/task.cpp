@@ -85,6 +85,7 @@ void Task::setStatus(Status status)
     }
 
     d->status = status;
+    qDebug() << "ST2 status changed " << status;
     emit changedStatus();
     emit changed(this);
 }

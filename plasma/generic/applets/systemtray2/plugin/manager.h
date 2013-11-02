@@ -76,7 +76,7 @@ Q_SIGNALS:
      * Emitted when status of task changes (such as it changing from
      * Passive to NeedsAttention)
      **/
-    void taskStatusChanged();
+    void taskStatusChanged(SystemTray::Task *task);
 
     /**
      * Emitted when a task has been removed
@@ -87,6 +87,7 @@ private Q_SLOTS:
     void init();
     void addTask(SystemTray::Task *task);
     void removeTask(SystemTray::Task *task);
+    void slotTaskStatusChanged();
 
 private:
     class Private;

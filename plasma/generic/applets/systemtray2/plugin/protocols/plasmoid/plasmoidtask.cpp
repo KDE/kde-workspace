@@ -46,12 +46,45 @@ PlasmoidTask::PlasmoidTask(QQuickItem* rootItem, const QString &packageName, QOb
         m_valid = false;
         return;
     }
+    connect(m_taskItem, &PlasmoidInterface::statusChanged, this, &PlasmoidTask::updateStatus);
     KPluginInfo info = m_taskItem->pluginInfo();
     setName(info.name());
+    updateStatus();
 }
 
 PlasmoidTask::~PlasmoidTask()
 {
+}
+
+void PlasmoidTask::updateStatus()
+{
+// enum ItemStatus {
+//     UnknownStatus = 0, /**< The status is unknown **/
+//     PassiveStatus = 1, /**< The Item is passive **/
+//     ActiveStatus = 2, /**< The Item is active **/
+//     NeedsAttentionStatus = 3, /**< The Item needs attention **/
+//     AcceptingInputStatus = 4 /**< The Item is accepting input **/
+// };
+//     enum Status {
+//         UnknownStatus = 0,
+//         Passive = 1,
+//         Active = 2,
+//         NeedsAttention = 3
+//     };
+    qDebug() << "Updateing Plasmoid status";
+    if (!m_taskItem) {
+        return;
+    }
+    const Plasma::Types::ItemStatus ps = m_taskItem->status();
+    if (ps == Plasma::Types::UnknownStatus) {
+        setStatus(Task::UnknownStatus);
+    } else if (ps == Plasma::Types::PassiveStatus) {
+        setStatus(Task::Passive);
+    } else if (ps == Plasma::Types::NeedsAttentionStatus) {
+        setStatus(Task::NeedsAttention);
+    } else {
+        setStatus(Task::Active);
+    }
 }
 
 bool PlasmoidTask::isValid() const

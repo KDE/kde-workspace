@@ -72,7 +72,13 @@ Q_SIGNALS:
     void tasksChanged();
     void categoriesChanged();
 
+private Q_SLOTS:
+    void taskAdded(SystemTray::Task *task);
+    void taskRemoved(SystemTray::Task *task);
+    void taskStatusChanged(SystemTray::Task *task);
+
 private:
+    void initTasks();
     static SystemTray::Manager *s_manager;
     static int s_managerUsage;
     HostPrivate* d;

@@ -75,6 +75,7 @@ private Q_SLOTS:
     void syncStatus(QString status);
 
 private:
+    void updateStatus();
     QString m_taskId;
     PlasmoidInterface* m_taskItem;
     QQuickItem* m_rootItem;
