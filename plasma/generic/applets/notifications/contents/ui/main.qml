@@ -77,8 +77,14 @@ MouseEventListener {
         } else  {
             data["subText"] = i18np("%1 running job", "%1 running jobs", jobs.count) + "<br/>" + i18np("%1 notification", "%1 notifications", notifications.count)
         }
-        plasmoid.popupIconToolTip = data
-        plasmoid.passivePopup = jobs.count != 0
+        //plasmoid.popupIconToolTip = data
+        //plasmoid.passivePopup = jobs.count != 0
+
+        if (totalCount > 0) {
+            plasmoid.status = PlasmaCore.Types.ActiveStatus;
+        } else {
+            plasmoid.status = PlasmaCore.Types.PassiveStatus;
+        }
     }
 
     property Item notificationIcon
