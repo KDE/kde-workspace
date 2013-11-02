@@ -227,7 +227,6 @@ bool HostPrivate::showTask(Task *task) {
 
 void Host::taskStatusChanged(SystemTray::Task *task)
 {
-    bool _changed = false;
     if (task) {
         if (d->shownTasks.contains(task)) {
             if (!d->showTask(task)) {
@@ -235,19 +234,17 @@ void Host::taskStatusChanged(SystemTray::Task *task)
                 d->shownTasks.removeAll(task);
                 d->hiddenTasks.append(task);
                 qSort(d->hiddenTasks.begin(), d->hiddenTasks.end(), taskLessThan);
+                emit tasksChanged();
             }
-            _changed = true;
         } else if (d->hiddenTasks.contains(task)) {
             if (d->showTask(task)) {
                 qDebug() << "ST2 Migrating hidden -> shown" << task->name();
                 d->hiddenTasks.removeAll(task);
                 d->shownTasks.append(task);
                 qSort(d->shownTasks.begin(), d->shownTasks.end(), taskLessThan);
+                emit tasksChanged();
             }
         }
-        emit tasksChanged();
-    } else {
-        qDebug() << "ST2 Task changed, but failed to cast to Task* ";
     }
 }
 
