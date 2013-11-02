@@ -57,7 +57,7 @@ void PlasmoidProtocol::init()
 
     QStringList blacklist;
     blacklist << "notifier";
-    blacklist << "org.kde.notifications";
+    //blacklist << "org.kde.notifications";
     blacklist << "org.kde.systrayplasmoidtest";
 
     QMap<QString, KPluginInfo> sortedApplets;

@@ -88,42 +88,15 @@ Item {
         subText: plasmoid.expanded ? i18n("Hide icons") : i18n("Show hidden icons")
     }
 
-    Item {
-        id: notificationsContainer
-
-        anchors {
-            top: parent.top
-            left: parent.left
-        }
-        height: gridView.cellWidth
-        width: gridView.cellHeight
-
-        Rectangle {
-            anchors.fill: parent;
-            border.width: 2;
-            border.color: "black";
-            color: "transparent";
-            opacity: plasmoid.configuration.debug ? 0.6 : 0;
-        }
-
-        Timer {
-            interval: 0
-            running: true
-            onTriggered: {
-                loadNotificationsPlasmoid();
-            }
-        }
-    }
-
     GridView {
         id: gridView
         objectName: "gridView"
         flow: !root.vertical ? GridView.LeftToRight : GridView.TopToBottom
 
         anchors {
-            top: notificationsContainer.top
+            top: parent.top
             bottom: parent.bottom
-            left: notificationsContainer.right
+            left: parent.left
             leftMargin: root.vertical ? 0 : itemSpacing
             right: arrow.left
         }

@@ -43,29 +43,23 @@ class Host : public QObject
 {
     Q_OBJECT
 
-    Q_PROPERTY(QQmlListProperty<SystemTray::Task> tasks READ tasks NOTIFY tasksChanged)
     Q_PROPERTY(QQmlListProperty<SystemTray::Task> hiddenTasks READ hiddenTasks NOTIFY tasksChanged)
     Q_PROPERTY(QQmlListProperty<SystemTray::Task> shownTasks READ shownTasks NOTIFY tasksChanged)
+
     Q_PROPERTY(QStringList categories READ categories NOTIFY categoriesChanged)
 
     Q_PROPERTY(QQuickItem* rootItem WRITE setRootItem)
-    //Q_PROPERTY(QQuickItem* notificationsPlasmoid READ notificationsPlasmoid)
 
 public:
     Host(QObject* parent = 0);
     virtual ~Host();
     void setRootItem(QQuickItem* rootItem);
-
-    Q_INVOKABLE QQuickItem* notificationsPlasmoid(const QString &plugin = QStringLiteral("org.kde.notifications"));
-
+    void init();
 
 public Q_SLOTS:
-    QQmlListProperty<SystemTray::Task> tasks();
     QQmlListProperty<SystemTray::Task> hiddenTasks();
     QQmlListProperty<SystemTray::Task> shownTasks();
     QStringList categories() const;
-
-    void init();
 
 
 Q_SIGNALS:

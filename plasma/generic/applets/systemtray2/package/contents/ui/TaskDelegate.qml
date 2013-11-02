@@ -90,7 +90,11 @@ Item {
         if ((taskItem != undefined)) {
             //print( " TASK ITEM CHANGED"  + (taskItem != undefined));
             taskItem.parent = taskItemContainer;
-            taskItem.anchors.fill = taskItem.parent;
+            //taskItem.anchors.fill = taskItem.parent;
+            taskItem.anchors.left = taskItem.parent.left;
+            taskItem.anchors.verticalCenter = taskItem.parent.verticalCenter;
+            taskItem.height = taskItem.parent.height;
+            taskItem.width = taskItem.parent.height;
         }
     }
 }
