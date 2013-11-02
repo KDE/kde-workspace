@@ -37,6 +37,11 @@
 namespace SystemTray
 {
 
+bool taskLessThan(const Task *lhs, const Task *rhs)
+{
+    return lhs->status() > rhs->status();
+}
+
 Manager *SystemTray::Host::s_manager = 0;
 int SystemTray::Host::s_managerUsage = 0;
 
@@ -120,6 +125,9 @@ void Host::initTasks()
         }
     }
 
+    qSort(d->shownTasks.begin(), d->shownTasks.end(), taskLessThan);
+    qSort(d->hiddenTasks.begin(), d->hiddenTasks.end(), taskLessThan);
+
     QQmlListProperty<SystemTray::Task> _shown(this, d->shownTasks);
     d->shownTasksDeclarative = _shown;
 
@@ -175,8 +183,10 @@ void Host::taskAdded(Task* task)
     qDebug() << "ST2 Task added" << task->name();
     if (d->showTask(task)) {
         d->shownTasks.append(task);
+        qSort(d->shownTasks.begin(), d->shownTasks.end(), taskLessThan);
     } else {
         d->hiddenTasks.append(task);
+        qSort(d->hiddenTasks.begin(), d->hiddenTasks.end(), taskLessThan);
     }
     emit tasksChanged();
 }
@@ -199,25 +209,37 @@ bool HostPrivate::showTask(Task *task) {
 
 void Host::taskStatusChanged(SystemTray::Task *task)
 {
+    bool _changed = true;
     if (task) {
         qDebug() << "==> ST2 Migrate changed Task?: " << task->name() << task->status();
-        if (d->shownTasks.contains(task) && !d->showTask(task)) {
-            qDebug() << "ST2 Migrating shown -> hidden" << task->name();
-            d->shownTasks.removeAll(task);
-            d->hiddenTasks.append(task);
-            emit tasksChanged();
-        } else if (d->hiddenTasks.contains(task) && d->showTask(task)) {
-            qDebug() << "ST2 Migrating hidden -> shown" << task->name();
-            d->hiddenTasks.removeAll(task);
-            d->shownTasks.append(task);
-            emit tasksChanged();
-        }
+        if (d->shownTasks.contains(task)) {
+            if (!d->showTask(task)) {
+                qDebug() << "ST2 Migrating shown -> hidden" << task->name();
+                d->shownTasks.removeAll(task);
+                d->hiddenTasks.append(task);
+                qSort(d->hiddenTasks.begin(), d->hiddenTasks.end(), taskLessThan);
+            } else {
+                qSort(d->shownTasks.begin(), d->shownTasks.end(), taskLessThan);
+            }
+            _changed = true;
+        } else if (d->hiddenTasks.contains(task)) {
+            if (d->showTask(task)) {
+                qDebug() << "ST2 Migrating hidden -> shown" << task->name();
+                d->hiddenTasks.removeAll(task);
+                d->shownTasks.append(task);
+                qSort(d->shownTasks.begin(), d->shownTasks.end(), taskLessThan);
+            } else {
+                qSort(d->hiddenTasks.begin(), d->hiddenTasks.end(), taskLessThan);
+            }
 
+        }
+        emit tasksChanged();
     } else {
-        Manager* man = qobject_cast<Manager*>(sender());
-        qDebug() << "ST2 Task changed, but failed to cast to Task* " << man;
+        qDebug() << "ST2 Task changed, but failed to cast to Task* ";
     }
 }
+
+
 
 QStringList Host::categories() const
 {
