@@ -37,9 +37,27 @@
 namespace SystemTray
 {
 
+
 bool taskLessThan(const Task *lhs, const Task *rhs)
 {
-    return lhs->status() > rhs->status();
+    /* Sorting of systemtray icons
+     *
+     * We sort (and thus group) in the following order, from high to low priority
+     * - Category
+     * - Name
+     */
+
+    if (lhs->category() != rhs->category()) {
+        QMap<Task::Category, int> weights;
+        weights.insert(Task::Communications, 0);
+        weights.insert(Task::SystemServices, 1);
+        weights.insert(Task::Hardware, 2);
+        weights.insert(Task::ApplicationStatus, 3);
+        weights.insert(Task::UnknownCategory, 4);
+
+        return weights.value(lhs->category()) < weights.value(rhs->category());
+    }
+    return lhs->name() < rhs->name();
 }
 
 Manager *SystemTray::Host::s_manager = 0;
@@ -209,17 +227,14 @@ bool HostPrivate::showTask(Task *task) {
 
 void Host::taskStatusChanged(SystemTray::Task *task)
 {
-    bool _changed = true;
+    bool _changed = false;
     if (task) {
-        qDebug() << "==> ST2 Migrate changed Task?: " << task->name() << task->status();
         if (d->shownTasks.contains(task)) {
             if (!d->showTask(task)) {
                 qDebug() << "ST2 Migrating shown -> hidden" << task->name();
                 d->shownTasks.removeAll(task);
                 d->hiddenTasks.append(task);
                 qSort(d->hiddenTasks.begin(), d->hiddenTasks.end(), taskLessThan);
-            } else {
-                qSort(d->shownTasks.begin(), d->shownTasks.end(), taskLessThan);
             }
             _changed = true;
         } else if (d->hiddenTasks.contains(task)) {
@@ -228,10 +243,7 @@ void Host::taskStatusChanged(SystemTray::Task *task)
                 d->hiddenTasks.removeAll(task);
                 d->shownTasks.append(task);
                 qSort(d->shownTasks.begin(), d->shownTasks.end(), taskLessThan);
-            } else {
-                qSort(d->hiddenTasks.begin(), d->hiddenTasks.end(), taskLessThan);
             }
-
         }
         emit tasksChanged();
     } else {

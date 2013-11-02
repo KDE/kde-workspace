@@ -54,7 +54,9 @@ StatusNotifierTest::StatusNotifierTest(QWidget* parent) :
     d = new StatusNotifierTestPrivate;
 
     d->systemNotifier = new KStatusNotifierItem(this);
-    d->systemNotifier->setCategory(KStatusNotifierItem::SystemServices);
+    //d->systemNotifier->setCategory(KStatusNotifierItem::SystemServices);
+    //d->systemNotifier->setCategory(KStatusNotifierItem::Hardware);
+    d->systemNotifier->setCategory(KStatusNotifierItem::Communications);
     d->systemNotifier->setIconByName("plasma");
     d->systemNotifier->setStatus(KStatusNotifierItem::Active);
     d->systemNotifier->setToolTipTitle(i18nc("tooltip title", "System Service Item"));
