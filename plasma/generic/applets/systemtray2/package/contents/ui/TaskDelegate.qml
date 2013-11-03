@@ -59,6 +59,7 @@ Item {
         running: status == SystemTray.Task.NeedsAttention
     }
 
+    /*
     onTaskStatusChanged: {
         print("ST2 status changed to " + taskStatusString());
     }
@@ -83,14 +84,12 @@ Item {
         }
         return "Unknown";
     }
-
+    */
     Component.onCompleted: {
         //host.rootItem = gridView;
         print(" ST2 taskitem created: " + taskItem + " " + iconName);
         if ((taskItem != undefined)) {
-            //print( " TASK ITEM CHANGED"  + (taskItem != undefined));
             taskItem.parent = taskItemContainer;
-            //taskItem.anchors.fill = taskItem.parent;
             taskItem.anchors.left = taskItem.parent.left;
             taskItem.anchors.verticalCenter = taskItem.parent.verticalCenter;
             taskItem.height = taskItem.parent.height;
