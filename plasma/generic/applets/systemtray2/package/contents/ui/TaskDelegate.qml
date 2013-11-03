@@ -57,13 +57,6 @@ Item {
     PulseAnimation {
         targetItem: taskItemContainer
         running: status == SystemTray.Task.NeedsAttention
-        onRunningChanged: {
-            // Make sure we reset the scale (which is manipulated by the Animation
-            // as to avoid freezing a scale icon when the status changes
-            if (status != SystemTray.Task.NeedsAttention) {
-                targetItem.scale = 1.0;
-            }
-        }
     }
     /*
     onTaskStatusChanged: {

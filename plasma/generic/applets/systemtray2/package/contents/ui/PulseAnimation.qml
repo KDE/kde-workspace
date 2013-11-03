@@ -26,8 +26,15 @@ SequentialAnimation {
 
     property Item targetItem
     //property int duration: Animations.normalDuration
-    property int duration: 1300
+    property int duration: 2000
 
+    onRunningChanged: {
+        // Make sure we reset the scale (which is manipulated by the Animation
+        // as to avoid freezing a scale icon when the status changes
+        if (!running) {
+            targetItem.scale = 1.0;
+        }
+    }
     // Fast scaling while we're animation == more FPS
     ScriptAction { script: { targetItem.smooth = false } }
 
@@ -39,7 +46,7 @@ SequentialAnimation {
             target: targetItem
             property: "scale"
             from: 1
-            to: 1.3
+            to: 1.2
             duration: pulseAnimation.duration * 0.1
             easing.type: Easing.InQuad;
         }
@@ -47,7 +54,7 @@ SequentialAnimation {
         PropertyAnimation {
             target: targetItem
             property: "scale"
-            from: 1.3
+            from: 1.2
             to: 1
             duration: pulseAnimation.duration * 0.1
             easing.type: Easing.OutQuad;
