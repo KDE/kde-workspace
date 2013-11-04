@@ -38,10 +38,6 @@
 #include <ktoolinvocation.h>
 #include <klauncher_iface.h>
 #include <QtDBus/QtDBus>
-#ifdef Q_WS_X11
-#include <X11/Xlib.h>
-#include <QX11Info>
-#endif
 
 #include <kservicetypetrader.h>
 #include <kdefakes.h>
@@ -187,7 +183,7 @@ KCMInit::KCMInit( KCmdLineArgs* args )
   KConfigGroup config(&_config, "X11");
 #ifdef Q_WS_X11
   bool multihead = !config.readEntry( "disableMultihead", false) &&
-                    (ScreenCount(QX11Info::display()) > 1);
+                    (QDesktopWidget().screenCount() > 1);
 #else
   bool multihead = false;
 #endif
