@@ -90,7 +90,7 @@ Item {
     Column {
         id: pageColumn
         anchors.fill: parent
-        spacing: theme.defaultFont.pixelSize / 2
+        spacing: itemSizeLabel.height / 2
         PlasmaExtras.Title {
             text: i18n("SystemTray Settings")
         }
@@ -133,7 +133,7 @@ Item {
         ListView {
             model: host.categories
             width: parent.width
-            height: theme.defaultFont.pixelSize * 10
+            height: itemSizeLabel.height * 10
             delegate: Row {
                 height: implicitHeight
                 width: parent.width

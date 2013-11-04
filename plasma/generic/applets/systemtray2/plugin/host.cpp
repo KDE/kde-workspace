@@ -49,7 +49,6 @@ bool taskLessThan(const Task *lhs, const Task *rhs)
      */
 
     const QString _not = QStringLiteral("org.kde.notifications");
-    qDebug() << "Compare: lhs: " << lhs->taskId() << " rhs: " << rhs->taskId();
     if (lhs->taskId() == _not) {
         return true;
     }

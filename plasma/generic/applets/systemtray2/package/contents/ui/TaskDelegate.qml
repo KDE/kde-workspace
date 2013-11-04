@@ -23,6 +23,7 @@ import org.kde.plasma.components 2.0 as PlasmaComponents
 import org.kde.plasma.extras 2.0 as PlasmaExtras
 
 import org.kde.private.systemtray 2.0 as SystemTray
+import "plasmapackage:/code/Layout.js" as Layout
 
 
 Item {
@@ -85,15 +86,26 @@ Item {
         return "Unknown";
     }
     */
-    Component.onCompleted: {
-        //host.rootItem = gridView;
-        print(" ST2 taskitem created: " + taskItem + " " + iconName);
-        if ((taskItem != undefined)) {
-            taskItem.parent = taskItemContainer;
-            taskItem.anchors.left = taskItem.parent.left;
+    onWidthChanged: updatePlasmoidGeometry()
+    onHeightChanged: updatePlasmoidGeometry()
+
+    function updatePlasmoidGeometry() {
+        if (taskItem != undefined) {
+
+            var _size = Layout.alignedSize(taskItemContainer.height);
+            var _m = (taskItemContainer.height - _size) / 2
+
             taskItem.anchors.verticalCenter = taskItem.parent.verticalCenter;
-            taskItem.height = taskItem.parent.height;
-            taskItem.width = taskItem.parent.height;
+            taskItem.x = _m;
+            taskItem.height = _size;
+            taskItem.width = _size;
+        }
+    }
+    Component.onCompleted: {
+        print(" ST2 taskitem created: " + taskItem + " " + iconName);
+        if (taskItem != undefined) {
+            taskItem.parent = taskItemContainer;
+            updatePlasmoidGeometry();
         }
     }
 }
