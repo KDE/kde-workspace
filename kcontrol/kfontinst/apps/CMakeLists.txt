@@ -49,4 +49,4 @@ install(PROGRAMS kfontview.desktop DESTINATION ${XDG_APPS_INSTALL_DIR} )
 install(FILES installfont.desktop DESTINATION
 ${SERVICES_INSTALL_DIR}/ServiceMenus )
 
-kde4_install_icons( ${ICON_INSTALL_DIR} )
+ecm_install_icons( ${ICON_INSTALL_DIR} )

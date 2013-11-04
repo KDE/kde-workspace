@@ -9,4 +9,4 @@ target_link_libraries(kio_fonts Qt5::DBus Qt5::X11Extras Qt5::Xml KF5::KArchive 
 install(TARGETS kio_fonts  DESTINATION ${PLUGIN_INSTALL_DIR} )
 install( FILES fonts.desktop  DESTINATION  ${DATA_INSTALL_DIR}/konqsidebartng/virtual_folders/services )
 install( FILES fonts.protocol  DESTINATION  ${SERVICES_INSTALL_DIR} )
-kde4_install_icons( ${ICON_INSTALL_DIR}  )
+ecm_install_icons( ${ICON_INSTALL_DIR}  )

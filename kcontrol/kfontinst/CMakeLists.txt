@@ -45,6 +45,6 @@ if (X11_Xft_FOUND)
     add_subdirectory( thumbnail )
     add_subdirectory( viewpart )
 
-    kde4_install_icons( ${ICON_INSTALL_DIR} )
+    ecm_install_icons( ${ICON_INSTALL_DIR} )
 
 endif (X11_Xft_FOUND)

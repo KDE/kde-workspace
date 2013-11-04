@@ -48,5 +48,5 @@ if(NOT WIN32)
 add_dependencies(kdeinit_kmenuedit kded_khotkeys)
 endif(NOT WIN32)
 
-kde4_install_icons( ${ICON_INSTALL_DIR}  )
+ecm_install_icons( ${ICON_INSTALL_DIR}  )
 
