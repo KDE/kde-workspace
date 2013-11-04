@@ -34,6 +34,7 @@ include(KDECMakeSettings)
 include(KDECompilerSettings)
 
 include(ECMOptionalAddSubdirectory)
+include(ECMInstallIcons)
 
 find_package(Qt5Core REQUIRED NO_MODULE)
 find_package(Qt5DBus REQUIRED NO_MODULE)
