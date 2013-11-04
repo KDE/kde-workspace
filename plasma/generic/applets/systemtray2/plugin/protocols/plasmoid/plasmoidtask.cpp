@@ -32,7 +32,7 @@
 namespace SystemTray
 {
 
-PlasmoidTask::PlasmoidTask(QQuickItem* rootItem, const QString &packageName, QObject *parent)
+PlasmoidTask::PlasmoidTask(QQuickItem* rootItem, const QString &packageName, const QUrl &compactQml, const QUrl &defaultQml, QObject *parent)
     : Task(parent),
       m_taskId(packageName),
       m_taskItem(0),
@@ -40,7 +40,7 @@ PlasmoidTask::PlasmoidTask(QQuickItem* rootItem, const QString &packageName, QOb
       m_valid(true)
 {
     qDebug() << "Loading applet: " << packageName;
-    m_taskItem = new PlasmoidInterface(packageName, m_rootItem);
+    m_taskItem = new PlasmoidInterface(packageName, compactQml, defaultQml, m_rootItem);
     if (!m_taskItem) {
         qDebug() << "Invalid applet taskitem";
         m_valid = false;

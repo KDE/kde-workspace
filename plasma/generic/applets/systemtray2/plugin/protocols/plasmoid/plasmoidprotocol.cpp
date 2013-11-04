@@ -48,6 +48,17 @@ PlasmoidProtocol::~PlasmoidProtocol()
 
 void PlasmoidProtocol::init()
 {
+    Plasma::Package package = Plasma::PluginLoader::self()->loadPackage("Plasma/Applet");
+    package.setPath("org.kde.systemtray");
+    const QString _p = package.path();
+    m_compactQml = QUrl::fromLocalFile(_p+"contents/ui/CompactApplet.qml");
+    m_defaultQml = QUrl::fromLocalFile(_p+"contents/ui/DefaultCompactRepresentation.qml");
+
+    qDebug() << "ST2 PackagePathQml: " << package.path();
+    qDebug() << "ST2 PackagePathQml mainScript: " << package.filePath("mainScript");
+
+
+
     //X-Plasma-NotificationArea
     KPluginInfo::List applets = Plasma::PluginLoader::self()->listAppletInfo(QString());
     const QString constraint = QString("[X-Plasma-NotificationArea] == 'true'");
@@ -109,7 +120,7 @@ void PlasmoidProtocol::newTask(const QString &service)
     Manager* m = qobject_cast<Manager*>(parent());
     QQuickItem* rootItem = m->rootItem();
 
-    PlasmoidTask *task = new PlasmoidTask(rootItem, service, this);
+    PlasmoidTask *task = new PlasmoidTask(rootItem, service, m_compactQml, m_defaultQml, this);
 
     m_tasks[service] = task;
     emit taskCreated(task);

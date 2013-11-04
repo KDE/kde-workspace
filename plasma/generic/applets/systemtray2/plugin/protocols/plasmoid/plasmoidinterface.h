@@ -162,7 +162,7 @@ class PlasmoidInterface : public QQuickItem
     Q_PROPERTY(bool fillHeight READ fillHeight NOTIFY fillHeightChanged)
 
 public:
-    PlasmoidInterface(const QString &plugin, QQuickItem *parent = 0);
+    PlasmoidInterface(const QString &plugin, const QUrl &compactQml, const QUrl &defaultQml, QQuickItem *parent = 0);
     ~PlasmoidInterface();
 
     KPluginInfo pluginInfo() const;
@@ -356,6 +356,8 @@ private:
     QString m_icon;
     QString m_title;
     QString m_plugin;
+    const QUrl m_compactQml;
+    const QUrl m_defaultQml;
     KPluginInfo m_pluginInfo;
     bool m_isUserConfiguring;
     friend class ContainmentInterface;

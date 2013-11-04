@@ -41,6 +41,7 @@
 #include <KLocalizedString>
 
 #include <Plasma/Plasma>
+#include <Plasma/PackageStructure>
 #include <Plasma/Applet>
 #include <Plasma/Corona>
 #include <Plasma/Package>
@@ -55,7 +56,7 @@ Q_DECLARE_METATYPE(PlasmoidInterface*)
 
 #define DEFAULTITEMSIZE 22
 
-PlasmoidInterface::PlasmoidInterface(const QString &plugin, QQuickItem *parent)
+PlasmoidInterface::PlasmoidInterface(const QString &plugin, const QUrl &compactQml, const QUrl &defaultQml,  QQuickItem *parent)
     : QQuickItem(parent),
 //       m_actionSignals(0),
       m_backgroundHints(Plasma::Types::StandardBackground),
@@ -64,6 +65,8 @@ PlasmoidInterface::PlasmoidInterface(const QString &plugin, QQuickItem *parent)
       m_busy(false),
       m_expanded(false),
       m_plugin(plugin),
+      m_compactQml(compactQml),
+      m_defaultQml(defaultQml),
       m_pluginInfo(KPluginInfo()),
       m_isUserConfiguring(false)
 {
@@ -160,16 +163,13 @@ void PlasmoidInterface::init()
         return;
     }
     m_pluginInfo = i;
-    qDebug() << (i18n("Showing info for package: %1", m_plugin));
-    qDebug() << (i18n("      Name : %1", i.name()));
-    qDebug() << (i18n("   Comment : %1", i.comment()));
-    qDebug() << (i18n("    Plugin : %1", i.pluginName()));
-    qDebug() << (i18n("    Author : %1", i.author()));
-    qDebug() << (i18n("      Path : %1", pkg.path()));
-    qDebug() << "mainScript:" << mainScript;
-
-
-
+//     qDebug() << (i18n("Showing info for package: %1", m_plugin));
+//     qDebug() << (i18n("      Name : %1", i.name()));
+//     qDebug() << (i18n("   Comment : %1", i.comment()));
+//     qDebug() << (i18n("    Plugin : %1", i.pluginName()));
+//     qDebug() << (i18n("    Author : %1", i.author()));
+//     qDebug() << (i18n("      Path : %1", pkg.path()));
+//     qDebug() << "mainScript:" << mainScript;
 
     if (!m_qmlObject->engine() || !m_qmlObject->engine()->rootContext() || !m_qmlObject->engine()->rootContext()->isValid() || m_qmlObject->mainComponent()->isError()) {
         QString reason;
@@ -796,10 +796,31 @@ void PlasmoidInterface::compactRepresentationCheck()
             return;
         }
 
-        const QUrl compactQml = QUrl::fromLocalFile("/home/sebas/kf5/src/plasma-framework/src/shell/qmlpackages/desktop/contents/applet/CompactApplet.qml"); // FIXME
-        const QUrl defaultCompactQml = QUrl::fromLocalFile("/home/sebas/kf5/src/plasma-framework/src/shell/qmlpackages/desktop/contents/applet/DefaultCompactRepresentation.qml"); // FIXME
-        m_compactUiObject = m_qmlObject->createObjectFromSource(compactQml);
+//         //Plasma::PackageStructure* structure = new Plasma::PackageStructure;
+//         //Plasma::Package package(structure);
+//         Plasma::Package package = Plasma::PluginLoader::self()->loadPackage("Plasma/Applet");
+//         //package.setPath(path);
+//         package.setPath("org.kde.systemtray");
+//
+//         qDebug() << "ST2 PackagePathQml: " << package.path();
+//         qDebug() << "ST2 PackagePathQml mainScript: " << package.filePath("mainScript");
+//
+//         const QString _p = package.path();
+//         if (_p.isEmpty()) {
+//             // show AppletError somehow. This should of course never happen though
+//         }
+// /*        const QUrl compactQml = QUrl::fromLocalFile("/home/sebas/kf5/src/plasma-framework/src/shell/qmlpackages/desktop/contents/applet/CompactApplet.qml"); // FIXME
+//         const QUrl defaultCompactQml = QUrl::fromLocalFile("/home/sebas/kf5/src/plasma-framework/src/shell/qmlpackages/desktop/contents/applet/DefaultCompactRepresentation.qml"); // */
+//         const QUrl compactQml = QUrl::fromLocalFile(_p+"contents/ui/CompactApplet.qml");
+//         const QUrl defaultCompactQml = QUrl::fromLocalFile(_p+"contents/ui/DefaultCompactRepresentation.qml");
+
+        m_compactUiObject = m_qmlObject->createObjectFromSource(m_compactQml);
+
+
         // m_compactUiObject = m_qmlObject->createObjectFromSource(QUrl::fromLocalFile(applet()->containment()->corona()->package().filePath("compactapplet")));
+
+        qDebug() << "ST2 compactQml: " << m_compactQml;
+        qDebug() << "ST2 defaultcompactQml: " << m_defaultQml;
 
         QObject *compactRepresentation = 0;
 
@@ -811,7 +832,7 @@ void PlasmoidInterface::compactRepresentationCheck()
                 compactRepresentation = compactComponent->create(compactComponent->creationContext());
             } else {
                 //compactRepresentation = m_qmlObject->createObjectFromSource(QUrl::fromLocalFile(applet()->containment()->corona()->package().filePath("defaultcompactrepresentation")));
-                compactRepresentation = m_qmlObject->createObjectFromSource(defaultCompactQml);
+                compactRepresentation = m_qmlObject->createObjectFromSource(m_defaultQml);
             }
 
             if (compactRepresentation && compactComponent) {
