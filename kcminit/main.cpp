@@ -200,14 +200,14 @@ KCMInit::KCMInit( KCmdLineArgs* args )
   if( startup )
   {
      runModules( 0 );
-     XEvent e;
-     e.xclient.type = ClientMessage;
-     e.xclient.message_type = XInternAtom( QX11Info::display(), "_KDE_SPLASH_PROGRESS", False );
-     e.xclient.display = QX11Info::display();
-     e.xclient.window = QX11Info::appRootWindow();
-     e.xclient.format = 8;
-     strcpy( e.xclient.data.b, "kcminit" );
-     XSendEvent( QX11Info::display(), QX11Info::appRootWindow(), False, SubstructureNotifyMask, &e );
+     // Tell KSplash that KCMInit has started
+     QDBusMessage ksplashProgressMessage = QDBusMessage::createMethodCall(QStringLiteral("org.kde.KSplash"),
+                                                                          QStringLiteral("/KSplash"),
+                                                                          QStringLiteral("org.kde.KSplash"),
+                                                                          QStringLiteral("setStage"));
+     ksplashProgressMessage.setArguments(QList<QVariant>() << QStringLiteral("kcminit"));
+     QDBusConnection::sessionBus().asyncCall(ksplashProgressMessage);
+
      sendReady();
      QTimer::singleShot( 300 * 1000, qApp, SLOT(quit())); // just in case
      qApp->exec(); // wait for runPhase1() and runPhase2()
