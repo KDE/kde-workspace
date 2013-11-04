@@ -102,7 +102,7 @@ Item {
         }
     }
     Component.onCompleted: {
-        print(" ST2 taskitem created: " + taskItem + " " + iconName);
+        //print(" ST2 taskitem created: " + taskItem + " " + iconName);
         if (taskItem != undefined) {
             taskItem.parent = taskItemContainer;
             updatePlasmoidGeometry();

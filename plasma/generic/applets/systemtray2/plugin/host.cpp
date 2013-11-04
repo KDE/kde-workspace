@@ -33,6 +33,9 @@
 #include <QQuickItem>
 #include <QTimer>
 #include <QVariant>
+#include <zlib.h>
+
+#define TIMEOUT 200
 
 namespace SystemTray
 {
@@ -88,6 +91,7 @@ public:
     QStringList categories;
 
     bool showTask(Task *task);
+    QTimer compressionTimer;
 };
 
 Host::Host(QObject* parent) :
@@ -95,6 +99,7 @@ Host::Host(QObject* parent) :
 {
     d = new HostPrivate;
     init();
+    connect(&d->compressionTimer, &QTimer::timeout, this, &Host::compressionTimeout);
 }
 
 Host::~Host()
@@ -106,7 +111,7 @@ void Host::init()
 {
     if (!s_manager) {
         s_manager = new SystemTray::Manager();
-        connect(s_manager, &Manager::tasksChanged, this, &Host::tasksChanged);
+//        connect(s_manager, &Manager::tasksChanged, this, &Host::tasksChanged);
         connect(s_manager, &Manager::taskAdded, this, &Host::taskAdded);
         connect(s_manager, &Manager::taskRemoved, this, &Host::taskRemoved);
         connect(s_manager, &Manager::taskStatusChanged, this, &Host::taskStatusChanged);
@@ -116,6 +121,15 @@ void Host::init()
     initTasks();
     emit categoriesChanged();
 }
+
+void Host::compressionTimeout()
+{
+    qDebug() << "ST2 tasksChanged";
+    emit tasksChanged();
+    d->compressionTimer.stop();
+
+}
+
 
 void Host::initTasks()
 {
@@ -138,8 +152,8 @@ void Host::initTasks()
 
     QQmlListProperty<SystemTray::Task> _hidden(this, d->hiddenTasks);
     d->hiddenTasksDeclarative = _hidden;
-
-    emit tasksChanged();
+    qDebug() << "ST2 init starting timer" << TIMEOUT;
+    d->compressionTimer.start(TIMEOUT);
 }
 
 void Host::setRootItem(QQuickItem* rootItem)
@@ -168,6 +182,7 @@ void Host::taskAdded(Task* task)
         d->hiddenTasks.append(task);
         qSort(d->hiddenTasks.begin(), d->hiddenTasks.end(), taskLessThan);
     }
+    d->compressionTimer.start(TIMEOUT);
     emit tasksChanged();
 }
 
@@ -178,7 +193,7 @@ void Host::taskRemoved(Task* task)
     } else {
         d->hiddenTasks.removeAll(task);
     }
-    emit tasksChanged();
+    d->compressionTimer.start(TIMEOUT);
 }
 
 bool HostPrivate::showTask(Task *task) {
@@ -194,7 +209,7 @@ void Host::taskStatusChanged(SystemTray::Task *task)
                 d->shownTasks.removeAll(task);
                 d->hiddenTasks.append(task);
                 qSort(d->hiddenTasks.begin(), d->hiddenTasks.end(), taskLessThan);
-                emit tasksChanged();
+                d->compressionTimer.start(TIMEOUT);
             }
         } else if (d->hiddenTasks.contains(task)) {
             if (d->showTask(task)) {
@@ -202,7 +217,7 @@ void Host::taskStatusChanged(SystemTray::Task *task)
                 d->hiddenTasks.removeAll(task);
                 d->shownTasks.append(task);
                 qSort(d->shownTasks.begin(), d->shownTasks.end(), taskLessThan);
-                emit tasksChanged();
+                d->compressionTimer.start(TIMEOUT);
             }
         }
     }
