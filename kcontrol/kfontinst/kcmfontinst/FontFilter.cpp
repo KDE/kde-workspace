@@ -285,7 +285,7 @@ void CFontFilter::filterChanged()
             itsCurrentFileTypes.clear();
 
             setCriteria(crit);
-            setClickMessage(i18n("Type here to filter on %1", act->text()));
+            setClickMessage(i18n("Type here to filter on %1", act->text().toLower()));
             setReadOnly(false);
         }
     }
@@ -347,7 +347,7 @@ void CFontFilter::addAction(ECriteria crit, const QString &text, bool on)
     itsActions[crit]->setData((int)crit);
     itsActions[crit]->setChecked(on);
     if(on)
-        setClickMessage(i18n("Type here to filter on %1", text));
+        setClickMessage(i18n("Type here to filter on %1", text.toLower()));
     connect(itsActions[crit], SIGNAL(toggled(bool)), SLOT(filterChanged()));
 }
 
