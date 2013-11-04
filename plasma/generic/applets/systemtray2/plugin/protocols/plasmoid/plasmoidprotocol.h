@@ -47,8 +47,7 @@ protected Q_SLOTS:
 
 private:
     QHash<QString, PlasmoidTask*> m_tasks;
-    QUrl m_compactQml;
-    QUrl m_defaultQml;
+    QString m_systrayPackageRoot;
 };
 
 }

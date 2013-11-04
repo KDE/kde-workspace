@@ -56,7 +56,7 @@ Q_DECLARE_METATYPE(PlasmoidInterface*)
 
 #define DEFAULTITEMSIZE 22
 
-PlasmoidInterface::PlasmoidInterface(const QString &plugin, const QUrl &compactQml, const QUrl &defaultQml,  QQuickItem *parent)
+PlasmoidInterface::PlasmoidInterface(const QString &plugin, const QString &systrayPackageRoot,  QQuickItem *parent)
     : QQuickItem(parent),
 //       m_actionSignals(0),
       m_backgroundHints(Plasma::Types::StandardBackground),
@@ -65,8 +65,7 @@ PlasmoidInterface::PlasmoidInterface(const QString &plugin, const QUrl &compactQ
       m_busy(false),
       m_expanded(false),
       m_plugin(plugin),
-      m_compactQml(compactQml),
-      m_defaultQml(defaultQml),
+      m_systrayPackageRoot(systrayPackageRoot),
       m_pluginInfo(KPluginInfo()),
       m_isUserConfiguring(false)
 {
@@ -178,8 +177,9 @@ void PlasmoidInterface::init()
             qDebug() << error.toString();
         }
         reason = i18n("Error loading QML file: %1", reason);
+        const QUrl appletError = QUrl::fromLocalFile(m_systrayPackageRoot+QStringLiteral("/contents/ui/CompactApplet.qml"));
 
-        //m_qmlObject->setSource(QUrl::fromLocalFile(applet()->containment()->corona()->package().filePath("appleterror")));
+        m_qmlObject->setSource(appletError);
         m_qmlObject->completeInitialization();
 
 
@@ -814,13 +814,15 @@ void PlasmoidInterface::compactRepresentationCheck()
 //         const QUrl compactQml = QUrl::fromLocalFile(_p+"contents/ui/CompactApplet.qml");
 //         const QUrl defaultCompactQml = QUrl::fromLocalFile(_p+"contents/ui/DefaultCompactRepresentation.qml");
 
-        m_compactUiObject = m_qmlObject->createObjectFromSource(m_compactQml);
+        const QUrl compactQml = QUrl::fromLocalFile(m_systrayPackageRoot+QStringLiteral("/contents/ui/CompactApplet.qml"));
+        const QUrl defaultQml = QUrl::fromLocalFile(m_systrayPackageRoot+QStringLiteral("/contents/ui/DefaultCompactRepresentation.qml"));
+        m_compactUiObject = m_qmlObject->createObjectFromSource(compactQml);
 
 
         // m_compactUiObject = m_qmlObject->createObjectFromSource(QUrl::fromLocalFile(applet()->containment()->corona()->package().filePath("compactapplet")));
 
-        qDebug() << "ST2 compactQml: " << m_compactQml;
-        qDebug() << "ST2 defaultcompactQml: " << m_defaultQml;
+        qDebug() << "ST2 compactQml: " << compactQml;
+        qDebug() << "ST2 defaultcompactQml: " << defaultQml;
 
         QObject *compactRepresentation = 0;
 
@@ -832,7 +834,7 @@ void PlasmoidInterface::compactRepresentationCheck()
                 compactRepresentation = compactComponent->create(compactComponent->creationContext());
             } else {
                 //compactRepresentation = m_qmlObject->createObjectFromSource(QUrl::fromLocalFile(applet()->containment()->corona()->package().filePath("defaultcompactrepresentation")));
-                compactRepresentation = m_qmlObject->createObjectFromSource(m_defaultQml);
+                compactRepresentation = m_qmlObject->createObjectFromSource(defaultQml);
             }
 
             if (compactRepresentation && compactComponent) {
