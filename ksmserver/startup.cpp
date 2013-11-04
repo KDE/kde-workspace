@@ -540,15 +540,12 @@ void KSMServer::resumeStartupInternal()
 
 void KSMServer::upAndRunning( const QString& msg )
 {
-    XEvent e;
-    e.xclient.type = ClientMessage;
-    e.xclient.message_type = XInternAtom( QX11Info::display(), "_KDE_SPLASH_PROGRESS", False );
-    e.xclient.display = QX11Info::display();
-    e.xclient.window = QX11Info::appRootWindow();
-    e.xclient.format = 8;
-    assert( strlen( msg.toLatin1()) < 20 );
-    strcpy( e.xclient.data.b, msg.toLatin1());
-    XSendEvent( QX11Info::display(), QX11Info::appRootWindow(), False, SubstructureNotifyMask, &e );
+    QDBusMessage ksplashProgressMessage = QDBusMessage::createMethodCall(QStringLiteral("org.kde.KSplash"),
+                                                                         QStringLiteral("/KSplash"),
+                                                                         QStringLiteral("org.kde.KSplash"),
+                                                                         QStringLiteral("setStage"));
+    ksplashProgressMessage.setArguments(QList<QVariant>() << msg);
+    QDBusConnection::sessionBus().asyncCall(ksplashProgressMessage);
 }
 
 void KSMServer::restoreSubSession( const QString& name )
