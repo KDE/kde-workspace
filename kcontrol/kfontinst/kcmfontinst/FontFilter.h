@@ -77,7 +77,6 @@ class CFontFilter : public KLineEdit
     private:
 
     void addAction(ECriteria crit, const QString &text, bool on);
-    void paintEvent(QPaintEvent *ev);
     void resizeEvent(QResizeEvent *ev);
     void mousePressEvent(QMouseEvent *ev);
     void setCriteria(ECriteria crit);

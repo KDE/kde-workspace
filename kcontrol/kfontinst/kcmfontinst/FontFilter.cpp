@@ -351,29 +351,6 @@ void CFontFilter::addAction(ECriteria crit, const QString &text, bool on)
     connect(itsActions[crit], SIGNAL(toggled(bool)), SLOT(filterChanged()));
 }
 
-void CFontFilter::paintEvent(QPaintEvent *ev)
-{
-    QLineEdit::paintEvent(ev);
-
-    if (!hasFocus() && text().isEmpty())
-    {
-        QPainter p(this);
-        QPen     oldPen(p.pen());
-
-        p.setPen(palette().color(QPalette::Disabled, QPalette::Text));
-
-        //FIXME: this rect is not where the text actually starts
-        // qlineedit uses an internal qstyleoption set to figure this out
-        // and then adds a hardcoded 2 pixel interior to that.
-        // probably requires fixes to Qt itself to do this cleanly
-        QRect cr(contentsRect());
-
-        cr.adjust(itsMenuButton->width()+4, 0, -(itsMenuButton->width()+4), 0);
-        p.drawText(cr, Qt::AlignLeft|Qt::AlignVCenter, clickMessage());
-        p.setPen(oldPen);
-    }
-}
-
 void CFontFilter::resizeEvent(QResizeEvent *ev)
 {
     KLineEdit::resizeEvent(ev);
