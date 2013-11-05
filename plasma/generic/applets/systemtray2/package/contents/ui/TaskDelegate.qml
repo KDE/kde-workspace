@@ -56,8 +56,10 @@ Item {
         } else {
             print("ST2P == null...");
         }
+//         if (root.expandedItem != expandedItem) {
+//             root.expandedItem.visible = false;
+//         }
         root.expandedItem = expandedItem;
-        plasmoid.expanded = expandedItem != undefined;
     }
 
     PlasmaCore.IconItem {

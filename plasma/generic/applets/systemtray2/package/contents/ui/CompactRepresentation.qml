@@ -21,11 +21,12 @@ import QtQuick 2.0
 import org.kde.plasma.core 2.0 as PlasmaCore
 import org.kde.plasma.components 2.0 as PlasmaComponents
 import org.kde.plasma.extras 2.0 as PlasmaExtras
+import org.kde.qtextracomponents 2.0 as QtExtraComponents
 
 import org.kde.private.systemtray 2.0 as SystemTray
 
 
-Item {
+QtExtraComponents.MouseEventListener {
     id: compactRepresenation
 
     // TODO: vertical formfactor
@@ -38,6 +39,12 @@ Item {
 
     property QtObject systrayhost: undefined
 
+    onClicked: {
+        print("ST2P MouseEventListener.clicked!")
+        plasmoid.expanded = !plasmoid.expanded
+
+    }
+
     function computeDimension() {
         var dim = 0;
 
@@ -48,7 +55,7 @@ Item {
 
         return dim;
     }
-
+/*
     function loadNotificationsPlasmoid() {
         var plugin = "org.kde.notifications";
         systrayhost.rootItem = gridView;
@@ -59,7 +66,7 @@ Item {
         }
         notificationsPlasmoid.parent = notificationsContainer;
         notificationsPlasmoid.anchors.fill = notificationsContainer;
-    }
+    }*/
 
     function togglePopup() {
         plasmoid.expanded = !plasmoid.expanded;

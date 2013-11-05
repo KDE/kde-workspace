@@ -46,15 +46,30 @@ Item {
 
     onExpandedItemChanged: {
         print("ST2P main.qml Expanded item changed ... reparenting ");
-        if (expandedItem != undefined) {
-            expandedItem.parent = expandedItemContainer;
-            expandedItem.anchors.fill = expandedItemContainer;
-            hiddenView.width = _h * 1.5;
-            expandedItemContainer.visible = true;
+
+        if (expandedItem == null && plasmoid.expanded) {
+            //plasmoid.expanded = false;
+            expandedItemContainer.clear();
+        }
+
+        if (expandedItem != null) {
+            if (expandedItemContainer.currentPage != expandedItem) {
+                expandedItemContainer.replace(expandedItem);
+            } else {
+                hiddenView.width = parent.width;
+                expandedItemContainer.clear();
+            }
+            if (!plasmoid.expanded) {
+                hiddenView.width = _h * 2;
+                plasmoid.expanded = true;
+            }
         } else {
+            if (plasmoid.expanded) {
+                plasmoid.expanded = false;
+            }
             print("ST2P main.qml Resetting");
             hiddenView.width = parent.width;
-            expandedItemContainer.visible = false;
+            expandedItemContainer.clear();
         }
     }
 
@@ -95,31 +110,40 @@ Item {
         objectName: "hiddenView"
         clip: true
 
+        width: parent.width
+
         anchors {
             top: (loadingItem.visible && !plasmoid.expanded) ? loadingItem.bottom : parent.top
             bottom: (loadingItem.visible && !plasmoid.expanded) ? undefined : parent.bottom
             left: parent.left
             //right: parent.right
-            //bottom: parent.bottom
         }
         spacing: 4
 
         model: host.hiddenTasks
 
-        delegate: TaskListDelegate {}
+        delegate: TaskListDelegate {
+            expanded: (root.expandedItem == null)
+        }
     }
 
-    Item {
+    Connections {
+        target: plasmoid
+        onExpandedChanged: {
+            if (!plasmoid.expanded) {
+                //root.expandedItem = undefined;
+                //expandedItemContainer.clear();
+            }
+        }
+    }
+
+    PlasmaComponents.PageStack {
         id: expandedItemContainer
-//         width: parent.width
-//         height: taskListDelegate.height - labels.height
-        //x: _h * 1.2
-        //height: (expandedItem != undefined) ? expandedItem.minimumHeight : hiddenView.height
         anchors {
-            left: hiddenView.left
-            leftMargin: _h * 1.5
-            top: hiddenView.top
-            bottom: hiddenView.bottom
+            left: parent.left
+            leftMargin: _h * 1.2
+            top: parent.top
+            bottom: parent.bottom
             right: parent.right
         }
     }

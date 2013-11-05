@@ -58,6 +58,16 @@ Item {
 //         applet.anchors.fill = applet.parent;
     }
 
+//     Connections {
+//         target: applet
+//         onVisibleChanged: {
+//             print("ST2P Visible changed, collapsing?" + !visible);
+//             if (!visible) {
+//                 plasmoid.expanded = false;
+//             }
+//         }
+//     }
+
     onCompactRepresentationChanged: {
         compactRepresentation.parent = root
         compactRepresentation.anchors.fill = root

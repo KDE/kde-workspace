@@ -115,7 +115,11 @@ PlasmoidInterface::~PlasmoidInterface()
 
 QQuickItem* PlasmoidInterface::defaultRepresentation()
 {
-    return m_defaultRepresentation;
+    if (m_expanded) {
+        return m_defaultRepresentation;
+    } else {
+        return 0;
+    }
 }
 
 KPluginInfo PlasmoidInterface::pluginInfo() const
@@ -399,19 +403,21 @@ void PlasmoidInterface::setExpanded(bool expanded)
 {
     //if there is no compact representation it means it's always expanded
     //Containnments are always expanded
-    if (!m_compactUiObject || m_expanded == expanded) {
+    if (!m_compactUiObject) {
         return;
     }
-    //if (!expanded) {
+    if (m_expanded != expanded) {
+        m_expanded = expanded;
         //m_defaultRepresentation = 0;
+        emit expandedChanged();
+        emit defaultRepresentationChanged();
         m_defaultRepresentation->setProperty("visible", expanded);
         //m_defaultRepresentation
-    //}
+    }
     qDebug() << "ST2P expandedchanged:" << expanded;
-    emit defaultRepresentationChanged();
 
-    m_expanded = expanded;
-    emit expandedChanged();
+
+    emit defaultRepresentationChanged();
 }
 
 Plasma::Types::BackgroundHints PlasmoidInterface::backgroundHints() const
@@ -904,7 +910,7 @@ void PlasmoidInterface::compactRepresentationCheck()
 //             QQmlExpression expr(m_qmlObject->engine()->rootContext(), m_qmlObject->rootObject(), "y");
 //             QQmlProperty prop(m_qmlObject->rootObject(), "48");
 //             prop.write(expr.evaluate());
-            emit defaultRepresentationChanged();
+            //emit defaultRepresentationChanged();
 
             //hook m_compactUiObject size hints to this size hint
             //Here we have to use the old connect syntax, because we don't have access to the class type
