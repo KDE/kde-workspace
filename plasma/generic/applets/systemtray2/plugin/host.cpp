@@ -159,7 +159,19 @@ void Host::initTasks()
 void Host::setRootItem(QQuickItem* rootItem)
 {
     //qDebug() << "Set root item";
-    s_manager->setRootItem(rootItem);
+    if (s_manager && s_manager->rootItem() != rootItem) {
+        s_manager->setRootItem(rootItem);
+        //emit rootItemChanged();
+    }
+}
+
+QQuickItem* Host::rootItem()
+{
+    if (s_manager) {
+        return s_manager->rootItem();
+    } else {
+        return 0;
+    }
 }
 
 QQmlListProperty<SystemTray::Task> Host::hiddenTasks()

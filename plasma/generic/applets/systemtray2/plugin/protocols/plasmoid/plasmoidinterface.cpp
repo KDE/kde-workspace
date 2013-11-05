@@ -216,7 +216,7 @@ void PlasmoidInterface::init()
 
     //m_qmlObject->rootObject()->setParent(rootItem);
     //m_taskItem->setProperty("parent", QVariant::fromValue(rootItem));
-    qDebug() << " ST2 Parent object : " << parent()->objectName() << parent();
+    //qDebug() << " ST2 Parent object : " << parent()->objectName() << parent();
     qDebug() << " ST2 Plasmoidobject: " << m_qmlObject->rootObject();
     if (!m_qmlObject->rootObject()) {
         qDebug() << " PROBLEM!";

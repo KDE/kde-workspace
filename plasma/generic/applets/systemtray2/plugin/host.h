@@ -48,12 +48,14 @@ class Host : public QObject
 
     Q_PROPERTY(QStringList categories READ categories NOTIFY categoriesChanged)
 
-    Q_PROPERTY(QQuickItem* rootItem WRITE setRootItem)
+    Q_PROPERTY(QQuickItem* rootItem READ rootItem WRITE setRootItem NOTIFY rootItemChanged)
+    //Q_PROPERTY(QQuickItem* rootItem WRITE setRootItem)
 
 public:
     Host(QObject* parent = 0);
     virtual ~Host();
     void setRootItem(QQuickItem* rootItem);
+    QQuickItem* rootItem();
     void init();
 
 public Q_SLOTS:
@@ -65,6 +67,7 @@ public Q_SLOTS:
 Q_SIGNALS:
     void tasksChanged();
     void categoriesChanged();
+    void rootItemChanged();
 
 private Q_SLOTS:
     void taskAdded(SystemTray::Task *task);

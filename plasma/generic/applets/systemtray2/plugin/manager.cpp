@@ -58,6 +58,7 @@ public:
 Manager::Manager()
     : d(new Private(this))
 {
+    d->rootItem = 0;
     QTimer::singleShot(500, this, SLOT(init())); // FIXME: remove timer
 
 }
