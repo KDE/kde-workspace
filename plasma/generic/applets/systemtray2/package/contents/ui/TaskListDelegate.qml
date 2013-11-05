@@ -20,45 +20,54 @@
 import QtQuick 2.0
 import org.kde.plasma.core 2.0 as PlasmaCore
 import org.kde.plasma.components 2.0 as PlasmaComponents
-import org.kde.plasma.extras 2.0 as PlasmaExtras
 
 import org.kde.private.systemtray 2.0 as SystemTray
 
-Item {
-    id: root
-    objectName: "SystemTrayRootItem"
 
-    property bool vertical: (plasmoid.formFactor == PlasmaCore.Types.Vertical)
+TaskDelegate {
+    id: taskListDelegate
+    objectName: "taskListDelegate"
 
-    property int minimumWidth: 200 // just needs to run out of space in the panel ...
-    property int minimumHeight: 200 // ... but not too big to screw up initial layouts
+    property bool expanded: false
 
-    property int _h: plasmoid.configuration.itemSize
-    property int itemSpacing: 2
+    width: parent.width
+    height: plasmoid.configuration.itemSize
+    //height: itemSize
 
-    property bool debug: plasmoid.configuration.debug
+//     onExpandedItemChanged: {
+//         print("ST2P TaskDelegate Expanded changed ...");
+//         if (expandedItem != undefined) {
+// //             expandedItem.anchors.fill = expandedItemContainer;
+//         }
+//     }
 
-    property Item expandedItem: undefined
-
-    property Component compactRepresentation: CompactRepresentation {
-        systrayhost: host
-    }
-
-
-    Rectangle {
-        anchors.fill: parent;
-        border.width: 2;
-        border.color: "black";
-        color: "blue";
-        visible: root.debug;
-        opacity: 0.2;
-    }
-    SystemTray.Host {
-        id: host
-        rootItem: hiddenView
-    }
-
-    ExpandedRepresentation {
+    MouseArea {
         anchors.fill: parent
+
+    }
+
+    Column {
+        id: labels
+        width: parent.width
+        height: mainLabel.height * 2
+        x: taskListDelegate.height * 1.2
+//         anchors {
+//             //fill: parent
+//         }
+        PlasmaComponents.Label {
+            id: mainLabel
+            width: parent.width
+            visible: taskListDelegate.expanded
+            text: name
+            elide: Text.ElideRight
+        }
+//         PlasmaComponents.Label {
+//             width: parent.width
+//             font.pointSize: theme.defaultFont.pointSize - 2
+//             opacity: 0.7
+//             text: tooltipTitle + "<br />" + tooltipText
+//             elide: Text.ElideRight
+//             clip: true
+//         }
     }
 }
