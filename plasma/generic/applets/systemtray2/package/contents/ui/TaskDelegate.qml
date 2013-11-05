@@ -110,7 +110,7 @@ Item {
     MouseArea {
         anchors.fill: parent
         onClicked: {
-            print("ST2B click ... " + !plasmoid.expanded);
+            print("ST2B click ... " + !plasmoid.expanded + root.itemSize);
             plasmoid.expanded = !plasmoid.expanded;
             //root.expandedItem = taskItemExpanded;
             if (expandedItem != undefined) {
@@ -126,7 +126,8 @@ Item {
     function updatePlasmoidGeometry() {
         if (taskItem != undefined) {
 
-            var _size = root.itemSize;
+            //var _size = root.itemSize;
+            var _size = 32;
             var _m = (taskItemContainer.height - _size) / 2
 
             taskItem.anchors.verticalCenter = taskItem.parent.verticalCenter;

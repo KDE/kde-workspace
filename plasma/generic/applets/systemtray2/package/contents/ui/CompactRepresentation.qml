@@ -49,12 +49,21 @@ QtExtraComponents.MouseEventListener {
     }
 
     function computeDimension() {
-        var dim = 0;
-        var x = vertical ? compactRepresenation.width : compactRepresenation.height
-        dim = (systrayhost.shownTasks.length) * (x + itemSpacing);
-        dim = dim + arrow.width + itemSpacing + itemSpacing;
 
-        return dim;
+        var dim = root.vertical ? compactRepresenation.width : compactRepresenation.height
+
+        var rows = Math.floor(dim / root.itemSize);
+        var cols = Math.ceil(systrayhost.shownTasks.length / rows);
+        //var x = vertical ? compactRepresenation.width : compactRepresenation.height
+        //dim = (systrayhost.shownTasks.length) * (x + itemSpacing);
+        var res = cols * (root.itemSize + root.smallSpacing) + arrow.width;
+        print("DIM itemSize : " + root.itemSize);
+        print("DIM dim : " + dim);
+        print("DIM rows : " + rows);
+        print("DIM cols : " + cols);
+        print("DIM res : " + cols);
+
+        return res;
     }
 /*
     function loadNotificationsPlasmoid() {
@@ -108,8 +117,9 @@ QtExtraComponents.MouseEventListener {
             leftMargin: root.vertical ? 0 : itemSpacing
             right: arrow.left
         }
-        cellWidth: root.vertical ? parent.width / gridRows() : parent.height / gridRows()
-
+        cellWidth: root.itemSize
+        cellHeight: cellWidth
+/*
         function gridRows() {
             var r = 0;
             if (root.vertical) {
@@ -120,8 +130,7 @@ QtExtraComponents.MouseEventListener {
             print("ST2 ROW: ::::::: " + r);
             return Math.max(1, r);
 
-        }
-        cellHeight: cellWidth
+        }*/
         interactive: false
 
         model: systrayhost.shownTasks
@@ -133,15 +142,33 @@ QtExtraComponents.MouseEventListener {
 
         id: arrow
 
+        y: root.itemSize / 4
         anchors {
-            leftMargin: itemSpacing
+            leftMargin: root.smallSpacing
             right: parent.right
-            verticalCenter: notificationsContainer.verticalCenter
+            //verticalCenter: notificationsContainer.verticalCenter
         }
-        width: _h / 2
+        width: Math.floor(root.itemSize / 2)
         height: width
 
         svg: PlasmaCore.Svg { imagePath: "widgets/arrows" }
-        elementId: "up-arrow"
+        elementId: {
+            // FIXME : Account for top, bottom, left, right
+            if (!vertical) {
+                if (plasmoid.expanded) {
+                    return "up-arrow";
+                } else {
+                    return "down-arrow";
+
+                }
+            } else {
+                if (plasmoid.expanded) {
+                    return "left-arrow";
+                } else {
+                    return "right-arrow";
+
+                }
+            }
+        }
     }
 }
