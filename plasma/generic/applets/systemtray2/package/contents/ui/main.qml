@@ -64,11 +64,14 @@ Item {
                 plasmoid.expanded = true;
             }
         } else {
-            if (plasmoid.expanded) {
-                plasmoid.expanded = false;
-            }
+//             if (plasmoid.expanded) {
+//                 plasmoid.expanded = false;
+//             }
             print("ST2P main.qml Resetting");
             hiddenView.width = parent.width;
+            if (expandedItemContainer.currentPage == null) {
+                plasmoid.expanded = false;
+            }
             expandedItemContainer.clear();
         }
     }

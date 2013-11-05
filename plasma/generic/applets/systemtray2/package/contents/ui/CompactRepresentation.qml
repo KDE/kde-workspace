@@ -31,8 +31,10 @@ QtExtraComponents.MouseEventListener {
 
     // TODO: vertical formfactor
     //property int minimumWidth: (1.5 + systrayhost.shownTasks.length) * (plasmoid.configuration.itemSize + itemSpacing) + (2 * itemSpacing)
-    property int minimumWidth: computeDimension()
-    property int maximumWidth: minimumWidth
+    property int minimumWidth: !vertical ? computeDimension() : undefined
+    property int minimumHeight: vertical ? computeDimension() : undefined
+    property int maximumWidth: !vertical ? minimumWidth : computeDimension()
+    property int maximumHeight: vertical ? minimumWidth : computeDimension()
 
     property bool fillWidth: !vertical
     property bool fillHeight: vertical
@@ -47,10 +49,8 @@ QtExtraComponents.MouseEventListener {
 
     function computeDimension() {
         var dim = 0;
-
-        // systray tasks + notifications widget
         var x = vertical ? compactRepresenation.width : compactRepresenation.height
-        dim = (systrayhost.shownTasks.length + 1) * (x + itemSpacing);
+        dim = (systrayhost.shownTasks.length) * (x + itemSpacing);
         dim = dim + arrow.width + itemSpacing + itemSpacing;
 
         return dim;
