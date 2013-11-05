@@ -303,7 +303,7 @@ KSharedConfigPtr KDModule::createBackgroundTempConfig()
         config->group("X-*-Greeter").readEntry(
             "BackgroundCfg", KDE_CONFDIR "/kdm/backgroundrc");
 
-    KConfig systemBackgroundConfig(systemBackgroundConfigName);
+    KConfig systemBackgroundConfig(systemBackgroundConfigName, KConfig::SimpleConfig);
     KSharedConfigPtr pTempConfig = KSharedConfig::openConfig(tempBackgroundConfigName);
     systemBackgroundConfig.copyTo(tempBackgroundConfigName, pTempConfig.data());
     pTempConfig->sync();
