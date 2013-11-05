@@ -35,7 +35,7 @@ KeyboardPainter::KeyboardPainter():
     exitButton(new QPushButton(i18n("Close"), this)),
     levelBox(new QComboBox(this))
 {
-    kbframe->setFixedSize(1100,490);
+    kbframe->setFixedSize(1100, 490);
     exitButton->setFixedSize( 120, 30 );
     levelBox->setFixedSize( 360, 30 );
 
@@ -61,7 +61,6 @@ void KeyboardPainter::generateKeyboardLayout(const QString& layout, const QStrin
     kbframe->generateKeyboardLayout(layout, variant, model);
     kbframe->setFixedSize(getWidth(),getHeight());
     kbDialog->setFixedSize(getWidth(),getWidth());
-    qDebug()<<kbframe->size()<<kbDialog->size();
     setWindowTitle(title);
 
     int level = kbframe->getLevel();
@@ -83,15 +82,12 @@ void KeyboardPainter::levelChanged(int l_id){
 
 int KeyboardPainter::getHeight(){
    int height = kbframe->getHeight();
-   qDebug()<<"scaleFactor"<<kbframe->getScaleFactor()<<"height"<<height;
    height = kbframe->getScaleFactor() * height + 50;
    return height;
 }
 
 int KeyboardPainter::getWidth(){
    int width = kbframe->getWidth();
-
-   qDebug()<<"scaleFactor"<<kbframe->getScaleFactor()<<"width"<<width;
    width = kbframe->getScaleFactor() * width + 20;
    return width;
 }
