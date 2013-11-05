@@ -68,6 +68,7 @@ FocusScope {
             right: parent.right
             top: plasmoid.location == PlasmaCore.Types.BottomEdge ? parent.top : undefined
             bottom: plasmoid.location == PlasmaCore.Types.BottomEdge ? undefined : parent.bottom
+            //bottomMargin: parent.height - childrenRect.height
         }
 
         Repeater {

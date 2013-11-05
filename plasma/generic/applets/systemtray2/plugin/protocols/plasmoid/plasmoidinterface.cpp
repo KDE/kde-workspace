@@ -62,6 +62,7 @@ PlasmoidInterface::PlasmoidInterface(const QString &plugin, const QString &systr
       m_backgroundHints(Plasma::Types::StandardBackground),
       m_status(Plasma::Types::ActiveStatus),
       m_qmlObject(0),
+      m_defaultRepresentation(0),
       m_busy(false),
       m_expanded(false),
       m_plugin(plugin),
@@ -108,6 +109,13 @@ PlasmoidInterface::PlasmoidInterface(const QString &plugin, const QString &systr
 PlasmoidInterface::~PlasmoidInterface()
 {
     qDebug() << "!!! Plasmoid is gone";
+}
+
+
+
+QQuickItem* PlasmoidInterface::defaultRepresentation()
+{
+    return m_defaultRepresentation;
 }
 
 KPluginInfo PlasmoidInterface::pluginInfo() const
@@ -394,6 +402,13 @@ void PlasmoidInterface::setExpanded(bool expanded)
     if (!m_compactUiObject || m_expanded == expanded) {
         return;
     }
+    //if (!expanded) {
+        //m_defaultRepresentation = 0;
+        m_defaultRepresentation->setProperty("visible", expanded);
+        //m_defaultRepresentation
+    //}
+    qDebug() << "ST2P expandedchanged:" << expanded;
+    emit defaultRepresentationChanged();
 
     m_expanded = expanded;
     emit expandedChanged();
@@ -876,10 +891,20 @@ void PlasmoidInterface::compactRepresentationCheck()
 //
 //             m_qmlObject->rootObject()->setProperty("width", width);
 //             m_qmlObject->rootObject()->setProperty("height", height);
-            m_qmlObject->rootObject()->setProperty("width", 400);
+            m_qmlObject->rootObject()->setProperty("width", 400); // FIXME: dynamic sizing
             m_qmlObject->rootObject()->setProperty("height", 300);
 
             m_compactUiObject.data()->setProperty("applet", QVariant::fromValue(m_qmlObject->rootObject()));
+
+            m_defaultRepresentation = qobject_cast<QQuickItem*>(m_qmlObject->rootObject());
+            m_defaultRepresentation->setProperty("visible", false);
+            m_defaultRepresentation->setProperty("y", 48);
+
+            qDebug() << "ST2P defaultcompactrepresentation" << m_defaultRepresentation;
+//             QQmlExpression expr(m_qmlObject->engine()->rootContext(), m_qmlObject->rootObject(), "y");
+//             QQmlProperty prop(m_qmlObject->rootObject(), "48");
+//             prop.write(expr.evaluate());
+            emit defaultRepresentationChanged();
 
             //hook m_compactUiObject size hints to this size hint
             //Here we have to use the old connect syntax, because we don't have access to the class type
@@ -937,6 +962,7 @@ void PlasmoidInterface::compactRepresentationCheck()
 
     //show the full UI
     } else {
+        qDebug() << "ST2P expanded NOW";
         m_expanded = true;
         emit expandedChanged();
 
@@ -993,8 +1019,11 @@ void PlasmoidInterface::compactRepresentationCheck()
         }
 
         //set anchors
-        QQmlExpression expr(m_qmlObject->engine()->rootContext(), m_qmlObject->rootObject(), "parent");
-        QQmlProperty prop(m_qmlObject->rootObject(), "anchors.fill");
+//         QQmlExpression expr(m_qmlObject->engine()->rootContext(), m_qmlObject->rootObject(), "parent");
+//         QQmlProperty prop(m_qmlObject->rootObject(), "anchors.fill");
+//         prop.write(expr.evaluate());
+        QQmlExpression expr(m_qmlObject->engine()->rootContext(), m_qmlObject->rootObject(), "y");
+        QQmlProperty prop(m_qmlObject->rootObject(), "48");
         prop.write(expr.evaluate());
     }
 }

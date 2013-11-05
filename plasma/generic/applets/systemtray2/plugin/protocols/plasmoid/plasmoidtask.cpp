@@ -47,6 +47,7 @@ PlasmoidTask::PlasmoidTask(QQuickItem* rootItem, const QString &packageName, con
         return;
     }
     connect(m_taskItem, &PlasmoidInterface::statusChanged, this, &PlasmoidTask::updateStatus);
+    connect(m_taskItem, &PlasmoidInterface::defaultRepresentationChanged, this, &PlasmoidTask::taskItemExpandedChanged);
     KPluginInfo info = m_taskItem->pluginInfo();
     setName(info.name());
     updateStatus();
@@ -121,6 +122,14 @@ QQuickItem* PlasmoidTask::taskItem()
 
     }
     return m_taskItem;
+}
+
+QQuickItem* PlasmoidTask::taskItemExpanded()
+{
+    if (!m_taskItem) {
+        return 0;
+    }
+    return m_taskItem->defaultRepresentation();
 }
 
 QIcon PlasmoidTask::icon() const

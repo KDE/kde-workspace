@@ -151,6 +151,8 @@ class PlasmoidInterface : public QQuickItem
 //     Q_PROPERTY(qreal implicitWidth READ implicitWidth NOTIFY implicitWidthChanged)
 //     Q_PROPERTY(qreal implicitHeight READ implicitHeight NOTIFY implicitHeightChanged)
 
+    Q_PROPERTY(QQuickItem* defaultRepresentation READ defaultRepresentation NOTIFY defaultRepresentationChanged)
+
     /**
      * If the plasmoid is in a linear layout, such as a panel, it indicates to take as much horizontal space as possible
      */
@@ -256,6 +258,8 @@ public:
     bool isExpanded() const;
     void setExpanded(bool expanded);
 
+    QQuickItem* defaultRepresentation();
+
     Plasma::Types::BackgroundHints backgroundHints() const;
     void setBackgroundHints(Plasma::Types::BackgroundHints hint);
 
@@ -306,6 +310,7 @@ Q_SIGNALS:
     void busyChanged();
     void expandedChanged();
     void screenChanged();
+    void defaultRepresentationChanged();
 
     void minimumWidthChanged();
     void minimumHeightChanged();
@@ -345,6 +350,7 @@ private:
 //UI-specific members ------------------
     QmlObject *m_qmlObject;
     QWeakPointer<QObject> m_compactUiObject;
+    QQuickItem* m_defaultRepresentation;
 
     QTimer *m_collapseTimer;
 

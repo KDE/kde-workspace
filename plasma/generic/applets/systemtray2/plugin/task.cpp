@@ -119,6 +119,11 @@ QQuickItem* Task::taskItem() const
     return 0;
 }
 
+QQuickItem* Task::taskItemExpanded() const
+{
+    return 0;
+}
+
 
 void Task::setName(QString name)
 {

@@ -33,6 +33,7 @@ Item {
     width: gridView.cellWidth
     height: gridView.cellHeight
     property int taskStatus: status
+    property Item expandedItem: taskItemExpanded
 
     Rectangle {
         anchors.fill: parent;
@@ -41,6 +42,22 @@ Item {
         color: "pink";
         visible: root.debug;
         opacity: 0.5;
+    }
+
+    onExpandedItemChanged: {
+        print("ST2P TaskDelegate Expanded changed ...");
+        if (expandedItem != undefined) {
+            print("ST2P Expanded defined ..." + expandedItem);
+        } else {
+            print("ST2P == undefined...");
+        }
+        if (expandedItem != null) {
+            print("ST2P not null...");
+        } else {
+            print("ST2P == null...");
+        }
+        root.expandedItem = expandedItem;
+        plasmoid.expanded = expandedItem != undefined;
     }
 
     PlasmaCore.IconItem {
@@ -86,6 +103,20 @@ Item {
         return "Unknown";
     }
     */
+
+    MouseArea {
+        anchors.fill: parent
+        onClicked: {
+            print("ST2B click ... " + !plasmoid.expanded);
+            plasmoid.expanded = !plasmoid.expanded;
+            //root.expandedItem = taskItemExpanded;
+            if (expandedItem != undefined) {
+                root.expandedItem = expandedItem;
+            } else {
+                root.expandedItem = undefined;
+            }
+     }
+    }
     onWidthChanged: updatePlasmoidGeometry()
     onHeightChanged: updatePlasmoidGeometry()
 

@@ -47,6 +47,7 @@ class Task : public QObject
     Q_PROPERTY(TaskType type READ type CONSTANT)
     Q_PROPERTY(QString taskId READ taskId CONSTANT)
     Q_PROPERTY(QQuickItem* taskItem READ taskItem NOTIFY taskItemChanged)
+    Q_PROPERTY(QQuickItem* taskItemExpanded READ taskItem NOTIFY taskItemExpandedChanged)
     Q_PROPERTY(Status status READ status NOTIFY changedStatus)
     Q_PROPERTY(bool shown READ shown NOTIFY shownChanged)
     Q_PROPERTY(QString name READ name NOTIFY changedName)
@@ -118,7 +119,9 @@ public:
     virtual QString taskId() const = 0;
 
     virtual QQuickItem* taskItem() const;
+    virtual QQuickItem* taskItemExpanded() const;
 
+    
     /**
      * Returns an icon that can be associated with this task
      *
@@ -172,6 +175,7 @@ Q_SIGNALS:
     void shownChanged();
 
     void taskItemChanged();
+    void taskItemExpandedChanged();
     /**
      * Special signal for changed status
      */

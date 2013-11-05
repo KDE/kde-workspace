@@ -47,6 +47,7 @@ class PlasmoidTask : public Task
     Q_PROPERTY(QString shortcut READ shortcut NOTIFY changedShortcut)
     Q_PROPERTY(QString iconName READ iconName NOTIFY iconNameChanged)
     Q_PROPERTY(QQuickItem* taskItem READ taskItem NOTIFY taskItemChanged)
+    Q_PROPERTY(QQuickItem* taskItemExpanded READ taskItemExpanded NOTIFY taskItemExpandedChanged)
 
     friend class PlasmoidProtocol;
 
@@ -58,6 +59,7 @@ public:
     bool isEmbeddable() const;
     virtual QString taskId() const;
     virtual QQuickItem* taskItem();
+    virtual QQuickItem* taskItemExpanded();
     virtual QIcon icon() const;
     virtual bool isWidget() const;
     virtual TaskType type() const { return TypePlasmoid; };
@@ -69,6 +71,7 @@ public:
 Q_SIGNALS:
     void changedShortcut();
     void taskItemChanged();
+    void taskItemExpandedChanged();
     void iconNameChanged();
 
 private Q_SLOTS:

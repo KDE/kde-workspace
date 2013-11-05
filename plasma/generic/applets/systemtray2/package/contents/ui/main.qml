@@ -38,8 +38,24 @@ Item {
 
     property bool debug: plasmoid.configuration.debug
 
+    property Item expandedItem: undefined
+
     property Component compactRepresentation: CompactRepresentation {
         systrayhost: host
+    }
+
+    onExpandedItemChanged: {
+        print("ST2P main.qml Expanded item changed ... reparenting ");
+        if (expandedItem != undefined) {
+            expandedItem.parent = expandedItemContainer;
+            expandedItem.anchors.fill = expandedItemContainer;
+            hiddenView.width = _h * 1.5;
+            expandedItemContainer.visible = true;
+        } else {
+            print("ST2P main.qml Resetting");
+            hiddenView.width = parent.width;
+            expandedItemContainer.visible = false;
+        }
     }
 
     Rectangle {
@@ -77,12 +93,13 @@ Item {
     ListView {
         id: hiddenView
         objectName: "hiddenView"
+        clip: true
 
         anchors {
             top: (loadingItem.visible && !plasmoid.expanded) ? loadingItem.bottom : parent.top
             bottom: (loadingItem.visible && !plasmoid.expanded) ? undefined : parent.bottom
             left: parent.left
-            right: parent.right
+            //right: parent.right
             //bottom: parent.bottom
         }
         spacing: 4
@@ -90,6 +107,21 @@ Item {
         model: host.hiddenTasks
 
         delegate: TaskListDelegate {}
+    }
+
+    Item {
+        id: expandedItemContainer
+//         width: parent.width
+//         height: taskListDelegate.height - labels.height
+        //x: _h * 1.2
+        //height: (expandedItem != undefined) ? expandedItem.minimumHeight : hiddenView.height
+        anchors {
+            left: hiddenView.left
+            leftMargin: _h * 1.5
+            top: hiddenView.top
+            bottom: hiddenView.bottom
+            right: parent.right
+        }
     }
 
 }

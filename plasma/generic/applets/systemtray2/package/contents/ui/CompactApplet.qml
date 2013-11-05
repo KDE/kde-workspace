@@ -24,6 +24,7 @@ import org.kde.plasma.components 2.0 as PlasmaComponents
 
 Item {
     id: root
+    objectName: "CompactApplet.qml"
 
     property int minimumWidth: compactRepresentation && compactRepresentation.minimumWidth !== undefined ? compactRepresentation.minimumWidth : -1
     property int minimumHeight: compactRepresentation && compactRepresentation.minimumHeight !== undefined ? compactRepresentation.minimumHeight : -1
@@ -42,46 +43,60 @@ Item {
     property Item compactRepresentation
 
     onAppletChanged: {
-
+        print("ST2P applet changed!");
+        print("ST2P root.objectName: " + root.objectName);
+        expandedItem = applet;
         //if the applet size was restored to a stored size, or if is dragged from the desktop, restore popup size
-        if (applet.width > 0) {
-            popupWindow.mainItem.width = applet.width;
-        }
-        if (applet.height > 0) {
-            popupWindow.mainItem.height = applet.height;
-        }
-
-        applet.parent = appletParent;
-        applet.anchors.fill = applet.parent;
+//         if (applet.width > 0) {
+//             appletParent.width = applet.width;
+//         }
+//         if (applet.height > 0) {
+//             appletParent.height = applet.height;
+//         }
+//
+//         applet.parent = appletParent;
+//         applet.anchors.fill = applet.parent;
     }
+
     onCompactRepresentationChanged: {
         compactRepresentation.parent = root
         compactRepresentation.anchors.fill = root
     }
 
 
-    PlasmaCore.Dialog {
-        id: popupWindow
-        //windowFlags: Qt.Popup
-        color: Qt.rgba(0,0,0,0)
-        visible: plasmoid.expanded
-        visualParent: root
-        mainItem: Item {
-            id: appletParent
+//     PlasmaCore.Dialog {
+//         id: popupWindow
+//         //windowFlags: Qt.Popup
+//         color: Qt.rgba(0,0,0,0)
+//         visible: plasmoid.expanded
+//         visualParent: root
+//         mainItem:
+//         Item {
+//             id: appletParent
+//             Rectangle { anchors.fill: parent; color: "orange" }
+//             visible: plasmoid.expanded
+//             onVisibleChanged: {
+//                 applet.visible = visible
+// //                 if (visible) {
+// //                     applet.parent = hiddenView;
+// //                     applet.anchors.fill = hiddenView;
+// //                 }
+//             }
+//             x: 48
+//             y: 48
+//             width: applet && applet.implicitHeight > 0 ? applet.implicitHeight : theme.mSize(theme.defaultFont).width * 35
+//             height: applet && applet.implicitHeight > 0 ? applet.implicitHeight : theme.mSize(theme.defaultFont).height * 25
+//         }
 
-            width: applet && applet.implicitHeight > 0 ? applet.implicitHeight : theme.mSize(theme.defaultFont).width * 35
-            height: applet && applet.implicitHeight > 0 ? applet.implicitHeight : theme.mSize(theme.defaultFont).height * 25
-        }
-
-        onActiveWindowChanged: {
-            if (!activeWindow) {
-               // plasmoid.expanded = false
-            }
-        }
-        onVisibleChanged: {
-            if (!visible) {
-                plasmoid.expanded = false
-            }
-        }
-    }
+//         onActiveWindowChanged: {
+//             if (!activeWindow) {
+//                // plasmoid.expanded = false
+//             }
+//         }
+//         onVisibleChanged: {
+//             if (!visible) {
+//                 plasmoid.expanded = false
+//             }
+//         }
+//     }
 }
