@@ -42,14 +42,14 @@ Item {
 
             var above = target.childAt(event.x, event.y);
 
-            if (tasks.dragSource) {
+            if (tasks.dragSource && tasks.manualSorting) {
                 if (tasks.dragSource != above && !tasks.dragSource.isLauncher
                     && !(above && "isLauncher" in above && above.isLauncher)) {
                     itemMove(tasks.dragSource.itemId,
                         TaskTools.insertionIndexAt(tasks.dragSource.itemIndex,
                             event.x, event.y));
                 }
-            } else if (above && hoveredItem != above) {
+            } else if (!tasks.dragSource && above && hoveredItem != above) {
                 hoveredItem = above;
                 activationTimer.start();
             } else if (!above) {

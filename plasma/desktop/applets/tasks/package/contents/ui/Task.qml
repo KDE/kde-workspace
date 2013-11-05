@@ -124,7 +124,7 @@ MouseEventListener {
     }
 
     onPositionChanged: {
-        if (tasks.manualSorting && pressX != -1 && dragHelper.isDrag(pressX, pressY, mouse.x, mouse.y)) {
+        if (pressX != -1 && dragHelper.isDrag(pressX, pressY, mouse.x, mouse.y)) {
             tasks.dragSource = task;
             dragHelper.startDrag(model.MimeType, model.MimeData, model.LauncherUrl, model.DecorationRole);
             pressX = -1;
