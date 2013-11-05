@@ -30,7 +30,7 @@ QtExtraComponents.MouseEventListener {
     id: compactRepresenation
 
     // TODO: vertical formfactor
-    //property int minimumWidth: (1.5 + systrayhost.shownTasks.length) * (plasmoid.configuration.itemSize + itemSpacing) + (2 * itemSpacing)
+    //property int minimumWidth: (1.5 + systrayhost.shownTasks.length) * (root.itemSize + itemSpacing) + (2 * itemSpacing)
     property int minimumWidth: !vertical ? computeDimension() : undefined
     property int minimumHeight: vertical ? computeDimension() : undefined
     property int maximumWidth: !vertical ? minimumWidth : computeDimension()
@@ -43,6 +43,7 @@ QtExtraComponents.MouseEventListener {
 
     onClicked: {
         print("ST2P MouseEventListener.clicked!")
+        print("ST2P baseSize: " + root.baseSize);
         plasmoid.expanded = !plasmoid.expanded
 
     }
@@ -112,9 +113,9 @@ QtExtraComponents.MouseEventListener {
         function gridRows() {
             var r = 0;
             if (root.vertical) {
-                r = Math.floor(parent.width / plasmoid.configuration.itemSize);
+                r = Math.floor(parent.width / root.itemSize);
             } else {
-                r = Math.floor(parent.height / plasmoid.configuration.itemSize);
+                r = Math.floor(parent.height / root.itemSize);
             }
             print("ST2 ROW: ::::::: " + r);
             return Math.max(1, r);

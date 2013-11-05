@@ -45,7 +45,7 @@ Item {
     onAppletChanged: {
         print("ST2P applet changed!");
         print("ST2P root.objectName: " + root.objectName);
-        expandedItem = applet;
+        root.expandedItem = applet;
         //if the applet size was restored to a stored size, or if is dragged from the desktop, restore popup size
 //         if (applet.width > 0) {
 //             appletParent.width = applet.width;

@@ -30,8 +30,9 @@ Item {
     id: taskItemContainer
     objectName: "taskItemContainer"
 
-    width: gridView.cellWidth
-    height: gridView.cellHeight
+    width: root.itemSize
+    height: root.itemSize + (root.smallSpacing * 2)
+
     property int taskStatus: status
     property Item expandedItem: taskItemExpanded
 
@@ -125,7 +126,7 @@ Item {
     function updatePlasmoidGeometry() {
         if (taskItem != undefined) {
 
-            var _size = Layout.alignedSize(taskItemContainer.height);
+            var _size = root.itemSize;
             var _m = (taskItemContainer.height - _size) / 2
 
             taskItem.anchors.verticalCenter = taskItem.parent.verticalCenter;
@@ -135,6 +136,7 @@ Item {
         }
     }
     Component.onCompleted: {
+        print("ST2P baseSize: " + root.baseSize);
         //print(" ST2 taskitem created: " + taskItem + " " + iconName);
         if (taskItem != undefined) {
             taskItem.parent = taskItemContainer;

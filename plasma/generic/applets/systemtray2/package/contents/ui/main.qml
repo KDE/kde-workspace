@@ -23,6 +23,7 @@ import org.kde.plasma.components 2.0 as PlasmaComponents
 import org.kde.plasma.extras 2.0 as PlasmaExtras
 
 import org.kde.private.systemtray 2.0 as SystemTray
+import "plasmapackage:/code/Layout.js" as Layout
 
 Item {
     id: root
@@ -33,12 +34,18 @@ Item {
     property int minimumWidth: 200 // just needs to run out of space in the panel ...
     property int minimumHeight: 200 // ... but not too big to screw up initial layouts
 
-    property int _h: plasmoid.configuration.itemSize
-    property int itemSpacing: 2
+    property int _h: itemSize // should go away, replace with root.baseSize
+
+    // Sizes depend on the font, and thus on DPI
+    property int baseSize: theme.mSize(theme.defaultFont).height
+    property int itemSize: Layout.alignedSize(baseSize * 2)
+    property int smallSpacing: Math.ceil(baseSize / 10)
+    property int largeSpacing: Math.ceil(baseSize / 2)
+
 
     property bool debug: plasmoid.configuration.debug
 
-    property Item expandedItem: undefined
+    property Item expandedItem: undefined // null?
 
     property Component compactRepresentation: CompactRepresentation {
         systrayhost: host
@@ -60,5 +67,9 @@ Item {
 
     ExpandedRepresentation {
         anchors.fill: parent
+    }
+
+    Component.onCompleted: {
+        print("ST2P baseSize: " + root.baseSize);
     }
 }
