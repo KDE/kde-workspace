@@ -90,9 +90,9 @@ PlasmaExtras.ConditionalLoader {
                             case Kickoff.TopEdge:
                             case Kickoff.LeftEdge:
                             case Kickoff.RightEdge:
-                                return undefined;
-                            default:
                                 return footer.top;
+                            default:
+                                return undefined;
                         }
                     }
                     right: parent.right
