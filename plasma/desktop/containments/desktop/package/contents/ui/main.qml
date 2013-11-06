@@ -143,6 +143,8 @@ DragDrop.DropArea {
 
         onAppletRemoved: {
             //clean any eventual invalid chunks in the config
+            print("Applet REMOVED!!!!!!!!!");
+            LayoutManager.removeApplet(applet);
             LayoutManager.save();
         }
     }

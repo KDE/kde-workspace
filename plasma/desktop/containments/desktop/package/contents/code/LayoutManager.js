@@ -48,7 +48,7 @@ function restore()
 
     itemsConfig = new Object();
     var configString = String(plasmoid.readConfig("ItemsGeometries"))
-    print("COnfig read from configfile: " + configString);
+    print("Config read from configfile: " + configString);
     //array, a cell for encoded item geometry
     var itemsStrings = configString.split(";")
     for (var i=0; i<itemsStrings.length; i++) {
@@ -89,7 +89,7 @@ function save()
             configString +=  idstring + ":" + rect.x + "," + rect.y + "," + rect.width + "," + rect.height + "," + rect.rotation + ";";
         }
     }
-
+    print("Applet number: " + plasmoid.applets.length);
     print("saving "+configString);
     plasmoid.writeConfig("ItemsGeometries", configString);
 }
@@ -273,8 +273,15 @@ function positionItem(item)
     saveItem(item);
 }
 
+function removeApplet(applet) {
+    // Keeps config in sync, deletion of items in the scene
+    // are handled in AppletAppearance and main.qml
+    delete itemsConfig["Applet-"+applet.id];
+    delete itemGroups["Applet-"+applet.id];
+}
+
 function saveItem(item) {
-     var rect = new Object()
+    var rect = new Object()
     rect.x = item.x
     rect.y = item.y
     rect.width = item.width

@@ -165,6 +165,16 @@ Item {
                 dragMouseArea.visible = !plasmoid.immutable;
                 showAppletHandle = false;
             }
+            onAppletRemoved: {
+                print("Applet removed Applet-" + applet.id)
+                if (applet.id == appletItem.applet.id) {
+                    print("Destroying Applet-" + applet.id)
+                    LayoutManager.setSpaceAvailable(appletItem.x, appletItem.y, appletItem.width, appletItem.height, true)
+                    //applet.action("remove").trigger();
+                    //appletItem.destroy()
+                    appletItem.destroy();
+                }
+            }
         }
         Connections {
             target: applet
