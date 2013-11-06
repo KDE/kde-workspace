@@ -35,6 +35,7 @@ Item {
 
     property int taskStatus: status
     property Item expandedItem: taskItemExpanded
+    property bool isExpanded: (taskItemExpanded != null)
     property alias icon: itemIcon
 
     Rectangle {
@@ -44,6 +45,13 @@ Item {
         color: "pink";
         visible: root.debug;
         opacity: 0.5;
+    }
+
+    onIsExpandedChanged: {
+        if (isExpanded) {
+            root.expandedItem = expandedItem
+
+        }
     }
 
     onExpandedItemChanged: {
@@ -112,7 +120,7 @@ Item {
         anchors.fill: parent
         onClicked: {
             print("ST2B click ... " + !plasmoid.expanded + root.itemSize);
-            plasmoid.expanded = !plasmoid.expanded;
+            //plasmoid.expanded = !plasmoid.expanded;
             //root.expandedItem = taskItemExpanded;
             if (expandedItem != undefined && expandedItem != null) {
                 root.expandedItem = expandedItem;

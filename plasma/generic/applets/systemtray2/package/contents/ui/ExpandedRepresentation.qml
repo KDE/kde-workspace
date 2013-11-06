@@ -26,32 +26,55 @@ import org.kde.private.systemtray 2.0 as SystemTray
 
 Item {
 
+    function checkTask(task) {
+        if (task.taskItemExpanded == null) return;
+        //if (root.expandedItem == null) return;
+
+        print("ST2P Task name " + task.name);
+        //print("ST2P Task !null " + (task.taskItemExpanded != null));
+        //print("ST2P Task !undefined " + (task.taskItemExpanded != undefined));
+        //print("ST2P Task   id " + task.taskId);
+        var isthis = (task.taskItemExpanded == root.expandedItem);
+
+        print("ST2P      samesame?? " + isthis);
+        //print("ST2P Task expanded?? " + task.expanded);
+
+        if (!isthis) {
+            print("      ----> ST2P !!!!!!!!! Collapsing ?? " + task.taskId);
+            task.expanded = false;
+        }
+    }
+    function clearExpanded() {
+        var _hidden = host.hiddenTasks;
+        for (var i = 0; i < _hidden.length; i++) {
+            checkTask(_hidden[i]);
+        }
+        var _shown = host.shownTasks;
+        for (i = 0; i < _shown.length; i++) {
+            checkTask(_shown[i]);
+
+        }
+    }
     Connections {
         target: root
         onExpandedItemChanged: {
+
+            print("ST2P main.qml =======================================");
             print("ST2P main.qml Expanded item changed ... reparenting ");
-            var _m = host.hiddenTasks;
-            for (var i = 0; i < _m.length; i++) {
-                print("ST2P Task name " + _m[i].name);
-                print("ST2P Task   id " + _m[i].id);
-                var isthis = (_m[i].taskItemExpanded == root.expandedItem);
-                print("ST2P Task samesame?? " + isthis);
-                if (isthis) {
 
-                }
-
-            }
-
-            if (expandedItem == null && plasmoid.expanded) {
+            if (root.expandedItem == null && plasmoid.expanded) {
                 //plasmoid.expanded = false;
+                //clearExpanded();
                 expandedItemContainer.clear();
             }
 
-            if (expandedItem != null) {
-                if (expandedItemContainer.currentPage != expandedItem) {
-                    expandedItemContainer.replace(expandedItem);
+            if (root.expandedItem != null) {
+                if (expandedItemContainer.currentPage != root.expandedItem) {
+                    expandedItemContainer.replace(root.expandedItem);
                 } else {
+                    expandedItemContainer.replace(root.expandedItem);
                     hiddenView.width = parent.width;
+                    //clearExpanded();
                     expandedItemContainer.clear();
                 }
                 if (!plasmoid.expanded) {
@@ -65,10 +88,11 @@ Item {
                 print("ST2P main.qml Resetting");
                 hiddenView.width = parent.width;
                 if (expandedItemContainer.currentPage == null) {
-                    plasmoid.expanded = false;
+                    //plasmoid.expanded = false;
                 }
                 expandedItemContainer.clear();
             }
+            clearExpanded();
         }
 
     }
@@ -100,6 +124,7 @@ Item {
         }
         onClicked: {
             print("ST2 Clearing on request");
+            clearExpanded();
             expandedItemContainer.clear();
             root.expandedItem = null;
             plasmoid.expanded = true;

@@ -38,75 +38,12 @@ Item {
     property bool fillWidth: compactRepresentation && compactRepresentation.fillWidth !== undefined ? compactRepresentation.fillWidth : false
     property bool fillHeight: compactRepresentation && compactRepresentation.fillHeight !== undefined ? compactRepresentation.fillHeight : false
 
-
     property Item applet
     property Item compactRepresentation
-
-    onAppletChanged: {
-        print("ST2P applet changed!");
-        print("ST2P root.objectName: " + root.objectName);
-        //root.expandedItem = applet;
-        //if the applet size was restored to a stored size, or if is dragged from the desktop, restore popup size
-//         if (applet.width > 0) {
-//             appletParent.width = applet.width;
-//         }
-//         if (applet.height > 0) {
-//             appletParent.height = applet.height;
-//         }
-//
-//         applet.parent = appletParent;
-//         applet.anchors.fill = applet.parent;
-    }
-
-//     Connections {
-//         target: applet
-//         onVisibleChanged: {
-//             print("ST2P Visible changed, collapsing?" + !visible);
-//             if (!visible) {
-//                 plasmoid.expanded = false;
-//             }
-//         }
-//     }
 
     onCompactRepresentationChanged: {
         compactRepresentation.parent = root
         compactRepresentation.anchors.fill = root
+        root.visible = true
     }
-
-
-//     PlasmaCore.Dialog {
-//         id: popupWindow
-//         //windowFlags: Qt.Popup
-//         color: Qt.rgba(0,0,0,0)
-//         visible: plasmoid.expanded
-//         visualParent: root
-//         mainItem:
-//         Item {
-//             id: appletParent
-//             Rectangle { anchors.fill: parent; color: "orange" }
-//             visible: plasmoid.expanded
-//             onVisibleChanged: {
-//                 applet.visible = visible
-// //                 if (visible) {
-// //                     applet.parent = hiddenView;
-// //                     applet.anchors.fill = hiddenView;
-// //                 }
-//             }
-//             x: 48
-//             y: 48
-//             width: applet && applet.implicitHeight > 0 ? applet.implicitHeight : theme.mSize(theme.defaultFont).width * 35
-//             height: applet && applet.implicitHeight > 0 ? applet.implicitHeight : theme.mSize(theme.defaultFont).height * 25
-//         }
-
-//         onActiveWindowChanged: {
-//             if (!activeWindow) {
-//                // plasmoid.expanded = false
-//             }
-//         }
-//         onVisibleChanged: {
-//             if (!visible) {
-//                 plasmoid.expanded = false
-//             }
-//         }
-//     }
 }

@@ -54,30 +54,15 @@ QtExtraComponents.MouseEventListener {
 
         var rows = Math.floor(dim / root.itemSize);
         var cols = Math.ceil(systrayhost.shownTasks.length / rows);
-        //var x = vertical ? compactRepresenation.width : compactRepresenation.height
-        //dim = (systrayhost.shownTasks.length) * (x + itemSpacing);
         var res = cols * (root.itemSize + root.smallSpacing) + arrow.width;
-        print("DIM itemSize : " + root.itemSize);
-        print("DIM dim : " + dim);
-        print("DIM rows : " + rows);
-        print("DIM cols : " + cols);
-        print("DIM res : " + cols);
+//         print("DIM itemSize : " + root.itemSize);
+//         print("DIM dim : " + dim);
+//         print("DIM rows : " + rows);
+//         print("DIM cols : " + cols);
+//         print("DIM res : " + cols);
 
         return res;
     }
-/*
-    function loadNotificationsPlasmoid() {
-        var plugin = "org.kde.notifications";
-        systrayhost.rootItem = gridView;
-        var notificationsPlasmoid = systrayhost.notificationsPlasmoid(plugin);
-        if (notificationsPlasmoid == null) {
-            print("Bah. Failed to load " + plugin);
-            return;
-        }
-        notificationsPlasmoid.parent = notificationsContainer;
-        notificationsPlasmoid.anchors.fill = notificationsContainer;
-    }*/
-
     function togglePopup() {
         plasmoid.expanded = !plasmoid.expanded;
     }
@@ -114,7 +99,7 @@ QtExtraComponents.MouseEventListener {
             top: parent.top
             bottom: parent.bottom
             left: parent.left
-            leftMargin: root.vertical ? 0 : itemSpacing
+            leftMargin: root.vertical ? 0 : root.smallSpacing
             right: arrow.left
         }
         cellWidth: root.itemSize
