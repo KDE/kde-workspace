@@ -399,6 +399,12 @@ bool PlasmoidInterface::isExpanded() const
     return m_expanded;
 }
 
+void PlasmoidInterface::setCollapsed()
+{
+    m_expanded = false;
+}
+
+
 void PlasmoidInterface::setExpanded(bool expanded)
 {
     //if there is no compact representation it means it's always expanded
@@ -414,7 +420,7 @@ void PlasmoidInterface::setExpanded(bool expanded)
         m_defaultRepresentation->setProperty("visible", expanded);
         //m_defaultRepresentation
     }
-    qDebug() << "ST2P expandedchanged:" << expanded;
+    qDebug() << "ST2P PI expandedchanged:" << expanded;
 
 
     emit defaultRepresentationChanged();

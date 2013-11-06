@@ -90,15 +90,20 @@ void PlasmoidTask::updateStatus()
 
 void PlasmoidTask::setExpanded(bool expanded)
 {
-    if (m_taskItem->isExpanded() != expanded) {
-        m_taskItem->setExpanded(expanded);
+    //if (m_taskItem->isExpanded() != expanded) {
+    if (!expanded) {
+        qDebug() << "ST2P collapsing applet: " << expanded;
+        //m_taskItem->setExpanded(expanded);
+        //m_taskItem->setCollapsed();
     }
     SystemTray::Task::setExpanded(expanded);
 }
 
 bool PlasmoidTask::expanded() const
 {
-    return SystemTray::Task::expanded();
+    qDebug() << "S2TP expanded " << m_taskItem->isExpanded();
+    //return SystemTray::Task::expanded();
+    return m_taskItem->isExpanded();
 }
 
 

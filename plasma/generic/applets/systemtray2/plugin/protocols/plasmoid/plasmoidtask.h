@@ -46,6 +46,7 @@ class PlasmoidTask : public Task
 
     Q_PROPERTY(QString shortcut READ shortcut NOTIFY changedShortcut)
     Q_PROPERTY(QString iconName READ iconName NOTIFY iconNameChanged)
+
     Q_PROPERTY(QQuickItem* taskItem READ taskItem NOTIFY taskItemChanged)
     Q_PROPERTY(QQuickItem* taskItemExpanded READ taskItemExpanded NOTIFY taskItemExpandedChanged)
     Q_PROPERTY(bool expanded READ expanded WRITE setExpanded NOTIFY expandedChanged)

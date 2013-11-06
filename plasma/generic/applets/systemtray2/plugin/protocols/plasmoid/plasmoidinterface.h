@@ -257,6 +257,7 @@ public:
 
     bool isExpanded() const;
     void setExpanded(bool expanded);
+    void setCollapsed();
 
     QQuickItem* defaultRepresentation();
 

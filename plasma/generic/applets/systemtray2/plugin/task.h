@@ -124,7 +124,6 @@ public:
     virtual bool expanded() const;
     virtual void setExpanded(bool expanded);
 
-    
     /**
      * Returns an icon that can be associated with this task
      *
