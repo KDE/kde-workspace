@@ -41,11 +41,12 @@ Item {
         anchors {
             verticalCenter: parent.verticalCenter
             left: parent.left
+            leftMargin: 4
         }
         height: 32
         width: 32
 
-        icon: QIcon("system-search")
+        icon: "system-search"
     }
 
     PlasmaComponents.Label {
