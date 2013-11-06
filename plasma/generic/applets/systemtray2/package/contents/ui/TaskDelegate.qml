@@ -35,6 +35,7 @@ Item {
 
     property int taskStatus: status
     property Item expandedItem: taskItemExpanded
+    property alias icon: itemIcon
 
     Rectangle {
         anchors.fill: parent;
@@ -113,10 +114,10 @@ Item {
             print("ST2B click ... " + !plasmoid.expanded + root.itemSize);
             plasmoid.expanded = !plasmoid.expanded;
             //root.expandedItem = taskItemExpanded;
-            if (expandedItem != undefined) {
+            if (expandedItem != undefined && expandedItem != null) {
                 root.expandedItem = expandedItem;
             } else {
-                root.expandedItem = undefined;
+                root.expandedItem = null;
             }
      }
     }
@@ -126,18 +127,18 @@ Item {
     function updatePlasmoidGeometry() {
         if (taskItem != undefined) {
 
-            //var _size = root.itemSize;
-            var _size = 32;
+            var _size = root.itemSize;
+            //var _size = 32;
             var _m = (taskItemContainer.height - _size) / 2
 
-            taskItem.anchors.verticalCenter = taskItem.parent.verticalCenter;
+            taskItem.anchors.verticalCenter = taskItemContainer.verticalCenter;
             taskItem.x = _m;
             taskItem.height = _size;
             taskItem.width = _size;
         }
     }
     Component.onCompleted: {
-        print("ST2P baseSize: " + root.baseSize);
+//         print("ST2P baseSize: " + root.baseSize);
         //print(" ST2 taskitem created: " + taskItem + " " + iconName);
         if (taskItem != undefined) {
             taskItem.parent = taskItemContainer;

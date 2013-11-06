@@ -30,6 +30,17 @@ Item {
         target: root
         onExpandedItemChanged: {
             print("ST2P main.qml Expanded item changed ... reparenting ");
+            var _m = host.hiddenTasks;
+            for (var i = 0; i < _m.length; i++) {
+                print("ST2P Task name " + _m[i].name);
+                print("ST2P Task   id " + _m[i].id);
+                var isthis = (_m[i].taskItemExpanded == root.expandedItem);
+                print("ST2P Task samesame?? " + isthis);
+                if (isthis) {
+
+                }
+
+            }
 
             if (expandedItem == null && plasmoid.expanded) {
                 //plasmoid.expanded = false;
@@ -80,11 +91,28 @@ Item {
         }
     }
 
+    MouseArea {
+        anchors {
+            top: parent.top
+            bottom: parent.bottom
+            left: parent.left
+            right: expandedItemContainer.left
+        }
+        onClicked: {
+            print("ST2 Clearing on request");
+            expandedItemContainer.clear();
+            root.expandedItem = null;
+            plasmoid.expanded = true;
+        }
+//         Rectangle { anchors.fill: parent; color: "orange"; opacity: 1; }
+
+    }
+
     ListView {
         id: hiddenView
         objectName: "hiddenView"
         clip: true
-
+        interactive: (contentHeight > height)
         width: parent.width
 
         anchors {
@@ -102,6 +130,27 @@ Item {
         }
     }
 
+    PlasmaCore.SvgItem {
+        id: separator
+
+        width: lineSvg.elementSize("vertical-line").width;
+        height: parent.width;
+        visible: root.expandedItem != null
+
+        anchors {
+            right: expandedItemContainer.left;
+            top: parent.right;
+            bottom: parent.bototm;
+            rightMargin: root.smallSpacing;
+        }
+        elementId: "vertical-line";
+
+        svg: PlasmaCore.Svg {
+            id: lineSvg;
+            imagePath: "widgets/line";
+        }
+    }
+
     Connections {
         target: plasmoid
         onExpandedChanged: {
@@ -116,7 +165,7 @@ Item {
         id: expandedItemContainer
         anchors {
             left: parent.left
-            leftMargin: _h * 1.2
+            leftMargin: root.itemSize + root.largeSpacing * 2
             top: parent.top
             bottom: parent.bottom
             right: parent.right

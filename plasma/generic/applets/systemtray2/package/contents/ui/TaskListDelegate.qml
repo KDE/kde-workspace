@@ -31,7 +31,7 @@ TaskDelegate {
     property bool expanded: false
 
     width: parent.width
-    height: plasmoid.configuration.itemSize
+    height: root.itemSize + root.largeSpacing
     //height: itemSize
 
 //     onExpandedItemChanged: {
@@ -46,21 +46,25 @@ TaskDelegate {
 
     }
 
-    Column {
-        id: labels
-        width: parent.width
-        height: mainLabel.height * 2
-        x: taskListDelegate.height * 1.2
+//     Column {
+//         id: labels
+//         width: parent.width
+//         height: mainLabel.height * 2
 //         anchors {
 //             //fill: parent
 //         }
-        PlasmaComponents.Label {
-            id: mainLabel
-            width: parent.width
-            visible: taskListDelegate.expanded
-            text: name
-            elide: Text.ElideRight
+    PlasmaComponents.Label {
+        id: mainLabel
+        //x: taskListDelegate.height + root.largeSpacing
+        anchors {
+            left: icon.right
+            right: parent.right
+            verticalCenter: parent.verticalCenter
         }
+        visible: taskListDelegate.expanded
+        text: name
+        elide: Text.ElideRight
+    }
 //         PlasmaComponents.Label {
 //             width: parent.width
 //             font.pointSize: theme.defaultFont.pointSize - 2
@@ -69,5 +73,5 @@ TaskDelegate {
 //             elide: Text.ElideRight
 //             clip: true
 //         }
-    }
+//    }
 }
