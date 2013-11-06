@@ -43,7 +43,7 @@ Item {
             }
         }
         elementId: "brilliant"
-        height: parent.height
+        height: qmin(implicitHeight, parent.height) //don't be bigger than the text or the logo size
         width: implicitWidth * (height / implicitHeight)
 
         anchors {
