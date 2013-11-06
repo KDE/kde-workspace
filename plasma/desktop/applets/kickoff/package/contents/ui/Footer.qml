@@ -35,7 +35,6 @@ Item {
             }
     }
 
-    //FIXME: make it not look bad
     PlasmaCore.SvgItem {
         id: brandingButton
         svg {
@@ -44,8 +43,9 @@ Item {
             }
         }
         elementId: "brilliant"
-        height: statusLabel.height
-        width: 4*height
+        height: parent.height
+        width: implicitWidth * (height / implicitHeight)
+
         anchors {
             verticalCenter: parent.verticalCenter
             left: statusLabel.right
