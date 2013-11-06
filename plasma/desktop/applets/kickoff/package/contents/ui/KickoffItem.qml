@@ -37,7 +37,7 @@ Item {
             listItem.ListView.view.model.rootIndex = listItem.ListView.view.model.modelIndex(index);
         } else {
             launcher.openUrl(model["url"]);
-            kickoff.hidePopup();
+            plasmoid.expanded = false;
         }
     }
 
