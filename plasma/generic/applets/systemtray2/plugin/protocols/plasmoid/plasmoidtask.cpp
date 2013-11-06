@@ -88,6 +88,20 @@ void PlasmoidTask::updateStatus()
     }
 }
 
+void PlasmoidTask::setExpanded(bool expanded)
+{
+    if (m_taskItem->isExpanded() != expanded) {
+        m_taskItem->setExpanded(expanded);
+    }
+    SystemTray::Task::setExpanded(expanded);
+}
+
+bool PlasmoidTask::expanded() const
+{
+    return SystemTray::Task::expanded();
+}
+
+
 bool PlasmoidTask::isValid() const
 {
     return m_valid;

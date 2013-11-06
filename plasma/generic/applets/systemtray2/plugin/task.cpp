@@ -33,7 +33,8 @@ class Task::Private
 public:
     Private()
         : status(Task::UnknownStatus),
-          category(Task::UnknownCategory)
+          category(Task::UnknownCategory),
+          expanded(false)
     {
     }
 
@@ -41,6 +42,7 @@ public:
     Task::Category category;
     QString name;
     bool shown;
+    bool expanded;
 };
 
 
@@ -61,6 +63,20 @@ void Task::emitChanged()
 {
     emit changed(this);
 }
+
+void Task::setExpanded(bool expanded)
+{
+    if (d->expanded != expanded) {
+        d->expanded = expanded;
+        emit expandedChanged();
+    }
+}
+
+bool Task::expanded() const
+{
+    return d->expanded;
+}
+
 
 void Task::setCategory(Category category)
 {
