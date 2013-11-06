@@ -32,35 +32,47 @@ Item {
     property bool fillWidth: !vertical
     property bool fillHeight: vertical
 
-    property int preferredWidth: 100
-    property int preferredHeight: 22
+    property int dim: 256
 
-    property int implicitWidth: 100
-    property int implicitHeight: 256
+    property int preferredWidth: dim
+    property int preferredHeight: dim
 
-    property int minimumWidth: 100
-    property int minimumHeight: 100
+    property int implicitWidth: dim
+    property int implicitHeight: dim
 
+    property int minimumWidth: dim
+    property int minimumHeight: dim
+
+    //
     //Rectangle { anchors.fill: parent; color: "orange"; opacity: 0.8; }
+
+    /*
     property Component compactRepresentation: Component {
-        Rectangle {
-            property bool fillWidth: !vertical
-            property bool fillHeight: vertical
+        Rectangle { color: "orange"; opacity: 1; }
 
-//             property int preferredWidth: 100
-//             property int preferredHeight: 22
+    }
+    */
+    property Component compactRepresentation: Component {
+        Item {
+            Rectangle {
+                property bool fillWidth: !vertical
+                property bool fillHeight: vertical
 
-//             property int implicitWidth: 100
-//             property int implicitHeight: 256
-            //anchors.fill: parent;
-            border.width: 2;
-            border.color: "black";
-            color: "green";
-            opacity: 0.4;
+    //             property int preferredWidth: 100
+    //             property int preferredHeight: 22
 
+    //             property int implicitWidth: 100
+    //             property int implicitHeight: 256
+    //             anchors.fill: parent;
+                border.width: 2;
+                border.color: "black";
+                color: "green";
+                opacity: 0.0;
+
+            }
             PlasmaCore.IconItem {
-                //anchors.fill: parent
-                source: "plasma"
+                anchors.centerIn: parent
+                source: "mail-unread"
             }
             MouseArea {
                 anchors.fill: parent
@@ -69,30 +81,31 @@ Item {
         }
     }
 
-
     Rectangle {
-        anchors.fill: parent;
         border.width: 2;
         border.color: "black";
         color: "blue";
-        opacity: 0.4;
+        opacity: 0.8;
+        visible: false
+        anchors.fill: parent;
+    }
 
-        PlasmaCore.IconItem {
-            anchors.fill: parent
-            source: "konqueror"
-        }
+    PlasmaCore.IconItem {
+        source: "konqueror"
+        anchors.fill: parent;
+        anchors.margins: 12
     }
 
     Component.onCompleted: {
         print("Loaded plasmoid's main.qml.");
     }
-    MouseArea {
-        anchors.fill: parent
-        onClicked: {
-            print(taskRoot.objectName + " has been clicked on.");
-            print(" Is there a plasmoid? " + plasmoid != undefined);
-            print(" Plasmoid ID: " + plasmoid.id);
-        }
-    }
+//     MouseArea {
+//         anchors.fill: parent
+//         onClicked: {
+//             print(taskRoot.objectName + " has been clicked on.");
+//             print(" Is there a plasmoid? " + plasmoid != undefined);
+//             print(" Plasmoid ID: " + plasmoid.id);
+//         }
+//     }
 }
 
