@@ -47,48 +47,14 @@ Item {
         opacity: 0.5;
     }
 
-//     onIsExpandedChanged: {
-//         //if (isExpanded) {
-// //             root.expandedItem = expandedItem
-//         //}
-//     }
-
-//     Connections {
-//         target: taskApplet
-//         onExpandedChanged: {
-//             print("Applet expansion changed to " + taskApplet.expanded )
-//         }
-//     }
-//     onTaskActiveChanged: {
-//         print("ST2B ActiveChanged... " + !taskItemContainer.expanded + taskItemContainer.expandedItem);
-//         //plasmoid.expanded = !plasmoid.expanded;
-//         //root.expandedItem = taskItemExpanded;
-//         taskItemContainer.expanded = !taskItemContainer.expanded;
-//         if (taskItemContainer.expanded) {
-//             print("Setting taskitem");
-//             root.expandedItem = taskItemContainer.expandedItem;
-//         } else {
-//             print("Setting root.expandedItem to null");
-//             root.expandedItem = null;
-//         }
-//
-//     }
-//
     onExpandedItemChanged: {
-        print("ST2P TaskDelegate Expanded changed ..." + taskId);
-        if (expandedItem != undefined) {
-            print("ST2P Expanded defined ..." + expandedItem);
-        } else {
-            print("ST2P == undefined...");
-        }
-        if (expandedItem != null) {
-            print("ST2P not null...");
-        } else {
-            print("ST2P == null...");
-        }
         if (expandedItem && root.expandedItem != expandedItem) {
             root.currentTask = taskId;
             root.expandedItem = expandedItem;
+        } else if (root.currentTask == taskId) {
+            // release
+            root.currentTask = ""
+            root.expandedItem = null;
         }
     }
 
@@ -100,7 +66,6 @@ Item {
             left: parent.left
             verticalCenter: parent.verticalCenter
         }
-        //visible: source != ""
         source: iconName != "" ? iconName : (typeof(icon) != "undefined" ? icon : "")
     }
 
@@ -108,47 +73,21 @@ Item {
         targetItem: taskItemContainer
         running: status == SystemTray.Task.NeedsAttention
     }
-    /*
-    onTaskStatusChanged: {
-        print("ST2 status changed to " + taskStatusString());
-    }
-
-    // just for debugging purposes
-    function taskStatusMnemonic() {
-        if (status == SystemTray.Task.Passive) {
-            return "--";
-        } else if (status == SystemTray.Task.Active) {
-            return "o";
-        } else if (status == SystemTray.Task.NeedsAttention) {
-            return "\o/";
-        }
-        return "??";
-    }
-    function taskStatusString() {
-        if (status == SystemTray.Task.Passive) {
-            return "Passive";
-        } else if (status == SystemTray.Task.Active) {
-            return "Active";
-        } else if (status == SystemTray.Task.NeedsAttention) {
-            return "NeedsAttention";
-        }
-        return "Unknown";
-    }
-    */
 
     MouseArea {
         anchors.fill: parent
         onClicked: {
-            print("ST2B click ... " + !taskItemContainer.expanded + taskItemContainer.expandedItem);
-            //plasmoid.expanded = !plasmoid.expanded;
-            //root.expandedItem = taskItemExpanded;
-            //taskItemContainer.expanded = !taskItemContainer.expanded;
-            if (taskItemContainer.expanded) {
+            print("ST2B TaskDelegate clicked ... " + !taskItemContainer.expanded + taskItemContainer.expandedItem);
+            if (root.currentTask == taskId) {
+                root.currentTask = 0;
+                root.expandedItem = null;
+                plasmoid.expanded = false;
+            } else if (taskItemContainer.expanded) {
                 print("Setting taskitem");
                 root.currentTask = taskId;
                 root.expandedItem = taskItemContainer.expandedItem;
             } else {
-                print("Setting taskitem");
+                print("resetting taskitem");
                 root.currentTask = "";
                 root.expandedItem = null;
             }
@@ -161,7 +100,6 @@ Item {
         if (taskItem != undefined) {
 
             var _size = root.itemSize;
-            //var _size = 32;
             var _m = (taskItemContainer.height - _size) / 2
 
             taskItem.anchors.verticalCenter = taskItemContainer.verticalCenter;
@@ -171,8 +109,6 @@ Item {
         }
     }
     Component.onCompleted: {
-//         print("ST2P baseSize: " + root.baseSize);
-        //print(" ST2 taskitem created: " + taskItem + " " + iconName);
         if (taskItem != undefined) {
             taskItem.parent = taskItemContainer;
             updatePlasmoidGeometry();

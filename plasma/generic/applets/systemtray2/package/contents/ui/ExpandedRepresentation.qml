@@ -140,6 +140,7 @@ Item {
             print("ST2 Clearing on request");
             clearExpanded();
             expandedItemContainer.clear();
+            root.currentTask = ""
             root.expandedItem = null;
             //plasmoid.expanded = true;
         }
@@ -164,9 +165,7 @@ Item {
 
         model: host.hiddenTasks
 
-        delegate: TaskListDelegate {
-            //expanded: (root.expandedItem == null)
-        }
+        delegate: TaskListDelegate {}
     }
 
     PlasmaCore.SvgItem {

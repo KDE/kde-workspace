@@ -28,7 +28,7 @@ TaskDelegate {
     id: taskListDelegate
     objectName: "taskListDelegate"
 
-    property bool expanded: false
+    property bool expanded: (root.currentTask == "")
 
     width: parent.width
     height: root.itemSize + root.largeSpacing

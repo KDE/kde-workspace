@@ -49,8 +49,19 @@ QtExtraComponents.MouseEventListener {
     onClicked: {
         print("ST2P MouseEventListener.clicked!")
         print("ST2P baseSize: " + root.baseSize);
-        if (!plasmoid.expanded) {
-            togglePopup();
+        togglePopup();
+    }
+
+    Timer {
+        id: hidePopupTimer
+        interval: 10
+        running: false
+        repeat: false
+        onTriggered: {
+            print("hidetimer triggered, collapsing " + (root.currentTask == "") )
+            if (root.currentTask == "") {
+                plasmoid.expanded = false
+            }
         }
     }
 
@@ -71,12 +82,23 @@ QtExtraComponents.MouseEventListener {
     }
     function togglePopup() {
         print("toggle popup => " + !plasmoid.expanded);
-        plasmoid.expanded = !plasmoid.expanded;
+        if (!plasmoid.expanded) {
+            plasmoid.expanded = true
+        } else {
+            hidePopupTimer.start();
+        }
+        //plasmoid.expanded = !plasmoid.expanded;
     }
 
     MouseArea {
-        anchors.fill: arrow
-        onClicked: togglePopup()
+        anchors.fill: parent
+        onClicked: {
+            print("Empty clicked => " + !plasmoid.expanded)
+            plasmoid.expanded = true;
+            root.currentTask = "";
+            root.expandedItem = null
+        }
+        //visible: plasmoid.expanded
         onPressed: PlasmaExtras.PressedAnimation { targetItem: arrow }
         onReleased: PlasmaExtras.ReleasedAnimation { targetItem: arrow }
     }

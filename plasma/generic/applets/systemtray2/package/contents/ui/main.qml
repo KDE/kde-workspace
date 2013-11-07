@@ -42,7 +42,6 @@ Item {
     property int smallSpacing: Math.ceil(baseSize / 10)
     property int largeSpacing: Math.ceil(baseSize / 2)
 
-
     property bool debug: plasmoid.configuration.debug
 
     property Item expandedItem: undefined // null?
