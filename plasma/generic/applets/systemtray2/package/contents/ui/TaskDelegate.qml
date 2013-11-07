@@ -21,18 +21,21 @@ import QtQuick 2.0
 import org.kde.plasma.core 2.0 as PlasmaCore
 import org.kde.plasma.components 2.0 as PlasmaComponents
 import org.kde.plasma.extras 2.0 as PlasmaExtras
+import org.kde.qtextracomponents 2.0 as QtExtraComponents
 
 import org.kde.private.systemtray 2.0 as SystemTray
 import "plasmapackage:/code/Layout.js" as Layout
 
 
-Item {
+QtExtraComponents.MouseEventListener {
     id: taskItemContainer
     objectName: "taskItemContainer"
 
     width: root.itemSize
     height: root.itemSize + (root.smallSpacing * 2)
-    opacity: (!plasmoid.expanded || root.currentTask == taskId) || (plasmoid.expanded && root.currentTask == "") ? 1.0 : 0.6
+
+    hoverEnabled: true
+    opacity: (containsMouse || !plasmoid.expanded || root.currentTask == taskId) || (plasmoid.expanded && root.currentTask == "") ? 1.0 : 0.6
     Behavior on opacity { NumberAnimation { duration: 150 } }
 
     property int taskStatus: status
