@@ -209,6 +209,10 @@ int TasksModel::activeTaskId(TaskGroup *group) const
             }
         } else if (item->itemType() == GroupItemType) {
             id = activeTaskId(static_cast<TaskGroup *>(item));
+
+            if (id > -1) {
+                break;
+            }
         }
     }
 
