@@ -35,11 +35,15 @@ QtExtraComponents.MouseEventListener {
     height: root.itemSize + (root.smallSpacing * 2)
 
     hoverEnabled: true
+
+    // opacity is raised when: plasmoid is collapsed, we are the current task, or it's hovered
     opacity: (containsMouse || !plasmoid.expanded || root.currentTask == taskId) || (plasmoid.expanded && root.currentTask == "") ? 1.0 : 0.6
     Behavior on opacity { NumberAnimation { duration: 150 } }
 
     property int taskStatus: status
+    property int taskType: type
     property Item expandedItem: taskItemExpanded
+    property Item expandedStatusItem: null
     property alias icon: itemIcon
 
     Rectangle {
@@ -49,6 +53,21 @@ QtExtraComponents.MouseEventListener {
         color: "pink";
         visible: root.debug;
         opacity: 0.5;
+    }
+
+    Component {
+        id: exandedStatusItemComponent
+        Item {
+            Rectangle {
+                anchors.fill: parent;
+                border.width: 1;
+                border.color: "black";
+                color: "green";
+                visible: root.debug;
+                opacity: 0.7;
+            }
+
+        }
     }
 
     onExpandedItemChanged: {
@@ -86,7 +105,7 @@ QtExtraComponents.MouseEventListener {
                 root.currentTask = 0;
                 root.expandedItem = null;
                 plasmoid.expanded = false;
-            } else if (taskItemContainer.expanded) {
+            } else if (taskItemContainer.expanded || taskItemContainer.taskStatus == SystemTray.Task.TypeStatusItem) {
                 print("Setting taskitem");
                 root.currentTask = taskId;
                 root.expandedItem = taskItemContainer.expandedItem;
@@ -112,8 +131,17 @@ QtExtraComponents.MouseEventListener {
             taskItem.width = _size;
         }
     }
+
     Component.onCompleted: {
-        if (taskItem != undefined) {
+        if (taskType == SystemTray.Task.TypeStatusItem) {
+            var component = Qt.createComponent("ExpandedStatusNotifier.qml");
+            if (component.status == Component.Ready) {
+                print("ST2P Loading STatusItemExpanded: ");
+                expandedItem = component.createObject(taskItemContainer, {"x": 300, "y": 300});
+            } else {
+                print("Error loading statusitem: " + component.errorString());
+            }
+        } else if (taskItem != undefined) {
             taskItem.parent = taskItemContainer;
             updatePlasmoidGeometry();
         }

@@ -33,10 +33,10 @@ TaskDelegate {
     width: parent.width
     height: root.itemSize + root.largeSpacing
 
-    MouseArea {
-        anchors.fill: parent
-
-    }
+//     MouseArea {
+//         anchors.fill: parent
+//
+//     }
 
     PlasmaComponents.Label {
         id: mainLabel
