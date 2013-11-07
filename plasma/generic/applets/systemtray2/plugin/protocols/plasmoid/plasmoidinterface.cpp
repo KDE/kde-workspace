@@ -396,7 +396,7 @@ void PlasmoidInterface::setExpanded(bool expanded)
     if (m_expanded != expanded) {
         m_expanded = expanded;
         //m_defaultRepresentation = 0;
-        m_defaultRepresentation->setProperty("visible", expanded);
+        QTimer::singleShot(500, this, SLOT(hideDefaultRepresenation()));
         qDebug() << "ST2P PI expandedItem (visible):" << m_plugin << expanded;
 
         emit expandedChanged();
@@ -408,6 +408,13 @@ void PlasmoidInterface::setExpanded(bool expanded)
 
 
 }
+void PlasmoidInterface::hideDefaultRepresenation()
+{
+    m_defaultRepresentation->setProperty("visible", m_expanded);
+}
+
+
+
 
 Plasma::Types::BackgroundHints PlasmoidInterface::backgroundHints() const
 {

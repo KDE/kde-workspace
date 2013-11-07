@@ -335,6 +335,7 @@ protected Q_SLOTS:
 private Q_SLOTS:
     void compactRepresentationCheck();
     void updatePopupSize();
+    void hideDefaultRepresenation();
 
 private:
     //Helper for minimumWidth etc.

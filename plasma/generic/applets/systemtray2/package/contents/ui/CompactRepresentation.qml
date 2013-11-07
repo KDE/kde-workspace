@@ -29,8 +29,6 @@ import org.kde.private.systemtray 2.0 as SystemTray
 QtExtraComponents.MouseEventListener {
     id: compactRepresenation
 
-    // TODO: vertical formfactor
-    //property int minimumWidth: (1.5 + systrayhost.shownTasks.length) * (root.itemSize + itemSpacing) + (2 * itemSpacing)
     property int minimumWidth: !vertical ? computeDimension() : undefined
     property int minimumHeight: vertical ? computeDimension() : undefined
     property int maximumWidth: !vertical ? minimumWidth : computeDimension()
@@ -41,16 +39,12 @@ QtExtraComponents.MouseEventListener {
 
     property QtObject systrayhost: undefined
 
-
-    onPressed: {
-//         print("ST2P MouseEventListener.pressed!")
-    }
-
     onClicked: {
         print("ST2P MouseEventListener.clicked!")
-        print("ST2P baseSize: " + root.baseSize);
         togglePopup();
     }
+    onPressed: PlasmaExtras.PressedAnimation { targetItem: arrow }
+    onReleased: PlasmaExtras.ReleasedAnimation { targetItem: arrow }
 
     Timer {
         id: hidePopupTimer
@@ -66,20 +60,13 @@ QtExtraComponents.MouseEventListener {
     }
 
     function computeDimension() {
-
         var dim = root.vertical ? compactRepresenation.width : compactRepresenation.height
-
         var rows = Math.floor(dim / root.itemSize);
         var cols = Math.ceil(systrayhost.shownTasks.length / rows);
         var res = cols * (root.itemSize + root.smallSpacing) + arrow.width;
-//         print("DIM itemSize : " + root.itemSize);
-//         print("DIM dim : " + dim);
-//         print("DIM rows : " + rows);
-//         print("DIM cols : " + cols);
-//         print("DIM res : " + cols);
-
         return res;
     }
+
     function togglePopup() {
         print("toggle popup => " + !plasmoid.expanded);
         if (!plasmoid.expanded) {
@@ -87,7 +74,6 @@ QtExtraComponents.MouseEventListener {
         } else {
             hidePopupTimer.start();
         }
-        //plasmoid.expanded = !plasmoid.expanded;
     }
 
     MouseArea {
@@ -98,9 +84,6 @@ QtExtraComponents.MouseEventListener {
             root.currentTask = "";
             root.expandedItem = null
         }
-        //visible: plasmoid.expanded
-        onPressed: PlasmaExtras.PressedAnimation { targetItem: arrow }
-        onReleased: PlasmaExtras.ReleasedAnimation { targetItem: arrow }
     }
 
     Rectangle {
@@ -133,18 +116,6 @@ QtExtraComponents.MouseEventListener {
         }
         cellWidth: root.itemSize
         cellHeight: cellWidth
-/*
-        function gridRows() {
-            var r = 0;
-            if (root.vertical) {
-                r = Math.floor(parent.width / root.itemSize);
-            } else {
-                r = Math.floor(parent.height / root.itemSize);
-            }
-            print("ST2 ROW: ::::::: " + r);
-            return Math.max(1, r);
-
-        }*/
         interactive: false
 
         model: systrayhost.shownTasks
@@ -160,7 +131,6 @@ QtExtraComponents.MouseEventListener {
         anchors {
             leftMargin: root.smallSpacing
             right: parent.right
-            //verticalCenter: notificationsContainer.verticalCenter
         }
         width: Math.floor(root.itemSize / 2)
         height: width
@@ -168,20 +138,12 @@ QtExtraComponents.MouseEventListener {
         svg: PlasmaCore.Svg { imagePath: "widgets/arrows" }
         elementId: {
             // FIXME : Account for top, bottom, left, right
+            var exp = plasmoid.expanded; // flip for bottom edge and right edge
+            // ...
             if (!vertical) {
-                if (plasmoid.expanded) {
-                    return "up-arrow";
-                } else {
-                    return "down-arrow";
-
-                }
+                return (exp) ? "up-arrow" : "down-arrow"
             } else {
-                if (plasmoid.expanded) {
-                    return "left-arrow";
-                } else {
-                    return "right-arrow";
-
-                }
+                return (exp) ? "left-arrow" : "right-arrow"
             }
         }
     }

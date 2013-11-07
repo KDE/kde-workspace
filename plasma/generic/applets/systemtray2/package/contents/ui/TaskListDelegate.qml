@@ -32,46 +32,24 @@ TaskDelegate {
 
     width: parent.width
     height: root.itemSize + root.largeSpacing
-    //height: itemSize
-
-//     onExpandedItemChanged: {
-//         print("ST2P TaskDelegate Expanded changed ...");
-//         if (expandedItem != undefined) {
-// //             expandedItem.anchors.fill = expandedItemContainer;
-//         }
-//     }
 
     MouseArea {
         anchors.fill: parent
 
     }
 
-//     Column {
-//         id: labels
-//         width: parent.width
-//         height: mainLabel.height * 2
-//         anchors {
-//             //fill: parent
-//         }
     PlasmaComponents.Label {
         id: mainLabel
-        //x: taskListDelegate.height + root.largeSpacing
+
         anchors {
             left: icon.right
             right: parent.right
             verticalCenter: parent.verticalCenter
         }
-        visible: taskListDelegate.expanded
+        opacity: taskListDelegate.expanded ? 1 : 0
+        Behavior on opacity { NumberAnimation { duration: 250 } }
+        //visible: taskListDelegate.expanded
         text: name
         elide: Text.ElideRight
     }
-//         PlasmaComponents.Label {
-//             width: parent.width
-//             font.pointSize: theme.defaultFont.pointSize - 2
-//             opacity: 0.7
-//             text: tooltipTitle + "<br />" + tooltipText
-//             elide: Text.ElideRight
-//             clip: true
-//         }
-//    }
 }

@@ -34,6 +34,10 @@ Item {
     property int minimumWidth: 200 // just needs to run out of space in the panel ...
     property int minimumHeight: 200 // ... but not too big to screw up initial layouts
 
+    property int implicitWidth: baseSize * 25
+    property int implicitHeight: baseSize * 20
+
+
     property int _h: itemSize // should go away, replace with root.baseSize
 
     // Sizes depend on the font, and thus on DPI
@@ -44,7 +48,7 @@ Item {
 
     property bool debug: plasmoid.configuration.debug
 
-    property Item expandedItem: undefined // null?
+    property Item expandedItem: null
     property string currentTask: ""
 
     property Component compactRepresentation: CompactRepresentation {
@@ -67,9 +71,5 @@ Item {
 
     ExpandedRepresentation {
         anchors.fill: parent
-    }
-
-    Component.onCompleted: {
-        print("ST2P baseSize: " + root.baseSize);
     }
 }
