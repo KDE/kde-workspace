@@ -115,11 +115,10 @@ PlasmoidInterface::~PlasmoidInterface()
 
 QQuickItem* PlasmoidInterface::defaultRepresentation()
 {
-    if (m_expanded) {
-        return m_defaultRepresentation;
-    } else {
+    if (!m_expanded) {
         return 0;
     }
+    return m_defaultRepresentation;
 }
 
 KPluginInfo PlasmoidInterface::pluginInfo() const
@@ -146,16 +145,6 @@ void PlasmoidInterface::init()
 
     QQmlEngine *engine = m_qmlObject->engine();
 
-    //m_m_qmlObject->setSource(QUrl::fromLocalFile(m_appletScriptEngine->mainScript()));
-    //m_qmlObject->setSource(QUrl("/home/sebas/kf5/install/share/plasma/plasmoids/org.kde.systrayplasmoidtest/contents/ui/main.qml"));
-
-    //Plasma::Package pkg = Plasma::PluginLoader::self()->loadPackage("Plasma/Applet");
-
-    //QString p = findPackageRoot("org.kde.microblog-qml", "plasma/plasmoids/");
-    //pkg.setDefaultPackageRoot(d->packageRoot);
-
-    //pkg.setPath(plugin);
-
     //Hook generic url resolution to the applet package as well
     //TODO: same thing will have to be done for every qqmlengine: PackageUrlInterceptor is material for plasmaquick?
     engine->setUrlInterceptor(new PackageUrlInterceptor(engine, pkg));
@@ -174,13 +163,6 @@ void PlasmoidInterface::init()
         return;
     }
     m_pluginInfo = i;
-//     qDebug() << (i18n("Showing info for package: %1", m_plugin));
-//     qDebug() << (i18n("      Name : %1", i.name()));
-//     qDebug() << (i18n("   Comment : %1", i.comment()));
-//     qDebug() << (i18n("    Plugin : %1", i.pluginName()));
-//     qDebug() << (i18n("    Author : %1", i.author()));
-//     qDebug() << (i18n("      Path : %1", pkg.path()));
-//     qDebug() << "mainScript:" << mainScript;
 
     if (!m_qmlObject->engine() || !m_qmlObject->engine()->rootContext() || !m_qmlObject->engine()->rootContext()->isValid() || m_qmlObject->mainComponent()->isError()) {
         QString reason;
@@ -193,7 +175,6 @@ void PlasmoidInterface::init()
 
         m_qmlObject->setSource(appletError);
         m_qmlObject->completeInitialization();
-
 
         //even the error message QML may fail
         if (m_qmlObject->mainComponent()->isError()) {
@@ -415,15 +396,17 @@ void PlasmoidInterface::setExpanded(bool expanded)
     if (m_expanded != expanded) {
         m_expanded = expanded;
         //m_defaultRepresentation = 0;
-        emit expandedChanged();
-        emit defaultRepresentationChanged();
         m_defaultRepresentation->setProperty("visible", expanded);
+        qDebug() << "ST2P PI expandedItem (visible):" << m_plugin << expanded;
+
+        emit expandedChanged();
+        //emit defaultRepresentationChanged();
+        //m_defaultRepresentation->setProperty("visible", expanded);
         //m_defaultRepresentation
+        emit defaultRepresentationChanged();
     }
-    qDebug() << "ST2P PI expandedchanged:" << expanded;
 
 
-    emit defaultRepresentationChanged();
 }
 
 Plasma::Types::BackgroundHints PlasmoidInterface::backgroundHints() const
@@ -909,10 +892,10 @@ void PlasmoidInterface::compactRepresentationCheck()
             m_compactUiObject.data()->setProperty("applet", QVariant::fromValue(m_qmlObject->rootObject()));
 
             m_defaultRepresentation = qobject_cast<QQuickItem*>(m_qmlObject->rootObject());
-            m_defaultRepresentation->setProperty("visible", false);
+            m_defaultRepresentation->setProperty("visible", m_expanded);
             m_defaultRepresentation->setProperty("y", 48);
 
-            qDebug() << "ST2P defaultcompactrepresentation" << m_defaultRepresentation;
+            qDebug() << "ST2P defaultRepresentation" << m_defaultRepresentation;
 //             QQmlExpression expr(m_qmlObject->engine()->rootContext(), m_qmlObject->rootObject(), "y");
 //             QQmlProperty prop(m_qmlObject->rootObject(), "48");
 //             prop.write(expr.evaluate());
@@ -965,6 +948,7 @@ void PlasmoidInterface::compactRepresentationCheck()
             emit implicitHeightChanged();
             emit maximumWidthChanged();
             emit maximumHeightChanged();
+            emit defaultRepresentationChanged();
         //failed to create UI, don't do anything, return in expanded status
         } else {
             m_expanded = true;

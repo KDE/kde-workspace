@@ -46,6 +46,7 @@ Item {
     property bool debug: plasmoid.configuration.debug
 
     property Item expandedItem: undefined // null?
+    property string currentTask: ""
 
     property Component compactRepresentation: CompactRepresentation {
         systrayhost: host

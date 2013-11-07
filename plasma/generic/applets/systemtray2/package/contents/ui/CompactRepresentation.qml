@@ -41,11 +41,17 @@ QtExtraComponents.MouseEventListener {
 
     property QtObject systrayhost: undefined
 
+
+    onPressed: {
+//         print("ST2P MouseEventListener.pressed!")
+    }
+
     onClicked: {
         print("ST2P MouseEventListener.clicked!")
         print("ST2P baseSize: " + root.baseSize);
-        plasmoid.expanded = !plasmoid.expanded
-
+        if (!plasmoid.expanded) {
+            togglePopup();
+        }
     }
 
     function computeDimension() {
@@ -64,11 +70,12 @@ QtExtraComponents.MouseEventListener {
         return res;
     }
     function togglePopup() {
+        print("toggle popup => " + !plasmoid.expanded);
         plasmoid.expanded = !plasmoid.expanded;
     }
 
     MouseArea {
-        anchors.fill: parent
+        anchors.fill: arrow
         onClicked: togglePopup()
         onPressed: PlasmaExtras.PressedAnimation { targetItem: arrow }
         onReleased: PlasmaExtras.ReleasedAnimation { targetItem: arrow }

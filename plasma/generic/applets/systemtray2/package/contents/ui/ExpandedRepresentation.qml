@@ -30,18 +30,22 @@ Item {
         if (task.taskItemExpanded == null) return;
         //if (root.expandedItem == null) return;
 
-        print("ST2P Task name " + task.name);
+//         print("ST2P Task name " + task.name);
         //print("ST2P Task !null " + (task.taskItemExpanded != null));
         //print("ST2P Task !undefined " + (task.taskItemExpanded != undefined));
         //print("ST2P Task   id " + task.taskId);
-        var isthis = (task.taskItemExpanded == root.expandedItem);
+        var isthis = (task.taskId == root.currentTask);
 
-        print("ST2P      samesame?? " + isthis);
+//        print("ST2P      samesame?? " + isthis);
         //print("ST2P Task expanded?? " + task.expanded);
+        print("ST2P Checking Task name " + task.taskId + " this? " + isthis);
 
         if (!isthis) {
-            print("      ----> ST2P !!!!!!!!! Collapsing ?? " + task.taskId);
+            print("             ----> ST2P !!!!!!!!! Collapsing ?? " + task.taskId);
             task.expanded = false;
+            //task.taskItemExpanded.opacity = 0.1
+        } else {
+            //task.taskItemExpanded.opacity = 1
         }
     }
     function clearExpanded() {
@@ -57,40 +61,50 @@ Item {
     }
     Connections {
         target: root
+        onCurrentTaskChanged: print("Current Task now: " + root.currentTask);
         onExpandedItemChanged: {
 
             print("ST2P main.qml =======================================");
-            print("ST2P main.qml Expanded item changed ... reparenting ");
+            print("ST2P main.qml Expanded item changed ... reparenting " + root.currentTask);
 
-            if (root.expandedItem == null && plasmoid.expanded) {
-                //plasmoid.expanded = false;
-                //clearExpanded();
-                expandedItemContainer.clear();
-            }
+//             if (root.expandedItem == null && plasmoid.expanded) {
+//                 //plasmoid.expanded = false;
+//                 //clearExpanded();
+//                 expandedItemContainer.clear();
+//             }
 
             if (root.expandedItem != null) {
+                print("not null");
+
+                root.expandedItem.parent = expandedItemContainer;
+                root.expandedItem.anchors.fill = expandedItemContainer;
+                //expandedItemContainer.currentPage.opacity = 0.2
+                expandedItemContainer.replace(root.expandedItem);
+                //expandedItemContainer.currentPage.opacity = 1
                 if (expandedItemContainer.currentPage != root.expandedItem) {
-                    expandedItemContainer.replace(root.expandedItem);
+                    //expandedItemContainer.replace(root.expandedItem);
                 } else {
-                    expandedItemContainer.replace(root.expandedItem);
-                    hiddenView.width = parent.width;
+                    //expandedItemContainer.replace(root.expandedItem);
+                    //hiddenView.width = parent.width;
                     //clearExpanded();
-                    expandedItemContainer.clear();
+                    //expandedItemContainer.clear();
                 }
-                if (!plasmoid.expanded) {
-                    hiddenView.width = _h * 2;
-                    plasmoid.expanded = true;
-                }
+                //if (!plasmoid.expanded) {
+//                    hiddenView.width = _h * 2;
+                    //plasmoid.expanded = true;
+                //}
             } else {
+                print("null");
     //             if (plasmoid.expanded) {
     //                 plasmoid.expanded = false;
     //             }
                 print("ST2P main.qml Resetting");
-                hiddenView.width = parent.width;
-                if (expandedItemContainer.currentPage == null) {
+                //hiddenView.width = parent.width;
+                if (expandedItemContainer.currentPage != null) {
                     //plasmoid.expanded = false;
+                    expandedItemContainer.clear();
                 }
-                expandedItemContainer.clear();
+                root.currentTask = "";
             }
             clearExpanded();
         }
@@ -127,7 +141,7 @@ Item {
             clearExpanded();
             expandedItemContainer.clear();
             root.expandedItem = null;
-            plasmoid.expanded = true;
+            //plasmoid.expanded = true;
         }
 //         Rectangle { anchors.fill: parent; color: "orange"; opacity: 1; }
 
@@ -151,7 +165,7 @@ Item {
         model: host.hiddenTasks
 
         delegate: TaskListDelegate {
-            expanded: (root.expandedItem == null)
+            //expanded: (root.expandedItem == null)
         }
     }
 
@@ -180,9 +194,11 @@ Item {
         target: plasmoid
         onExpandedChanged: {
             if (!plasmoid.expanded) {
-                //root.expandedItem = undefined;
-                //expandedItemContainer.clear();
+                root.expandedItem = null;
+                expandedItemContainer.clear();
+                root.currentTask = "";
             }
+            clearExpanded();
         }
     }
 

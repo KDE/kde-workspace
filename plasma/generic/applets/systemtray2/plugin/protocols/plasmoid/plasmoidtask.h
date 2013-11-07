@@ -49,7 +49,7 @@ class PlasmoidTask : public Task
 
     Q_PROPERTY(QQuickItem* taskItem READ taskItem NOTIFY taskItemChanged)
     Q_PROPERTY(QQuickItem* taskItemExpanded READ taskItemExpanded NOTIFY taskItemExpandedChanged)
-    Q_PROPERTY(bool expanded READ expanded WRITE setExpanded NOTIFY expandedChanged)
+    Q_PROPERTY(bool opened READ expanded WRITE setExpanded NOTIFY expandedChanged)
 
     friend class PlasmoidProtocol;
 

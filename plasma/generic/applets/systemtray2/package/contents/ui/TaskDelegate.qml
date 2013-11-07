@@ -35,7 +35,7 @@ Item {
 
     property int taskStatus: status
     property Item expandedItem: taskItemExpanded
-    property bool isExpanded: (taskItemExpanded != null)
+//     property bool taskApplet: applet
     property alias icon: itemIcon
 
     Rectangle {
@@ -47,15 +47,35 @@ Item {
         opacity: 0.5;
     }
 
-    onIsExpandedChanged: {
-        if (isExpanded) {
-            root.expandedItem = expandedItem
+//     onIsExpandedChanged: {
+//         //if (isExpanded) {
+// //             root.expandedItem = expandedItem
+//         //}
+//     }
 
-        }
-    }
-
+//     Connections {
+//         target: taskApplet
+//         onExpandedChanged: {
+//             print("Applet expansion changed to " + taskApplet.expanded )
+//         }
+//     }
+//     onTaskActiveChanged: {
+//         print("ST2B ActiveChanged... " + !taskItemContainer.expanded + taskItemContainer.expandedItem);
+//         //plasmoid.expanded = !plasmoid.expanded;
+//         //root.expandedItem = taskItemExpanded;
+//         taskItemContainer.expanded = !taskItemContainer.expanded;
+//         if (taskItemContainer.expanded) {
+//             print("Setting taskitem");
+//             root.expandedItem = taskItemContainer.expandedItem;
+//         } else {
+//             print("Setting root.expandedItem to null");
+//             root.expandedItem = null;
+//         }
+//
+//     }
+//
     onExpandedItemChanged: {
-        print("ST2P TaskDelegate Expanded changed ...");
+        print("ST2P TaskDelegate Expanded changed ..." + taskId);
         if (expandedItem != undefined) {
             print("ST2P Expanded defined ..." + expandedItem);
         } else {
@@ -66,10 +86,10 @@ Item {
         } else {
             print("ST2P == null...");
         }
-//         if (root.expandedItem != expandedItem) {
-//             root.expandedItem.visible = false;
-//         }
-        root.expandedItem = expandedItem;
+        if (expandedItem && root.expandedItem != expandedItem) {
+            root.currentTask = taskId;
+            root.expandedItem = expandedItem;
+        }
     }
 
     PlasmaCore.IconItem {
@@ -119,15 +139,20 @@ Item {
     MouseArea {
         anchors.fill: parent
         onClicked: {
-            print("ST2B click ... " + !plasmoid.expanded + root.itemSize);
+            print("ST2B click ... " + !taskItemContainer.expanded + taskItemContainer.expandedItem);
             //plasmoid.expanded = !plasmoid.expanded;
             //root.expandedItem = taskItemExpanded;
-            if (expandedItem != undefined && expandedItem != null) {
-                root.expandedItem = expandedItem;
+            //taskItemContainer.expanded = !taskItemContainer.expanded;
+            if (taskItemContainer.expanded) {
+                print("Setting taskitem");
+                root.currentTask = taskId;
+                root.expandedItem = taskItemContainer.expandedItem;
             } else {
+                print("Setting taskitem");
+                root.currentTask = "";
                 root.expandedItem = null;
             }
-     }
+        }
     }
     onWidthChanged: updatePlasmoidGeometry()
     onHeightChanged: updatePlasmoidGeometry()
