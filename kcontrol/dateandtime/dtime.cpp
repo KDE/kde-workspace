@@ -126,11 +126,11 @@ void Dtime::currentZone()
 
     if (localZone.abbreviations().isEmpty()) {
         m_local->setText(i18nc("%1 is name of time zone", "Current local time zone: %1",
-                              KTimeZoneWidget::displayName(localZone)));
+                              K4TimeZoneWidget::displayName(localZone)));
     } else {
         m_local->setText(i18nc("%1 is name of time zone, %2 is its abbreviation",
                                "Current local time zone: %1 (%2)",
-                              KTimeZoneWidget::displayName(localZone),
+                              K4TimeZoneWidget::displayName(localZone),
                               QString::fromUtf8(localZone.abbreviations().first())));
     }
 }

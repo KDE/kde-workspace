@@ -157,7 +157,7 @@
         </widget>
        </item>
        <item>
-        <widget class="KTimeZoneWidget" name="tzonelist">
+        <widget class="K4TimeZoneWidget" name="tzonelist">
         </widget>
        </item>
       </layout>
@@ -168,9 +168,9 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>KTimeZoneWidget</class>
+   <class>K4TimeZoneWidget</class>
    <extends>QTreeWidget</extends>
-   <header>ktimezonewidget.h</header>
+   <header>k4timezonewidget.h</header>
   </customwidget>
   <customwidget>
    <class>KTreeWidgetSearchLine</class>
