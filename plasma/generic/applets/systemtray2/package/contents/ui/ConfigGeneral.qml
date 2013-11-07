@@ -83,6 +83,7 @@ Item {
         }
         return ix;
     }
+
     SystemTray.Host {
         id: host
     }
@@ -166,6 +167,15 @@ Item {
                         ListElement { text: "Auto"; val: 1 }
                         ListElement { text: "Shown"; val: 2 }
                         ListElement { text: "Hidden"; val: 0 }
+                    }
+                    onCurrentIndexChanged {
+                        if (index == 0) {
+                            print(name + "Now Hidden")
+                        } else if (index == 1) {
+                            print(name + "Now Auto")
+                        } else {
+                            print(name + "Now Shown")
+                        }
                     }
                     width: 200
                     onCurrentIndexChanged: console.debug(cbItems.get(currentIndex).text + ", " + cbItems.get(currentIndex).val)

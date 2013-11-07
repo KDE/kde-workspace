@@ -18,6 +18,12 @@
     <entry name="extraItems" type="StringList">
       <default></default>
     </entry>
+    <entry name="hiddenItems" type="StringList">
+      <default></default>
+    </entry>
+    <entry name="shownItems" type="StringList">
+      <default></default>
+    </entry>
   </group>
 
 </kcfg>
