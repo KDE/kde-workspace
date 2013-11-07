@@ -32,6 +32,8 @@ Item {
 
     width: root.itemSize
     height: root.itemSize + (root.smallSpacing * 2)
+    opacity: (!plasmoid.expanded || root.currentTask == taskId) ? 1.0 : 0.6
+    Behavior on opacity { NumberAnimation { duration: 150 } }
 
     property int taskStatus: status
     property Item expandedItem: taskItemExpanded
