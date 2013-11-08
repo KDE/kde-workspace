@@ -467,25 +467,25 @@ void KCMStyle::save()
 #endif
 
     args = QList<QVariant>() << "appmenu" << (style != "InApplication");
-    method = QDBusMessage::createMethodCall("org.kde.kded",
+    method = QDBusMessage::createMethodCall("org.kde.kded5",
                                             "/kded",
-                                            "org.kde.kded",
+                                            "org.kde.kded5",
                                             "setModuleAutoloading");
     method.setArguments(args);
     QDBusConnection::sessionBus().asyncCall(method);
 
     args = QList<QVariant>() << "appmenu";
     if (load) {
-        method = QDBusMessage::createMethodCall("org.kde.kded",
+        method = QDBusMessage::createMethodCall("org.kde.kded5",
                                                 "/kded",
-                                                "org.kde.kded",
+                                                "org.kde.kded5",
                                                 "loadModule");
         QDBusMessage method = QDBusMessage::createMethodCall("org.kde.kappmenu", "/KAppMenu", "org.kde.kappmenu", "reconfigure");
         QDBusConnection::sessionBus().asyncCall(method);
     } else if (style == "InApplication") {
-        method = QDBusMessage::createMethodCall("org.kde.kded",
+        method = QDBusMessage::createMethodCall("org.kde.kded5",
                                                 "/kded",
-                                                "org.kde.kded",
+                                                "org.kde.kded5",
                                                 "unloadModule");
     }
     method.setArguments(args);
