@@ -27,7 +27,8 @@ import org.kde.private.systemtray 2.0 as SystemTray
 Item {
 
     //property QtObject systrayhost: root.host
-
+    property Item root: undefined
+    
     function checkTask(task) {
         if (task.taskItemExpanded == null) return;
         var isthis = (task.taskId == root.currentTask);

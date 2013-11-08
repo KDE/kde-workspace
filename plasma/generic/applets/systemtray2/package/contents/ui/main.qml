@@ -68,23 +68,24 @@ Item {
         id: host
         rootItem: hiddenView
     }
-    /*
-    Connections {
-        target: plasmoid
-        onExpandedChanged: {
-            if (expandedLoader.source == "") {
-                expandedLoader.source = "ExpandedRepresentation.qml"
-                expandedLoader.item.host = host;
-            }
-        }
-    }
 
-    Loader {
-        id: expandedLoader
-    }
-    */
+// FIXME: Doesn't work, parenting problems and no model available
+//     Timer {
+//         interval: 4000
+//         onTriggered: {
+//             if (expandedLoader.source == "") {
+//                 expandedLoader.setSource("ExpandedRepresentation.qml", { 'anchors.fill': parent, 'root': root });
+//                 //expandedLoader.item.host = host;
+//             }
+//         }
+//     }
+//
+//
+//     Loader {
+//         id: expandedLoader
+//     }
+
     ExpandedRepresentation {
-//         systrayhost: host
         anchors.fill: parent
     }
 }
