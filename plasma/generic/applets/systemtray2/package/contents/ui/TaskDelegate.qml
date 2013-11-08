@@ -146,6 +146,7 @@ QtExtraComponents.MouseEventListener {
     }
 
     Component.onCompleted: {
+        print("ST2PX new delegate: " + name);
         if (taskType == SystemTray.Task.TypeStatusItem) {
             var component = Qt.createComponent("ExpandedStatusNotifier.qml");
             if (component.status == Component.Ready) {

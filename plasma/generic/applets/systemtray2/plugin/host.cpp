@@ -35,7 +35,7 @@
 #include <QVariant>
 #include <zlib.h>
 
-#define TIMEOUT 200
+#define TIMEOUT 100
 
 namespace SystemTray
 {
@@ -98,7 +98,13 @@ Host::Host(QObject* parent) :
     QObject(parent)
 {
     d = new HostPrivate;
-    init();
+    if (!s_manager) {
+        s_manager = new SystemTray::Manager();
+//        connect(s_manager, &Manager::tasksChanged, this, &Host::tasksChanged);
+    }
+    ++s_managerUsage;
+    QTimer::singleShot(10, this, SLOT(init())); // FIXME: remove timer
+    //init();
     connect(&d->compressionTimer, &QTimer::timeout, this, &Host::compressionTimeout);
 }
 
@@ -109,16 +115,11 @@ Host::~Host()
 
 void Host::init()
 {
-    if (!s_manager) {
-        s_manager = new SystemTray::Manager();
-//        connect(s_manager, &Manager::tasksChanged, this, &Host::tasksChanged);
-        connect(s_manager, &Manager::taskAdded, this, &Host::taskAdded);
-        connect(s_manager, &Manager::taskRemoved, this, &Host::taskRemoved);
-        connect(s_manager, &Manager::taskStatusChanged, this, &Host::taskStatusChanged);
-    }
-    ++s_managerUsage;
 
     initTasks();
+    connect(s_manager, &Manager::taskAdded, this, &Host::taskAdded);
+    connect(s_manager, &Manager::taskRemoved, this, &Host::taskRemoved);
+    connect(s_manager, &Manager::taskStatusChanged, this, &Host::taskStatusChanged);
     emit categoriesChanged();
 }
 

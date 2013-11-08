@@ -56,9 +56,9 @@ public:
     virtual ~Host();
     void setRootItem(QQuickItem* rootItem);
     QQuickItem* rootItem();
-    void init();
 
 public Q_SLOTS:
+    void init();
     QQmlListProperty<SystemTray::Task> hiddenTasks();
     QQmlListProperty<SystemTray::Task> shownTasks();
     QStringList categories() const;
