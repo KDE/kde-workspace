@@ -161,14 +161,12 @@ QtExtraComponents.MouseEventListener {
 
     Timer {
         id: ttt
-        interval: 100
-        running: true
+        interval: 50
+        running: false
         repeat: false
         onTriggered: {
             var dim = root.vertical ? compactRepresenation.width : compactRepresenation.height;
-            print("ST2PX updating cheight: " + dim);
             root.cHeight = dim - root.smallSpacing;
         }
     }
-    //Component.onCompleted: root.cHeight = 16
 }
