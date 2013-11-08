@@ -32,8 +32,8 @@
 #include <QDBusObjectPath>
 #include <QDBusServiceWatcher>
 
-static const char* DBUS_SERVICE = "org.kde.kded";
-static const char* DBUS_OBJECT_PATH = "/modules/appmenu";
+static const char* DBUS_SERVICE = "org.kde.kappmenu";
+static const char* DBUS_OBJECT_PATH = "/KAappMenu";
 
 AppmenuDBus::AppmenuDBus(QObject* parent)
 : QObject(parent)

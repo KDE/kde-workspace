@@ -23,7 +23,7 @@ set(kded_appmenu_SRCS
 qt4_add_dbus_adaptor(kded_appmenu_SRCS com.canonical.AppMenu.Registrar.xml
     menuimporter.h MenuImporter menuimporteradaptor MenuImporterAdaptor)
 
-qt4_add_dbus_adaptor(kded_appmenu_SRCS org.kde.kded.appmenu.xml
+qt4_add_dbus_adaptor(kded_appmenu_SRCS org.kde.kappmenu.xml
     appmenu_dbus.h AppmenuDBus appmenuadaptor AppmenuAdaptor)
 
 kde4_add_plugin(kded_appmenu ${kded_appmenu_SRCS})
@@ -46,4 +46,4 @@ install(TARGETS kded_appmenu  DESTINATION ${PLUGIN_INSTALL_DIR} )
 
 install( FILES appmenu.desktop  DESTINATION  ${SERVICES_INSTALL_DIR}/kded )
 install( FILES com.canonical.AppMenu.Registrar.xml DESTINATION ${DBUS_INTERFACES_INSTALL_DIR} )
-install( FILES org.kde.kded.appmenu.xml DESTINATION ${DBUS_INTERFACES_INSTALL_DIR} )
+install( FILES org.kde.kappmenu.xml DESTINATION ${DBUS_INTERFACES_INSTALL_DIR} )

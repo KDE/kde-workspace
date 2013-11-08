@@ -436,9 +436,9 @@ void KCMStyle::save()
     menuBarStyleGroup.writeEntry("Style", style);
     _config.sync();
 
-    QDBusMessage method = QDBusMessage::createMethodCall("org.kde.kded",
-                                                         "/modules/appmenu",
-                                                         "org.kde.kded",
+    QDBusMessage method = QDBusMessage::createMethodCall("org.kde.kappmenu",
+                                                         "/KAppMenu",
+                                                         "org.kde.kappmenu",
                                                          "reconfigure");
     QDBusConnection::sessionBus().asyncCall(method);
 
@@ -480,7 +480,7 @@ void KCMStyle::save()
                                                 "/kded",
                                                 "org.kde.kded",
                                                 "loadModule");
-        QDBusMessage method = QDBusMessage::createMethodCall("org.kde.kded", "/modules/appmenu", "org.kde.kded", "reconfigure");
+        QDBusMessage method = QDBusMessage::createMethodCall("org.kde.kappmenu", "/KAppMenu", "org.kde.kappmenu", "reconfigure");
         QDBusConnection::sessionBus().asyncCall(method);
     } else if (style == "InApplication") {
         method = QDBusMessage::createMethodCall("org.kde.kded",
