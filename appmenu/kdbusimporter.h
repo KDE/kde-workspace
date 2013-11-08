@@ -55,14 +55,13 @@ public:
 protected:
     virtual QIcon iconForName(const QString &name)
     {
-        KIcon icon;
         if(m_icons->contains(name)){
-            icon =  KIcon(m_icons->value(name));
+            return QIcon::fromTheme(m_icons->value(name));
         }
         else if(!KIconLoader::global()->iconPath(name, 1, true ).isNull()){
-            icon = KIcon(name);
+            return QIcon::fromTheme(name);
         }
-        return icon;
+        return QIcon();
     }
 
 private:
