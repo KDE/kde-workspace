@@ -40,59 +40,49 @@ Item {
         opacity: 0.8;
     }
 
-    PlasmaCore.IconItem {
-        id: itemIcon
-        width: root.itemSize * 2
-        height: root.itemSize * 2
-        opacity: 0.3;
+    Item {
         anchors {
-            right: parent.right
-            bottom: parent.bottom
-            rightMargin: root.largeSpacing
-            bottomMargin: root.largeSpacing
-        }
-        source: iconName != "" ? iconName : (typeof(icon) != "undefined" ? icon : "")
-    }
-
-    PlasmaExtras.Heading {
-        id: snHeading
-
-        level: 3
-
-        anchors {
+            fill: parent
             margins: root.largeSpacing
-            top: parent.top
-            left: parent.left
-            right: parent.right
         }
 
-        text: name
-    }
-
-    PlasmaComponents.Label {
-        id: snTooltip
-
-        anchors {
-            top: snHeading.bottom
-            topMargin: root.largeSpacing
-            left: snHeading.left
-            right: snHeading.right
+        PlasmaCore.IconItem {
+            id: itemIcon
+            width: root.itemSize * 4
+            height: root.itemSize * 4
+            opacity: 0.3;
+            anchors {
+                right: parent.right
+                bottom: parent.bottom
+                rightMargin: root.largeSpacing
+                bottomMargin: root.largeSpacing
+            }
+            source: iconName != "" ? iconName : (typeof(icon) != "undefined" ? icon : "")
         }
 
-        text: tooltipTitle
-    }
+        PlasmaComponents.Label {
+            id: snTooltip
 
-    PlasmaComponents.Label {
-        id: snTooltipSub
+            anchors {
+                top: parent.top
+                left: parent.left
+                right: parent.right
+            }
 
-        anchors {
-            top: snTooltip.bottom
-            topMargin: root.largeSpacing
-            left: snHeading.left
-            right: snHeading.right
+            text: tooltipTitle
         }
 
-        text: tooltipText
-    }
+        PlasmaComponents.Label {
+            id: snTooltipSub
 
+            anchors {
+                top: snTooltip.bottom
+                topMargin: root.largeSpacing
+                left: parent.left
+                right: parent.right
+            }
+
+            text: tooltipText
+        }
+    }
 }

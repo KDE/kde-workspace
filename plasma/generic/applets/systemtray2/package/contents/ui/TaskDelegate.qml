@@ -36,6 +36,12 @@ QtExtraComponents.MouseEventListener {
 
     hoverEnabled: true
 
+    property variant task: null
+
+    onTaskChanged: {
+        //print("******************* Task changed:" + task.taskId + " " + task.name)
+    }
+
     // opacity is raised when: plasmoid is collapsed, we are the current task, or it's hovered
     opacity: (containsMouse || !plasmoid.expanded || root.currentTask == taskId) || (plasmoid.expanded && root.currentTask == "") ? 1.0 : 0.6
     Behavior on opacity { NumberAnimation { duration: 150 } }
@@ -45,6 +51,7 @@ QtExtraComponents.MouseEventListener {
     property Item expandedItem: taskItemExpanded
     property Item expandedStatusItem: null
     property alias icon: itemIcon
+    property bool snExpanded: false
 
     Rectangle {
         anchors.fill: parent;
@@ -100,18 +107,24 @@ QtExtraComponents.MouseEventListener {
     MouseArea {
         anchors.fill: parent
         onClicked: {
+//             if (taskItemContainer.taskStatus == SystemTray.Task.TypeStatusItem) {
+//                 taskItemContainer.snExpanded = !taskItemContainer.snExpanded;
+//             }
             print("ST2B TaskDelegate clicked ... " + !taskItemContainer.expanded + taskItemContainer.expandedItem);
             if (root.currentTask == taskId) {
                 root.currentTask = 0;
+                root.currentName = ""
                 root.expandedItem = null;
                 plasmoid.expanded = false;
             } else if (taskItemContainer.expanded || taskItemContainer.taskStatus == SystemTray.Task.TypeStatusItem) {
                 print("Setting taskitem");
                 root.currentTask = taskId;
+                root.currentName = name
                 root.expandedItem = taskItemContainer.expandedItem;
             } else {
                 print("resetting taskitem");
                 root.currentTask = "";
+                root.currentName = ""
                 root.expandedItem = null;
             }
         }

@@ -31,11 +31,11 @@ Item {
 
     property bool vertical: (plasmoid.formFactor == PlasmaCore.Types.Vertical)
 
-    property int minimumWidth: 200 // just needs to run out of space in the panel ...
-    property int minimumHeight: 200 // ... but not too big to screw up initial layouts
+    property int minimumWidth: implicitWidth // just needs to run out of space in the panel ...
+    property int minimumHeight: implicitHeight // ... but not too big to screw up initial layouts
 
-    property int implicitWidth: baseSize * 25
-    property int implicitHeight: baseSize * 20
+    property int implicitWidth: baseSize * 32
+    property int implicitHeight: baseSize * 24
 
 
     property int _h: itemSize // should go away, replace with root.baseSize
@@ -50,11 +50,11 @@ Item {
 
     property Item expandedItem: null
     property string currentTask: ""
+    property string currentName: ""
 
     property Component compactRepresentation: CompactRepresentation {
         systrayhost: host
     }
-
 
     Rectangle {
         anchors.fill: parent;
@@ -68,8 +68,23 @@ Item {
         id: host
         rootItem: hiddenView
     }
+    /*
+    Connections {
+        target: plasmoid
+        onExpandedChanged: {
+            if (expandedLoader.source == "") {
+                expandedLoader.source = "ExpandedRepresentation.qml"
+                expandedLoader.item.host = host;
+            }
+        }
+    }
 
+    Loader {
+        id: expandedLoader
+    }
+    */
     ExpandedRepresentation {
+//         systrayhost: host
         anchors.fill: parent
     }
 }

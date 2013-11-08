@@ -26,11 +26,15 @@ import org.kde.private.systemtray 2.0 as SystemTray
 
 Item {
 
+    //property QtObject systrayhost: root.host
+
     function checkTask(task) {
         if (task.taskItemExpanded == null) return;
         var isthis = (task.taskId == root.currentTask);
         if (!isthis) {
             task.expanded = false;
+        } else {
+            root.currentName = task.name;
         }
     }
 
@@ -101,11 +105,15 @@ Item {
         id: hiddenView
         objectName: "hiddenView"
         clip: true
-        interactive: (contentHeight > height)
         width: parent.width
 
+        interactive: (contentHeight > height)
+//         highlightFollowsCurrentItem: true
+//         highlight: PlasmaComponents.Highlight {}
+
         anchors {
-            top: (loadingItem.visible && !plasmoid.expanded) ? loadingItem.bottom : parent.top
+            //top: (loadingItem.visible && !plasmoid.expanded) ? loadingItem.bottom : parent.top
+            top: snHeading.bottom
             bottom: (loadingItem.visible && !plasmoid.expanded) ? undefined : parent.bottom
             left: parent.left
         }
@@ -126,8 +134,8 @@ Item {
         anchors {
             right: expandedItemContainer.left;
             top: parent.right;
-            bottom: parent.bototm;
-            rightMargin: root.smallSpacing;
+            bottom: parent.bottom;
+            //rightMargin: root.largeSpacing
         }
         elementId: "vertical-line";
 
@@ -149,12 +157,28 @@ Item {
         }
     }
 
+    PlasmaExtras.Heading {
+        id: snHeading
+
+        level: 3
+
+        anchors {
+            margins: root.largeSpacing
+            top: parent.top
+            //left: parent.left
+            left: expandedItemContainer.left
+            right: parent.right
+        }
+
+        text: root.currentName != "" ? root.currentName : i18n("Status & Notifications")
+    }
+
     PlasmaComponents.PageStack {
         id: expandedItemContainer
         anchors {
             left: parent.left
             leftMargin: root.itemSize + root.largeSpacing * 2
-            top: parent.top
+            top: snHeading.bottom
             bottom: parent.bottom
             right: parent.right
         }

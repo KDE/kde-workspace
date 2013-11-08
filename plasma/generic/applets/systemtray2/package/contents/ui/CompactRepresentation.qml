@@ -102,6 +102,14 @@ QtExtraComponents.MouseEventListener {
         subText: plasmoid.expanded ? i18n("Hide icons") : i18n("Show hidden icons")
     }
 
+    Component {
+        id: taskDelegateComponent
+        TaskDelegate {
+            id: taskDelegate
+            //task: ListView.view.model
+        }
+    }
+
     GridView {
         id: gridView
         objectName: "gridView"
@@ -120,7 +128,7 @@ QtExtraComponents.MouseEventListener {
 
         model: systrayhost.shownTasks
 
-        delegate: TaskDelegate {}
+        delegate: taskDelegateComponent
     }
 
     PlasmaCore.SvgItem {
