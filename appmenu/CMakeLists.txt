@@ -3,7 +3,7 @@ include_directories(
     ${CMAKE_BINARY_DIR}
     )
 
-include_directories(${DBUSMENUQT_INCLUDE_DIR})
+include_directories(${DBusMenuQt5_INCLUDE_DIR})
 
 set(kded_appmenu_SRCS
     appmenu.cpp
@@ -26,7 +26,17 @@ qt4_add_dbus_adaptor(kded_appmenu_SRCS org.kde.kded.appmenu.xml
 
 kde4_add_plugin(kded_appmenu ${kded_appmenu_SRCS})
 
-target_link_libraries(kded_appmenu KF5::KIOCore KF5::KIOWidgets ${X11_LIBRARIES} ${DBUSMENUQT_LIBRARIES} ${KDE4_PLASMA_LIBS})
+target_link_libraries(kded_appmenu
+    Qt5::DBus
+    Qt5::X11Extras
+    KF5::KDBusAddons
+    KF5::KIOCore
+    KF5::KIOWidgets
+    KF5::KWindowSystem
+    KF5::KDE4Support
+    ${X11_LIBRARIES}
+    ${DBusMenuQt5_LIBRARY}
+)
 
 install(TARGETS kded_appmenu  DESTINATION ${PLUGIN_INSTALL_DIR} )
 
