@@ -28,7 +28,9 @@
 #include "menuimporteradaptor.h"
 #include "appmenuadaptor.h"
 #include "appmenu_dbus.h"
+#if 0
 #include "topmenubar.h"
+#endif
 #include "verticalmenu.h"
 
 #include <QDBusInterface>
@@ -188,19 +190,24 @@ void AppMenuModule::slotWindowUnregistered(WId id)
         delete importer;
     }
 
+#if 0
     if (m_menubar && m_menubar->parentWid() == id) {
         hideMenubar();
     }
+#endif
 }
 
 // Keyboard activation requested, transmit it to menu
 void AppMenuModule::slotActionActivationRequested(QAction* a)
 {
     // If we have a topmenubar, activate action
+#if 0
     if (m_menubar) {
         m_menubar->setActiveAction(a);
         m_menubar->show();
-    } else { // else send request to kwin or others dbus interface registrars
+    } else
+#endif
+    { // else send request to kwin or others dbus interface registrars
         m_waitingAction = a;
         emit showRequest(KWindowSystem::self()->activeWindow());
     }
@@ -235,6 +242,7 @@ void AppMenuModule::slotActiveWindowChanged(WId id)
         return;
     }
 
+#if 0
     QMenu *menu = importer->menu();
 
     if(menu) {
@@ -243,6 +251,7 @@ void AppMenuModule::slotActiveWindowChanged(WId id)
     } else {
         hideMenubar();
     }
+#endif
 }
 
 void AppMenuModule::slotShowCurrentWindowMenu()
@@ -253,19 +262,23 @@ void AppMenuModule::slotShowCurrentWindowMenu()
 void AppMenuModule::slotCurrentScreenChanged()
 {
     if (m_currentScreen != currentScreen()) {
+#if 0
         if (m_menubar) {
             m_menubar->setParentWid(0);
         }
+#endif
         slotActiveWindowChanged(KWindowSystem::self()->activeWindow());
     }
 }
 
 void AppMenuModule::slotBarNeedResize()
 {
+#if 0
     if (m_menubar) {
         m_menubar->updateSize();
         m_menubar->move(centeredMenubarPos());
     }
+#endif
 }
 
 // reload settings
@@ -322,6 +335,7 @@ void AppMenuModule::reconfigure()
 
     // Setup top menubar if needed
     if (m_menuStyle == "TopMenuBar") {
+#if 0
         m_menubar = new TopMenuBar();
         connect(KWindowSystem::self(), SIGNAL(activeWindowChanged(WId)), this, SLOT(slotActiveWindowChanged(WId)));
         connect(KWindowSystem::self(), SIGNAL(workAreaChanged()), this, SLOT(slotShowCurrentWindowMenu()));
@@ -329,6 +343,7 @@ void AppMenuModule::reconfigure()
         connect(m_menubar, SIGNAL(needResize()), SLOT(slotBarNeedResize()));
         m_screenTimer->start(1000);
         slotShowCurrentWindowMenu();
+#endif
     }
 }
 
@@ -352,6 +367,7 @@ KDBusMenuImporter* AppMenuModule::getImporter(WId id)
 
 void AppMenuModule::showMenuBar(QMenu *menu)
 {
+#if 0
     if (!menu) {
         return;
     }
@@ -360,10 +376,12 @@ void AppMenuModule::showMenuBar(QMenu *menu)
     if (menu->actions().length()) {
         m_menubar->enableMouseTracking();
     }
+#endif
 }
 
 void AppMenuModule::hideMenubar()
 {
+#if 0
     if (!m_menubar) {
         return;
     }
@@ -372,6 +390,7 @@ void AppMenuModule::hideMenubar()
     if (m_menubar->isVisible()) {
         m_menubar->hide();
     }
+#endif
 }
 
 int AppMenuModule::currentScreen()
@@ -391,8 +410,12 @@ QPoint AppMenuModule::centeredMenubarPos()
     QDesktopWidget *desktop = QApplication::desktop();
     m_currentScreen = currentScreen();
     QRect screen = desktop->availableGeometry(m_currentScreen);
+#if 0
     int x = screen.center().x() - m_menubar->sizeHint().width()/2;
     return QPoint(x, screen.topLeft().y());
+#else
+    return QPoint(screen.center().x(), screen.topLeft().y());
+#endif
 }
 
 

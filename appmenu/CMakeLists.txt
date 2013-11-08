@@ -9,13 +9,13 @@ set(kded_appmenu_SRCS
     appmenu.cpp
     menuimporter.cpp
     appmenu_dbus.cpp
-    menubutton.cpp
-    menuwidget.cpp
-    menubar.cpp
-    topmenubar.cpp
-    glowbar.cpp
+#     menubutton.cpp
+#     menuwidget.cpp
+#     menubar.cpp
+#     topmenubar.cpp
+#     glowbar.cpp
     verticalmenu.cpp
-    shadows.cpp
+#     shadows.cpp
     )
 
 qt4_add_dbus_adaptor(kded_appmenu_SRCS com.canonical.AppMenu.Registrar.xml
