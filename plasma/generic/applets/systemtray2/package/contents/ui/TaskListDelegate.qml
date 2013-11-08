@@ -31,7 +31,7 @@ TaskDelegate {
     property bool expanded: (root.currentTask == "")
 
     width: parent.width
-    height: root.itemSize + root.largeSpacing
+    height: (root.baseSize * 2)
 
 //     MouseArea {
 //         anchors.fill: parent

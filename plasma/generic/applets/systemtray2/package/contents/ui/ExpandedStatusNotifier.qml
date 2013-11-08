@@ -48,8 +48,8 @@ Item {
 
         PlasmaCore.IconItem {
             id: itemIcon
-            width: root.itemSize * 4
-            height: root.itemSize * 4
+            width: root.baseSize * 8
+            height: width
             opacity: 0.3;
             anchors {
                 right: parent.right

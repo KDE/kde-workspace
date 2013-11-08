@@ -37,12 +37,13 @@ Item {
     property int implicitWidth: baseSize * 32
     property int implicitHeight: baseSize * 24
 
+    property int cHeight: 100
 
     property int _h: itemSize // should go away, replace with root.baseSize
 
     // Sizes depend on the font, and thus on DPI
     property int baseSize: theme.mSize(theme.defaultFont).height
-    property int itemSize: Layout.alignedSize(baseSize * 2)
+    property int itemSize: Layout.alignedSize(Math.min(baseSize * 2, cHeight))
     property int smallSpacing: Math.ceil(baseSize / 10)
     property int largeSpacing: Math.ceil(baseSize / 2)
 

@@ -72,6 +72,8 @@ Item {
             }
             PlasmaCore.IconItem {
                 anchors.centerIn: parent
+                width: parent.width
+                height: parent.height
                 source: "mail-unread"
             }
             MouseArea {

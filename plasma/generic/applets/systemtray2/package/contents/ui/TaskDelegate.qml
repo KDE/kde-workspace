@@ -31,8 +31,10 @@ QtExtraComponents.MouseEventListener {
     id: taskItemContainer
     objectName: "taskItemContainer"
 
-    width: root.itemSize
-    height: root.itemSize + (root.smallSpacing * 2)
+    //width: root.itemSize
+    //height: root.itemSize + (root.smallSpacing * 2)
+    height: parent.height + (root.smallSpacing * 2)
+    width: parent.height+ (root.smallSpacing * 2)
 
     hoverEnabled: true
 
@@ -51,7 +53,7 @@ QtExtraComponents.MouseEventListener {
     property Item expandedItem: taskItemExpanded
     property Item expandedStatusItem: null
     property alias icon: itemIcon
-    property bool snExpanded: false
+    property bool snExpanded: expanded
 
     Rectangle {
         anchors.fill: parent;
@@ -107,22 +109,26 @@ QtExtraComponents.MouseEventListener {
     MouseArea {
         anchors.fill: parent
         onClicked: {
-//             if (taskItemContainer.taskStatus == SystemTray.Task.TypeStatusItem) {
-//                 taskItemContainer.snExpanded = !taskItemContainer.snExpanded;
-//             }
-            print("ST2B TaskDelegate clicked ... " + !taskItemContainer.expanded + taskItemContainer.expandedItem);
+            print("ST2PX TaskDelegate clicked ... " + !taskItemContainer.expanded + taskItemContainer.expandedItem);
+            if (taskItemContainer.taskStatus == SystemTray.Task.TypeStatusItem && !taskItemContainer.snExpanded) {
+//                 root.currentTask = "";
+//                 root.expandedItem = null
+//                 taskItemContainer.snExpanded = true;
+//                 taskItemContainer.expanded = true;
+//                 clearTasks();
+            }
             if (root.currentTask == taskId) {
                 root.currentTask = 0;
                 root.currentName = ""
                 root.expandedItem = null;
                 plasmoid.expanded = false;
             } else if (taskItemContainer.expanded || taskItemContainer.taskStatus == SystemTray.Task.TypeStatusItem) {
-                print("Setting taskitem");
+                print("S2TPX Setting taskitem");
                 root.currentTask = taskId;
                 root.currentName = name
                 root.expandedItem = taskItemContainer.expandedItem;
             } else {
-                print("resetting taskitem");
+                print("S2TPX resetting taskitem");
                 root.currentTask = "";
                 root.currentName = ""
                 root.expandedItem = null;
@@ -135,7 +141,7 @@ QtExtraComponents.MouseEventListener {
     function updatePlasmoidGeometry() {
         if (taskItem != undefined) {
 
-            var _size = root.itemSize;
+            var _size = height - (2*root.smallSpacing);
             var _m = (taskItemContainer.height - _size) / 2
 
             taskItem.anchors.verticalCenter = taskItemContainer.verticalCenter;

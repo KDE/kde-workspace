@@ -98,6 +98,7 @@ Item {
             clearExpanded();
             expandedItemContainer.clear();
             root.currentTask = ""
+            root.currentName = ""
             root.expandedItem = null;
         }
     }
@@ -178,7 +179,7 @@ Item {
         id: expandedItemContainer
         anchors {
             left: parent.left
-            leftMargin: root.itemSize + root.largeSpacing * 2
+            leftMargin: (root.baseSize + root.largeSpacing) * 2
             top: snHeading.bottom
             bottom: parent.bottom
             right: parent.right
