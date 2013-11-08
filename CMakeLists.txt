@@ -322,7 +322,7 @@ if(${KDE_PLATFORM_PROFILE} STREQUAL "Desktop")
       ecm_optional_add_subdirectory(khotkeys)
 #       macro_optional_add_subdirectory(kwrited)
 #       macro_optional_add_subdirectory(ksystraycmd)
-#       macro_optional_add_subdirectory(appmenu)
+      ecm_optional_add_subdirectory(appmenu)
    endif(NOT WIN32)
 #
    if(X11_Xau_FOUND AND X11_Xdmcp_FOUND)
