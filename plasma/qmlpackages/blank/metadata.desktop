@@ -1,8 +1,20 @@
 [Desktop Entry]
 Comment=Blank desktop view furniture
+Comment[nl]=Meubilair voor weergave op blanco bureaublad
+Comment[pt]=Disposição de ecrã vazio
+Comment[pt_BR]=Acessório de visualização da área de trabalho vazia
+Comment[uk]=Компоненти для перегляду порожньої стільниці
+Comment[x-test]=xxBlank desktop view furniturexx
 Encoding=UTF-8
 Keywords=
 Name=Blank Desktop
+Name[de]=Leere Arbeitsfläche
+Name[nl]=Blanco bureaublad
+Name[pt]=Ecrã Vazio
+Name[pt_BR]=Área de trabalho vazia
+Name[sl]=Prazno namizje
+Name[uk]=Порожня стільниця
+Name[x-test]=xxBlank Desktopxx
 Type=Service
 
 X-KDE-ServiceTypes=Plasma/Shell
