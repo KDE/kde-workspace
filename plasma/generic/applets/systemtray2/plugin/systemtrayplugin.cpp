@@ -22,6 +22,8 @@
 
 #include "host.h"
 #include "task.h"
+#include "protocols/plasmoid/plasmoidtask.h"
+#include "protocols/dbussystemtray/dbussystemtraytask.h"
 
 #include <QtQml>
 
@@ -35,6 +37,9 @@ void SystemTrayPlugin::registerTypes(const char *uri)
     QLoggingCategory::setFilterRules(QStringLiteral("systemtray.debug = true"));
 
     qmlRegisterType<SystemTray::Host>(uri, 2, 0,"Host");
+    qmlRegisterUncreatableType<SystemTray::Task>(uri, 2, 0, "Task", "You cannot create Task objects.");
+    qmlRegisterUncreatableType<SystemTray::DBusSystemTrayTask>(uri, 2, 0, "DBusSystemTrayTask", "You cannot create Task objects.");
+    qmlRegisterUncreatableType<SystemTray::PlasmoidTask>(uri, 2, 0, "PlasmoidTask", "You cannot create Task objects.");
     qmlRegisterUncreatableType<SystemTray::Task>(uri, 2, 0, "Task", "You cannot create Task objects.");
 
     qCDebug(SYSTEMTRAY) << "Categorized debug";
