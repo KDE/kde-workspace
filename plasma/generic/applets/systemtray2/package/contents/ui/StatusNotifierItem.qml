@@ -33,14 +33,15 @@ Item {
     property int blink_interval: 1000 // interval of blinking (if status of task is NeedsAttention)
     property variant task: null // task that provides information for item
 
-    property bool     __has_task: task ? true : false
-    property string   __icon_name:         __has_task ? task.iconName : ""
-    property string   __att_icon_name:     __has_task ? task.attIconName : ""
-    property variant  __icon:              __has_task ? task.icon : "default"
-    property variant  __att_icon:          __has_task ? task.attIcon : __getDefaultIcon()
-    property string   __overlay_icon_name: __has_task ? task.overlayIconName : ""
-    property string   __movie_path:        __has_task ? task.moviePath : ""
-    property int      __status:            __has_task ? task.status : SystemTray.Task.UnknownStatus
+    //property bool     __has_task: task ? true : false
+    property bool     __has_task: true
+    property string   __icon_name:         __has_task ? iconName : ""
+    property string   __att_icon_name:     __has_task ? attIconName : ""
+    property variant  __icon:              __has_task ? icon : "default"
+    property variant  __att_icon:          __has_task ? attIcon : __getDefaultIcon()
+    property string   __overlay_icon_name: __has_task ? overlayIconName : ""
+    property string   __movie_path:        __has_task ? moviePath : ""
+    property int      __status:            __has_task ? status : SystemTray.Task.UnknownStatus
 
     // Public functions ================================================================================================
     function click(buttons) {
@@ -48,32 +49,30 @@ Item {
     }
 
     function scrollHorz(delta) {
-        task.activateHorzScroll(delta)
+        activateHorzScroll(delta)
     }
 
     function scrollVert(delta) {
-        task.activateVertScroll(delta)
+        activateVertScroll(delta)
     }
 
     function getMouseArea() {
         return mouse_area
     }
-    /*
-    Connections {
-        target: task
-
-        onChangedShortcut: {
-            // update shortcut for icon widget
-            if (!icon_widget.action)
-                return
-            plasmoid.updateShortcutAction(icon_widget.action, task.shortcut)
-            icon_widget.action.triggered.disconnect(__onActivatedShortcut) // disconnect old signals
-            icon_widget.action.triggered.connect(__onActivatedShortcut)
-        }
-
-        onShowContextMenu: plasmoid.showMenu(menu, x, y, root_item)
-    }
-    */
+//     Connections {
+//         target: task
+//
+//         onChangedShortcut: {
+//             // update shortcut for icon widget
+//             if (!icon_widget.action)
+//                 return
+//             plasmoid.updateShortcutAction(icon_widget.action, task.shortcut)
+//             icon_widget.action.triggered.disconnect(__onActivatedShortcut) // disconnect old signals
+//             icon_widget.action.triggered.connect(__onActivatedShortcut)
+//         }
+//
+//         onShowContextMenu: plasmoid.showMenu(menu, x, y, root_item)
+//     }
     function __onActivatedShortcut() {
         __processClick(Qt.LeftButton, icon_widget)
     }
@@ -94,6 +93,17 @@ Item {
         }
     }
     
+    PlasmaCore.IconItem {
+        id: itemIcon
+        width: parent.height
+        height: parent.height
+        visible: false
+        anchors {
+            left: parent.left
+            verticalCenter: parent.verticalCenter
+        }
+        source: iconName != "" ? iconName : (typeof(icon) != "undefined" ? icon : "")
+    }
 
     // TODO: remove wheel area in QtQuick 2.0
     QtExtraComponents.MouseEventListener {
@@ -121,10 +131,11 @@ Item {
 
                 anchors.fill: parent
 
-                property QtObject action: __has_task ? plasmoid.createShortcutAction(task.objectName + "-" + plasmoid.id) : null
+                //property QtObject action: __has_task ? plasmoid.createShortcutAction(objectName + "-" + plasmoid.id) : null // FIXME
 
                 visible: false
                 active: mouse_area.containsMouse
+                source: iconName != "" ? iconName : (typeof(icon) != "undefined" ? icon : "")
 
                 // Overlay icon
                 Image {
@@ -161,21 +172,21 @@ Item {
         }
         onWheelMoved: {
             if (wheel.orientation === Qt.Horizontal)
-                task.activateHorzScroll(wheel.delta)
+                activateHorzScroll(wheel.delta)
             else
-                task.activateVertScroll(wheel.delta)
+                activateVertScroll(wheel.delta)
         }
-        // Tooltip =========================================================================================================
+        // Tooltip ================================================================================
         PlasmaCore.ToolTip {
             id: tooltip
             target: wheel_area
-            mainText: __has_task ? task.tooltipTitle : ""
-            subText:  __has_task ? task.tooltipText : ""
-            image:    __has_task ? task.tooltipIcon : ""
+            mainText: __has_task ? tooltipTitle : ""
+            subText:  __has_task ? tooltipText : ""
+            image:    __has_task ? tooltipIcon : ""
         }
     }
 
-    // Functions =======================================================================================================
+    // Functions ==================================================================================
     function __getDefaultIcon() {
         return task.customIcon(__icon_name != "" ? __icon_name : __icon)
     }
@@ -193,7 +204,7 @@ Item {
         }
     }
 
-    // States ==========================================================================================================
+    // States =====================================================================================
     states: [
         // Static icon
         State {

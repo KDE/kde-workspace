@@ -92,12 +92,19 @@ QtExtraComponents.MouseEventListener {
         id: itemIcon
         width: parent.height
         height: parent.height
+        visible: false
         anchors {
             left: parent.left
             verticalCenter: parent.verticalCenter
         }
         source: iconName != "" ? iconName : (typeof(icon) != "undefined" ? icon : "")
     }
+
+    StatusNotifierItem {
+        //task: ListView.view.item
+        anchors.fill: parent
+    }
+
 
     PulseAnimation {
         targetItem: taskItemContainer

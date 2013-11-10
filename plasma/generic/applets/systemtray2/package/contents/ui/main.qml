@@ -67,7 +67,7 @@ Item {
     }
     SystemTray.Host {
         id: host
-        rootItem: hiddenView
+        //rootItem: hiddenView
     }
 
 // FIXME: Doesn't work, parenting problems and no model available
