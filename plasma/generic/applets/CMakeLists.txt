@@ -10,7 +10,7 @@ plasma_install_package(analog-clock org.kde.analogclock)
 add_subdirectory(batterymonitor)
 # add_subdirectory(calendar)
 add_subdirectory(devicenotifier)
-plasma_install_package(digital_clock Digital_clock)
+plasma_install_package(digital-clock org.kde.digitalclock)
 # add_subdirectory(quicklaunch)
 #
 # if(QT_QTWEBKIT_FOUND)
