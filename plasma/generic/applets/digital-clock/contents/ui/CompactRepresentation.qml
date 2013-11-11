@@ -22,7 +22,8 @@ import org.kde.locale 2.0
 
 Item {
     id: main
-    property int minimumWidth: time.font.pixelSize * (plasmoid.configuration.showSeconds ? 4 : 3)
+    //property int minimumWidth: time.font.pixelSize * (plasmoid.configuration.showSeconds ? 4 : 3)
+    property int minimumWidth: time.paintedWidth
     property int maximumWidth: minimumWidth
     property int minimumHeight
     property int formFactor: plasmoid.formFactor
