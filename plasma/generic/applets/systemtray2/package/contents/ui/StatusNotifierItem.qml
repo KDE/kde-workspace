@@ -97,7 +97,7 @@ Item {
         id: itemIcon
         width: parent.height
         height: parent.height
-        visible: false
+        //visible: false
         anchors {
             left: parent.left
             verticalCenter: parent.verticalCenter
