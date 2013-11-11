@@ -97,7 +97,7 @@ private:
     QScriptValue m_scriptSelf;
 };
 
-static const int PLASMA_DESKTOP_SCRIPTING_VERSION = 6;
+static const int PLASMA_DESKTOP_SCRIPTING_VERSION = 7;
 }
 
 #endif
