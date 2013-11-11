@@ -18,10 +18,13 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>
  */
 
+// import QtQuick 2.0
+//
+// import org.kde.plasma.core 2.0 as PlasmaCore
+// import org.kde.plasma.components 2.0 as PlasmaComponents
 import QtQuick 2.0
-
-import org.kde.plasma.core 2.0 as PlasmaCore
-import org.kde.plasma.components 2.0 as PlasmaComponents
+import QtQuick.Controls 1.0 as QtControls
+import QtQuick.Layouts 1.0 as QtLayouts
 
 Item {
     id: appearancePage
@@ -33,18 +36,22 @@ Item {
     property alias cfg_boldText: boldCheckBox.checked
     property alias cfg_italicText: italicCheckBox.checked
 
-    Column {
-        PlasmaComponents.CheckBox {
-            id: boldCheckBox
-            text: i18n("Bold text")
-            checked: false
-        }
+    QtLayouts.ColumnLayout {
+        QtControls.GroupBox {
+            title: i18n("Appearance")
+            flat: true
 
-        PlasmaComponents.CheckBox {
-            id: italicCheckBox
-            text: i18n("Italic text")
-            checked: false
+            QtLayouts.ColumnLayout {
+                QtControls.CheckBox {
+                    id: boldCheckBox
+                    text: i18n("Bold text")
+                }
+
+                QtControls.CheckBox {
+                    id: italicCheckBox
+                    text: i18n("Italic text")
+                }
+            }
         }
     }
-
 }
