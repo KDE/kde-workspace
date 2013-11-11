@@ -236,20 +236,26 @@ void Panel::setLength(int minPixels, int maxPixels)
     if (v) {
         if (minPixels < 0) {
             minPixels = minLength();
+        } else if (minPixels > maxPixels) {
+            maxPixels = minPixels;
         }
 
         if (maxPixels < 0) {
             maxPixels = maxLength();
+        } else if (minPixels > maxPixels) {
+            minPixels = maxPixels;
         }
 
         int pixels = 0;
+        if (minPixels == maxPixels) {
             pixels = minPixels;
-
-        if (minPixels > maxPixels) {
-            maxPixels = minPixels;
+        } else {
+            pixels = qBound(minPixels,
+                            c->formFactor() == Plasma::Vertical ?
+                                c->preferredSize().toSize().height() :
+                                c->preferredSize().toSize().width(),
+                            maxPixels);
         }
-
-        pixels = qBound(minPixels, pixels, maxPixels);
 
         QRectF screen = c->corona()->screenGeometry(v->screen());
         QSizeF size = c->size();
