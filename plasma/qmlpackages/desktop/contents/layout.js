@@ -5,6 +5,7 @@ panel.location = 'top'
 panel.addWidget("org.kde.kickoff")
 panel.addWidget("org.kde.plasma.taskmanager")
 panel.addWidget("org.kde.systemtray")
+panel.addWidget("org.kde.digitalclock")
 
 for (var i = 0; i < screenCount; ++i) {
     var desktop = new Activity
