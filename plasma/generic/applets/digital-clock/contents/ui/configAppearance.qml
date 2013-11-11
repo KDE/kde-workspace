@@ -1,5 +1,6 @@
 /*
  * Copyright 2013  Bhushan Shah <bhush94@gmail.com>
+ * Copyright 2013 Sebastian Kügler <sebas@kde.org>
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -18,10 +19,6 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>
  */
 
-// import QtQuick 2.0
-//
-// import org.kde.plasma.core 2.0 as PlasmaCore
-// import org.kde.plasma.components 2.0 as PlasmaComponents
 import QtQuick 2.0
 import QtQuick.Controls 1.0 as QtControls
 import QtQuick.Layouts 1.0 as QtLayouts
@@ -34,7 +31,11 @@ Item {
     implicitHeight: pageColumn.implicitHeight
 
     property alias cfg_boldText: boldCheckBox.checked
+    property string cfg_timeFormat: ""
     property alias cfg_italicText: italicCheckBox.checked
+
+    property alias cfg_showTimezone: showTimezone.checked
+    property alias cfg_showSeconds: showSeconds.checked
 
     QtLayouts.ColumnLayout {
         QtControls.GroupBox {
@@ -50,6 +51,29 @@ Item {
                 QtControls.CheckBox {
                     id: italicCheckBox
                     text: i18n("Italic text")
+                }
+            }
+        }
+
+        QtControls.GroupBox {
+            title: i18n("Information")
+            flat: true
+
+            QtLayouts.ColumnLayout {
+                QtControls.CheckBox {
+                    id: showSeconds
+                    text: i18n("Show seconds")
+                }
+
+                QtControls.CheckBox {
+                    id: showTimezone
+                    text: i18n("Show time zone")
+                }
+
+                QtControls.ComboBox {
+                    id: timeFormat
+                    //model: [i18n("..."), i18n("..."), i18n("...")]
+                    // FIXME: write to cfg_timeFormat
                 }
             }
         }

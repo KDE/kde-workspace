@@ -35,7 +35,7 @@ Item {
         var toolTipData = new Object;
         toolTipData["image"] = "preferences-system-time"; 
         toolTipData["mainText"] ="Current Time"
-        toolTipData["subText"] = Qt.formatDate( dataSource.data["Local"]["Date"],"dddd dd MMM yyyy" )+"\n"+Qt.formatTime( dataSource.data["Local"]["Time"],"hh:mm AP" )
+        toolTipData["subText"] = Qt.formatDate( dataSource.data["Local"]["Date"],"dddd dd MMM yyyy" )+"\n"+Qt.formatTime( dataSource.data["Local"]["Time"], plasmoid.configuration.timeFormat)
         plasmoid.popupIconToolTip = toolTipData;
         plasmoid.aspectRatioMode = ConstrainedSquare;
     }

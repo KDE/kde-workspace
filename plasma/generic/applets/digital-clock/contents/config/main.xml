@@ -5,20 +5,21 @@
       http://www.kde.org/standards/kcfg/1.0/kcfg.xsd" >
   <kcfgfile name=""/>
 
-  <group name="General">
-    <entry name="showTZ" type="Bool">
+  <group name="Appearance">
+    <entry name="showTimezone" type="Bool">
       <default>false</default>
     </entry>
     <entry name="showSeconds" type="Bool">
       <default>false</default>
     </entry>
-  </group>
-  <group name="Appearance">
       <entry name="boldText" type="Bool">
           <default>false</default>
       </entry>
       <entry name="italicText" type="Bool">
           <default>false</default>
+      </entry>
+      <entry name="timeFormat" type="string">
+          <default>default</default>
       </entry>
   </group>
 
