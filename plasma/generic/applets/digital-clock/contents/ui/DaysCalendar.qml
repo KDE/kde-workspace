@@ -26,6 +26,8 @@ Grid {
     rows: 1 + monthCalendar.weeks
     spacing: 0
     property Item selectedItem
+    property bool containsEventItems: false // FIXME
+    property bool containsTodoItems: false // FIXME
 
     Repeater {
         id: days

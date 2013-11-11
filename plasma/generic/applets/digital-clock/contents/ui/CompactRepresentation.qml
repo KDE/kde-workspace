@@ -22,9 +22,15 @@ import org.kde.locale 2.0
 
 Item {
     id: main
-    property int minimumWidth
+    property int minimumWidth: time.font.pixelSize * (plasmoid.configuration.showSeconds ? 4 : 3)
+    property int maximumWidth: minimumWidth
     property int minimumHeight
     property int formFactor: plasmoid.formFactor
+    property int timePixelSize: theme.defaultFont.pixelSize
+    property int timezonePixelSize: theme.smallestFont.pixelSize
+    property bool fillWidth: true
+    property bool fillHeight: true
+
     property bool constrained: formFactor == PlasmaCore.Types.Vertical || formFactor == PlasmaCore.Types.Horizontal
 
     Locale {
@@ -35,7 +41,7 @@ Item {
         id: dataSource
         engine: "time"
         connectedSources: ["Local"]
-        interval: 300000
+        interval: plasmoid.configuration.showSeconds ? 500 : 300000
     }
 
     Components.Label  {
@@ -43,15 +49,24 @@ Item {
         font.bold: plasmoid.configuration.boldText
         font.italic: plasmoid.configuration.italicText
         font.pixelSize: Math.min(main.width/6, main.height)
+        style: Text.Raised; styleColor: "black"
         width: Math.max(paintedWidth,time.paintedWidth)
-        //FIXME: Fix enums in locale bindings.
+        //FIXME: Fix named enums in locale bindings.
+        opacity: 0.8
+        color: "white"
         text: {
-            if( plasmoid.configuration.showSeconds )
-                return locale.formatLocaleTime( dataSource.data["Local"]["Time"], Locale.TimeWithSeconds );
-            else
-                return locale.formatLocaleTime( dataSource.data["Local"]["Time"], Locale.TimeWithoutSeconds );
+            if( plasmoid.configuration.showSeconds ) {
+                print("WITH Seconds");
+                //return locale.formatLocaleTime( dataSource.data["Local"]["Time"], Locale.TimeWithSeconds );
+                return locale.formatLocaleTime( dataSource.data["Local"]["Time"], 0 );
+            } else {
+                print("Without Seconds");
+                //return locale.formatLocaleTime( dataSource.data["Local"]["Time"], Locale.TimeWithoutSeconds );
+                return locale.formatLocaleTime( dataSource.data["Local"]["Time"], 1);
+            }
         }
         horizontalAlignment: main.AlignHCenter
+        verticalAlignment: main.AlignVCenter
         anchors {
             centerIn: parent
         }
@@ -71,4 +86,32 @@ Item {
             }
         }
     }
+
+    function updateSize() {
+        //var maxSize = theme.smallestFont.pixelSize;
+        var maxSize = 0;
+        var threshold = theme.mSize(theme.defaultFont).height / 2;
+        var f = theme.defaultFont;
+        print(" STarting with:  " + theme.mSize(f).height);
+        var stop = false;
+        //var _ps = maxSize;
+        while (!stop) {
+            print(" maxSize.height: " + maxSize);
+            print("Main height: " + main.height);
+            if (maxSize + threshold >= main.height) {
+                stop = true;
+            }
+            maxSize = maxSize + 1;
+            //print("_ps = " + _ps);
+            //f.pointSize = _ps;
+
+        }
+        //maxSize = maxSize - 1;
+        print(" then with:  " + theme.mSize(f).height);
+        time.font.pixelSize = maxSize;
+        //if (time.paintedWidth)
+    }
+
+    onWidthChanged: updateSize()
+    onHeightChanged: updateSize()
 }
