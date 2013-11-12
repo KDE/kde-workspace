@@ -29,17 +29,36 @@ Item {
     property date showDate: new Date()
   
     property alias calendarGrid: calendarGrid
-    property rect mSize: theme.mSize(theme.defaultFont)
+    property int mWidth: theme.mSize(theme.defaultFont).width
+    property int mHeight: theme.mSize(theme.defaultFont).height
+
+    property int columns: monthCalendar.days
+    property int rows: 1 + monthCalendar.weeks
 
     property int cellWidth: prefCellWidth()
     property int cellHeight: prefCellHeight()
 
     function prefCellWidth() {
-        return Math.min( Math.max(theme.mSize(theme.defaultFont).width * 6, width / 8), theme.mSize(theme.defaultFont).width * 10 )
+        print("_______ root.mSize" + root.mWidth);
+        return Math.min(
+            Math.max(
+                mWidth * 6,
+                width / (root.columns + 1)
+            ),
+            mWidth * 10
+        )
     }
 
     function prefCellHeight() {
-        return Math.min( Math.max(theme.mSize(theme.defaultFont).height * 2, height / 9), theme.mSize(theme.defaultFont).height * 4 )
+        print("_______ root.mSize" + root.mHeight);
+        return Math.min(
+            Math.max(
+                mHeight * 2,
+                height / (root.rows + 2)
+            ),
+            mHeight * 4
+        )
+        //return Math.min( Math.max(theme.mSize(theme.defaultFont).height * 2, height / 9), theme.mSize(theme.defaultFont).height * 4 )
     }
 //     property real cellWidth: Math.min(Math.max(mSize.width * 6, width / 8), mSize.width * 10)
 //     property real cellHeight: Math.max(mSize.height * 2, height / 9)

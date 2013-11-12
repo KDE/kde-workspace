@@ -27,6 +27,7 @@ Item {
     Rectangle {
         id: frameTop
         height: borderWidth
+        width: root.columns * root.cellWidth
         color: theme.textColor
         opacity: borderOpacity
 //         visible: showtop
@@ -34,21 +35,37 @@ Item {
         anchors {
             top: parent.top
             left: calendarDays.left
-            right: calendarDays.right
+            //right: calendarDays.right
         }
     }
 
     Rectangle {
         id: frameLeft
         width: borderWidth
+        height: root.cellHeight * root.columns
         color: theme.textColor
         opacity: borderOpacity
-//         visible: showtop
+        //         visible: showtop
 
         anchors {
             right: calendarDays.left
             top: calendarDays.top
-            bottom: calendarDays.bottom
+            //bottom: calendarDays.bottom
+        }
+    }
+
+    Rectangle {
+        id: frameRight
+        width: borderWidth
+        height: root.cellHeight
+        color: theme.textColor
+        opacity: borderOpacity
+        //         visible: showtop
+
+        anchors {
+            right: frameTop.right
+            top: calendarDays.top
+            //bottom: calendarDays.bottom
         }
     }
 
@@ -62,7 +79,7 @@ Item {
         anchors {
             //top: parent.top
             left: calendarDays.left
-            right: calendarDays.right
+            right: frameTop.right
         }
     }
 

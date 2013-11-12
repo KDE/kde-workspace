@@ -58,19 +58,19 @@ Item {
         border.color: isToday(dayNumber+"/"+monthNumber+"/"+yearNumber) ? theme.highlightColor : "transparent"
     }
 
-    Rectangle {
-        id: frameTop
-        height: borderWidth
-        color: theme.textColor
-        opacity: borderOpacity
-        visible: showtop
-
-        anchors {
-            top: parent.top
-            left: parent.left
-            right: parent.right
-        }
-    }
+//     Rectangle {
+//         id: frameTop
+//         height: borderWidth
+//         color: theme.textColor
+//         opacity: borderOpacity
+//         visible: showtop
+//
+//         anchors {
+//             top: parent.top
+//             left: parent.left
+//             right: parent.right
+//         }
+//     }
 
     Rectangle {
         id: frameRight
@@ -100,19 +100,19 @@ Item {
         }
     }
 
-    Rectangle {
-        id: frameLeft
-        width: borderWidth
-        color: theme.textColor
-        opacity: borderOpacity
-        visible: showleft
-
-        anchors {
-            top: parent.top
-            left: parent.left
-            bottom: parent.bottom
-        }
-    }
+//     Rectangle {
+//         id: frameLeft
+//         width: borderWidth
+//         color: theme.textColor
+//         opacity: borderOpacity
+//         visible: showleft
+//
+//         anchors {
+//             top: parent.top
+//             left: parent.left
+//             bottom: parent.bottom
+//         }
+//     }
 
 
 
