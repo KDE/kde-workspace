@@ -1,5 +1,6 @@
 /*
  * Copyright 2013  Heena Mahour <heena393@gmail.com>
+ * Copyright 2013 Sebastian Kügler <sebas@kde.org>
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -20,8 +21,10 @@ import org.kde.plasma.components 2.0 as PlasmaComponents
 
 Item {
     id: main
-    property int minimumWidth: units.gridUnit * 80
-    property int minimumHeight: units.gridUnit * 40
+//     property int minimumWidth: units.gridUnit * 90
+//     property int minimumHeight: units.gridUnit * 30
+    property int minimumWidth: 360
+    property int minimumHeight: 280
     property int formFactor: plasmoid.formFactor
 
     PlasmaCore.DataSource {

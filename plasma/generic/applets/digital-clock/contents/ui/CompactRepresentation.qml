@@ -1,5 +1,6 @@
 /*
  * Copyright 2013  Heena Mahour <heena393@gmail.com>
+ * Copyright 2013 Sebastian Kügler <sebas@kde.org>
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -93,12 +94,12 @@ Item {
         var maxSize = 0;
         var threshold = theme.mSize(theme.defaultFont).height / 2;
         var f = theme.defaultFont;
-        print(" STarting with:  " + theme.mSize(f).height);
+//         print(" STarting with:  " + theme.mSize(f).height);
         var stop = false;
         //var _ps = maxSize;
         while (!stop) {
-            print(" maxSize.height: " + maxSize);
-            print("Main height: " + main.height);
+//             print(" maxSize.height: " + maxSize);
+//             print("Main height: " + main.height);
             if (maxSize + threshold >= main.height) {
                 stop = true;
             }
@@ -108,7 +109,7 @@ Item {
 
         }
         //maxSize = maxSize - 1;
-        print(" then with:  " + theme.mSize(f).height);
+//         print(" then with:  " + theme.mSize(f).height);
         time.font.pixelSize = maxSize;
         //if (time.paintedWidth)
     }

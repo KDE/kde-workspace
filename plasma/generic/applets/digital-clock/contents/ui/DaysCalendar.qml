@@ -1,5 +1,6 @@
 /*
  * Copyright 2013  Heena Mahour <heena393@gmail.com>
+ * Copyright 2013 Sebastian Kügler <sebas@kde.org>
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -19,57 +20,86 @@ import org.kde.plasma.calendar 2.0
 import org.kde.plasma.core 2.0 as PlasmaCore
 import org.kde.plasma.components 2.0 as Components
 import org.kde.plasma.extras 2.0 as PlasmaExtras
+Item {
+    property int borderWidth: 1
+    property real borderOpacity: 0.2
 
-Grid {
-    id: calendarDays
-    columns: monthCalendar.days 
-    rows: 1 + monthCalendar.weeks
-    spacing: 0
-    property Item selectedItem
-    property bool containsEventItems: false // FIXME
-    property bool containsTodoItems: false // FIXME
+    Rectangle {
+        id: frameTop
+        height: borderWidth
+        color: theme.textColor
+        opacity: borderOpacity
+//         visible: showtop
 
-    Repeater {
-        id: days
-        model: monthCalendar.days
-        Item {
-            width: cellWidth
-            height: cellHeight
-            Components.Label {
-                text: Qt.formatDate(new Date(showDate.getFullYear(), showDate.getMonth(), index - firstDay +1), "ddd");
-                horizontalAlignment: Text.AlignHCenter
-                anchors.centerIn: parent
-            }
+        anchors {
+            top: parent.top
+            left: calendarDays.left
+            right: calendarDays.right
         }
     }
 
-    Repeater {
-        id: repeater
-        model: monthCalendar.daysModel
-        Rectangle {
-            id: myRectangle
-            width: cellWidth
-            height: cellHeight
-            color: (dateMouse.containsMouse) ? "#eeeeee": "transparent"
-            border.color: isToday(dayNumber+"/"+monthNumber+"/"+yearNumber) ? "blue": calendarDays.selectedItem == myRectangle ? "black": "transparent"
-            Components.Label {
-                id: label
-                anchors.centerIn: parent
-                text: dayNumber
-                font.bold: (containsEventItems)||(containsTodoItems) ? true: false
-                opacity: (isPreviousMonth || isNextMonth || dateMouse.containsMouse) ? 0.5: 1.0
-            }
-            MouseArea {
-                id: dateMouse
-                anchors.fill: parent
-                hoverEnabled: true
-                onClicked: {
-                    var rowNumber = Math.floor ( index / 7)   ;
-                    week = 1+monthCalendar.weeksModel[rowNumber];
-                    date = dayNumber + "/" + monthNumber + "/" + yearNumber
-                    calendarDays.selectedItem = myRectangle
+    Rectangle {
+        id: frameLeft
+        width: borderWidth
+        color: theme.textColor
+        opacity: borderOpacity
+//         visible: showtop
+
+        anchors {
+            right: calendarDays.left
+            top: calendarDays.top
+            bottom: calendarDays.bottom
+        }
+    }
+
+    Rectangle {
+        id: frameSecond
+        height: borderWidth
+        color: theme.textColor
+        opacity: borderOpacity
+// //         visible: /*showtop*/
+        y: cellHeight - borderWidth
+        anchors {
+            //top: parent.top
+            left: calendarDays.left
+            right: calendarDays.right
+        }
+    }
+
+
+    Grid {
+        id: calendarDays
+        anchors.fill: parent
+        columns: monthCalendar.days
+        rows: 1 + monthCalendar.weeks
+        spacing: 0
+        property Item selectedItem
+        property bool containsEventItems: false // FIXME
+        property bool containsTodoItems: false // FIXME
+
+        Repeater {
+            id: days
+            model: monthCalendar.days
+            Item {
+                width: cellWidth
+                height: cellHeight
+                Components.Label {
+                    text: Qt.formatDate(new Date(showDate.getFullYear(), showDate.getMonth(), index - firstDay +1), "ddd");
+                    font: theme.smallestFont
+                    opacity: 0.2
+                    horizontalAlignment: Text.AlignHCenter
+                    verticalAlignment: Text.AlignBottom
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    anchors.bottom: parent.bottom
                 }
             }
+        }
+
+        Repeater {
+            id: repeater
+            model: monthCalendar.daysModel
+
+            DayDelegate {}
         }
     }
 }
