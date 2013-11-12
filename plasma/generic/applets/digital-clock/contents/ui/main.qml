@@ -18,7 +18,7 @@
 import QtQuick 2.0
 import org.kde.plasma.core 2.0 as PlasmaCore
 import org.kde.plasma.components 2.0 as PlasmaComponents
-import org.kde.plasma.calendar 2.0
+//import org.kde.plasma.calendar 2.0
 
 Item {
     id: main
@@ -28,6 +28,10 @@ Item {
     property int minimumHeight: 280
     property int formFactor: plasmoid.formFactor
 
+    property alias calendarLoader: calendarLoader
+
+    property Component compactRepresentation: DigitalClock { }
+
     PlasmaCore.DataSource {
         id: dataSource
         engine: "time"
@@ -35,21 +39,12 @@ Item {
         interval: 300000
     }
 
-    Component.onCompleted: {
-        var toolTipData = new Object;
-        toolTipData["image"] = "preferences-system-time"; 
-        toolTipData["mainText"] ="Current Time"
-        toolTipData["subText"] = Qt.formatDate( dataSource.data["Local"]["Date"],"dddd dd MMM yyyy" )+"\n"+Qt.formatTime( dataSource.data["Local"]["Time"], "HH:MM")
-        plasmoid.popupIconToolTip = toolTipData;
-        plasmoid.aspectRatioMode = ConstrainedSquare;
+
+    Loader {
+        id: calendarLoader
+        anchors.fill: parent
     }
 
-    MonthView {
-        id: calendar
-    }
-
-    property Component compactRepresentation: CompactRepresentation {
-    }
 
     Connections {
         target: plasmoid
@@ -60,5 +55,14 @@ Item {
                 minimumHeight=main.height/3.5
             }
         }
+    }
+
+    Component.onCompleted: {
+        var toolTipData = new Object;
+        toolTipData["image"] = "preferences-system-time";
+        toolTipData["mainText"] ="Current Time"
+        toolTipData["subText"] = Qt.formatDate( dataSource.data["Local"]["Date"],"dddd dd MMM yyyy" )+"\n"+Qt.formatTime( dataSource.data["Local"]["Time"], "HH:MM")
+        plasmoid.popupIconToolTip = toolTipData;
+        plasmoid.aspectRatioMode = ConstrainedSquare;
     }
 }

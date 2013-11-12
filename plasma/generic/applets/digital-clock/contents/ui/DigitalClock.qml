@@ -77,8 +77,14 @@ Item {
             id: mouseArea
             anchors.fill: parent
             hoverEnabled: true
-            onClicked: plasmoid.expanded = !plasmoid.expanded;
-
+            onClicked: {
+                plasmoid.expanded = !plasmoid.expanded;
+                if (calendarLoader.source == "") {
+                    calendarLoader.source = "CalendarView.qml"
+                } else {
+                    //menuLoader.source = ""
+                }
+            }
             PlasmaCore.ToolTip {
                 id: tooltip
                 target: time
