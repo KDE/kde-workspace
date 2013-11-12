@@ -65,6 +65,7 @@ Item {
         visible: root.debug;
         opacity: 0.2;
     }
+    
     SystemTray.Host {
         id: host
         //rootItem: hiddenView

@@ -18,6 +18,7 @@
 import QtQuick 2.0
 import org.kde.plasma.core 2.0 as PlasmaCore
 import org.kde.plasma.components 2.0 as PlasmaComponents
+import org.kde.plasma.calendar 2.0
 
 Item {
     id: main
@@ -43,7 +44,7 @@ Item {
         plasmoid.aspectRatioMode = ConstrainedSquare;
     }
 
-    CalendarPopup {
+    MonthView {
         id: calendar
     }
 
