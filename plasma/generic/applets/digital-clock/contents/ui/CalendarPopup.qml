@@ -31,37 +31,13 @@ Item {
     property alias calendarGrid: calendarGrid
     property int mWidth: theme.mSize(theme.defaultFont).width
     property int mHeight: theme.mSize(theme.defaultFont).height
+    property int borderWidth: 1
 
     property int columns: monthCalendar.days
     property int rows: 1 + monthCalendar.weeks
 
     property int cellWidth: prefCellWidth()
     property int cellHeight: prefCellHeight()
-
-    function prefCellWidth() {
-        print("_______ root.mSize" + root.mWidth);
-        return Math.min(
-            Math.max(
-                mWidth * 6,
-                width / (root.columns + 1)
-            ),
-            mWidth * 10
-        )
-    }
-
-    function prefCellHeight() {
-        print("_______ root.mSize" + root.mHeight);
-        return Math.min(
-            Math.max(
-                mHeight * 2,
-                height / (root.rows + 2)
-            ),
-            mHeight * 4
-        )
-        //return Math.min( Math.max(theme.mSize(theme.defaultFont).height * 2, height / 9), theme.mSize(theme.defaultFont).height * 4 )
-    }
-//     property real cellWidth: Math.min(Math.max(mSize.width * 6, width / 8), mSize.width * 10)
-//     property real cellHeight: Math.max(mSize.height * 2, height / 9)
 
     property int miniumWidth: implicitWidth
     property int miniumHeight: implicitHeight
@@ -75,6 +51,26 @@ Item {
     property int firstDay: new Date(showDate.getFullYear(), showDate.getMonth(), 1).getDay()
     
     anchors.margins: theme.largeSpacing * 3
+
+    function prefCellWidth() {
+        return Math.min(
+            Math.max(
+                mWidth * 4,
+                calendarGrid.width / (root.columns)
+            ),
+            mWidth * 100
+        )
+    }
+
+    function prefCellHeight() {
+        return Math.min(
+            Math.max(
+                mHeight * 1.5,
+                calendarGrid.height / (root.rows + 1)
+            ),
+            mHeight * 40
+        )
+    }
 
     function isToday(date) {
         if (date == Qt.formatDateTime(new Date(), "d/M/yyyy")) {
@@ -99,13 +95,14 @@ Item {
 
         anchors {
             top: parent.top
-            left: parent.left
+            left: calendarGrid.left
             right: parent.right
+            leftMargin: -borderWidth
         }
 
-        level: 2
+        level: 1
         opacity: 0.8
-        text: "Movember"
+        text: monthCalendar.monthName
     }
 
     Calendar {
@@ -116,7 +113,7 @@ Item {
         startDay: 1
         startDate: "2013-08-01"
         onStartDateChanged: {
-            monthHeading.text = monthName
+            //monthHeading.text = monthName
             month.text = monthName
             monthYear.text = year
         }
@@ -135,6 +132,8 @@ Item {
             right: parent.right
             bottom: calendarToolbar.top
             margins: theme.largeSpacing
+            bottomMargin: theme.largeSpacing * 3
+            topMargin: - (theme.largeSpacing / 2)
         }
 
     }

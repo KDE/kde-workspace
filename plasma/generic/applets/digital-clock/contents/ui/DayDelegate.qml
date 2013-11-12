@@ -31,6 +31,7 @@ DayStyle {
         id: label
         anchors.centerIn: parent
         //anchors.topMargin: 10
+        font.pixelSize: Math.max(theme.defaultFont.pixelSize, cellHeight / 3)
         text: dayNumber
         z: 99
         font.bold: (containsEventItems)||(containsTodoItems) ? true: false

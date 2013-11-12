@@ -21,7 +21,6 @@ import org.kde.plasma.core 2.0 as PlasmaCore
 import org.kde.plasma.components 2.0 as Components
 import org.kde.plasma.extras 2.0 as PlasmaExtras
 Item {
-    property int borderWidth: 1
     property real borderOpacity: 0.2
 
     Rectangle {
@@ -102,12 +101,14 @@ Item {
                 height: cellHeight
                 Components.Label {
                     text: Qt.formatDate(new Date(showDate.getFullYear(), showDate.getMonth(), index - firstDay +1), "ddd");
-                    font: theme.smallestFont
+                    font.pixelSize: Math.max(theme.smallestFont.pixelSize, root.cellHeight / 6)
+                    //font: theme.smallestFont
                     opacity: 0.2
                     horizontalAlignment: Text.AlignHCenter
                     verticalAlignment: Text.AlignBottom
                     anchors.horizontalCenter: parent.horizontalCenter
                     anchors.bottom: parent.bottom
+                    anchors.bottomMargin: borderWidth * 2
                 }
             }
         }

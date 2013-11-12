@@ -25,7 +25,7 @@ import org.kde.plasma.extras 2.0 as PlasmaExtras
 Item {
     id: dayStyle
 
-    property int borderWidth: 1
+    //property int borderWidth: root.borderWidth`
     property real borderOpacity: 0.2
 
     property bool showtop: false
