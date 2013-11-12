@@ -79,10 +79,15 @@ Item {
             hoverEnabled: true
             onClicked: {
                 plasmoid.expanded = !plasmoid.expanded;
-                if (calendarLoader.source == "") {
-                    calendarLoader.source = "CalendarView.qml"
-                } else {
-                    //menuLoader.source = ""
+                calTimer.start();
+            }
+            Timer {
+                id: calTimer
+                interval: 100
+                onTriggered: {
+                    if (calendarLoader.source == "") {
+                        calendarLoader.source = "CalendarView.qml"
+                    }
                 }
             }
             PlasmaCore.ToolTip {

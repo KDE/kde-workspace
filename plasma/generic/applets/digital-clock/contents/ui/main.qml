@@ -18,6 +18,7 @@
 import QtQuick 2.0
 import org.kde.plasma.core 2.0 as PlasmaCore
 import org.kde.plasma.components 2.0 as PlasmaComponents
+import org.kde.plasma.extras 2.0 as PlasmaExtras
 //import org.kde.plasma.calendar 2.0
 
 Item {
@@ -43,8 +44,33 @@ Item {
     Loader {
         id: calendarLoader
         anchors.fill: parent
+        opacity: (calendarLoader.status == Loader.Ready) ? 1 : 0
+        Behavior on opacity { NumberAnimation { duration: 200 } }
     }
 
+    PlasmaExtras.Heading {
+        id: loadingItem
+        ////text: Qt.formatDate(new Date());
+//         text: "Loading Calendar ..."
+        text: Qt.formatDate( dataSource.data["Local"]["Date"],"dddd, MMM d" )
+        anchors {
+            left: parent.left
+            top: parent.top
+            right: parent.right
+        }
+        opacity: (calendarLoader.status == Loader.Ready) ? 0 : 0.7
+        Behavior on opacity { NumberAnimation { duration: 200 } }
+    }
+
+    PlasmaComponents.Label {
+        anchors {
+            right: parent.right
+            bottom: parent.bottom
+        }
+        text: Qt.formatDateTime(new Date(), "yyyy")
+        font.pixelSize: parent.height / 6
+        opacity: loadingItem.opacity
+    }
 
     Connections {
         target: plasmoid
