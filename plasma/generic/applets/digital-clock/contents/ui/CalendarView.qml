@@ -234,20 +234,23 @@ Item {
             //text: monthCalendar.monthName + ", " + monthCalendar.year
             text: cal.isCurrentYear(monthView.date) ?  monthView.selectedMonth :  monthView.selectedMonth + ", " + monthView.selectedYear
             elide: Text.ElideRight
+            Loader {
+                id: menuLoader
+                property QtObject monthCalendar: monthView.calendar
+            }
             MouseArea {
-                id: month
+                id: monthMouse
                 width: monthHeading.paintedWidth
-    //             anchors {
-    //                 left: parent.left
-    //                 top: parent.top
-    //                 bottom: parent.bottom
-    //             }
-                anchors.fill: parent
-                Loader {
-                    id: menuLoader
-                    Rectangle { anchors.fill: parent; color: "green"; opacity: 0.2;  visible: debug;  }
+                //z: height
+                anchors {
+                    left: parent.left
+                    top: parent.top
+                    bottom: parent.bottom
                 }
+                //anchors.fill: parent
+                Rectangle { anchors.fill: parent; color: "green"; opacity: 0.2;  visible: true;  }
                 onClicked: {
+                    print("menu ...");
                     if (menuLoader.source == "") {
                         menuLoader.source = "MonthMenu.qml"
                     }
