@@ -25,8 +25,8 @@ Item {
     id: main
 //     property int minimumWidth: units.gridUnit * 90
 //     property int minimumHeight: units.gridUnit * 30
-    property int minimumWidth: 360
-    property int minimumHeight: 280
+    property int minimumWidth: 640
+    property int minimumHeight: 400
     property int formFactor: plasmoid.formFactor
 
     property alias calendarLoader: calendarLoader
@@ -46,6 +46,12 @@ Item {
         anchors.fill: parent
         opacity: (calendarLoader.status == Loader.Ready) ? 1 : 0
         Behavior on opacity { NumberAnimation { duration: 200 } }
+
+        onStatusChanged: {
+            if (status == Loader.Error) {
+                print("Error loading CalenderView.qml: " + sourceComponent.errorString())
+            }
+        }
     }
 
     PlasmaExtras.Heading {

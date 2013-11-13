@@ -16,7 +16,256 @@
  */
 import QtQuick 2.0
 import org.kde.plasma.calendar 2.0 as PlasmaCalendar
+import org.kde.plasma.components 2.0 as PlasmaComponents
+import org.kde.plasma.extras 2.0 as PlasmaExtras
 
-PlasmaCalendar.MonthView {
+Item {
     id: calendar
+
+    property int avWidth: (parent.width - (3 * theme.largeSpacing)) / 2
+    property int avHeight: parent.height - (2 * theme.largeSpacing)
+
+    //anchors.margins: theme.largeSpacing
+    property int spacing: theme.largeSpacing
+    property alias borderWidth: monthView.borderWidth
+    property alias monthView: monthView
+
+    property bool debug: false
+
+    Item {
+        id: agenda
+        property QtObject day
+
+        width: avWidth
+        anchors {
+            top: parent.top
+            left: parent.left
+            bottom: parent.bottom
+            leftMargin: spacing
+            topMargin: spacing
+            bottomMargin: spacing
+        }
+
+        Rectangle { anchors.fill: parent; color: "orange"; opacity: 0.2; visible: debug; }
+
+        function dateString(format) {
+            var d;
+            if (agenda.day != undefined) {
+                var day = agenda.day;
+                d = new Date(day.yearNumber, day.monthNumber-1, day.dayNumber);
+            } else {
+                d = new Date();
+            }
+            var o = Qt.formatDate(d, format);
+            return o;
+        }
+
+        Connections {
+            target: monthView
+            onDateChanged: {
+                print("Day change caught!");
+                var d = monthView.date;
+                for (var i = 0; i < d.length; i++) {
+                    print(" DD " + d[i]);
+                }
+                print(" date.day   " + d.dayNumber);
+                print(" date.month " + d.monthNumber);
+                print(" date.year  " + d.yearNumber);
+                agenda.day = d;
+            }
+        }
+
+        PlasmaComponents.Label {
+            id: dayLabel
+            height: dayHeading.height + dateHeading.height
+            width: paintedWidth
+            font.pixelSize: height
+            text: agenda.dateString("dd")
+            opacity: 0.3
+        }
+
+        PlasmaExtras.Heading {
+            id: dayHeading
+            //x: m
+            anchors {
+                top: parent.top
+                left: dayLabel.right
+                right: parent.right
+                leftMargin: spacing / 2
+            }
+            level: 1
+            opacity: 0.6
+            elide: Text.ElideRight
+            text: agenda.dateString("dddd")
+//             text: {
+//                 var day = agenda.day;
+//                 var d;
+//                 if (day != undefined) {
+//                     d = new Date(day.yearNumber, day.monthNumber-1, day.dayNumber);
+//                 } else {
+//                     d = new Date();
+//                 }
+//                 var o = Qt.formatDate(d, "dddd");
+//                 return o;
+//             }
+        }
+        PlasmaComponents.Label {
+            id: dateHeading
+            //font.pixelSize: dayLabel.paintedheight - dateHeading.paintedheight
+            anchors {
+                top: dayHeading.bottom
+                //bottom: dayLabel.bottom
+                left: dayLabel.right
+                //leftMargin: -borderWidth*2
+                right: parent.right
+                leftMargin: spacing / 2
+            }
+            opacity: 0.6
+            elide: Text.ElideRight
+            text: agenda.dateString("MMMM yyyy")
+//             text: {
+//                 var day = agenda.day;
+//                 var d;
+//                 if (day != undefined) {
+//                     d = new Date(day.yearNumber, day.monthNumber-1, day.dayNumber);
+//                 } else {
+//                     d = ne Date();
+//                 }
+//                 var o = Qt.formatDate(d, "MMM yyyy");
+//                 return o
+//             }
+        }
+
+        ListView {
+            id: eventList
+            anchors {
+                left: parent.left
+                right: parent.right
+                bottom: parent.bottom
+                top: parent.top
+                topMargin: monthView.cellHeight + dayHeading.height
+            }
+            //model: monthView.rows
+            model: [ 8, 10, 12, 14, 16, 18 ]
+
+            delegate: Item {
+                height: monthView.cellHeight
+                width: parent.width
+                Rectangle {
+                    height: monthView.borderWidth
+                    color: theme.textColor
+                    opacity: monthView.borderOpacity
+                    anchors {
+                        left: parent.left
+                        right: parent.right
+                        top: parent.top
+                        leftMargin: spacing
+                        rightMargin: spacing
+                    }
+                }
+
+                PlasmaComponents.Label {
+                    id: hourLabel
+                    height: paintedHeight
+                    font.pixelSize: monthView.cellHeight / 3
+                    opacity: .3
+                    anchors {
+                        right: minuteLabel.left
+                        verticalCenter: parent.verticalCenter
+                    }
+                    //text: eventList.model.get(index)
+                    text: modelData
+                }
+                PlasmaComponents.Label {
+                    id: minuteLabel
+                    x: theme.largeSpacing*2
+
+                    height: paintedHeight
+                    font.pixelSize: hourLabel.paintedHeight / 2
+                    opacity: hourLabel.opacity
+                    //font: theme.smallestFont
+                    anchors {
+                        top: hourLabel.top
+                    }
+                    text: "00"
+                }
+                Rectangle { anchors.fill: parent; color: "orange"; opacity: 0.2;  visible: debug;  }
+
+            }
+            Rectangle { anchors.fill: parent; color: "#4bd2ff"; opacity: 0.2;  visible: debug;  }
+        }
+
+    }
+    Item {
+        id: cal
+        width: avWidth
+        anchors {
+            top: parent.top
+            right: parent.right
+            bottom: parent.bottom
+            rightMargin: spacing
+            topMargin: spacing
+            bottomMargin: spacing
+        }
+
+        Rectangle { anchors.fill: parent; color: "orange"; opacity: 0.2;  visible: debug;  }
+
+        function isCurrentYear(date) {
+            var d = new Date();
+            print(" ????? " + Qt.formatDate(d, "yyyy") + " == " + date.yearNumber)
+            if (Qt.formatDate(d, "yyyy") == date.yearNumber) {
+                return true;
+            }
+            return false;
+        }
+
+        PlasmaExtras.Heading {
+            id: monthHeading
+
+            anchors {
+                top: parent.top
+                left: monthView.left
+//                 leftMargin: -borderWidth
+                right: monthView.right
+            }
+
+            level: 1
+            opacity: 0.6
+            //text: monthCalendar.monthName + ", " + monthCalendar.year
+            text: cal.isCurrentYear(monthView.date) ?  monthView.selectedMonth :  monthView.selectedMonth + ", " + monthView.selectedYear
+            elide: Text.ElideRight
+            MouseArea {
+                id: month
+                width: monthHeading.paintedWidth
+    //             anchors {
+    //                 left: parent.left
+    //                 top: parent.top
+    //                 bottom: parent.bottom
+    //             }
+                anchors.fill: parent
+                Loader {
+                    id: menuLoader
+                    Rectangle { anchors.fill: parent; color: "green"; opacity: 0.2;  visible: debug;  }
+                }
+                onClicked: {
+                    if (menuLoader.source == "") {
+                        menuLoader.source = "MonthMenu.qml"
+                    }
+                    menuLoader.item.open(0, height);
+                }
+            }
+        }
+
+        PlasmaCalendar.MonthView {
+            id: monthView
+            borderOpacity: 0.1
+            anchors {
+                top: monthHeading.bottom
+                left: parent.left
+                right: parent.right
+                bottom: parent.bottom
+            }
+        }
+
+    }
 }
