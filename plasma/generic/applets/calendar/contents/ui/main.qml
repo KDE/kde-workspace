@@ -22,10 +22,11 @@ import org.kde.plasma.calendar 2.0
 
 Item {
     id: main
-//     property int minimumWidth: units.gridUnit * 90
-//     property int minimumHeight: units.gridUnit * 30
-//     property int minimumWidth:
-//     property int minimumHeight: 280
+    //     property int minimumWidth: units.gridUnit * 90
+    //     property int minimumHeight: units.gridUnit * 30
+
+//     property int minimumWidth: 500
+//     property int minimumHeight: 500
     property int formFactor: plasmoid.formFactor
 
 //     PlasmaCore.DataSource {
@@ -48,19 +49,26 @@ Item {
         id: calendar
     }
 
-//     property Component compactRepresentation: PlasmaCore.IconItem {
-//         source: "view-calendar-agenda"
+//     property Component compactRepresentation: Item {
+//         width: main.minimumWidth
+//         height: main.minimumHeight
+//         Image {
+//             anchors.fill: parent
+//             source: "plasmapackage:/images/mini-calendar.svgz"
+//         }
+//         PlasmaCore.SvgItem {
+//             anchors.fill: parent
+//             elementId: "mini-calendar"
+//             svg: PlasmaCore.Svg {
+//                 imagePath: "plasmapackage:/images/mini-calendar.svgz"
+//
+//             }
+//
+//             PlasmaComponents.Label {
+//                 text: "14"
+//                 font: theme.smallestFont
+//                 anchors.centerIn: parent
+//             }
+//         }
 //     }
-
-/*
-    Connections {
-        target: plasmoid
-        onFormFactorChanged: {
-            main.formFactor = plasmoid.formFactor
-            if(main.formFactor==Planar || main.formFactor == MediaCenter ) {
-                minimumWidth=main.width/3.5
-                minimumHeight=main.height/3.5
-            }
-        }
-    }*/
 }
