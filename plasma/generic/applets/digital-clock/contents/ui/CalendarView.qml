@@ -248,9 +248,9 @@ Item {
                     bottom: parent.bottom
                 }
                 //anchors.fill: parent
-                Rectangle { anchors.fill: parent; color: "green"; opacity: 0.2;  visible: true;  }
+                Rectangle { anchors.fill: parent; color: "green"; opacity: 0.2;  visible: debug;  }
                 onClicked: {
-                    print("menu ...");
+                    //print("menu ...");
                     if (menuLoader.source == "") {
                         menuLoader.source = "MonthMenu.qml"
                     }
