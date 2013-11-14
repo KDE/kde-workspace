@@ -5,7 +5,6 @@
 
 include_directories(
    ${KDEBASE_WORKSPACE_SOURCE_DIR}/libs
-   ${QIMAGEBLITZ_INCLUDES}
    ${KDECLARATIVE_INCLUDE_DIR}
 )
 #
@@ -22,6 +21,7 @@ endif(NOT WIN32)
 #
 # ########### next target ###############
 #
+# include_directories(${QIMAGEBLITZ_INCLUDES})
 # set(ksmserver_KDEINIT_SRCS
 #    main.cpp
 #    server.cpp

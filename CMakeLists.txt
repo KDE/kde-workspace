@@ -105,7 +105,7 @@ set_package_properties(DBusMenuQt5 PROPERTIES DESCRIPTION "Support for notificat
 find_package(QImageBlitz)
 set_package_properties(QImageBlitz PROPERTIES DESCRIPTION "An image effects library"
                        URL "http://sourceforge.net/projects/qimageblitz"
-                       TYPE REQUIRED
+                       TYPE OPTIONAL
                       )
 
 # find_package(KDeclarative QUIET CONFIG)
