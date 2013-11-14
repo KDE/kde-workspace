@@ -32,7 +32,7 @@ target_link_libraries(plasma-overlay ${KDE4_PLASMA_LIBS} kworkspace  KIOCore KF5
                                      ${X11_X11_LIB} plasmagenericshell ${QT_QTDECLARATIVE_LIBRARY} kdeclarative)
 if(X11_Xrender_FOUND)
   target_link_libraries(plasma-overlay ${X11_Xrender_LIB})
-endif(X11_Xrender_FOUND)
+endif()
 set_target_properties(plasma-overlay PROPERTIES OUTPUT_NAME plasma-overlay)
 
 install(TARGETS plasma-overlay ${INSTALL_TARGETS_DEFAULT_ARGS})

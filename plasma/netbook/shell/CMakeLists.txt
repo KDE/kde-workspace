@@ -22,7 +22,7 @@ kf5_add_kdeinit_executable(plasma-netbook ${plasma-netbook_SRCS})
 target_link_libraries(kdeinit_plasma-netbook ${KDE4_PLASMA_LIBS} kworkspace KIOCore ${X11_LIBRARIES} KF5::KIOFileWidgets kephal plasmagenericshell ${QT_QTOPENGL_LIBRARY} ${QT_QTSCRIPT_LIBRARY})
 if(X11_Xrender_FOUND)
    target_link_libraries(kdeinit_plasma-netbook ${X11_Xrender_LIB})
-endif(X11_Xrender_FOUND)
+endif()
 
 install(TARGETS kdeinit_plasma-netbook DESTINATION ${LIB_INSTALL_DIR})
 install(TARGETS plasma-netbook ${INSTALL_TARGETS_DEFAULT_ARGS})

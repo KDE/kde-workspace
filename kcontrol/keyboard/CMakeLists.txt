@@ -4,9 +4,9 @@ CHECK_FUNCTION_EXISTS(_XiGetDevicePresenceNotifyEvent XiGetDevicePresenceNotifyE
 if( X11_Xinput_FOUND AND XiGetDevicePresenceNotifyEvent_EXISTS )
     set(XiGetDevicePresence_FOUND 1)
     ADD_DEFINITIONS(-DHAVE_XINPUT_AND_DEVICE_NOTIFY=1)
-else( X11_Xinput_FOUND AND XiGetDevicePresenceNotifyEvent_EXISTS )
+else()
     MESSAGE(STATUS "_XiGetDevicePresenceNotifyEvent is not found, libXi version 1.2.0 or later is required to keep layouts with keyboard hotplugging")
-endif( X11_Xinput_FOUND AND XiGetDevicePresenceNotifyEvent_EXISTS )
+endif()
 
 
 
@@ -53,11 +53,11 @@ target_link_libraries(kded_keyboard
 
 if(X11_XTest_FOUND)
   target_link_libraries(kded_keyboard ${X11_XTest_LIB})
-endif(X11_XTest_FOUND)
+endif()
 
 if(XiGetDevicePresence_FOUND)
   target_link_libraries(kded_keyboard ${X11_Xinput_LIB})
-endif(XiGetDevicePresence_FOUND)
+endif()
 
 install( TARGETS kded_keyboard DESTINATION ${PLUGIN_INSTALL_DIR} )
 install( FILES keyboard.desktop DESTINATION ${SERVICES_INSTALL_DIR}/kded )

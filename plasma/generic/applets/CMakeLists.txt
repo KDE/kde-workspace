@@ -3,7 +3,7 @@
    add_subdirectory(icon)
 #    add_subdirectory(lock_logout)
 #    add_subdirectory(panelspacer)
-# endif(${KDE_PLATFORM_PROFILE} STREQUAL "Desktop")
+# endif()
 #
 plasma_install_package(analog-clock org.kde.analogclock)
 
@@ -16,7 +16,7 @@ plasma_install_package(calendar org.kde.calendar)
 #
 # if(QT_QTWEBKIT_FOUND)
 #    add_subdirectory(webbrowser)
-# endif(QT_QTWEBKIT_FOUND)
+# endif()
 #
 if(NOT WIN32)
 #    add_subdirectory(system-monitor)
@@ -25,5 +25,5 @@ if(NOT WIN32)
     add_subdirectory(notifications)
     if(${KDE_PLATFORM_PROFILE} STREQUAL "Desktop")
         add_subdirectory(systemtray2)
-    endif(${KDE_PLATFORM_PROFILE} STREQUAL "Desktop")
-endif(NOT WIN32)
+    endif()
+endif()

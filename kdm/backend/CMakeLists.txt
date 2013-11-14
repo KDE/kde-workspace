@@ -29,22 +29,22 @@ if (XDMCP)
 		policy.c
 		xdmcp.c
 	)
-endif (XDMCP)
+endif ()
 if (HASXDMAUTH)
 	set(kdm_SRCS ${kdm_SRCS}
 		xdmauth.c
 	)
-endif (HASXDMAUTH)
+endif ()
 if (K5AUTH)
 	set(kdm_SRCS ${kdm_SRCS}
 		krb5auth.c
 	)
-endif (K5AUTH)
+endif ()
 if (SECURE_RPC)
 	set(kdm_SRCS ${kdm_SRCS}
 		rpcauth.c
 	)
-endif (SECURE_RPC)
+endif ()
 macro_add_file_dependencies(dm.h ${confci})
 macro_add_file_dependencies(error.c ${CMAKE_CURRENT_SOURCE_DIR}/printf.c)
 kde4_add_executable(kdm NOGUI ${kdm_SRCS})
@@ -64,18 +64,18 @@ target_link_libraries( kdm
 if (CKCONNECTOR_FOUND)
 	include_directories(${CKCONNECTOR_INCLUDE_DIR} ${DBUS_INCLUDE_DIR} ${DBUS_ARCH_INCLUDE_DIR})
 	target_link_libraries( kdm ${CKCONNECTOR_LIBRARIES} ${DBUS_LIBRARIES} )
-endif (CKCONNECTOR_FOUND)
+endif ()
 if(UTIL_LIBRARIES)
 	target_link_libraries( kdm ${UTIL_LIBRARIES} )
-endif(UTIL_LIBRARIES)
+endif()
 target_link_libraries( kdm ${POSIX4_LIBRARIES} )
 if(QT_RT_LIBRARY)
 	target_link_libraries( kdm ${QT_RT_LIBRARY} )
-endif(QT_RT_LIBRARY)
+endif()
 
 if(KDE4_ENABLE_FINAL)
         macro_add_file_dependencies(${CMAKE_CURRENT_BINARY_DIR}/kdm_final_cpp.cpp ${confci})
-endif(KDE4_ENABLE_FINAL)
+endif()
 
 add_dependencies( kdm ConfigCi )
 

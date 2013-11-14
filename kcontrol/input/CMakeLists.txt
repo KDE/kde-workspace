@@ -20,10 +20,10 @@ if(X11_Xcursor_FOUND)
     ../krdb/krdb.cpp )
   kde4_add_ui_files( libnoinst_SRCS xcursor/themepage.ui )
   include_directories( ${CMAKE_CURRENT_SOURCE_DIR}/xcursor/ )
-else(X11_Xcursor_FOUND)
+else()
   set( libnoinst_SRCS core/themepage.cpp )
   include_directories( ${CMAKE_CURRENT_SOURCE_DIR}/core/ )
-endif(X11_Xcursor_FOUND)
+endif()
 
 set(klauncher_xml ${KDE4_DBUS_INTERFACES_DIR}/org.kde.KLauncher.xml)
 qt5_add_dbus_interface(libnoinst_SRCS ${klauncher_xml} klauncher_iface)
@@ -39,7 +39,7 @@ kde4_add_executable(kapplymousetheme ${kapplymousetheme_SRCS})
 target_link_libraries(kapplymousetheme ${X11_Xrender_LIB} ${X11_X11_LIB})
 if (X11_Xcursor_FOUND)
    target_link_libraries(kapplymousetheme ${X11_Xcursor_LIB})
-endif (X11_Xcursor_FOUND)
+endif ()
 
 install(TARGETS kapplymousetheme ${INSTALL_TARGETS_DEFAULT_ARGS})
 
@@ -68,10 +68,10 @@ target_link_libraries(kcm_input
     )
 if (X11_Xcursor_FOUND)
    target_link_libraries(kcm_input ${X11_Xcursor_LIB})
-endif (X11_Xcursor_FOUND)
+endif ()
 if (X11_Xfixes_FOUND)
    target_link_libraries(kcm_input ${X11_Xfixes_LIB})
-endif (X11_Xfixes_FOUND)
+endif ()
 
 install(TARGETS kcm_input  DESTINATION ${PLUGIN_INSTALL_DIR} )
 
@@ -99,10 +99,10 @@ target_link_libraries(kcm_cursortheme
 
 if (X11_Xcursor_FOUND)
    target_link_libraries(kcm_cursortheme ${X11_Xcursor_LIB})
-endif (X11_Xcursor_FOUND)
+endif ()
 if (X11_Xfixes_FOUND)
    target_link_libraries(kcm_cursortheme ${X11_Xfixes_LIB})
-endif (X11_Xfixes_FOUND)
+endif ()
 
 install(TARGETS kcm_cursortheme  DESTINATION ${PLUGIN_INSTALL_DIR} )
 

@@ -58,6 +58,6 @@ if(LIBGPS_FOUND)
     target_link_libraries(plasma-geolocation-gps plasma-geolocation-interface ${LIBGPS_LIBRARIES})
     install(FILES plasma-geolocation-gps.desktop DESTINATION ${SERVICES_INSTALL_DIR})
     install(TARGETS plasma-geolocation-gps DESTINATION ${PLUGIN_INSTALL_DIR}/plasma/geolocationprovider)
-endif(LIBGPS_FOUND)
+endif()
 
 # -------------------------------------------------------------------------------------------------

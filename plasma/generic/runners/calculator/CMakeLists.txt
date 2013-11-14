@@ -15,7 +15,7 @@ if ( QALCULATE_FOUND )
     )
 
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${KDE4_ENABLE_EXCEPTIONS} -Wno-deprecated")
-endif( QALCULATE_FOUND )
+endif()
 
 set(krunner_calculatorrunner_SRCS
     calculatorrunner.cpp
@@ -24,10 +24,10 @@ set(krunner_calculatorrunner_SRCS
 if ( QALCULATE_FOUND )
     kde4_add_plugin(krunner_calculatorrunner ${qalculate_engine_SRCS} ${krunner_calculatorrunner_SRCS})
     target_link_libraries(krunner_calculatorrunner ${QALCULATE_LIBRARIES} ${CLN_LIBRARIES} ${KDE4_SOLID_LIBS} KIOCore ${KDE4_KDEUI_LIBS} ${KDE4_PLASMA_LIBS} )
-else ( QALCULATE_FOUND )
+else ()
     kde4_add_plugin(krunner_calculatorrunner ${krunner_calculatorrunner_SRCS})
     target_link_libraries(krunner_calculatorrunner ${KDE4_KDEUI_LIBS} ${QT_QTSCRIPT_LIBRARY} ${KDE4_PLASMA_LIBS})	
-endif ( QALCULATE_FOUND )
+endif ()
 
 install(TARGETS krunner_calculatorrunner DESTINATION ${PLUGIN_INSTALL_DIR} )
 

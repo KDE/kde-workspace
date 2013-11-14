@@ -27,7 +27,7 @@ target_link_libraries(kcm_style
     KF5::KDE4Support ${KDE4_KNEWSTUFF3_LIBS})
 if(NOT WIN32)
     target_link_libraries(kcm_style kdecorations)
-endif(NOT WIN32)
+endif()
 
 install(TARGETS kcm_style  DESTINATION ${PLUGIN_INSTALL_DIR})
 

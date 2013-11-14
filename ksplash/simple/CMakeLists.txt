@@ -13,7 +13,7 @@ target_link_libraries(ksplashsimple  ${X11_LIBRARIES} )
 
 if (X11_Xinerama_FOUND)
    target_link_libraries(ksplashsimple  ${X11_Xinerama_LIB} )
-endif (X11_Xinerama_FOUND)
+endif ()
 
 
 install(TARGETS ksplashsimple ${INSTALL_TARGETS_DEFAULT_ARGS})

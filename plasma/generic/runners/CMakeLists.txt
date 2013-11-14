@@ -12,12 +12,12 @@ add_subdirectory(windowedwidgets)
 
 if(NepomukCore_FOUND)
   add_subdirectory(nepomuksearch)
-endif(NepomukCore_FOUND)
+endif()
 
 if(NOT WIN32)
 add_subdirectory(powerdevil)
 add_subdirectory(sessions)
 add_subdirectory(windows)
 add_subdirectory(kill)
-endif(NOT WIN32)
+endif()
 

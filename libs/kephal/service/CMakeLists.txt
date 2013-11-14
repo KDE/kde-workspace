@@ -48,7 +48,7 @@ if(Q_WS_X11 AND XRANDR_1_2_FOUND)
       xrandr12/randrdisplay.cpp
       xrandroutputs.cpp
       )
-endif(Q_WS_X11 AND XRANDR_1_2_FOUND)
+endif()
 
 #QT4_GENERATE_DBUS_INTERFACE(dbus/dbusapi_screens.h org.kde.Kephal.Screens.xml)
 #QT4_GENERATE_DBUS_INTERFACE(dbus/dbusapi_outputs.h org.kde.Kephal.Outputs.xml)

@@ -6,7 +6,7 @@
 
 if (NOT KDE4_KPTY_BUILT_WITH_UTEMPTER)
     set(BUILD_AS_EXECUTABLE 1)
-endif (NOT KDE4_KPTY_BUILT_WITH_UTEMPTER)
+endif ()
 
 configure_file(config-kwrited.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/config-kwrited.h)
 
@@ -22,23 +22,23 @@ if (BUILD_AS_EXECUTABLE)
                if (EXISTS /etc/debian_version)
                    set(SETGID 1)
                    set(SETGID_GROUP utmp)
-               endif (EXISTS /etc/debian_version)
+               endif ()
 
                if (SETGID)
                    execute_process(COMMAND sh -c \"chgrp \${SETGID_GROUP} '\${KWRITED_PATH}' && chmod g+s '\${KWRITED_PATH}'\")
-               else (SETGID)
+               else ()
                    execute_process(COMMAND sh -c \"chown root '\${KWRITED_PATH}' && chmod u+s '\${KWRITED_PATH}'\")
-               endif(SETGID)
+               endif()
            ")
 
     install(FILES kwrited-autostart.desktop DESTINATION ${AUTOSTART_INSTALL_DIR})
-else (BUILD_AS_EXECUTABLE)
+else ()
     kde4_add_plugin(kded_kwrited kwrited.cpp)
     target_link_libraries(kded_kwrited  ${KDE4_KDEUI_LIBS} ${KDE4_KPTY_LIBS})
     install(TARGETS kded_kwrited  DESTINATION ${PLUGIN_INSTALL_DIR} )
 
     install(FILES kwrited.desktop DESTINATION ${SERVICES_INSTALL_DIR}/kded)
-endif (BUILD_AS_EXECUTABLE)
+endif ()
 
 # The .notifyrc file is common
 install(FILES kwrited.notifyrc DESTINATION ${DATA_INSTALL_DIR}/kwrited)

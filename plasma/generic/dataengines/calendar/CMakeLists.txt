@@ -16,7 +16,7 @@ if(Akonadi_FOUND)
     set(calendar_engine_srcs ${calendar_engine_srcs}
         eventdatacontainer.cpp
     )
-endif(Akonadi_FOUND)
+endif()
 
 plasma_add_plugin(plasma_engine_calendar ${calendar_engine_srcs})
 
@@ -37,7 +37,7 @@ if(Akonadi_FOUND)
         ${KDE4_AKONADI_LIBS}
         ${KDEPIMLIBS_AKONADI_KCAL_LIBS}
     )
-endif(Akonadi_FOUND)
+endif()
 
 install(TARGETS plasma_engine_calendar DESTINATION ${PLUGIN_INSTALL_DIR}/plasma/dataengine)
 install(FILES plasma-dataengine-calendar.desktop DESTINATION ${SERVICES_INSTALL_DIR})

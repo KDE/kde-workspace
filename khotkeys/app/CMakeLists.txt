@@ -16,7 +16,7 @@ target_link_libraries(kded_khotkeys
 # I'm not sure if this is needed anymore. Check it
 if(X11_XTest_FOUND)
     target_link_libraries(kded_khotkeys ${X11_XTest_LIB})
-endif(X11_XTest_FOUND)
+endif()
 
 
 ########### install files ###############

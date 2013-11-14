@@ -1,7 +1,7 @@
 
 # if(${KDE_PLATFORM_PROFILE} STREQUAL "Desktop")
 # add_subdirectory( kcm )
-# endif(${KDE_PLATFORM_PROFILE} STREQUAL "Desktop")
+# endif()
 
 include_directories(
    ${KDEBASE_WORKSPACE_SOURCE_DIR}/libs
@@ -14,7 +14,7 @@ if(NOT WIN32)
    add_subdirectory( screenlocker )
    set(COMPILE_SCREEN_LOCKER 1)
    set(SCREEN_LOCKER "screenlocker_static")
-endif(NOT WIN32)
+endif()
 #
 # check_library_exists(ICE _IceTransNoListen "" HAVE__ICETRANSNOLISTEN)
 # configure_file(config-ksmserver.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/config-ksmserver.h)
@@ -39,7 +39,7 @@ endif(NOT WIN32)
 #
 # if (HAVE_MMMX)
 #    SET_SOURCE_FILES_PROPERTIES(fadeeffect.cpp PROPERTIES COMPILE_FLAGS -mmmx)
-# endif (HAVE_MMMX)
+# endif ()
 #
 # set(kcminit_adaptor ${CMAKE_CURRENT_SOURCE_DIR}/../kcminit/main.h)
 # set(kcminit_xml ${CMAKE_CURRENT_BINARY_DIR}/org.kde.KCMinit.xml)

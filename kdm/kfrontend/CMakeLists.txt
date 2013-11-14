@@ -59,24 +59,24 @@ if (XDMCP)
 		kchooser.cpp
 		kchooser.h
 	)
-endif (XDMCP)
+endif ()
 
 if (WITH_KDM_XCONSOLE)
 	set(kdm_greet_SRCS ${kdm_greet_SRCS}
 		kconsole.cpp
 		kconsole.h
 	)
-endif (WITH_KDM_XCONSOLE)
+endif ()
 
 macro_add_file_dependencies(kdmconfig.h ${confci})
 kde4_add_executable(kdm_greet ${kdm_greet_SRCS})
 target_link_libraries(kdm_greet ${KDE4_KDEUI_LIBS} ${QT_QTXML_LIBRARY} ${X11_X11_LIB} ${POSIX4_LIBRARIES})
 if (X11_XTest_FOUND)
   target_link_libraries(kdm_greet ${X11_XTest_LIB})
-endif (X11_XTest_FOUND)
+endif ()
 if (WITH_KDM_XCONSOLE)
   target_link_libraries(kdm_greet ${KDE4_KPTY_LIBS})
-endif (WITH_KDM_XCONSOLE)
+endif ()
 
 install(TARGETS kdm_greet DESTINATION ${LIBEXEC_INSTALL_DIR})
 

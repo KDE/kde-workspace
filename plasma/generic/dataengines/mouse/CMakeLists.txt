@@ -6,13 +6,13 @@ set(mouse_engine_SRCS
 
 if (X11_Xfixes_FOUND)
     set(mouse_engine_SRCS ${mouse_engine_SRCS} cursornotificationhandler.cpp)
-endif (X11_Xfixes_FOUND)
+endif ()
 
 plasma_add_plugin(plasma_engine_mouse ${mouse_engine_SRCS})
 target_link_libraries(plasma_engine_mouse ${KDE4_KDEUI_LIBS} KF5::Plasma ${X11_LIBRARIES})
 if (X11_Xfixes_FOUND)
 	target_link_libraries(plasma_engine_mouse ${X11_Xfixes_LIB})
-endif (X11_Xfixes_FOUND)
+endif ()
 
 install(TARGETS plasma_engine_mouse DESTINATION ${PLUGIN_INSTALL_DIR}/plasma/dataengine)
 install(FILES plasma-dataengine-mouse.desktop DESTINATION ${SERVICES_INSTALL_DIR} )

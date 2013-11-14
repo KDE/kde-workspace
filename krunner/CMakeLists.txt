@@ -44,9 +44,9 @@ kde4_add_kcfg_files(krunner_SRCS ${krunner_KCFG_SRCS})
 qt4_add_dbus_adaptor(krunner_SRCS ${krunner_dbusAppXML} krunnerapp.h KRunnerApp)
 if(WIN32)
 	set(BIN_PREFIX bin)
-else(WIN32)
+else()
 	set(BIN_PREFIX ${CMAKE_INSTALL_PREFIX}/bin)
-endif(WIN32)
+endif()
 
 dbus_add_activation_service(dbus/org.kde.krunner.service.in)
 
@@ -56,7 +56,7 @@ set(krunner_SRCS
     ksystemactivitydialog.cpp
     startupid.cpp)
 
-endif(NOT WIN32)
+endif()
 
 kf5_add_kdeinit_executable(krunner ${krunner_SRCS})
 
@@ -64,15 +64,15 @@ target_link_libraries(kdeinit_krunner kworkspace  plasmagenericshell ${KDE4_PLAS
 
 if(NOT WIN32)
   target_link_libraries(kdeinit_krunner processui  ${X11_Xrender_LIB} ${X11_LIBRARIES})
-endif(NOT WIN32)
+endif()
 
 if(X11_Xss_LIB)
   target_link_libraries(kdeinit_krunner ${X11_Xss_LIB})
-endif(X11_Xss_LIB)
+endif()
 
 if(X11_Xcursor_FOUND)
   target_link_libraries(kdeinit_krunner ${X11_Xcursor_LIB})
-endif(X11_Xcursor_FOUND)
+endif()
 
 install(TARGETS kdeinit_krunner ${INSTALL_TARGETS_DEFAULT_ARGS} )
 install(TARGETS krunner         ${INSTALL_TARGETS_DEFAULT_ARGS} )

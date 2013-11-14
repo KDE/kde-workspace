@@ -256,9 +256,9 @@ if(NOT WIN32)
   configure_file(config-X11.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/config-X11.h )
   if(NOT CMAKE_INSTALL_PREFIX STREQUAL "/usr")
     set(EXPORT_XCURSOR_PATH "XCURSOR_PATH=${CMAKE_INSTALL_PREFIX}/share/icons:$XCURSOR_PATH\":~/.icons:/usr/share/icons:/usr/share/pixmaps:/usr/X11R6/lib/X11/icons\"; export XCURSOR_PATH")
-  endif(NOT CMAKE_INSTALL_PREFIX STREQUAL "/usr")
+  endif()
   configure_file(startkde.cmake ${CMAKE_CURRENT_BINARY_DIR}/startkde  @ONLY)
-endif(NOT WIN32)
+endif()
 configure_file(config-workspace.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/config-workspace.h )
 
 add_definitions(${QT_DEFINITIONS} ${KDE4_DEFINITIONS} -DHAVE_CONFIG_H=1)
@@ -281,7 +281,7 @@ add_subdirectory(libs)
  # system settings (kcontrol replacement)
 if(${KDE_PLATFORM_PROFILE} STREQUAL "Desktop")
    ecm_optional_add_subdirectory( systemsettings )
-endif(${KDE_PLATFORM_PROFILE} STREQUAL "Desktop")
+endif()
 #
 # # core apps
 if(NOT WIN32)
@@ -297,8 +297,8 @@ if(NOT WIN32)
 #    macro_optional_add_subdirectory( qguiplatformplugin_kde )
    if (NOT CMAKE_SYSTEM_NAME MATCHES Darwin)
 #       macro_optional_add_subdirectory( ksysguard )
-   endif (NOT CMAKE_SYSTEM_NAME MATCHES Darwin)
-endif(NOT WIN32)
+   endif ()
+endif()
 #
 if(${KDE_PLATFORM_PROFILE} STREQUAL "Desktop")
    ecm_optional_add_subdirectory(kcontrol)
@@ -323,19 +323,19 @@ if(${KDE_PLATFORM_PROFILE} STREQUAL "Desktop")
 #       macro_optional_add_subdirectory(kwrited)
 #       macro_optional_add_subdirectory(ksystraycmd)
       ecm_optional_add_subdirectory(appmenu)
-   endif(NOT WIN32)
+   endif()
 #
    if(X11_Xau_FOUND AND X11_Xdmcp_FOUND)
 #       macro_optional_add_subdirectory( kdm )
-   else(X11_Xau_FOUND AND X11_Xdmcp_FOUND)
+   else()
 #       message(STATUS "Xau lib or Xdmcp lib was missing. kdm will not compile")
-   endif(X11_Xau_FOUND AND X11_Xdmcp_FOUND)
-endif(${KDE_PLATFORM_PROFILE} STREQUAL "Desktop")
+   endif()
+endif()
 #
 if(NOT WIN32)
     # data
     ecm_optional_add_subdirectory(cursors)
-endif(NOT WIN32)
+endif()
 #
 ecm_optional_add_subdirectory(plasma)
 # macro_optional_add_subdirectory(statusnotifierwatcher)
@@ -344,7 +344,7 @@ ecm_optional_add_subdirectory(kstyles)
 # ########### install files ###############
 if(NOT WIN32)
 #   install(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/startkde DESTINATION ${BIN_INSTALL_DIR})
-endif(NOT WIN32)
+endif()
 
 feature_summary(WHAT ALL INCLUDE_QUIET_PACKAGES FATAL_ON_MISSING_REQUIRED_PACKAGES)
 
@@ -362,9 +362,9 @@ feature_summary(WHAT ALL INCLUDE_QUIET_PACKAGES FATAL_ON_MISSING_REQUIRED_PACKAG
 macro(MAKE_INSTALL_PATH_ABSOLUTE out in)
    if (IS_ABSOLUTE "${in}")    # IS_ABSOLUTE is new since cmake 2.4.8
       set(${out} "${in}")
-   else (IS_ABSOLUTE "${in}")
+   else ()
       set(${out} "\${KDE4WORKSPACE_INSTALL_DIR}/${in}")
-   endif (IS_ABSOLUTE "${in}")
+   endif ()
 endmacro(MAKE_INSTALL_PATH_ABSOLUTE out in)
 
 make_install_path_absolute(KDE4WORKSPACE_LIB_DIR     ${LIB_INSTALL_DIR})
@@ -412,7 +412,7 @@ set(_KDE4WorkspaceConfig_INSTALL_DIR ${LIB_INSTALL_DIR}/KDE4Workspace/cmake)
 # option to have kdepimlibs install its Config file there. Alex
 if(KDE4_USE_COMMON_CMAKE_PACKAGE_CONFIG_DIR)
    set(_KDE4WorkspaceConfig_INSTALL_DIR ${LIB_INSTALL_DIR}/cmake/KDE4Workspace)
-endif(KDE4_USE_COMMON_CMAKE_PACKAGE_CONFIG_DIR)
+endif()
 
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/KDE4WorkspaceConfig.cmake
               ${CMAKE_CURRENT_BINARY_DIR}/KDE4WorkspaceConfigVersion.cmake

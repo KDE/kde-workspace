@@ -14,7 +14,7 @@ python_install(pywallpaper.py ${DATA_INSTALL_DIR}/plasma_scriptengine_python)
 # recently been added to FindPYthonLib.cmake and should be used as install destination). Alex
 if(NOT PYTHON_SITE_PACKAGES_INSTALL_DIR)
   set(PYTHON_SITE_PACKAGES_INSTALL_DIR ${PYTHON_SITE_PACKAGES_DIR} )
-endif(NOT PYTHON_SITE_PACKAGES_INSTALL_DIR)
+endif()
 
 python_install(plasmascript.py ${PYTHON_SITE_PACKAGES_INSTALL_DIR}/PyKDE4)
 
@@ -38,4 +38,4 @@ if(INSTALL_PYTHON_TEST_PLASMA )
  #TODO where install it ?
  #install(DIRECTORY test/plasma-dataengine-pytime DESTINATION ${DATA_INSTALL_DIR}/plasma/engines)
 
-endif(INSTALL_PYTHON_TEST_PLASMA)
+endif()

@@ -18,7 +18,7 @@ kde4_add_executable(kcheckpass NOGUI ${kcheckpass_SRCS})
 if (KDE4_ENABLE_FPIE)
     set_property(TARGET kcheckpass APPEND_STRING PROPERTY COMPILE_FLAGS " ${KDE4_CXX_FPIE_FLAGS}")
     set_property(TARGET kcheckpass APPEND_STRING PROPERTY LINK_FLAGS " ${KDE4_PIE_LDFLAGS}")
-endif (KDE4_ENABLE_FPIE)
+endif ()
 
 set_property(TARGET kcheckpass APPEND_STRING PROPERTY COMPILE_FLAGS " -U_REENTRANT")
 target_link_libraries(kcheckpass ${UNIXAUTH_LIBRARIES} ${SOCKET_LIBRARIES})

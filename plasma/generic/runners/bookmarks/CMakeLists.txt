@@ -6,7 +6,7 @@ if(QJSON_FOUND)
     # which is preferred to our FindQJSON.cmake. Make sure this does not break the build.
     set(EXTERNAL_LIBS ${EXTERNAL_LIBS} ${QJSON_LIBRARIES} ${qjson_LIBRARIES} )
     include_directories(${QJSON_INCLUDE_DIR} ${qjson_INCLUDE_DIR})
-endif(QJSON_FOUND)
+endif()
 
 set(krunner_bookmarksrunner_SRCS
     browserfactory.cpp
@@ -26,7 +26,7 @@ set(krunner_bookmarksrunner_SRCS
     browsers/chromefindprofile.cpp
     browsers/chrome.cpp
 )
-endif(QJSON_FOUND)
+endif()
 
 
 kde4_add_plugin(krunner_bookmarksrunner ${krunner_bookmarksrunner_SRCS})
@@ -42,4 +42,4 @@ install(FILES plasma-runner-bookmarks.desktop DESTINATION ${SERVICES_INSTALL_DIR
 # Currently tests include only chrome, so no need to get include them if json is not found
 if(QJSON_FOUND)
     add_subdirectory(tests)
-endif(QJSON_FOUND)
+endif()

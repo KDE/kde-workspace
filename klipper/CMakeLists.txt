@@ -25,7 +25,7 @@ set_package_properties(Prison PROPERTIES DESCRIPTION "Prison library"
 if (PRISON_FOUND)
     add_definitions(-DHAVE_PRISON)
     include_directories(${PRISON_INCLUDE_DIR})
-endif (PRISON_FOUND)
+endif ()
 
 
 kde4_add_app_icon(libklipper_common_SRCS "${KDE4_ICON_INSTALL_DIR}/oxygen/*/apps/klipper.png")
@@ -40,10 +40,10 @@ kf5_add_kdeinit_executable(klipper ${klipper_KDEINIT_SRCS})
 target_link_libraries(kdeinit_klipper ${KDE4_KDEUI_LIBS} ${X11_LIBRARIES} ${ZLIB_LIBRARY})
 if (X11_Xfixes_FOUND)
   target_link_libraries(kdeinit_klipper ${X11_Xfixes_LIB})
-endif (X11_Xfixes_FOUND)
+endif ()
 if (PRISON_FOUND)
   target_link_libraries(kdeinit_klipper ${PRISON_LIBRARIES})
-endif (PRISON_FOUND)
+endif ()
 
 install(TARGETS kdeinit_klipper ${INSTALL_TARGETS_DEFAULT_ARGS})
 install(TARGETS klipper         ${INSTALL_TARGETS_DEFAULT_ARGS})
@@ -53,4 +53,4 @@ install(PROGRAMS klipper.desktop DESTINATION ${AUTOSTART_INSTALL_DIR})
 
 if(NOT WIN32)
   install( FILES klipper-kconfigxt.upd DESTINATION  ${KCONF_UPDATE_INSTALL_DIR} )
-endif(NOT WIN32)
+endif()
