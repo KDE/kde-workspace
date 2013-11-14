@@ -455,13 +455,14 @@ void KCMStyle::save()
     if (style == "ButtonVertical") {
         KConfig _kwinConfig("kwinrc", KConfig::NoGlobals);
         KConfigGroup kwinConfig(&_kwinConfig, "Style");
-        QString buttonsOnLeft = kwinConfig.readEntry("ButtonsOnLeft", KDecorationOptions::defaultTitleButtonsLeft());
-        QString buttonsOnRight = kwinConfig.readEntry("ButtonsOnRight", KDecorationOptions::defaultTitleButtonsRight());
-        qDebug() << buttonsOnLeft << buttonsOnRight;
-        if (!buttonsOnLeft.contains("N") && !buttonsOnRight.contains("N")) {
-            buttonsOnLeft = "N" + buttonsOnLeft;
+        auto buttonsOnLeft = KDecorationOptions::readDecorationButtons(kwinConfig, "ButtonsOnLeft",
+                                                                       KDecorationOptions::defaultTitleButtonsLeft());
+        const auto buttonsOnRight = KDecorationOptions::readDecorationButtons(kwinConfig, "ButtonsOnRight",
+                                                                              KDecorationOptions::defaultTitleButtonsRight());
+        if (!buttonsOnLeft.contains(KDecorationDefines::DecorationButtonApplicationMenu) && !buttonsOnRight.contains(KDecorationDefines::DecorationButtonApplicationMenu)) {
+            buttonsOnLeft.prepend(KDecorationDefines::DecorationButtonApplicationMenu);
         }
-        kwinConfig.writeEntry("ButtonsOnLeft", buttonsOnLeft);
+        KDecorationOptions::writeDecorationButtons(kwinConfig, "ButtonsOnLeft", buttonsOnLeft);
         kwinConfig.writeEntry("CustomButtonPositions", "true");
     }
 #endif
