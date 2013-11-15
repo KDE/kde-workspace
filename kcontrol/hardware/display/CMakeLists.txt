@@ -6,7 +6,7 @@
 set(kcm_display_PART_SRCS display.cpp )
 
 
-kde4_add_plugin(kcm_display ${kcm_display_PART_SRCS})
+add_library(kcm_display MODULE ${kcm_display_PART_SRCS})
 
 
 target_link_libraries(kcm_display

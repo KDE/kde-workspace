@@ -11,7 +11,7 @@ set(kcm_joystick_PART_SRCS
    caldialog.cpp )
 
 
-kde4_add_plugin(kcm_joystick ${kcm_joystick_PART_SRCS})
+add_library(kcm_joystick MODULE ${kcm_joystick_PART_SRCS})
 
 
 target_link_libraries(kcm_joystick

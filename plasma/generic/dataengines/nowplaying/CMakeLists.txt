@@ -15,7 +15,7 @@ set(nowplaying_engine_SRCS
     playerinterface/mpris2/mpris2.cpp
 )
 
-qt4_add_dbus_interface(nowplaying_engine_SRCS playerinterface/org.kde.juk.player.xml juk_interface)
+qt5_add_dbus_interface(nowplaying_engine_SRCS playerinterface/org.kde.juk.player.xml juk_interface)
 
 set(mpris_player_desc playerinterface/mpris/org.freedesktop.MediaPlayer.player.xml)
 set_source_files_properties(${mpris_player_desc} PROPERTIES
@@ -23,7 +23,7 @@ set_source_files_properties(${mpris_player_desc} PROPERTIES
    INCLUDE "playerinterface/mpris/mprisdbustypes.h"
    CLASSNAME MprisPlayer
 )
-qt4_add_dbus_interface(nowplaying_engine_SRCS ${mpris_player_desc} mprisplayer)
+qt5_add_dbus_interface(nowplaying_engine_SRCS ${mpris_player_desc} mprisplayer)
 
 if(GLIB2_FOUND)
    macro_optional_find_package(Xmms)
@@ -44,8 +44,8 @@ endif()
 
 configure_file(config-nowplaying.cmake ${CMAKE_CURRENT_BINARY_DIR}/config-nowplaying.h)
 
-plasma_add_plugin(plasma_engine_nowplaying ${nowplaying_engine_SRCS})
-target_link_libraries(plasma_engine_nowplaying KIOCore KF5::Plasma ${QT_QTGUI_LIBRARY})
+add_library(plasma_engine_nowplaying MODULE ${nowplaying_engine_SRCS})
+target_link_libraries(plasma_engine_nowplaying KIOCore KF5::Plasma Qt5::Gui)
 if(XMMS_FOUND)
    target_link_libraries(plasma_engine_nowplaying ${XMMS_LDFLAGS})
 endif()

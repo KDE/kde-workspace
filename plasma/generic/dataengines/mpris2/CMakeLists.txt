@@ -17,9 +17,9 @@ set_source_files_properties(
    org.mpris.MediaPlayer2.xml
    PROPERTIES
    NO_NAMESPACE ON)
-qt4_add_dbus_interface(mpris2_engine_SRCS org.freedesktop.DBus.Properties.xml dbusproperties)
-qt4_add_dbus_interface(mpris2_engine_SRCS org.mpris.MediaPlayer2.Player.xml mprisplayer)
-qt4_add_dbus_interface(mpris2_engine_SRCS org.mpris.MediaPlayer2.xml mprisroot)
+qt5_add_dbus_interface(mpris2_engine_SRCS org.freedesktop.DBus.Properties.xml dbusproperties)
+qt5_add_dbus_interface(mpris2_engine_SRCS org.mpris.MediaPlayer2.Player.xml mprisplayer)
+qt5_add_dbus_interface(mpris2_engine_SRCS org.mpris.MediaPlayer2.xml mprisroot)
 
 plasma_add_plugin(plasma_engine_mpris2 ${mpris2_engine_SRCS})
 target_link_libraries(plasma_engine_mpris2

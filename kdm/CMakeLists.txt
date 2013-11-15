@@ -22,7 +22,7 @@ add_custom_command(
 add_custom_target(ConfigCi DEPENDS ${confci})
 
 ### this is *only* for the kdm home page maintainer! ###
-ADD_CUSTOM_TARGET(hp scp
+add_custom_target(hp scp
 	${CMAKE_CURRENT_SOURCE_DIR}/README
 	${CMAKE_CURRENT_SOURCE_DIR}/ChangeLog
 	${CMAKE_CURRENT_SOURCE_DIR}/TODO

@@ -2,8 +2,8 @@ set(krunner_recentdocuments_SRCS
     recentdocuments.cpp
 )
 
-kde4_add_plugin(krunner_recentdocuments ${krunner_recentdocuments_SRCS})
-target_link_libraries(krunner_recentdocuments ${KDE4_PLASMA_LIBS} KIOCore)
+add_library(krunner_recentdocuments MODULE ${krunner_recentdocuments_SRCS})
+target_link_libraries(krunner_recentdocuments KF5::Plasma KIOCore)
 
 install(TARGETS krunner_recentdocuments DESTINATION ${PLUGIN_INSTALL_DIR} )
 

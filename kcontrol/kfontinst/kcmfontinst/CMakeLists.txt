@@ -5,9 +5,9 @@ include_directories(
 set(kcm_fontinst_PART_SRCS ${libkfontinstview_SRCS} ${libkfontinstjobrunner_SRCS} ${libkfontinstdbusiface_SRCS}
     DuplicatesDialog.cpp FontList.cpp GroupList.cpp KCmFontInst.cpp PrintDialog.cpp
     FontFilter.cpp FontFilterProxyStyle.cpp FcQuery.cpp PreviewList.cpp)
-# qt4_add_dbus_interface(kcm_fontinst_PART_SRCS ../dbus/org.kde.fontinst.xml FontinstIface)
+# qt5_add_dbus_interface(kcm_fontinst_PART_SRCS ../dbus/org.kde.fontinst.xml FontinstIface)
 
-kde4_add_plugin(kcm_fontinst ${kcm_fontinst_PART_SRCS})
+add_library(kcm_fontinst MODULE ${kcm_fontinst_PART_SRCS})
 
 target_link_libraries(kcm_fontinst
     KF5::KArchive
@@ -17,7 +17,7 @@ target_link_libraries(kcm_fontinst
     KF5::KIOCore
     KF5::KIOWidgets
     KF5::XmlGui
-    ${KDE4_KNEWSTUFF3_LIBRARY}
+    KF5::KNewStuff
     KF5::KDE4Support
     kfontinstui
     kfontinst

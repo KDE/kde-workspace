@@ -2,7 +2,7 @@ set(kcm_desktoppaths_PART_SRCS
    globalpaths.cpp
 )
 
-kde4_add_plugin(kcm_desktoppaths ${kcm_desktoppaths_PART_SRCS})
+add_library(kcm_desktoppaths MODULE ${kcm_desktoppaths_PART_SRCS})
 
 target_link_libraries(kcm_desktoppaths
     KF5::KCMUtils

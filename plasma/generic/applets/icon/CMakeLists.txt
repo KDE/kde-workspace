@@ -12,9 +12,9 @@ install(FILES plugin/qmldir DESTINATION ${QML_INSTALL_DIR}/org/kde/plasma/icon)
 add_library(iconplugin SHARED ${iconplugin_SRCS})
 
 target_link_libraries(iconplugin
-  ${QT_QTCORE_LIBRARY}
+  Qt5::Core
   ${Qt5Qml_LIBRARIES}
-  ${Qt5Quick_LIBRARIES}
+  Qt5::Quick
   KF5::KIOCore # KFileItem
 )
 

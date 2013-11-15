@@ -5,9 +5,9 @@ project(iondebianweather)
 set(karaboudjan_SRCS iondebianweather.cpp)
  
 # Now make sure all files get to the right place
-plasma_add_plugin(ion_debianweather ${karaboudjan_SRCS})
+add_library(ion_debianweather MODULE ${karaboudjan_SRCS})
 target_link_libraries(ion_debianweather weather_ion
-                      ${QT_QTCORE_LIBRARY})
+                      Qt5::Core)
  
 install(TARGETS ion_debianweather
        DESTINATION ${PLUGIN_INSTALL_DIR}/plasma/dataengine)

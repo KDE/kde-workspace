@@ -44,24 +44,24 @@ check_library_exists (Xss XScreenSaverQueryInfo "" HAVE_LIBXSS)
 
 configure_file (${CMAKE_CURRENT_SOURCE_DIR}/config.h.in ${CMAKE_CURRENT_BINARY_DIR}/config.h)
 
-IF (HAVE_LIBXSS)
-   SET (IDLE_DETECTION_LIB "Xss")
-ENDIF (HAVE_LIBXSS)
+if (HAVE_LIBXSS)
+   set (IDLE_DETECTION_LIB "Xss")
+endif ()
 
-plasma_add_plugin(plasma_applet_systemtray ${systemtray_SRCS})
+add_library(plasma_applet_systemtray MODULE ${systemtray_SRCS})
 include_directories(${CMAKE_SOURCE_DIR})
 target_link_libraries(plasma_applet_systemtray
-    ${Qt5DBus_LIBRARIES}
-    ${Qt5Quick_LIBRARIES}
-    ${Plasma_LIBRARIES}
-    ${KI18n_LIBRARIES}
-    ${KConfigWidgets_LIBRARIES}
-    ${KIconThemes_LIBRARIES}
-    ${KNotifications_LIBRARIES}
-    ${KService_LIBRARIES}
-    ${Solid_LIBRARIES}
-    ${KWindowSystem_LIBRARIES}
-    KIOCore
+    Qt5::DBus
+    Qt5::Quick
+    KF5::Plasma
+    KF5::KI18n
+    KF5::KConfigWidgets
+    KF5::KIconThemes
+    KF5::KNotifications
+    KF5::KService
+    KF5::Solid
+    KF5::KWindowSystem
+    KF5::KIOCore
     KF5::KDE4Support
     ${X11_LIBRARIES}
     ${X11_Xrender_LIB}
@@ -82,11 +82,11 @@ set(systemtrayplugin_SRCS
 add_library(systemtrayplugin SHARED ${systemtrayplugin_SRCS})
 
 target_link_libraries(systemtrayplugin
-    ${Qt5Quick_LIBRARIES}
+    Qt5::Quick
     ${Qt5Qml_LIBRARIES}
     ${KCore_LIBRARIES}
     ${KDECLARATIVE_LIBRARIES}
-    ${Plasma_LIBRARIES}
+    KF5::Plasma
     KF5::KWindowSystem
     )
 

@@ -6,12 +6,12 @@ set(dict_engine_SRCS
 
 kservice_desktop_to_json(plasma-dataengine-dict.desktop)
 
-plasma_add_plugin(plasma_engine_dict ${dict_engine_SRCS})
+add_library(plasma_engine_dict MODULE ${dict_engine_SRCS})
 
 target_link_libraries (plasma_engine_dict
   KF5::Plasma
   KF5::KService
-  ${QT_QTNETWORK_LIBRARY}
+  Qt5::Network
 )
 
 install(TARGETS plasma_engine_dict DESTINATION ${PLUGIN_INSTALL_DIR}/plasma/dataengine)

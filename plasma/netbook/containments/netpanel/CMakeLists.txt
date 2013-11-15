@@ -6,8 +6,8 @@ set(panel_SRCS
     ../common/appletmovespacer.cpp
     )
 
-kde4_add_plugin(plasma_containment_netpanel ${panel_SRCS})
-target_link_libraries(plasma_containment_netpanel ${KDE4_PLASMA_LIBS} KIOCore)
+add_library(plasma_containment_netpanel MODULE ${panel_SRCS})
+target_link_libraries(plasma_containment_netpanel KF5::Plasma KIOCore)
 
 install(TARGETS plasma_containment_netpanel DESTINATION ${PLUGIN_INSTALL_DIR})
 install(FILES plasma-containment-netpanel.desktop DESTINATION ${SERVICES_INSTALL_DIR})

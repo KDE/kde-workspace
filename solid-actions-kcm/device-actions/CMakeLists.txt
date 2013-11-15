@@ -1,3 +1,3 @@
-FILE(GLOB desktopfile *.desktop)
+file(GLOB desktopfile *.desktop)
 
-INSTALL( FILES ${desktopfile} DESTINATION ${DATA_INSTALL_DIR}/solid/devices )
+install( FILES ${desktopfile} DESTINATION ${DATA_INSTALL_DIR}/solid/devices )

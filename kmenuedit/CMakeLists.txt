@@ -10,7 +10,7 @@ endif()
 qt4_add_dbus_adaptor( kmenueditcommon_STAT_SRCS org.kde.kmenuedit.xml kmenuedit.h KMenuEdit)
 
 if(NOT WIN32)
-qt4_add_dbus_interface(
+qt5_add_dbus_interface(
     kmenueditcommon_STAT_SRCS
     ${CMAKE_CURRENT_BINARY_DIR}/../khotkeys/app/org.kde.khotkeys.xml
     khotkeys_interface)

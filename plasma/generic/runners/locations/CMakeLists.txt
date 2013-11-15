@@ -2,8 +2,8 @@ set(krunner_locations_SRCS
     locationrunner.cpp
 )
 
-kde4_add_plugin(krunner_locations ${krunner_locations_SRCS})
-target_link_libraries(krunner_locations KIOCore ${KDE4_PLASMA_LIBS})
+add_library(krunner_locations MODULE ${krunner_locations_SRCS})
+target_link_libraries(krunner_locations KIOCore KF5::Plasma)
 
 install(TARGETS krunner_locations DESTINATION ${PLUGIN_INSTALL_DIR} )
 

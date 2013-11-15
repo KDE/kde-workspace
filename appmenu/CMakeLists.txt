@@ -26,7 +26,7 @@ qt4_add_dbus_adaptor(kded_appmenu_SRCS com.canonical.AppMenu.Registrar.xml
 qt4_add_dbus_adaptor(kded_appmenu_SRCS org.kde.kappmenu.xml
     appmenu_dbus.h AppmenuDBus appmenuadaptor AppmenuAdaptor)
 
-kde4_add_plugin(kded_appmenu ${kded_appmenu_SRCS})
+add_library(kded_appmenu MODULE ${kded_appmenu_SRCS})
 
 target_link_libraries(kded_appmenu
     Qt5::DBus

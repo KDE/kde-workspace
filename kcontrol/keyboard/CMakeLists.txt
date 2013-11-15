@@ -1,11 +1,11 @@
-SET(CMAKE_REQUIRED_LIBRARIES -lXi)
-CHECK_FUNCTION_EXISTS(_XiGetDevicePresenceNotifyEvent XiGetDevicePresenceNotifyEvent_EXISTS)
+set(CMAKE_REQUIRED_LIBRARIES -lXi)
+check_function_exists(_XiGetDevicePresenceNotifyEvent XiGetDevicePresenceNotifyEvent_EXISTS)
 
 if( X11_Xinput_FOUND AND XiGetDevicePresenceNotifyEvent_EXISTS )
     set(XiGetDevicePresence_FOUND 1)
-    ADD_DEFINITIONS(-DHAVE_XINPUT_AND_DEVICE_NOTIFY=1)
+    add_definitions(-DHAVE_XINPUT_AND_DEVICE_NOTIFY=1)
 else()
-    MESSAGE(STATUS "_XiGetDevicePresenceNotifyEvent is not found, libXi version 1.2.0 or later is required to keep layouts with keyboard hotplugging")
+    message(STATUS "_XiGetDevicePresenceNotifyEvent is not found, libXi version 1.2.0 or later is required to keep layouts with keyboard hotplugging")
 endif()
 
 
@@ -30,7 +30,7 @@ set( kded_keyboard_SRCS
     xkb_rules.cpp
 )
 
-kde4_add_plugin(kded_keyboard ${kded_keyboard_SRCS})
+add_library(kded_keyboard MODULE ${kded_keyboard_SRCS})
 
 target_link_libraries(kded_keyboard
     Qt5::Concurrent
@@ -75,10 +75,10 @@ install( FILES keyboard.desktop DESTINATION ${SERVICES_INSTALL_DIR}/kded )
 #     layouts_menu.cpp
 # )
 #
-# kde4_add_plugin(plasma_applet_keyboard ${plasma_applet_keyboard_SRCS})
+# add_library(plasma_applet_keyboard MODULE ${plasma_applet_keyboard_SRCS})
 #
 # target_link_libraries(plasma_applet_keyboard
-#      ${KDE4_PLASMA_LIBS} ${KDE4_KDEUI_LIBS} ${QT_QTXML_LIBRARY} ${X11_Xkbfile_LIB} ${X11_LIBRARIES}
+#      KF5::Plasma ${KDE4_KDEUI_LIBS} Qt5::Xml ${X11_Xkbfile_LIB} ${X11_LIBRARIES}
 #      ${text_paint_LIB}
 # )
 #
@@ -97,7 +97,7 @@ set( keyboard_layout_widget_SRCS
 )
 
 # MODULE?
-kde4_add_plugin(keyboard_layout_widget ${keyboard_layout_widget_SRCS})
+add_library(keyboard_layout_widget MODULE ${keyboard_layout_widget_SRCS})
 
 target_link_libraries(keyboard_layout_widget
     Qt5::X11Extras
@@ -141,7 +141,7 @@ set(kcm_keyboard_PART_SRCS
 
 kde4_add_ui_files(kcm_keyboard_PART_SRCS kcm_keyboard.ui kcm_add_layout_dialog.ui kcmmiscwidget.ui)
 
-kde4_add_plugin(kcm_keyboard ${kcm_keyboard_PART_SRCS})
+add_library(kcm_keyboard MODULE ${kcm_keyboard_PART_SRCS})
 
 target_link_libraries(kcm_keyboard
     Qt5::Concurrent

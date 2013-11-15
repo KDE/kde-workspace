@@ -7,7 +7,7 @@ set(apps_engine_SRCS
 
 kservice_desktop_to_json(plasma-dataengine-apps.desktop)
 
-plasma_add_plugin(plasma_engine_apps ${apps_engine_SRCS})
+add_library(plasma_engine_apps MODULE ${apps_engine_SRCS})
 
 target_link_libraries(plasma_engine_apps
     KF5::Plasma

@@ -27,10 +27,10 @@ set(kcm_kdm_PART_SRCS ${kcmbackgroundlib_SRCS} ${backgroundlib_SRCS}
    positioner.cpp)
 
 
-kde4_add_plugin(kcm_kdm ${kcm_kdm_PART_SRCS})
+add_library(kcm_kdm MODULE ${kcm_kdm_PART_SRCS})
 
 
-target_link_libraries(kcm_kdm KF5::KIOCore KF5::KIOWidgets ${QIMAGEBLITZ_LIBRARIES} ${KDE4_KNEWSTUFF3_LIBS} ${X11_LIBRARIES} kworkspace)
+target_link_libraries(kcm_kdm KF5::KIOCore KF5::KIOWidgets ${QIMAGEBLITZ_LIBRARIES} KF5::KNewStuff ${X11_LIBRARIES} kworkspace)
 
 macro_add_file_dependencies(kdm-shut.cpp ${confci})
 add_dependencies(kcm_kdm ConfigCi)
@@ -38,8 +38,8 @@ add_dependencies(kcm_kdm ConfigCi)
 install(TARGETS kcm_kdm  DESTINATION ${PLUGIN_INSTALL_DIR})
 
 #### KAuth helper and actions ####
-kde4_add_executable(kcmkdmhelper helper.cpp)
-target_link_libraries(kcmkdmhelper ${KDE4_KDECORE_LIBS})
+add_executable(kcmkdmhelper helper.cpp)
+target_link_libraries(kcmkdmhelper )
 install(TARGETS kcmkdmhelper DESTINATION ${LIBEXEC_INSTALL_DIR})
 
 kde4_install_auth_helper_files(kcmkdmhelper org.kde.kcontrol.kcmkdm root)

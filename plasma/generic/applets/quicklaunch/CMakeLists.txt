@@ -11,10 +11,10 @@ set(quicklaunch_SRCS
 )
 
 kde4_add_ui_files(quicklaunch_SRCS quicklaunchConfig.ui)
-kde4_add_plugin(plasma_applet_quicklaunch ${quicklaunch_SRCS})
+add_library(plasma_applet_quicklaunch MODULE ${quicklaunch_SRCS})
 
 target_link_libraries(plasma_applet_quicklaunch
-  ${KDE4_PLASMA_LIBS}
+  KF5::Plasma
   KIOCore
 )
 

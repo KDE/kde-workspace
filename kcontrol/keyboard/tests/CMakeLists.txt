@@ -1,4 +1,4 @@
-MACRO(KEYBOARD_DAEMON_UNIT_TESTS _testname)
+macro(KEYBOARD_DAEMON_UNIT_TESTS _testname)
                kde4_add_unit_test(${_testname}_test TESTNAME kcm-keyboard-${_testname} NOGUI ${_testname}_test.cpp ../${_testname}.cpp)
                target_link_libraries(${_testname}_test
                                      Qt5::Concurrent
@@ -11,10 +11,10 @@ MACRO(KEYBOARD_DAEMON_UNIT_TESTS _testname)
                                      ${X11_Xkbfile_LIB}
                                      ${X11_LIBRARIES}
 )
-ENDMACRO(KEYBOARD_DAEMON_UNIT_TESTS)
+endmacro(KEYBOARD_DAEMON_UNIT_TESTS)
 
-KEYBOARD_DAEMON_UNIT_TESTS(xkb_rules)
-KEYBOARD_DAEMON_UNIT_TESTS(iso_codes)
+keyboard_daemon_unit_tests(xkb_rules)
+keyboard_daemon_unit_tests(iso_codes)
 
 kde4_add_unit_test(flags_test TESTNAME kcm-keyboard-flags_test NOGUI flags_test.cpp ../flags.cpp ../x11_helper.cpp ../keyboard_config.cpp ../xkb_rules.cpp)
 target_link_libraries(flags_test

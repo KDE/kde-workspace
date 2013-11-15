@@ -6,8 +6,8 @@ set(krunner_windowedwidgets_SRCS
     windowedwidgetsrunner.cpp
 )
 
-kde4_add_plugin(krunner_windowedwidgets ${krunner_windowedwidgets_SRCS})
-target_link_libraries(krunner_windowedwidgets ${KDE4_PLASMA_LIBS})
+add_library(krunner_windowedwidgets MODULE ${krunner_windowedwidgets_SRCS})
+target_link_libraries(krunner_windowedwidgets KF5::Plasma)
 
 install(TARGETS krunner_windowedwidgets DESTINATION ${PLUGIN_INSTALL_DIR})
 install(FILES plasma-runner-windowedwidgets.desktop DESTINATION ${SERVICES_INSTALL_DIR})

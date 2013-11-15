@@ -8,7 +8,7 @@ if (X11_Xfixes_FOUND)
     set(mouse_engine_SRCS ${mouse_engine_SRCS} cursornotificationhandler.cpp)
 endif ()
 
-plasma_add_plugin(plasma_engine_mouse ${mouse_engine_SRCS})
+add_library(plasma_engine_mouse MODULE ${mouse_engine_SRCS})
 target_link_libraries(plasma_engine_mouse ${KDE4_KDEUI_LIBS} KF5::Plasma ${X11_LIBRARIES})
 if (X11_Xfixes_FOUND)
 	target_link_libraries(plasma_engine_mouse ${X11_Xfixes_LIB})

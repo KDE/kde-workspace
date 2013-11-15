@@ -3,7 +3,7 @@ project(geolocation)
 # -------------------------------------------------------------------------------------------------
 
 set(plasma_geolocation_interface_SRCS geolocationprovider.cpp)
-kde4_add_library(plasma-geolocation-interface SHARED ${plasma_geolocation_interface_SRCS})
+add_library(plasma-geolocation-interface SHARED ${plasma_geolocation_interface_SRCS})
 target_link_libraries(plasma-geolocation-interface KIOCore KF5::Plasma)
 target_link_libraries(plasma-geolocation-interface
                       LINK_INTERFACE_LIBRARIES KIOCore KF5::Plasma)
@@ -23,7 +23,7 @@ install(FILES geolocationprovider.h geolocation_export.h
 # -------------------------------------------------------------------------------------------------
 
 set(plasma_dataengine_geolocation_SRCS geolocation.cpp)
-plasma_add_plugin(plasma_engine_geolocation ${plasma_dataengine_geolocation_SRCS})
+add_library(plasma_engine_geolocation MODULE ${plasma_dataengine_geolocation_SRCS})
 target_link_libraries(plasma_engine_geolocation
     plasma-geolocation-interface
     KF5::Plasma
@@ -38,7 +38,7 @@ install(FILES plasma-geolocationprovider.desktop DESTINATION ${SERVICETYPES_INST
 # -------------------------------------------------------------------------------------------------
 
 set(plasma_geolocation_ip_SRCS location_ip.cpp)
-plasma_add_plugin(plasma-geolocation-ip ${plasma_geolocation_ip_SRCS})
+add_library(plasma-geolocation-ip MODULE ${plasma_geolocation_ip_SRCS})
 target_link_libraries(plasma-geolocation-ip plasma-geolocation-interface)
 install(FILES plasma-geolocation-ip.desktop DESTINATION ${SERVICES_INSTALL_DIR})
 install(TARGETS plasma-geolocation-ip DESTINATION ${PLUGIN_INSTALL_DIR}/plasma/geolocationprovider)
@@ -54,7 +54,7 @@ set_package_properties(libgps PROPERTIES DESCRIPTION "GPS support for geolocatio
 if(LIBGPS_FOUND)
     include_directories(${LIBGPS_INCLUDES} ${LIBGPS_INCLUDE_DIR})
     set(plasma_geolocation_gps_SRCS location_gps.cpp)
-    plasma_add_plugin(plasma-geolocation-gps ${plasma_geolocation_gps_SRCS})
+    add_library(plasma-geolocation-gps MODULE ${plasma_geolocation_gps_SRCS})
     target_link_libraries(plasma-geolocation-gps plasma-geolocation-interface ${LIBGPS_LIBRARIES})
     install(FILES plasma-geolocation-gps.desktop DESTINATION ${SERVICES_INSTALL_DIR})
     install(TARGETS plasma-geolocation-gps DESTINATION ${PLUGIN_INSTALL_DIR}/plasma/geolocationprovider)

@@ -5,7 +5,7 @@ set(systemmonitor_engine_SRCS
 
 kservice_desktop_to_json(plasma-dataengine-systemmonitor.desktop)
 
-plasma_add_plugin(plasma_engine_systemmonitor ${systemmonitor_engine_SRCS})
+add_library(plasma_engine_systemmonitor MODULE ${systemmonitor_engine_SRCS})
 
 target_link_libraries(plasma_engine_systemmonitor
     Qt5::Network

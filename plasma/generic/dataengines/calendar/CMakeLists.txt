@@ -12,13 +12,13 @@ set(calendar_engine_srcs
 )
 
 if(Akonadi_FOUND)
-    ADD_DEFINITIONS(-DAKONADI_FOUND)
+    add_definitions(-DAKONADI_FOUND)
     set(calendar_engine_srcs ${calendar_engine_srcs}
         eventdatacontainer.cpp
     )
 endif()
 
-plasma_add_plugin(plasma_engine_calendar ${calendar_engine_srcs})
+add_library(plasma_engine_calendar MODULE ${calendar_engine_srcs})
 
 target_link_libraries(
     plasma_engine_calendar

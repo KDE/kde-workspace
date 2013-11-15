@@ -34,7 +34,7 @@ qt5_add_dbus_interface(libnoinst_SRCS ${klauncher_xml} klauncher_iface)
 set(kapplymousetheme_SRCS kapplymousetheme.cpp )
 
 
-kde4_add_executable(kapplymousetheme ${kapplymousetheme_SRCS})
+add_executable(kapplymousetheme ${kapplymousetheme_SRCS})
 
 target_link_libraries(kapplymousetheme ${X11_Xrender_LIB} ${X11_X11_LIB})
 if (X11_Xcursor_FOUND)
@@ -52,7 +52,7 @@ set(kcm_input_PART_SRCS mouse.cpp main.cpp logitechmouse.cpp)
 kde4_add_ui_files(kcm_input_PART_SRCS kmousedlg.ui logitechmouse_base.ui )
 qt5_add_dbus_interface(kcm_input_PART_SRCS ${klauncher_xml} klauncher_iface)
 
-kde4_add_plugin(kcm_input ${kcm_input_PART_SRCS})
+add_library(kcm_input MODULE ${kcm_input_PART_SRCS})
 
 
 target_link_libraries(kcm_input
@@ -80,7 +80,7 @@ install(TARGETS kcm_input  DESTINATION ${PLUGIN_INSTALL_DIR} )
 
 set(kcm_cursortheme_PART_SRCS kcmcursortheme.cpp ${libnoinst_SRCS})
 
-kde4_add_plugin(kcm_cursortheme ${kcm_cursortheme_PART_SRCS})
+add_library(kcm_cursortheme MODULE ${kcm_cursortheme_PART_SRCS})
 
 
 target_link_libraries(kcm_cursortheme
@@ -92,7 +92,7 @@ target_link_libraries(kcm_cursortheme
     KF5::KIOCore
     KF5::KIOWidgets
     KF5::KDE4Support
-    ${KDE4_KNEWSTUFF3_LIBS}
+    KF5::KNewStuff
     ${X11_LIBRARIES}
     ${XCB_XCB_LIBRARY}
 )

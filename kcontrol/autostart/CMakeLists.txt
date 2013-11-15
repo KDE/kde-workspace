@@ -1,25 +1,25 @@
-PROJECT (autostart)
+project (autostart)
 
-INCLUDE (KDE4Defaults)
+include (KDE4Defaults)
 
-ADD_DEFINITIONS (${QT_DEFINITIONS} ${KDE4_DEFINITIONS})
-INCLUDE_DIRECTORIES (${CMAKE_SOURCE_DIR} ${CMAKE_BINARY_DIR} ${KDE4_INCLUDES})
+add_definitions (${QT_DEFINITIONS} ${KDE4_DEFINITIONS})
+include_directories (${CMAKE_SOURCE_DIR} ${CMAKE_BINARY_DIR} ${KDE4_INCLUDES})
 
 ########### next target ###############
 
-SET(kcm_autostart_PART_SRCS
+set(kcm_autostart_PART_SRCS
    autostartitem.cpp
    addscriptdialog.cpp
    advanceddialog.cpp
    autostart.cpp )
 
-KDE4_ADD_UI_FILES(kcm_autostart_PART_SRCS autostartconfig.ui )
+kde4_add_ui_files(kcm_autostart_PART_SRCS autostartconfig.ui )
 
-KDE4_ADD_PLUGIN(kcm_autostart ${kcm_autostart_PART_SRCS})
+add_library(kcm_autostart MODULE ${kcm_autostart_PART_SRCS})
 
-TARGET_LINK_LIBRARIES(kcm_autostart KF5::KCMUtils KF5::KI18n KF5::KIOCore KF5::KIOWidgets KF5::KDE4Support )
+target_link_libraries(kcm_autostart KF5::KCMUtils KF5::KI18n KF5::KIOCore KF5::KIOWidgets KF5::KDE4Support )
 
 ########### install files ###############
 
-INSTALL(TARGETS kcm_autostart  DESTINATION ${PLUGIN_INSTALL_DIR} )
-INSTALL( FILES autostart.desktop   DESTINATION  ${SERVICES_INSTALL_DIR} )
+install(TARGETS kcm_autostart  DESTINATION ${PLUGIN_INSTALL_DIR} )
+install( FILES autostart.desktop   DESTINATION  ${SERVICES_INSTALL_DIR} )

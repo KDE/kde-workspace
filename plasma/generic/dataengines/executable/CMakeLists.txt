@@ -4,7 +4,7 @@ set(executable_engine_SRCS
 
 kservice_desktop_to_json(plasma-dataengine-executable.desktop)
 
-plasma_add_plugin(plasma_engine_executable ${executable_engine_SRCS})
+add_library(plasma_engine_executable MODULE ${executable_engine_SRCS})
 
 target_link_libraries(plasma_engine_executable
     KF5::Plasma

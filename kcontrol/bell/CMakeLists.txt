@@ -6,7 +6,7 @@
 set(kcm_bell_PART_SRCS bell.cpp )
 
 
-kde4_add_plugin(kcm_bell ${kcm_bell_PART_SRCS})
+add_library(kcm_bell MODULE ${kcm_bell_PART_SRCS})
 
 
 target_link_libraries(kcm_bell

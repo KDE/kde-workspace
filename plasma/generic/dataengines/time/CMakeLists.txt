@@ -7,7 +7,7 @@ set(time_engine_SRCS
 
 kservice_desktop_to_json(plasma-dataengine-time.desktop)
 
-plasma_add_plugin(plasma_engine_time ${time_engine_SRCS})
+add_library(plasma_engine_time MODULE ${time_engine_SRCS})
 
 target_link_libraries(plasma_engine_time
     Qt5::DBus

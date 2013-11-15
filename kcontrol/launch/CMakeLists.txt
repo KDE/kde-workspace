@@ -6,14 +6,14 @@
 set(kcm_launch_PART_SRCS kcmlaunch.cpp )
 
 set(kdesktop_xml  ${KDEBASE_WORKSPACE_SOURCE_DIR}/krunner/dbus/org.kde.krunner.App.xml)
-QT4_ADD_DBUS_INTERFACE( kcm_launch_PART_SRCS ${kdesktop_xml} krunner_interface )
+qt5_add_dbus_interface( kcm_launch_PART_SRCS ${kdesktop_xml} krunner_interface )
 set(kwin_xml ${KDEBASE_WORKSPACE_SOURCE_DIR}/kwin/org.kde.kwin.Effects.xml)
 set_source_files_properties(${kwin_xml} PROPERTIES INCLUDE "interface_util.h")
-QT4_ADD_DBUS_INTERFACE( kcm_launch_PART_SRCS ${kwin_xml} kwin_interface )
+qt5_add_dbus_interface( kcm_launch_PART_SRCS ${kwin_xml} kwin_interface )
 
 
 
-kde4_add_plugin(kcm_launch ${kcm_launch_PART_SRCS})
+add_library(kcm_launch MODULE ${kcm_launch_PART_SRCS})
 
 
 target_link_libraries(kcm_launch

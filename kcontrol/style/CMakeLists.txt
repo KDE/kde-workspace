@@ -14,7 +14,7 @@ qt5_add_dbus_interface(kcm_style_PART_SRCS ${klauncher_xml} klauncher_iface)
 
 kde4_add_ui_files(kcm_style_PART_SRCS stylepreview.ui finetuning.ui)
 
-kde4_add_plugin(kcm_style ${kcm_style_PART_SRCS})
+add_library(kcm_style MODULE ${kcm_style_PART_SRCS})
 
 target_link_libraries(kcm_style
     Qt5::DBus
@@ -24,7 +24,7 @@ target_link_libraries(kcm_style
     KF5::KNotifications
     KF5::Plasma
     ${X11_LIBRARIES}
-    KF5::KDE4Support ${KDE4_KNEWSTUFF3_LIBS})
+    KF5::KDE4Support KF5::KNewStuff)
 if(NOT WIN32)
     target_link_libraries(kcm_style kdecorations)
 endif()

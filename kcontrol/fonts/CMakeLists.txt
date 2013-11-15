@@ -14,7 +14,7 @@ endif()
 set(klauncher_xml ${KDE4_DBUS_INTERFACES_DIR}/org.kde.KLauncher.xml)
 qt5_add_dbus_interface(kcm_fonts_PART_SRCS ${klauncher_xml} klauncher_iface)
 
-kde4_add_plugin(kcm_fonts ${kcm_fonts_PART_SRCS})
+add_library(kcm_fonts MODULE ${kcm_fonts_PART_SRCS})
 
 
 target_link_libraries(kcm_fonts Qt5::DBus Qt5::Xml KF5::KCMUtils KF5::KI18n KF5::KDE4Support ${FREETYPE_LIBRARIES})

@@ -7,7 +7,7 @@ qt4_add_dbus_adaptor( device_notifications_engine_SRCS org.kde.DeviceNotificatio
 
 kservice_desktop_to_json(plasma-dataengine-devicenotifications.desktop)
 
-plasma_add_plugin(plasma_engine_devicenotifications ${device_notifications_engine_SRCS})
+add_library(plasma_engine_devicenotifications MODULE ${device_notifications_engine_SRCS})
 
 target_link_libraries(plasma_engine_devicenotifications 
     Qt5::DBus

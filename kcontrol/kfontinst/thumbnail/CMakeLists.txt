@@ -5,7 +5,7 @@ include_directories(
 
 set(fontthumbnail_PART_SRCS FontThumbnail.cpp )
 
-kde4_add_plugin(fontthumbnail ${fontthumbnail_PART_SRCS})
+add_library(fontthumbnail MODULE ${fontthumbnail_PART_SRCS})
 
 target_link_libraries(fontthumbnail KF5::KArchive KF5::KIOCore KF5::KIOWidgets kfontinstui kfontinst )
 

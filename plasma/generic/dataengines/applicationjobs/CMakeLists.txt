@@ -14,7 +14,7 @@ qt4_add_dbus_adaptor(kuiserver_engine_SRCS ${KDE4_DBUS_INTERFACES_DIR}/org.kde.J
 
 kservice_desktop_to_json(plasma-dataengine-applicationjobs.desktop)
 
-plasma_add_plugin(plasma_engine_applicationjobs ${kuiserver_engine_SRCS})
+add_library(plasma_engine_applicationjobs MODULE ${kuiserver_engine_SRCS})
 target_link_libraries(plasma_engine_applicationjobs
   Qt5::DBus
   KF5::KI18n

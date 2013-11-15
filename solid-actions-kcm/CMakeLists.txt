@@ -1,21 +1,21 @@
-PROJECT (solid-actions)
+project (solid-actions)
 
 # We allow this to be built seperately for convienence purposes
-IF(CMAKE_SOURCE_DIR STREQUAL "${CMAKE_CURRENT_SOURCE_DIR}")
+if(CMAKE_SOURCE_DIR STREQUAL "${CMAKE_CURRENT_SOURCE_DIR}")
 
-    FIND_PACKAGE(KDE4 REQUIRED)
-    INCLUDE(KDE4Defaults)
-    ADD_DEFINITIONS(${QT_DEFINITIONS} ${KDE4_DEFINITIONS})
+    find_package(KDE4 REQUIRED)
+    include(KDE4Defaults)
+    add_definitions(${QT_DEFINITIONS} ${KDE4_DEFINITIONS})
 
-ENDIF(CMAKE_SOURCE_DIR STREQUAL "${CMAKE_CURRENT_SOURCE_DIR}")
+endif()
 
-INCLUDE_DIRECTORIES (${CMAKE_BINARY_DIR} ${KDE4_INCLUDES})
+include_directories (${CMAKE_BINARY_DIR} ${KDE4_INCLUDES})
 
-ADD_SUBDIRECTORY(device-actions)
+add_subdirectory(device-actions)
 
 ########### next target ###############
 
-SET(kcm_solid_actions_srcs
+set(kcm_solid_actions_srcs
     PredicateItem.cpp
     PredicateModel.cpp
     ActionItem.cpp
@@ -24,26 +24,26 @@ SET(kcm_solid_actions_srcs
     SolidActionData.cpp
     SolidActions.cpp )
 
-SET(solid_action_desktop_gen_srcs
+set(solid_action_desktop_gen_srcs
     DesktopFileGenerator.cpp
     SolidActionData.cpp )
 
-KDE4_ADD_UI_FILES(kcm_solid_actions_srcs
+kde4_add_ui_files(kcm_solid_actions_srcs
     SolidActions.ui
     AddAction.ui
     ActionEditor.ui )
 
-KDE4_ADD_PLUGIN(kcm_solid_actions ${kcm_solid_actions_srcs})
-KDE4_ADD_EXECUTABLE(solid-action-desktop-gen ${solid_action_desktop_gen_srcs})
+add_library(kcm_solid_actions MODULE ${kcm_solid_actions_srcs})
+add_executable(solid-action-desktop-gen ${solid_action_desktop_gen_srcs})
 
-TARGET_LINK_LIBRARIES(kcm_solid_actions KF5::KIOCore KF5::KIOWidgets ${KDE4_SOLID_LIBS} )
-TARGET_LINK_LIBRARIES(solid-action-desktop-gen ${KDE4_SOLID_LIBS} KF5::KIOCore KF5::KIOWidgets )
+target_link_libraries(kcm_solid_actions KF5::KIOCore KF5::KIOWidgets KF5::Solid )
+target_link_libraries(solid-action-desktop-gen KF5::Solid KF5::KIOCore KF5::KIOWidgets )
 
 ########### install files ###############
 
-INSTALL( TARGETS kcm_solid_actions DESTINATION ${PLUGIN_INSTALL_DIR} )
-INSTALL( TARGETS solid-action-desktop-gen ${INSTALL_TARGETS_DEFAULT_ARGS} )
-INSTALL( FILES solid-actions.desktop DESTINATION ${SERVICES_INSTALL_DIR} )
-INSTALL( FILES solid-action-template.desktop DESTINATION ${DATA_INSTALL_DIR}/kcmsolidactions )
-INSTALL( FILES solid-device-type.desktop DESTINATION ${SERVICETYPES_INSTALL_DIR} )
+install( TARGETS kcm_solid_actions DESTINATION ${PLUGIN_INSTALL_DIR} )
+install( TARGETS solid-action-desktop-gen ${INSTALL_TARGETS_DEFAULT_ARGS} )
+install( FILES solid-actions.desktop DESTINATION ${SERVICES_INSTALL_DIR} )
+install( FILES solid-action-template.desktop DESTINATION ${DATA_INSTALL_DIR}/kcmsolidactions )
+install( FILES solid-device-type.desktop DESTINATION ${SERVICETYPES_INSTALL_DIR} )
 

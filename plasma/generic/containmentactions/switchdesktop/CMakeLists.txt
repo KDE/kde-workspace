@@ -6,7 +6,7 @@ set(switchdesktop_SRCS
 
 kservice_desktop_to_json(plasma-containmentactions-switchdesktop.desktop)
 
-kde4_add_plugin(plasma_containmentactions_switchdesktop ${switchdesktop_SRCS})
+add_library(plasma_containmentactions_switchdesktop MODULE ${switchdesktop_SRCS})
 target_link_libraries(plasma_containmentactions_switchdesktop
                         KF5::Plasma
                         KF5::KWindowSystem

@@ -69,7 +69,7 @@ set(khotkeysprivate_SRCS
     # voicesignature.cpp
 )
 
-kde4_add_library(khotkeysprivate SHARED ${khotkeysprivate_SRCS})
+add_library(khotkeysprivate SHARED ${khotkeysprivate_SRCS})
 target_link_libraries(khotkeysprivate
     kworkspace
     Qt5::X11Extras

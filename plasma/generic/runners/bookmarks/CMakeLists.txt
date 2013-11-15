@@ -1,5 +1,5 @@
 ########### next target ###############
-set(EXTERNAL_LIBS KIOCore ${QT_QTSCRIPT_LIBRARY} ${KDE4_PLASMA_LIBS} ${QT_QTSQL_LIBRARY})
+set(EXTERNAL_LIBS KIOCore ${QT_QTSCRIPT_LIBRARY} KF5::Plasma Qt5::Sql)
 if(QJSON_FOUND)
     add_definitions(-DHAVE_QJSON=1)
     # Some distributions (e.g. Debian or Ubuntu 12.10) seem to install a QJSONConfig.cmake with lower-case variables,
@@ -29,7 +29,7 @@ set(krunner_bookmarksrunner_SRCS
 endif()
 
 
-kde4_add_plugin(krunner_bookmarksrunner ${krunner_bookmarksrunner_SRCS})
+add_library(krunner_bookmarksrunner MODULE ${krunner_bookmarksrunner_SRCS})
 target_link_libraries(krunner_bookmarksrunner ${EXTERNAL_LIBS})
 
 install(TARGETS krunner_bookmarksrunner DESTINATION ${PLUGIN_INSTALL_DIR} )

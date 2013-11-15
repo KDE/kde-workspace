@@ -9,7 +9,7 @@ set(tasks_engine_SRCS
 )
 kservice_desktop_to_json(plasma-dataengine-tasks.desktop)
 
-plasma_add_plugin(plasma_engine_tasks ${tasks_engine_SRCS})
+add_library(plasma_engine_tasks MODULE ${tasks_engine_SRCS})
 target_link_libraries(plasma_engine_tasks
                       KF5::KCoreAddons
                       KF5::KService

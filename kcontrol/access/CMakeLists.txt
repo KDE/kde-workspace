@@ -8,7 +8,7 @@ include_directories(${PHONON_INCLUDE_DIR})
 set(kcm_access_PART_SRCS kcmaccess.cpp )
 
 
-kde4_add_plugin(kcm_access ${kcm_access_PART_SRCS})
+add_library(kcm_access MODULE ${kcm_access_PART_SRCS})
 
 
 target_link_libraries(kcm_access

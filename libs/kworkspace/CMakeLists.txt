@@ -30,7 +30,7 @@ soprano_add_ontology(
    "trig"
    )
 
-ADD_DEFINITIONS(-DHAVE_SOPRANO_PLUGIN_RAPTORPARSER=1)
+add_definitions(-DHAVE_SOPRANO_PLUGIN_RAPTORPARSER=1)
 
 endif()
 
@@ -40,13 +40,13 @@ remove_definitions(-DQT_NO_CAST_TO_ASCII)
 
 
 set(ksmserver_xml  ${KDEBASE_WORKSPACE_SOURCE_DIR}/ksmserver/org.kde.KSMServerInterface.xml)
-qt4_add_dbus_interface( kworkspace_LIB_SRCS ${ksmserver_xml} ksmserver_interface )
+qt5_add_dbus_interface( kworkspace_LIB_SRCS ${ksmserver_xml} ksmserver_interface )
 
 set(kwin_xml  ${KDEBASE_WORKSPACE_SOURCE_DIR}/kwin/org.kde.KWin.xml)
 
 set_source_files_properties(${kwin_xml} PROPERTIES INCLUDE "interface_util.h")
 
-qt4_add_dbus_interface( kworkspace_LIB_SRCS ${kwin_xml} kwin_interface )
+qt5_add_dbus_interface( kworkspace_LIB_SRCS ${kwin_xml} kwin_interface )
 
 
 add_library(kworkspace SHARED ${kworkspace_LIB_SRCS})

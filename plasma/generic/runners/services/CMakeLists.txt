@@ -2,8 +2,8 @@ set(krunner_services_SRCS
     servicerunner.cpp
 )
 
-kde4_add_plugin(krunner_services ${krunner_services_SRCS})
-target_link_libraries(krunner_services KIOCore ${KDE4_PLASMA_LIBS})
+add_library(krunner_services MODULE ${krunner_services_SRCS})
+target_link_libraries(krunner_services KIOCore KF5::Plasma)
 
 install(TARGETS krunner_services DESTINATION ${PLUGIN_INSTALL_DIR} )
 

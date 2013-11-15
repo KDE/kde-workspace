@@ -1,7 +1,7 @@
 set(ksystraycmd_SRCS ksystraycmd.cpp main.cpp )
 
 
-kde4_add_executable(ksystraycmd ${ksystraycmd_SRCS})
+add_executable(ksystraycmd ${ksystraycmd_SRCS})
 
 target_link_libraries(ksystraycmd ${KDE4_KDEUI_LIBS})
 if (Q_WS_X11)

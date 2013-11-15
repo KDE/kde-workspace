@@ -14,7 +14,7 @@ kde4_add_ui_files(kded_freespacenotifier_SRCS freespacenotifier_prefs_base.ui)
 
 kde4_add_kcfg_files(kded_freespacenotifier_SRCS settings.kcfgc)
 
-kde4_add_plugin(kded_freespacenotifier ${kded_freespacenotifier_SRCS})
+add_library(kded_freespacenotifier MODULE ${kded_freespacenotifier_SRCS})
 
 target_link_libraries(kded_freespacenotifier
     KF5::KConfigWidgets

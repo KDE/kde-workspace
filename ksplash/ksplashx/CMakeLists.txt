@@ -9,7 +9,7 @@ include_directories(${PNG_INCLUDE_DIR}  # Deprecated in CMake 2.8.7
                    )
 
 include (CheckCXXSourceCompiles)
-CHECK_CXX_SOURCE_COMPILES("	#ifdef __SUNPRO_CC
+check_cxx_source_compiles("	#ifdef __SUNPRO_CC
 					#define __asm__ asm
 				#endif
 				int main() { __asm__(\"pxor %mm0, %mm0\") ; }" X86_MMX_FOUND)
@@ -43,7 +43,7 @@ if( X86_MMX_FOUND2 )
         COMMAND gcc -c ${CMAKE_CURRENT_SOURCE_DIR}/asm_scale.S 
         DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/asm_scale.S )
     set( ksplashx_EXTRA_SRCS ${CMAKE_CURRENT_BINARY_DIR}/asm_scale.o )
-    ADD_DEFINITIONS( -DHAVE_X86_MMX )
+    add_definitions( -DHAVE_X86_MMX )
 endif()
 
 add_executable( ksplashx ${ksplashx_SRCS} ${ksplashx_EXTRA_SRCS} )

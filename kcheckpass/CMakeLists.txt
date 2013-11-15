@@ -13,7 +13,8 @@ set(kcheckpass_SRCS
 	checkpass_aix.c
 )
 
-kde4_add_executable(kcheckpass NOGUI ${kcheckpass_SRCS})
+add_executable(kcheckpass ${kcheckpass_SRCS})
+ecm_mark_nongui_executable(kcheckpass)
 
 if (KDE4_ENABLE_FPIE)
     set_property(TARGET kcheckpass APPEND_STRING PROPERTY COMPILE_FLAGS " ${KDE4_CXX_FPIE_FLAGS}")
@@ -25,7 +26,7 @@ target_link_libraries(kcheckpass ${UNIXAUTH_LIBRARIES} ${SOCKET_LIBRARIES})
 install(TARGETS kcheckpass DESTINATION ${LIBEXEC_INSTALL_DIR})
 install(CODE "
     set(KCP_PATH \"\$ENV{DESTDIR}${LIBEXEC_INSTALL_DIR}/kcheckpass\")
-    EXECUTE_PROCESS(COMMAND sh -c \"chown root '\${KCP_PATH}' && chmod +s '\${KCP_PATH}'\")
+    execute_process(COMMAND sh -c \"chown root '\${KCP_PATH}' && chmod +s '\${KCP_PATH}'\")
 ")
 
 #EXTRA_DIST = README

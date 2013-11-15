@@ -8,11 +8,11 @@ set(powermanagement_engine_SRCS
 )
 
 set(krunner_xml ${KDEBASE_WORKSPACE_SOURCE_DIR}/krunner/dbus/org.kde.krunner.App.xml)
-QT4_ADD_DBUS_INTERFACE(powermanagement_engine_SRCS ${krunner_xml} krunner_interface)
+qt5_add_dbus_interface(powermanagement_engine_SRCS ${krunner_xml} krunner_interface)
 
 kservice_desktop_to_json(plasma-dataengine-powermanagement.desktop)
 
-plasma_add_plugin(plasma_engine_powermanagement ${powermanagement_engine_SRCS})
+add_library(plasma_engine_powermanagement MODULE ${powermanagement_engine_SRCS})
 
 target_link_libraries(plasma_engine_powermanagement
     KF5::Solid

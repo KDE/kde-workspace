@@ -9,7 +9,7 @@ set(soliddevice_engine_SRCS
 
 kservice_desktop_to_json(plasma-dataengine-soliddevice.desktop)
 
-plasma_add_plugin(plasma_engine_soliddevice ${soliddevice_engine_SRCS})
+add_library(plasma_engine_soliddevice MODULE ${soliddevice_engine_SRCS})
 
 target_link_libraries(plasma_engine_soliddevice
   Qt5::Network

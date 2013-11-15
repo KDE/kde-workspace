@@ -1,6 +1,6 @@
 set(kcm_standard_actions_PART_SRCS standard_actions_module.cpp)
 
-kde4_add_plugin(kcm_standard_actions ${kcm_standard_actions_PART_SRCS})
+add_library(kcm_standard_actions MODULE ${kcm_standard_actions_PART_SRCS})
 
 target_link_libraries(kcm_standard_actions
     KF5::KCMUtils

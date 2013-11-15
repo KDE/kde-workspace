@@ -8,7 +8,7 @@ set(image_SRCS
 )
 
 
-kde4_add_library(plasma_wallpaper_imageplugin SHARED ${image_SRCS})
+add_library(plasma_wallpaper_imageplugin SHARED ${image_SRCS})
 target_link_libraries(plasma_wallpaper_imageplugin
 	 Qt5::Core
 	 Qt5::Quick
@@ -19,8 +19,8 @@ target_link_libraries(plasma_wallpaper_imageplugin
 	 KF5::ThreadWeaver
          KF5::KI18n
     KF5::KIOCore
-    ${KDE4_KIO_LIBS} # KFileDialog
-	 ${KDE4_KNEWSTUFF3_LIBS}
+    KF5::KIOWidgets # KFileDialog
+	 KF5::KNewStuff
          KF5::KDE4Support
          )
 

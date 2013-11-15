@@ -2,7 +2,7 @@ project(StatusNotifierWatcher)
 
 set(kded_statusnotifierwatcher_SRCS statusnotifierwatcher.cpp )
 
-QT4_ADD_DBUS_ADAPTOR(kded_statusnotifierwatcher_SRCS     ${KDE4_DBUS_INTERFACES_DIR}/org.kde.StatusNotifierWatcher.xml
+qt4_add_dbus_adaptor(kded_statusnotifierwatcher_SRCS     ${KDE4_DBUS_INTERFACES_DIR}/org.kde.StatusNotifierWatcher.xml
                      statusnotifierwatcher.h StatusNotifierWatcher)
 
 
@@ -12,9 +12,9 @@ set_source_files_properties(${statusnotifieritem_xml} PROPERTIES
    INCLUDE "systemtraytypedefs.h"
    CLASSNAME OrgKdeStatusNotifierItemInterface
 )
-QT4_ADD_DBUS_INTERFACE(kded_statusnotifierwatcher_SRCS ${statusnotifieritem_xml} statusnotifieritem_interface)
+qt5_add_dbus_interface(kded_statusnotifierwatcher_SRCS ${statusnotifieritem_xml} statusnotifieritem_interface)
 
-kde4_add_plugin(kded_statusnotifierwatcher ${kded_statusnotifierwatcher_SRCS})
+add_library(kded_statusnotifierwatcher MODULE ${kded_statusnotifierwatcher_SRCS})
 
 
 target_link_libraries(kded_statusnotifierwatcher  KF5::KIOCore KF5::KIOWidgets )

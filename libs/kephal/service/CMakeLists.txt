@@ -3,11 +3,11 @@ include_directories(${kephal_SOURCE_DIR}/kephal)
 configure_file (../kephal/config-kephal.h.cmake
 ${CMAKE_CURRENT_BINARY_DIR}/config-kephal.h )
 
-IF(WIN32)
-    ADD_DEFINITIONS(-Dkephal_NOT_EXPORTS)
-ENDIF(WIN32)
+if(WIN32)
+    add_definitions(-Dkephal_NOT_EXPORTS)
+endif()
 
-SET (kephalshared_SRCS
+set (kephalshared_SRCS
    ${CMAKE_CURRENT_SOURCE_DIR}/../kephal/outputs.cpp
    ${CMAKE_CURRENT_SOURCE_DIR}/../kephal/screens.cpp
    ${CMAKE_CURRENT_SOURCE_DIR}/../kephal/simplescreen.cpp
@@ -18,7 +18,7 @@ set (unused_SRCS
    ${CMAKE_CURRENT_SOURCE_DIR}/../kephal/desktopwidgetoutputs.cpp
    )
 
-SET(kephal_service_SRCS
+set(kephal_service_SRCS
    ${kephalshared_SRCS}
    kephalservice.cpp
    backendoutputs.cpp
@@ -39,7 +39,7 @@ set(unused_SRCS
    )
 
 if(Q_WS_X11 AND XRANDR_1_2_FOUND)
-   SET (kephal_service_SRCS ${kephal_service_SRCS}
+   set (kephal_service_SRCS ${kephal_service_SRCS}
       xrandr12/randr.cpp
       xrandr12/randrscreen.cpp
       xrandr12/randroutput.cpp
@@ -64,24 +64,24 @@ endif()
 #   ${CMAKE_CURRENT_BINARY_DIR}/org.kde.Kephal.Configurations.xml
 #   dbus/dbusapi_configurations.h DBusAPIConfigurations)
 
-SET(kded_kephal_SRCS
+set(kded_kephal_SRCS
    ${kephal_service_SRCS}
    kephald.cpp
    )
 
-SET(standalone_kephald_SRCS
+set(standalone_kephald_SRCS
    ${kephal_service_SRCS}
    standalonekephald.cpp
    )
 
-SET(service_libs ${KDE4_KDECORE_LIBS} ${KDE4_KDEUI_LIBS} ${QT_QTCORE_LIBRARY} ${QT_QTDBUS_LIBRARY} ${QT_QTXML_LIBRARY} ${X11_LIBRARIES} ${X11_Xrandr_LIB})
+set(service_libs  ${KDE4_KDEUI_LIBS} Qt5::Core Qt5::DBus Qt5::Xml ${X11_LIBRARIES} ${X11_Xrandr_LIB})
 
-KDE4_ADD_PLUGIN (kded_kephal ${kded_kephal_SRCS})
-TARGET_LINK_LIBRARIES (kded_kephal ${service_libs})
+kde4_add_plugin (kded_kephal ${kded_kephal_SRCS})
+target_link_libraries (kded_kephal ${service_libs})
 
-KDE4_ADD_EXECUTABLE (kephald ${standalone_kephald_SRCS})
-TARGET_LINK_LIBRARIES (kephald ${service_libs})
+add_executable (kephald ${standalone_kephald_SRCS})
+target_link_libraries (kephald ${service_libs})
 
-INSTALL (TARGETS kded_kephal DESTINATION ${PLUGIN_INSTALL_DIR})
+install (TARGETS kded_kephal DESTINATION ${PLUGIN_INSTALL_DIR})
 
-INSTALL (FILES kephal.desktop DESTINATION ${SERVICES_INSTALL_DIR}/kded)
+install (FILES kephal.desktop DESTINATION ${SERVICES_INSTALL_DIR}/kded)

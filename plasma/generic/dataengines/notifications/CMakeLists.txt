@@ -8,7 +8,7 @@ qt4_add_dbus_adaptor( notifications_engine_SRCS org.freedesktop.Notifications.xm
 
 kservice_desktop_to_json(plasma-dataengine-notifications.desktop)
 
-plasma_add_plugin(plasma_engine_notifications ${notifications_engine_SRCS})
+add_library(plasma_engine_notifications MODULE ${notifications_engine_SRCS})
 
 target_link_libraries(plasma_engine_notifications
     Qt5::DBus
@@ -18,7 +18,7 @@ target_link_libraries(plasma_engine_notifications
     KF5::KNotifications
     KF5::Plasma
     KF5::KService
-    #${KDE4_KNOTIFYCONFIG_LIBRARY}
+    #KF5::KNotifyConfig
 )
 
 install(TARGETS plasma_engine_notifications DESTINATION ${PLUGIN_INSTALL_DIR}/plasma/dataengine)

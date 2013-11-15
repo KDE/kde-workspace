@@ -6,7 +6,7 @@ set(share_engine_SRCS
         shareservice.cpp
         share_package.cpp)
 
-plasma_add_plugin(plasma_engine_share ${share_engine_SRCS})
+add_library(plasma_engine_share MODULE ${share_engine_SRCS})
 target_link_libraries(plasma_engine_share
                       KF5::KCore
                       KF5::Plasma

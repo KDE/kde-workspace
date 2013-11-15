@@ -6,7 +6,7 @@ include_directories(
 
 set(kfontviewpart_PART_SRCS ${libkfontinstview_SRCS} ${libkfontinstdbusiface_SRCS} FontViewPart.cpp )
 
-kde4_add_plugin(kfontviewpart ${kfontviewpart_PART_SRCS})
+add_library(kfontviewpart MODULE ${kfontviewpart_PART_SRCS})
 
 target_link_libraries(kfontviewpart KF5::KArchive KF5::KParts KF5::XmlGui ${FONTCONFIG_LIBRARIES} kfontinstui kfontinst )
 

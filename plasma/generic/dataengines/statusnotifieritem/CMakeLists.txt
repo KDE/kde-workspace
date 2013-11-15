@@ -27,7 +27,7 @@ qt5_add_dbus_interface(statusnotifieritem_engine_SRCS ${statusnotifieritem_xml} 
 
 kservice_desktop_to_json(plasma-engine-statusnotifieritem.desktop)
 
-plasma_add_plugin(plasma_engine_statusnotifieritem ${statusnotifieritem_engine_SRCS})
+add_library(plasma_engine_statusnotifieritem MODULE ${statusnotifieritem_engine_SRCS})
 target_link_libraries(plasma_engine_statusnotifieritem
     Qt5::DBus
     KF5::KService

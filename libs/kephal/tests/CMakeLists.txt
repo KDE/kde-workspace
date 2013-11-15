@@ -1,9 +1,9 @@
-SET (kephalapp_SRCS kephalapp.cpp)
-QT4_WRAP_CPP (kephalapp_SRCS kephalapp.h)
+set (kephalapp_SRCS kephalapp.cpp)
+qt4_wrap_cpp (kephalapp_SRCS kephalapp.h)
 
-ADD_EXECUTABLE (kephalapp ${kephalapp_SRCS})
+add_executable (kephalapp ${kephalapp_SRCS})
 
-INCLUDE_DIRECTORIES (${CMAKE_CURRENT_SOURCE_DIR}/.. ${QT_INCLUDES} ${CMAKE_CURRENT_BINARY_DIR})
-TARGET_LINK_LIBRARIES (kephalapp ${QT_QTCORE_LIBRARY} ${QT_QTGUI_LIBRARY} ${KDE4_KDECORE_LIBRARY} ${QT_QTDBUS_LIBRARY} kephal)
+include_directories (${CMAKE_CURRENT_SOURCE_DIR}/.. ${QT_INCLUDES} ${CMAKE_CURRENT_BINARY_DIR})
+target_link_libraries (kephalapp Qt5::Core Qt5::Gui ${KDE4_KDECORE_LIBRARY} Qt5::DBus kephal)
 
 #INSTALL (TARGETS kephalapp RUNTIME DESTINATION bin)

@@ -71,7 +71,7 @@ kde4_add_ui_files(
     hotkeys_widget_base.ui
     )
 
-qt4_add_dbus_interface(
+qt5_add_dbus_interface(
     kcm_hotkeys_PART_SRCS
     ${CMAKE_CURRENT_BINARY_DIR}/../app/org.kde.khotkeys.xml
     khotkeys_interface)
@@ -93,7 +93,7 @@ target_link_libraries(
     KF5::KIOWidgets
     KF5::KTextWidgets
     KF5::KDE4Support
-    ${QT_QTGUI_LIBRARY}
+    Qt5::Gui
     ${X11_X11_LIB}
     )
 

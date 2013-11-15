@@ -16,12 +16,12 @@ else()
     kde4_add_ui_files(plasmaclock_LIB_SRCS timezonesConfig.ui generalConfig.ui calendarConfig.ui)
 endif()
 
-kde4_add_library(plasmaclock SHARED ${plasmaclock_LIB_SRCS})
+add_library(plasmaclock SHARED ${plasmaclock_LIB_SRCS})
 
 target_link_libraries(plasmaclock
-                      ${KDE4_PLASMA_LIBS}
+                      KF5::Plasma
                       ${KDE4_KDEUI_LIBS}
-                      ${KDE4_KIO_LIBS}
+                      KF5::KIOCore KF5::KIOWidgets
                       kephal)
 
 if(KdepimLibs_FOUND)

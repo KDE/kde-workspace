@@ -46,13 +46,13 @@ set(plasmaapp_dbusXML dbus/org.kde.plasma.App.xml)
 qt4_add_dbus_adaptor(plasma_SRCS ${plasmaapp_dbusXML} plasmaapp.h PlasmaApp)
 
 set(ksmserver_xml ${KDEBASE_WORKSPACE_SOURCE_DIR}/ksmserver/org.kde.KSMServerInterface.xml)
-qt4_add_dbus_interface(plasma_SRCS ${ksmserver_xml} ksmserver_interface)
+qt5_add_dbus_interface(plasma_SRCS ${ksmserver_xml} ksmserver_interface)
 
 kde4_add_app_icon(plasma_SRCS "${KDE4_INSTALL_DIR}/share/icons/oxygen/*/apps/plasma.png")
 
 kf5_add_kdeinit_executable(plasma-desktop ${plasma_SRCS})
 
-target_link_libraries(kdeinit_plasma-desktop ${KDE4_PLASMA_LIBS} KIOCore KF5::KIOFileWidgets ${KDE4_KTEXTEDITOR_LIBS} ${KDE4_KIDLETIME_LIBS} ${QT_QTSCRIPT_LIBRARY} ${KACTIVITIES_LIBRARY} kworkspace kactivities plasmagenericshell ${QT_QTDECLARATIVE_LIBRARY})
+target_link_libraries(kdeinit_plasma-desktop KF5::Plasma KIOCore KF5::KIOFileWidgets KF5::KTextEditor ${KDE4_KIDLETIME_LIBS} ${QT_QTSCRIPT_LIBRARY} ${KACTIVITIES_LIBRARY} kworkspace kactivities plasmagenericshell Qt5::Declarative)
 
 if(UNIX AND Q_WS_X11)
     target_link_libraries(kdeinit_plasma-desktop ${X11_LIBRARIES})
@@ -63,7 +63,7 @@ if(UNIX AND Q_WS_X11)
 endif()
 
 target_link_libraries(kdeinit_plasma-desktop kephal)
-target_link_libraries(kdeinit_plasma-desktop ${KDE4_KNEWSTUFF3_LIBS})
+target_link_libraries(kdeinit_plasma-desktop KF5::KNewStuff)
 
 install(TARGETS kdeinit_plasma-desktop DESTINATION ${LIB_INSTALL_DIR})
 install(TARGETS plasma-desktop ${INSTALL_TARGETS_DEFAULT_ARGS})
@@ -80,16 +80,16 @@ install(FILES data/layouts/00-defaultLayout.js DESTINATION ${DATA_INSTALL_DIR}/p
 install(FILES data/plasma-desktop-js.xml DESTINATION ${DATA_INSTALL_DIR}/katepart/syntax/)
 install(DIRECTORY activitymanager/package/ DESTINATION ${DATA_INSTALL_DIR}/plasma/packages/org.kde.desktop.activitymanager)
 
-MACRO(INSTALL_PLASMA_JAVASCRIPT_TEMPLATE dir addonPrefix)
+macro(INSTALL_PLASMA_JAVASCRIPT_TEMPLATE dir addonPrefix)
    configure_file(${dir}/metadata.desktop ${CMAKE_CURRENT_BINARY_DIR}/plasma-layout-${addonPrefix}.desktop COPYONLY)
    install(FILES ${CMAKE_CURRENT_BINARY_DIR}/plasma-layout-${addonPrefix}.desktop DESTINATION ${SERVICES_INSTALL_DIR})
    install(FILES ${dir}/metadata.desktop DESTINATION ${DATA_INSTALL_DIR}/plasma/layout-templates/${addonPrefix}/)
    install(FILES ${dir}/contents/layout.js DESTINATION ${DATA_INSTALL_DIR}/plasma/layout-templates/${addonPrefix}/contents/)
-ENDMACRO(INSTALL_PLASMA_JAVASCRIPT_TEMPLATE)
+endmacro(INSTALL_PLASMA_JAVASCRIPT_TEMPLATE)
 
-INSTALL_PLASMA_JAVASCRIPT_TEMPLATE(data/layouts/org.kde.plasma-desktop.defaultPanel org.kde.plasma-desktop.defaultPanel)
-INSTALL_PLASMA_JAVASCRIPT_TEMPLATE(data/layouts/org.kde.plasma-desktop.findWidgets org.kde.plasma-desktop.findWidgets)
-INSTALL_PLASMA_JAVASCRIPT_TEMPLATE(data/layouts/org.kde.plasma-desktop.photoActivity org.kde.plasma-desktop.photoActivity)
-INSTALL_PLASMA_JAVASCRIPT_TEMPLATE(data/layouts/org.kde.plasma-desktop.desktopIcons org.kde.plasma-desktop.desktopIcons)
-INSTALL_PLASMA_JAVASCRIPT_TEMPLATE(data/layouts/org.kde.plasma-desktop.SaL org.kde.plasma-desktop.SaL)
+install_plasma_javascript_template(data/layouts/org.kde.plasma-desktop.defaultPanel org.kde.plasma-desktop.defaultPanel)
+install_plasma_javascript_template(data/layouts/org.kde.plasma-desktop.findWidgets org.kde.plasma-desktop.findWidgets)
+install_plasma_javascript_template(data/layouts/org.kde.plasma-desktop.photoActivity org.kde.plasma-desktop.photoActivity)
+install_plasma_javascript_template(data/layouts/org.kde.plasma-desktop.desktopIcons org.kde.plasma-desktop.desktopIcons)
+install_plasma_javascript_template(data/layouts/org.kde.plasma-desktop.SaL org.kde.plasma-desktop.SaL)
 

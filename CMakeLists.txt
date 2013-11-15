@@ -28,6 +28,7 @@ include(WriteBasicConfigVersionFile)
 
 # where to look first for cmake modules, before ${CMAKE_ROOT}/Modules/ is checked
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${ECM_MODULE_PATH} ${ECM_KDE_MODULE_DIR})
+include(ECMMarkNonGuiExecutable)
 
 include(KDEInstallDirs)
 include(KDECMakeSettings)
@@ -54,7 +55,7 @@ find_package(KF5 CONFIG REQUIRED
     KIdleTime ItemModels KWidgetsAddons KWindowSystem KCodecs KArchive KCoreAddons Solid ThreadWeaver
     KConfig KAuth KJS KWallet KDBusAddons Sonnet
     KI18n KGuiAddons KService KConfigWidgets ItemViews KNotifications KIconThemes KStyle KCompletion KJobWidgets KTextWidgets XmlGui KCrash
-    KBookmarks KUnitConversion KIO KCMUtils Kross KParts KNotifyConfig KPrintUtils KDESu)
+    KBookmarks KUnitConversion KIO KCMUtils Kross KParts KNotifyConfig KPrintUtils KDESu KDocTools KNewStuff )
 
 find_package(Plasma REQUIRED NO_MODULE)
 find_package(PlasmaQuick REQUIRED NO_MODULE)

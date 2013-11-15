@@ -5,7 +5,7 @@ set(rss_engine_SRCS
     rss.cpp
 )
 
-plasma_add_plugin(plasma_engine_rss ${rss_engine_SRCS})
+add_library(plasma_engine_rss MODULE ${rss_engine_SRCS})
 target_link_libraries(plasma_engine_rss KF5::Plasma KF5::KCoreAddons ${KDE4_SYNDICATION_LIBS} KF5::Solid)
 
 install(TARGETS plasma_engine_rss DESTINATION ${PLUGIN_INSTALL_DIR}/plasma/dataengine)

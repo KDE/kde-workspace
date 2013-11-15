@@ -6,7 +6,7 @@ include_directories( ${KDEBASE_WORKSPACE_SOURCE_DIR}/kdm/kfrontend  )
 set(kgreet_classic_PART_SRCS kgreet_classic.cpp )
 
 
-kde4_add_plugin(kgreet_classic ${kgreet_classic_PART_SRCS})
+add_library(kgreet_classic MODULE ${kgreet_classic_PART_SRCS})
 
 
 target_link_libraries(kgreet_classic  ${KDE4_KDEUI_LIBS})
@@ -19,7 +19,7 @@ install(TARGETS kgreet_classic  DESTINATION ${PLUGIN_INSTALL_DIR} )
 set(kgreet_winbind_PART_SRCS kgreet_winbind.cpp )
 
 
-kde4_add_plugin(kgreet_winbind ${kgreet_winbind_PART_SRCS})
+add_library(kgreet_winbind MODULE ${kgreet_winbind_PART_SRCS})
 
 
 target_link_libraries(kgreet_winbind ${KDE4_KDEUI_LIBS})
@@ -31,7 +31,7 @@ install(TARGETS kgreet_winbind  DESTINATION ${PLUGIN_INSTALL_DIR} )
 set(kgreet_generic_PART_SRCS kgreet_generic.cpp )
 
 
-kde4_add_plugin(kgreet_generic ${kgreet_generic_PART_SRCS})
+add_library(kgreet_generic MODULE ${kgreet_generic_PART_SRCS})
 
 
 target_link_libraries(kgreet_generic ${KDE4_KDEUI_LIBS})

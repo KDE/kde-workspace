@@ -16,7 +16,7 @@ if (X11_Xinput_FOUND)
     )
 
     target_link_libraries(kded_ktouchpadenabler 
-        ${KDE4_KDECORE_LIBS}
+        
         ${KDE4_KDEUI_LIBS}
         ${X11_X11_LIB}
         ${X11_Xinput_LIB}

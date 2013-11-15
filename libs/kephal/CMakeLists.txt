@@ -1,5 +1,5 @@
-PROJECT (kephal)
-ADD_SUBDIRECTORY(client)
-ADD_SUBDIRECTORY(service)
-ADD_SUBDIRECTORY(tests)
+project (kephal)
+add_subdirectory(client)
+add_subdirectory(service)
+add_subdirectory(tests)
 

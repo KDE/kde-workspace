@@ -2,8 +2,8 @@ set(krunner_webshortcuts_SRCS
     webshortcutrunner.cpp
 )
 
-kde4_add_plugin(krunner_webshortcuts ${krunner_webshortcuts_SRCS})
-target_link_libraries(krunner_webshortcuts KIOCore ${KDE4_PLASMA_LIBS})
+add_library(krunner_webshortcuts MODULE ${krunner_webshortcuts_SRCS})
+target_link_libraries(krunner_webshortcuts KIOCore KF5::Plasma)
 
 install(TARGETS krunner_webshortcuts DESTINATION ${PLUGIN_INSTALL_DIR} )
 

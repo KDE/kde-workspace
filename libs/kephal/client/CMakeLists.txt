@@ -1,10 +1,10 @@
 include_directories(${kephal_SOURCE_DIR}/kephal)
 
-ADD_DEFINITIONS (-DSCREENS_FACTORY=libkephal_factory)
-ADD_DEFINITIONS (-DOUTPUTS_FACTORY=libkephal_factory)
-ADD_DEFINITIONS (-DCONFIGURATIONS_FACTORY=libkephal_factory)
+add_definitions (-DSCREENS_FACTORY=libkephal_factory)
+add_definitions (-DOUTPUTS_FACTORY=libkephal_factory)
+add_definitions (-DCONFIGURATIONS_FACTORY=libkephal_factory)
 
-SET (kephalshared_SRCS
+set (kephalshared_SRCS
    ${CMAKE_CURRENT_SOURCE_DIR}/../kephal/simplescreen.cpp
    ${CMAKE_CURRENT_SOURCE_DIR}/../kephal/screens.cpp
    ${CMAKE_CURRENT_SOURCE_DIR}/../kephal/desktopwidgetscreens.cpp
@@ -35,9 +35,9 @@ set(more_unused_SRCS
 #QT4_GENERATE_DBUS_INTERFACE(../service/dbus/dbusapi_configurations.h org.kde.Kephal.Configurations.xml)
 #QT4_ADD_DBUS_INTERFACE(libkephal_SRCS ${CMAKE_CURRENT_BINARY_DIR}/org.kde.Kephal.Configurations.xml configurations_interface)
 
-KDE4_ADD_LIBRARY(kephal SHARED ${libkephal_SRCS})
+add_library(kephal SHARED ${libkephal_SRCS})
 
-TARGET_LINK_LIBRARIES (kephal ${QT_QTCORE_LIBRARY} ${QT_QTGUI_LIBRARY} ${KDE4_KDEUI_LIBS})
+target_link_libraries (kephal Qt5::Core Qt5::Gui ${KDE4_KDEUI_LIBS})
 
 set_target_properties(kephal PROPERTIES
    VERSION ${GENERIC_LIB_VERSION}
@@ -47,6 +47,6 @@ set_target_properties(kephal PROPERTIES
 #   INSTALL_RPATH_USE_LINK_PATH true
 #   )
 
-INSTALL (TARGETS kephal EXPORT kdeworkspaceLibraryTargets ${INSTALL_TARGETS_DEFAULT_ARGS})
+install (TARGETS kephal EXPORT kdeworkspaceLibraryTargets ${INSTALL_TARGETS_DEFAULT_ARGS})
 
-INSTALL (FILES FindKephal.cmake DESTINATION ${DATA_INSTALL_DIR}/cmake/modules)
+install (FILES FindKephal.cmake DESTINATION ${DATA_INSTALL_DIR}/cmake/modules)

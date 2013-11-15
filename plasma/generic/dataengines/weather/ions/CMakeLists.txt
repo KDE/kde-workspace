@@ -1,6 +1,6 @@
 # the Ion shared library
 set (ionlib_SRCS ion.cpp)
-kde4_add_library (weather_ion SHARED ${ionlib_SRCS})
+add_library (weather_ion SHARED ${ionlib_SRCS})
 target_link_libraries (weather_ion KIOCore KF5::Plasma)
 target_link_libraries (weather_ion LINK_INTERFACE_LIBRARIES ${KDE4_KDEUI_LIBS} KIOCore KF5::Plasma)
 
@@ -11,11 +11,11 @@ set_target_properties(weather_ion PROPERTIES
 
 install (TARGETS weather_ion EXPORT kdeworkspaceLibraryTargets ${INSTALL_TARGETS_DEFAULT_ARGS})
 
-INSTALL (FILES ion.h
+install (FILES ion.h
                ion_export.h
          DESTINATION ${INCLUDE_INSTALL_DIR}/plasma/weather COMPONENT Devel)
 
-INSTALL (FILES includes/Ion
+install (FILES includes/Ion
          DESTINATION ${INCLUDE_INSTALL_DIR}/KDE/Plasma/Weather COMPONENT Devel)
 
 # the individual ion plugins

@@ -3,10 +3,10 @@ set(krunner_sessions_SRCS
 )
 
 set(screensaver_xml ${KDEBASE_WORKSPACE_SOURCE_DIR}/ksmserver/screenlocker/dbus/org.freedesktop.ScreenSaver.xml)
-QT4_ADD_DBUS_INTERFACE(krunner_sessions_SRCS ${screensaver_xml} screensaver_interface)
+qt5_add_dbus_interface(krunner_sessions_SRCS ${screensaver_xml} screensaver_interface)
 
-kde4_add_plugin(krunner_sessions ${krunner_sessions_SRCS})
-target_link_libraries(krunner_sessions KIOCore ${KDE4_PLASMA_LIBS} kworkspace)
+add_library(krunner_sessions MODULE ${krunner_sessions_SRCS})
+target_link_libraries(krunner_sessions KIOCore KF5::Plasma kworkspace)
 
 install(TARGETS krunner_sessions DESTINATION ${PLUGIN_INSTALL_DIR} )
 

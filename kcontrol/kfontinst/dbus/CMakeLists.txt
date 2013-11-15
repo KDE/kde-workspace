@@ -8,18 +8,18 @@ set(fontinst_helper_SRCS FcConfig.cpp Helper.cpp Folder.cpp Utils.cpp ${libkfont
 
 # qt4_generate_dbus_interface(FontInst.h org.kde.fontinst.xml)
 qt4_add_dbus_adaptor(fontinst_bin_SRCS org.kde.fontinst.xml FontInst.h KFI::FontInst)
-# qt4_add_dbus_interface(fontinst_bin_SRCS org.kde.fontinst.xml FontinstIface)
+# qt5_add_dbus_interface(fontinst_bin_SRCS org.kde.fontinst.xml FontinstIface)
 
-kde4_add_executable(fontinst_bin ${fontinst_bin_SRCS})
-kde4_add_executable(fontinst_helper ${fontinst_helper_SRCS})
+add_executable(fontinst_bin ${fontinst_bin_SRCS})
+add_executable(fontinst_helper ${fontinst_helper_SRCS})
 
 set_target_properties(fontinst_bin PROPERTIES OUTPUT_NAME fontinst)
-target_link_libraries(fontinst_bin ${KDE4_KDECORE_LIBS}
-                      ${QT_QTDBUS_LIBRARY} ${QT_QTXML_LIBRARY} ${FONTCONFIG_LIBRARIES} kfontinst)
+target_link_libraries(fontinst_bin 
+                      Qt5::DBus Qt5::Xml ${FONTCONFIG_LIBRARIES} kfontinst)
 
 set_target_properties(fontinst_helper PROPERTIES OUTPUT_NAME fontinst_helper)
-target_link_libraries(fontinst_helper ${KDE4_KDECORE_LIBS}
-                      ${QT_QTDBUS_LIBRARY} ${QT_QTXML_LIBRARY} ${FONTCONFIG_LIBRARIES} kfontinst)
+target_link_libraries(fontinst_helper 
+                      Qt5::DBus Qt5::Xml ${FONTCONFIG_LIBRARIES} kfontinst)
 
 install(TARGETS fontinst_bin DESTINATION ${LIBEXEC_INSTALL_DIR} )
 install(TARGETS fontinst_helper DESTINATION ${LIBEXEC_INSTALL_DIR} )

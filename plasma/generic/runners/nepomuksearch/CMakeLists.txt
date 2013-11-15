@@ -7,20 +7,20 @@ include_directories(
   ${NEPOMUK_CORE_INCLUDE_DIR}
 )
 
-SET(nepomuksearchrunner_SRCS
+set(nepomuksearchrunner_SRCS
     nepomuksearchrunner.cpp
 )
 
-kde4_add_plugin(krunner_nepomuksearchrunner ${nepomuksearchrunner_SRCS})
+add_library(krunner_nepomuksearchrunner MODULE ${nepomuksearchrunner_SRCS})
 
 target_link_libraries(krunner_nepomuksearchrunner
-  ${KDE4_KDECORE_LIBS}
+  
   ${KDE4_KDEUI_LIBS}
   KIOCore
   ${NEPOMUK_CORE_LIBRARY}
-  ${QT_QTGUI_LIBRARY}
+  Qt5::Gui
   ${SOPRANO_LIBRARIES}
-  ${KDE4_PLASMA_LIBS}
+  KF5::Plasma
 )
 
 install(

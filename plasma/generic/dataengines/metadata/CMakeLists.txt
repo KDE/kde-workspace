@@ -2,7 +2,7 @@ project(metadata)
 
 set(metadata_engine_SRCS metadata_engine.cpp)
  
-plasma_add_plugin(plasma_engine_metadata ${metadata_engine_SRCS})
+add_library(plasma_engine_metadata MODULE ${metadata_engine_SRCS})
 
 include_directories(${SOPRANO_INCLUDE_DIR} ${NEPOMUK_CORE_INCLUDE_DIR})
 

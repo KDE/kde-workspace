@@ -6,7 +6,7 @@ set(hotplug_engine_SRCS
 
 kservice_desktop_to_json(plasma-dataengine-hotplug.desktop)
 
-plasma_add_plugin(plasma_engine_hotplug ${hotplug_engine_SRCS})
+add_library(plasma_engine_hotplug MODULE ${hotplug_engine_SRCS})
 target_link_libraries(plasma_engine_hotplug
                 Qt5::DBus
 		KF5::KCoreAddons

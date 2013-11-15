@@ -4,7 +4,7 @@ project(desktoptheme)
 set(kcmdesktoptheme_SRCS kcmdesktoptheme.cpp desktopthemedetails.cpp thememodel.cpp)
 kde4_add_ui_files(kcmdesktoptheme_SRCS DesktopTheme.ui DesktopThemeDetails.ui)
 
-kde4_add_plugin(kcm_desktoptheme ${kcmdesktoptheme_SRCS})
+add_library(kcm_desktoptheme MODULE ${kcmdesktoptheme_SRCS})
 target_link_libraries(kcm_desktoptheme ${X11_LIBRARIES}
     KF5::KArchive
     KF5::KCMUtils
@@ -13,7 +13,7 @@ target_link_libraries(kcm_desktoptheme ${X11_LIBRARIES}
     KF5::Plasma
     KF5::KIOCore
     KF5::KIOWidgets
-    ${KDE4_KNEWSTUFF3_LIBS}
+    KF5::KNewStuff
     KF5::KDE4Support
 )
 

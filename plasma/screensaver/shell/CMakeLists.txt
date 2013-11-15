@@ -26,10 +26,10 @@ set(plasmaapp_dbusXML org.kde.plasma-overlay.App.xml)
 #qt4_generate_dbus_interface(plasmaapp.h ${plasmaapp_dbusXML} OPTIONS -S -M)
 qt4_add_dbus_adaptor(plasma-overlay_SRCS ${plasmaapp_dbusXML} plasmaapp.h PlasmaApp)
 
-kde4_add_executable(plasma-overlay ${plasma-overlay_SRCS})
+add_executable(plasma-overlay ${plasma-overlay_SRCS})
 
-target_link_libraries(plasma-overlay ${KDE4_PLASMA_LIBS} kworkspace  KIOCore KF5::KIOFileWidgets
-                                     ${X11_X11_LIB} plasmagenericshell ${QT_QTDECLARATIVE_LIBRARY} kdeclarative)
+target_link_libraries(plasma-overlay KF5::Plasma kworkspace  KIOCore KF5::KIOFileWidgets
+                                     ${X11_X11_LIB} plasmagenericshell Qt5::Declarative kdeclarative)
 if(X11_Xrender_FOUND)
   target_link_libraries(plasma-overlay ${X11_Xrender_LIB})
 endif()

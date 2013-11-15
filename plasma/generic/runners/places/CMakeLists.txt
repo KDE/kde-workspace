@@ -3,13 +3,13 @@ set(krunner_placesrunner_SRCS
     placesrunner.cpp
 )
 
-kde4_add_plugin(krunner_placesrunner ${krunner_placesrunner_SRCS})
+add_library(krunner_placesrunner MODULE ${krunner_placesrunner_SRCS})
 target_link_libraries(
     krunner_placesrunner
     KF5::KIOFileWidgets
-    ${KDE4_SOLID_LIBS}
+    KF5::Solid
     KIOCore
-    ${KDE4_PLASMA_LIBS}
+    KF5::Plasma
     )
 
 install(TARGETS krunner_placesrunner DESTINATION ${PLUGIN_INSTALL_DIR} )
