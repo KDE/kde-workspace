@@ -418,9 +418,9 @@ install(FILES ${CMAKE_CURRENT_BINARY_DIR}/KDE4WorkspaceConfig.cmake
               ${CMAKE_CURRENT_BINARY_DIR}/KDE4WorkspaceConfigVersion.cmake
         DESTINATION ${_KDE4WorkspaceConfig_INSTALL_DIR})
 
-# install(EXPORT kdeworkspaceLibraryTargets
-#         NAMESPACE ${KDE4WORKSPACE_TARGET_PREFIX}
-#         DESTINATION ${_KDE4WorkspaceConfig_INSTALL_DIR}
-#         FILE KDE4WorkspaceLibraryTargets.cmake )
+install(EXPORT kdeworkspaceLibraryTargets
+        NAMESPACE ${KDE4WORKSPACE_TARGET_PREFIX}
+        DESTINATION ${_KDE4WorkspaceConfig_INSTALL_DIR}
+        FILE KDE4WorkspaceLibraryTargets.cmake )
 
 
