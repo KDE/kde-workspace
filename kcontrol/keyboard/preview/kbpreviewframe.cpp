@@ -46,7 +46,7 @@ static const QColor unknownSymbolColor("#FF3300");
 static const int xOffset[] = {10, 10, -15, -15 };
 static const int yOffset[] = {5, -20, 5, -20 };
 static const QColor color[] = { lev12color, lev12color, lev34color, lev34color };
-static const int keyLevel[3][4] = { { 1, 0, 2, 3}, { 1, 0, 4, 5}, { 1, 0, 6, 7} };
+static const int keyLevel[3][4] = { { 1, 0, 3, 2}, { 1, 0, 5, 4}, { 1, 0, 7, 6} };
 static const QRegExp fkKey("^FK\\d+$");
 
 
@@ -127,10 +127,12 @@ void KbPreviewFrame::drawKeySymbols(QPainter &painter, QPoint temp[], const GSha
         painter.setPen(Qt::black);
 
         if( name.contains(fkKey) ){
-            name.remove("K");
+            QString tempName = name;
+            tempName.remove("K");
+            painter.drawText(temp[0].x()+s.size(0)-10, temp[0].y()+3*s.size(1)/2, tempName);
         }
-
-        painter.drawText(temp[0].x()+s.size(0)-10, temp[0].y()+3*s.size(1)/2, name);
+        else
+            painter.drawText(temp[0].x()+s.size(0)-10, temp[0].y()+3*s.size(1)/2, name);
 
         tip = name;
 
