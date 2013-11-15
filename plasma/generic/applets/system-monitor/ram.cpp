@@ -58,7 +58,13 @@ void SM::Ram::configChanged()
 {
     KConfigGroup cg = config();
     setInterval(cg.readEntry("interval", 2.0) * 1000.0);
-    setSources(cg.readEntry("memories", m_memories));
+    // sanity check
+    QStringList memories = cg.readEntry("memories", m_memories);
+    foreach (QString source, memories) {
+        if (source != phys_source && source != swap_source)
+            memories.removeAt(memories.indexOf(source));
+    }
+    setSources(memories);
     m_max.clear();
     connectToEngine();
 }

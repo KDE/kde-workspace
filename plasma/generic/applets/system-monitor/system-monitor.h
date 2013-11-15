@@ -46,6 +46,7 @@ class SystemMonitor : public Plasma::PopupApplet
     protected slots:
         void toggled(bool toggled);
         void appletRemoved(QObject *object);
+        void configChanged();
 
     protected:
         SM::Applet *addApplet(const QString &name);
