@@ -1,6 +1,8 @@
 [Desktop Entry]
 Comment=Blank desktop view furniture
+Comment[es]=Accesorio de vista del escritorio vacío
 Comment[ia]=Blanchi le vista de accessorios de scriptorio
+Comment[kk]=Бос үстел көрініс әбзелдері
 Comment[nl]=Meubilair voor weergave op blanco bureaublad
 Comment[pt]=Disposição de ecrã vazio
 Comment[pt_BR]=Acessório de visualização da área de trabalho vazia
@@ -14,8 +16,10 @@ Keywords=
 Name=Blank Desktop
 Name[cs]=Prázdná pracovní plocha
 Name[de]=Leere Arbeitsfläche
+Name[es]=Escritorio vacío
 Name[gl]=Esvaer o escritorio
 Name[ia]=Blanchi scriptorio
+Name[kk]=Бос жұмыс үстелі
 Name[nl]=Blanco bureaublad
 Name[pt]=Ecrã Vazio
 Name[pt_BR]=Área de trabalho vazia
