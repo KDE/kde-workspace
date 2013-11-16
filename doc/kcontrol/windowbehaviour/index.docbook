@@ -140,7 +140,7 @@ The window that happens to be under the mouse pointer becomes active.  If
 the mouse is not over a window (for instance, it's on the desktop) the last
 window that was under the mouse has focus.  New windows such as the mini
 command line invoked with <keycombo action="simul">&Alt;<keycap>F2</keycap></keycombo> will
-ot receive the focus, you must move the mouse over them to type.
+not receive the focus, you must move the mouse over them to type.
 </para>
 </listitem>
 </varlistentry>
