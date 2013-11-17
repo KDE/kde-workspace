@@ -92,7 +92,7 @@ This behaviour is common on other operating systems and likely what you want.</p
 <para>
 This is mostly the same as <guilabel>Click To Focus</guilabel>.
 If an active window has to be chosen by the system
-(eg. because the currently active one was closed) 
+(&eg; because the currently active one was closed) 
 the window under the mouse is the preferred candidate.
 Unusual, but possible variant of <guilabel>Click To Focus</guilabel>.
 </para>
