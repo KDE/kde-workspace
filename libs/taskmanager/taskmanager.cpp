@@ -335,7 +335,7 @@ void TaskManager::windowChanged(WId w, const unsigned long *dirty)
 {
 #if HAVE_X11
     if (dirty[NETWinInfo::PROTOCOLS] & NET::WMState) {
-        NETWinInfo info(QX11Info::display(), w, QX11Info::appRootWindow(),
+        NETWinInfo info(QX11Info::connection(), w, QX11Info::appRootWindow(),
                         NET::WMState | NET::XAWMState);
 
         if (info.state() & NET::SkipTaskbar) {

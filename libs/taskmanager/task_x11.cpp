@@ -25,6 +25,8 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "task_p.h"
 
 #include <QX11Info>
+#include <X11/Xutil.h>
+#include <fixx11h.h>
 
 namespace TaskManager
 {
@@ -34,7 +36,7 @@ bool Task::updateDemandsAttentionState(WId w)
     const bool empty = d->transientsDemandingAttention.isEmpty();
     if (window() != w) {
         // 'w' is a transient for this task
-        NETWinInfo i(QX11Info::display(), w, QX11Info::appRootWindow(), NET::WMState);
+        NETWinInfo i(QX11Info::connection(), w, QX11Info::appRootWindow(), NET::WMState);
         if (i.state() & NET::DemandsAttention) {
             if (!d->transientsDemandingAttention.contains(w)) {
                 d->transientsDemandingAttention.insert(w);
@@ -82,7 +84,7 @@ QString Task::classClass() const
 
 int Task::pid() const
 {
-    return NETWinInfo(QX11Info::display(), d->win, QX11Info::appRootWindow(), NET::WMPid).pid();
+    return NETWinInfo(QX11Info::connection(), d->win, QX11Info::appRootWindow(), NET::WMPid).pid();
 }
 
 void Task::move()
@@ -101,7 +103,7 @@ void Task::move()
     QRect geom = d->info.geometry();
     QCursor::setPos(geom.center());
 
-    NETRootInfo ri(QX11Info::display(), NET::WMMoveResize);
+    NETRootInfo ri(QX11Info::connection(), NET::WMMoveResize);
     ri.moveResizeRequest(d->win, geom.center().x(),
                          geom.center().y(), NET::Move);
 }
@@ -122,7 +124,7 @@ void Task::resize()
     QRect geom = d->info.geometry();
     QCursor::setPos(geom.bottomRight());
 
-    NETRootInfo ri(QX11Info::display(), NET::WMMoveResize);
+    NETRootInfo ri(QX11Info::connection(), NET::WMMoveResize);
     ri.moveResizeRequest(d->win, geom.bottomRight().x(),
                          geom.bottomRight().y(), NET::BottomRight);
 }
@@ -140,7 +142,7 @@ void Task::setMaximized(bool maximize)
         KWindowSystem::unminimizeWindow(d->win);
     }
 
-    NETWinInfo ni(QX11Info::display(), d->win, QX11Info::appRootWindow(), NET::WMState);
+    NETWinInfo ni(QX11Info::connection(), d->win, QX11Info::appRootWindow(), NET::WMState);
 
     if (maximize) {
         ni.setState(NET::Max, NET::Max);
@@ -166,7 +168,7 @@ void Task::restore()
         KWindowSystem::unminimizeWindow(d->win);
     }
 
-    NETWinInfo ni(QX11Info::display(), d->win, QX11Info::appRootWindow(), NET::WMState);
+    NETWinInfo ni(QX11Info::connection(), d->win, QX11Info::appRootWindow(), NET::WMState);
     ni.setState(0, NET::Max);
 
     if (!on_current) {
@@ -176,7 +178,7 @@ void Task::restore()
 
 void Task::close()
 {
-    NETRootInfo ri(QX11Info::display(), NET::CloseWindow);
+    NETRootInfo ri(QX11Info::connection(), NET::CloseWindow);
     ri.closeWindowRequest(d->win);
 }
 
@@ -202,7 +204,7 @@ void Task::toDesktop(int desk)
 
 void Task::setAlwaysOnTop(bool stay)
 {
-    NETWinInfo ni(QX11Info::display(), d->win, QX11Info::appRootWindow(), NET::WMState);
+    NETWinInfo ni(QX11Info::connection(), d->win, QX11Info::appRootWindow(), NET::WMState);
     if (stay)
         ni.setState(NET::StaysOnTop, NET::StaysOnTop);
     else
@@ -211,7 +213,7 @@ void Task::setAlwaysOnTop(bool stay)
 
 void Task::setKeptBelowOthers(bool below)
 {
-    NETWinInfo ni(QX11Info::display(), d->win, QX11Info::appRootWindow(), NET::WMState);
+    NETWinInfo ni(QX11Info::connection(), d->win, QX11Info::appRootWindow(), NET::WMState);
 
     if (below) {
         ni.setState(NET::KeepBelow, NET::KeepBelow);
@@ -222,7 +224,7 @@ void Task::setKeptBelowOthers(bool below)
 
 void Task::setFullScreen(bool fullscreen)
 {
-    NETWinInfo ni(QX11Info::display(), d->win, QX11Info::appRootWindow(), NET::WMState);
+    NETWinInfo ni(QX11Info::connection(), d->win, QX11Info::appRootWindow(), NET::WMState);
 
     if (fullscreen) {
         ni.setState(NET::FullScreen, NET::FullScreen);
@@ -233,7 +235,7 @@ void Task::setFullScreen(bool fullscreen)
 
 void Task::setShaded(bool shade)
 {
-    NETWinInfo ni(QX11Info::display(), d->win, QX11Info::appRootWindow(), NET::WMState);
+    NETWinInfo ni(QX11Info::connection(), d->win, QX11Info::appRootWindow(), NET::WMState);
     if (shade)
         ni.setState(NET::Shaded, NET::Shaded);
     else
@@ -247,7 +249,7 @@ void Task::publishIconGeometry(QRect rect)
     }
 
     d->iconGeometry = rect;
-    NETWinInfo ni(QX11Info::display(), d->win, QX11Info::appRootWindow(), 0);
+    NETWinInfo ni(QX11Info::connection(), d->win, QX11Info::appRootWindow(), 0);
     NETRect r;
 
     if (rect.isValid()) {
@@ -262,7 +264,7 @@ void Task::publishIconGeometry(QRect rect)
 void Task::refreshActivities()
 {
     unsigned long properties[] = { 0, NET::WM2Activities };
-    NETWinInfo info(QX11Info::display(), d->win, QX11Info::appRootWindow(), properties, 2);
+    NETWinInfo info(QX11Info::connection(), d->win, QX11Info::appRootWindow(), properties, 2);
     QString result(info.activities());
     if (result.isEmpty() || result == "00000000-0000-0000-0000-000000000000") {
         d->activities.clear();

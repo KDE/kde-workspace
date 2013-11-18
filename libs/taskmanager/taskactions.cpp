@@ -305,7 +305,7 @@ ToNewDesktopActionImpl::ToNewDesktopActionImpl(QObject *parent, AbstractGroupabl
 
 void ToNewDesktopActionImpl::slotToNewDesktop()
 {
-    NETRootInfo info(QX11Info::display(), NET::NumberOfDesktops);
+    NETRootInfo info(QX11Info::connection(), NET::NumberOfDesktops);
     info.setNumberOfDesktops(m_newDesktop);
 
     foreach (QWeakPointer<Task> task, m_tasks) {
