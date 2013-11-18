@@ -30,10 +30,7 @@
 #include <QDebug>
 
 #include <KDE/KJob>
-#include <KDE/KIcon>
 #include <KDE/KIconLoader>
-#include <KDE/KStandardDirs>
-#include <KGlobal>
 
 #include <Plasma/ServiceJob>
 #include <Plasma/Applet>
@@ -161,7 +158,10 @@ QVariant DBusSystemTrayTask::customIcon(QVariant variant) const
             return variant;
 
         // Otherwise return a QIcon from our custom icon loader.
-        return QVariant(KIcon(variant.toString(), m_customIconLoader));
+        if (!QIcon::themeSearchPaths().contains(m_iconThemePath)) {
+            QIcon::setThemeSearchPaths(QStringList(m_iconThemePath) << QIcon::themeSearchPaths());
+        }
+        return QVariant(QIcon::fromTheme(variant.toString()));
     } else {
         // Most importantly QIcons. Nothing to do for those.
         return variant;
@@ -328,9 +328,9 @@ void DBusSystemTrayTask::syncIcons(const Plasma::DataEngine::Data &properties)
             if (tokens.length() >= 3 && tokens.takeLast() == QLatin1String("icons")) {
                 QString appName = tokens.takeLast();
                 QString prefix = QChar('/') % tokens.join("/");
-                // FIXME: Fix KIconLoader and KIconTheme so that we can use
-                // our own instance of KStandardDirs
-                KGlobal::dirs()->addResourceDir("data", prefix);
+                if (!QIcon::themeSearchPaths().contains(prefix)) {
+                    QIcon::setThemeSearchPaths(QStringList(prefix) << QIcon::themeSearchPaths());
+                }
                 // We use a separate instance of KIconLoader to avoid
                 // adding all application dirs to KIconLoader::global(), to
                 // avoid potential icon name clashes between application
