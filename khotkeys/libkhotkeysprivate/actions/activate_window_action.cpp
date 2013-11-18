@@ -81,7 +81,7 @@ void ActivateWindowAction::execute()
     if( window()->match( windows_handler->active_window()))
         return; // is already active
     WId win_id = windows_handler->find_window( window());
-    if( win_id != None )
+    if( win_id != XCB_WINDOW_NONE )
         windows_handler->activate_window( win_id );
     }
 
