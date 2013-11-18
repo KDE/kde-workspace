@@ -99,6 +99,8 @@ void Panel::setLocation(const QString &locationString)
     }
 
     c->setLocation(loc);
+
+    c->flushPendingConstraintsEvents();
 }
 
 PanelView *Panel::panel() const
