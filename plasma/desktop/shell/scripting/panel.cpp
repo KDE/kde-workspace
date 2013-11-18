@@ -99,6 +99,8 @@ void Panel::setLocation(const QString &locationString)
     }
 
     c->setLocation(loc);
+
+    c->flushPendingConstraintsEvents();
 }
 
 PanelView *Panel::panel() const
@@ -225,33 +227,109 @@ int Panel::length() const
     }
 }
 
-void Panel::setLength(int pixels)
+void Panel::setLength(int minPixels, int maxPixels)
 {
     Plasma::Containment *c = containment();
-    if (pixels < 0 || !c) {
+    if ((minPixels < 0 && maxPixels < 0) || !c) {
         return;
     }
 
     PanelView *v = panel();
     if (v) {
+        if (minPixels < 0) {
+            minPixels = minLength();
+        } else if (minPixels > maxPixels) {
+            maxPixels = minPixels;
+        }
+
+        if (maxPixels < 0) {
+            maxPixels = maxLength();
+        } else if (minPixels > maxPixels) {
+            minPixels = maxPixels;
+        }
+
+        int pixels = 0;
+        if (minPixels == maxPixels) {
+            pixels = minPixels;
+        } else {
+            pixels = qBound(minPixels,
+                            c->formFactor() == Plasma::Vertical ?
+                                c->preferredSize().toSize().height() :
+                                c->preferredSize().toSize().width(),
+                            maxPixels);
+        }
+
         QRectF screen = c->corona()->screenGeometry(v->screen());
-        QSizeF s = c->size();
+        QSizeF size = c->size();
+        QSizeF minSize = c->minimumSize();
+        QSizeF maxSize = c->maximumSize();
         if (c->formFactor() == Plasma::Vertical) {
-            if (pixels > screen.height() - v->offset()) {
+            if (minPixels > screen.height() - v->offset()) {
                 return;
             }
 
-            s.setHeight(pixels);
-        } else if (pixels > screen.width() - v->offset()) {
+            size.setHeight(pixels);
+            minSize.setHeight(minPixels);
+            maxSize.setHeight(maxPixels);
+        } else if (minPixels > screen.width() - v->offset()) {
             return;
         } else {
-            s.setWidth(pixels);
+            size.setWidth(pixels);
+            minSize.setWidth(minPixels);
+            maxSize.setWidth(maxPixels);
         }
 
-        c->resize(s);
-        c->setMinimumSize(s);
-        c->setMaximumSize(s);
+        //kDebug() << "sizes:" << minSize << size << maxSize;
+        c->setMinimumSize(0, 0);
+        c->setMaximumSize(QWIDGETSIZE_MAX, QWIDGETSIZE_MAX);
+        c->resize(size);
+        c->setMinimumSize(minSize);
+        c->setMaximumSize(maxSize);
+        v->pinchContainmentToCurrentScreen();
     }
+}
+
+void Panel::setLength(int pixels)
+{
+    setLength(pixels, pixels);
+}
+
+int Panel::minLength() const
+{
+    Plasma::Containment *c = containment();
+    if (!c) {
+        return 0;
+    }
+
+    if (c->formFactor() == Plasma::Vertical) {
+        return c->minimumHeight();
+    } else {
+        return c->minimumWidth();
+    }
+}
+
+void Panel::setMinLength(int pixels)
+{
+    setLength(pixels, -1);
+}
+
+int Panel::maxLength() const
+{
+    Plasma::Containment *c = containment();
+    if (!c) {
+        return 0;
+    }
+
+    if (c->formFactor() == Plasma::Vertical) {
+        return c->maximumHeight();
+    } else {
+        return c->maximumWidth();
+    }
+}
+
+void Panel::setMaxLength(int pixels)
+{
+    setLength(-1, pixels);
 }
 
 int Panel::height() const

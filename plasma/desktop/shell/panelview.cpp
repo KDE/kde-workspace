@@ -338,6 +338,9 @@ void PanelView::setContainment(Plasma::Containment *containment)
     if (m_visibilityMode != NormalPanel && m_visibilityMode != WindowsGoBelow) {
         checkUnhide(containment->status());
     }
+
+    // disable removing widgets from the context menu
+    containment->setProperty("hideCloseAppletInContextMenu", true);
 }
 
 void PanelView::themeChanged()
@@ -917,6 +920,8 @@ void PanelView::togglePanelController()
         qDebug() << "showing panel controller!" << m_panelController->geometry();
         m_panelController->show();
     }
+
+    containment()->setProperty("hideCloseAppletInContextMenu", false);
 }
 
 void PanelView::editingComplete()
@@ -932,6 +937,7 @@ void PanelView::editingComplete()
     }
 
     containment()->closeToolBox();
+    containment()->setProperty("hideCloseAppletInContextMenu", true);
     updateStruts();
 
     if (m_visibilityMode == LetWindowsCover || m_visibilityMode == AutoHide) {
@@ -1121,6 +1127,8 @@ void PanelView::showWidgetExplorer()
     } else {
         m_panelController->showWidgetExplorer();
     }
+
+    containment()->setProperty("hideCloseAppletInContextMenu", false);
 }
 
 void PanelView::moveEvent(QMoveEvent *event)

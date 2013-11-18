@@ -51,6 +51,8 @@ class Panel : public Containment
     // panel properties
     Q_PROPERTY(QString alignment READ alignment WRITE setAlignment)
     Q_PROPERTY(int offset READ offset WRITE setOffset)
+    Q_PROPERTY(int minLength READ minLength WRITE setMinLength)
+    Q_PROPERTY(int maxLength READ maxLength WRITE setMaxLength)
     Q_PROPERTY(int length READ length WRITE setLength)
     Q_PROPERTY(int height READ height WRITE setHeight)
     Q_PROPERTY(QString hiding READ hiding WRITE setHiding)
@@ -67,6 +69,12 @@ public:
 
     int offset() const;
     void setOffset(int pixels);
+
+    int minLength() const;
+    void setMinLength(int pixels);
+
+    int maxLength() const;
+    void setMaxLength(int pixels);
 
     int length() const;
     void setLength(int pixels);
@@ -87,6 +95,7 @@ public Q_SLOTS:
     void reloadConfig() { Applet::reloadConfig(); }
 
 private:
+    void setLength(int minPixels, int maxPixels);
     PanelView *panel() const;
 };
 

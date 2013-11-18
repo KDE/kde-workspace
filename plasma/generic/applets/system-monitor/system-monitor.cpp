@@ -129,6 +129,44 @@ void SystemMonitor::toggled(bool toggled)
     }
 }
 
+void SystemMonitor::configChanged()
+{
+    KConfigGroup cg = config();
+    QStringList appletNames = cg.readEntry("applets", QStringList());
+
+    QStringList oldAppletNames;
+    foreach (SM::Applet *applet, m_applets) {
+        oldAppletNames << applet->objectName();
+    }
+
+    if (appletNames == oldAppletNames) {
+        foreach (SM::Applet *applet, m_applets)
+            applet->configChanged();
+    } else {
+        QMap<QString, KPluginInfo> appletsFound;
+        KPluginInfo::List appletList = listAppletInfo("System Information");
+        foreach (const KPluginInfo &pluginInfo, appletList) {
+            if (pluginInfo.pluginName().startsWith("sm_") && !pluginInfo.isHidden()) {
+                appletsFound.insert(pluginInfo.pluginName(), pluginInfo);
+            }
+        }
+
+        foreach (MonitorButton *button, m_monitorButtons) {
+            button->setChecked(false);
+        }
+
+        foreach (const QString& appletName, appletNames) {
+            if (appletsFound.contains(appletName)) {
+                foreach (MonitorButton* button, m_monitorButtons) {
+                    if (button->objectName() == appletName)
+                        button->setChecked(true);
+                }
+            }
+        }
+        checkGeometry();
+    }
+}
+
 SM::Applet *SystemMonitor::addApplet(const QString &name)
 {
     if (name.isEmpty()) {
