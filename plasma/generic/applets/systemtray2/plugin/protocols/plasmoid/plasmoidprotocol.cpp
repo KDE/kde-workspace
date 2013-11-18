@@ -117,8 +117,12 @@ void PlasmoidProtocol::newTask(const QString &service)
 
     PlasmoidTask *task = new PlasmoidTask(rootItem, service, m_systrayPackageRoot, this);
 
-    m_tasks[service] = task;
-    emit taskCreated(task);
+    if (task->pluginInfo().isValid()) {
+        m_tasks[service] = task;
+        emit taskCreated(task);
+    } else {
+        qWarning() << "Failed to load Plasmoid: " << service;
+    }
 }
 
 void PlasmoidProtocol::cleanupTask(const QString &service)

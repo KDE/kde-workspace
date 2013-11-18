@@ -69,6 +69,7 @@ public:
     virtual TaskType type() const { return TypePlasmoid; };
 
     QString iconName() const { return m_iconName; }
+    KPluginInfo pluginInfo() const;
     QString shortcut() const { return m_shortcut; }
     void    setShortcut(QString text);
 

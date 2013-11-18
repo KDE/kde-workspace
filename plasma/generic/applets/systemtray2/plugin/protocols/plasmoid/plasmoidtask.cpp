@@ -49,7 +49,11 @@ PlasmoidTask::PlasmoidTask(QQuickItem* rootItem, const QString &packageName, con
     connect(m_taskItem, &PlasmoidInterface::statusChanged, this, &PlasmoidTask::updateStatus);
     connect(m_taskItem, &PlasmoidInterface::defaultRepresentationChanged, this, &PlasmoidTask::taskItemExpandedChanged);
     KPluginInfo info = m_taskItem->pluginInfo();
-    setName(info.name());
+    if (!pluginInfo().isValid()) {
+        setName(info.name());
+    } else {
+        qWarning() << "Invalid Plasmoid: " << packageName;
+    }
     updateStatus();
 }
 
@@ -57,9 +61,17 @@ PlasmoidTask::~PlasmoidTask()
 {
 }
 
-void PlasmoidTask::updateStatus()
+KPluginInfo PlasmoidTask::pluginInfo() const
 {
     if (!m_taskItem) {
+        return KPluginInfo();
+    }
+    return m_taskItem->pluginInfo();
+}
+
+void PlasmoidTask::updateStatus()
+{
+    if (!m_taskItem || !pluginInfo().isValid()) {
         return;
     }
     const Plasma::Types::ItemStatus ps = m_taskItem->status();
@@ -77,7 +89,7 @@ void PlasmoidTask::updateStatus()
 void PlasmoidTask::setExpanded(bool expanded)
 {
     //if (m_taskItem->isExpanded() != expanded) {
-    if (m_taskItem->isExpanded() != expanded) {
+    if (m_taskItem && m_taskItem->isExpanded() != expanded) {
         qDebug() << "ST2P plasmoid.expand = " << expanded;
         m_taskItem->setExpanded(expanded);
         //m_taskItem->setCollapsed();
@@ -87,15 +99,18 @@ void PlasmoidTask::setExpanded(bool expanded)
 
 bool PlasmoidTask::expanded() const
 {
-    qDebug() << "S2TP expanded " << m_taskItem->isExpanded();
-    //return SystemTray::Task::expanded();
-    return m_taskItem->isExpanded();
+    if (m_taskItem) {
+        qDebug() << "S2TP expanded " << m_taskItem->isExpanded();
+        //return SystemTray::Task::expanded();
+        return m_taskItem->isExpanded();
+    }
+    return false;
 }
 
 
 bool PlasmoidTask::isValid() const
 {
-    return m_valid;
+    return m_valid && pluginInfo().isValid();
 }
 
 bool PlasmoidTask::isEmbeddable() const
@@ -123,9 +138,6 @@ QString PlasmoidTask::taskId() const
 
 QQuickItem* PlasmoidTask::taskItem()
 {
-    if (!m_taskItem) {
-
-    }
     return m_taskItem;
 }
 
