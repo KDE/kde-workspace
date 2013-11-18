@@ -372,7 +372,7 @@ void Pager::recalculateWindowRects()
 
         //check activity
         unsigned long properties[] = { 0, NET::WM2Activities };
-        NETWinInfo netInfo(QX11Info::display(), window, QX11Info::appRootWindow(), properties, 2);
+        NETWinInfo netInfo(QX11Info::connection(), window, QX11Info::appRootWindow(), properties, 2);
         QString result(netInfo.activities());
         if (!result.isEmpty() && result != "00000000-0000-0000-0000-000000000000") {
             QStringList activities = result.split(',');
@@ -492,7 +492,7 @@ void Pager::moveWindow(int window, double x, double y, int targetDesktop, int so
     dest = QPointF(qMax(dest.x(), qreal(0.0)), qMax(dest.y(), qreal(0.0)));
 
     // use _NET_MOVERESIZE_WINDOW rather than plain move, so that the WM knows this is a pager request
-    NETRootInfo info(QX11Info::display(), 0);
+    NETRootInfo info(QX11Info::connection(), 0);
     int flags = (0x20 << 12) | (0x03 << 8) | 1; // from tool, x/y, northwest gravity
 
     if (!KWindowSystem::mapViewport()) {
@@ -525,7 +525,7 @@ void Pager::changeDesktop(int newDesktop)
     if (m_currentDesktop == newDesktop+1) {
         // toogle the desktop or the dashboard
         if (m_currentDesktopSelected == ShowDesktop) {
-            NETRootInfo info(QX11Info::display(), 0);
+            NETRootInfo info(QX11Info::connection(), 0);
             m_desktopDown = !m_desktopDown;
             info.setShowingDesktop(m_desktopDown);
         } else if (m_currentDesktopSelected == ShowDashboard) {
