@@ -277,4 +277,4 @@ ActionReply Helper::managethemes(const QVariantMap &args)
     }
 }
 
-KDE4_AUTH_HELPER_MAIN("org.kde.kcontrol.kcmkdm", Helper)
+KAUTH_HELPER_MAIN("org.kde.kcontrol.kcmkdm", Helper)

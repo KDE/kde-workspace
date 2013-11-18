@@ -251,4 +251,4 @@ ActionReply ClockHelper::save(const QVariantMap &args)
   }
 }
 
-KDE4_AUTH_HELPER_MAIN("org.kde.kcontrol.kcmclock", ClockHelper)
+KAUTH_HELPER_MAIN("org.kde.kcontrol.kcmclock", ClockHelper)

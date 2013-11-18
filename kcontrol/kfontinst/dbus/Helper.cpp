@@ -38,7 +38,7 @@
 
 #define KFI_DBUG kDebug() << time(0L)
 
-KDE4_AUTH_HELPER_MAIN("org.kde.fontinst", KFI::Helper)
+KAUTH_HELPER_MAIN("org.kde.fontinst", KFI::Helper)
 
 namespace KFI
 {
@@ -78,7 +78,7 @@ static void registerSignalHandler(SignalHandler handler)
 static void signalHander(int)
 {
     static bool inHandler=false;
-    
+
     if(!inHandler)
     {
         inHandler=true;
@@ -268,7 +268,7 @@ int Helper::move(const QVariantMap &args)
                     else
                         result=KIO::ERR_WRITE_ACCESS_DENIED;
                 }
-                
+
                 if(toSystem)
                     theFontFolder.addModifiedDir(theFontFolder.location());
             }
@@ -289,7 +289,7 @@ int Helper::move(const QVariantMap &args)
 }
 
 int Helper::toggle(const QVariantMap &args)
-{  
+{
     QDomDocument    doc;
     doc.setContent(args["xml"].toString());
     Family          font(doc.documentElement(), true);
@@ -387,7 +387,7 @@ int Helper::toggle(const QVariantMap &args)
         for(; ait!=aend; ++ait)
             renameFontFile(ait.value(), ait.key());
     }
-    
+
     return result;
 }
 
