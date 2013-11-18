@@ -80,6 +80,10 @@ links in most web browsers. If checked however, icons/files will be
 opened with a double click, while a single click will only select the
 icon or file. This is the behavior you may know from other desktops or
 operating systems.</para>
+<note>
+<para>This option can be changed in the configuration dialogs of &dolphin; and &konqueror;
+on the <guilabel>Navigation</guilabel> tab as well.</para>
+</note>
 </listitem>
 </varlistentry>
 
