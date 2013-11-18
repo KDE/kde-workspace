@@ -42,9 +42,9 @@ add_executable(kcmkdmhelper helper.cpp)
 target_link_libraries(kcmkdmhelper )
 install(TARGETS kcmkdmhelper DESTINATION ${LIBEXEC_INSTALL_DIR})
 
-kde4_install_auth_helper_files(kcmkdmhelper org.kde.kcontrol.kcmkdm root)
+kauth_install_helper_files(kcmkdmhelper org.kde.kcontrol.kcmkdm root)
 
-kde4_install_auth_actions(org.kde.kcontrol.kcmkdm kcmkdm_actions.actions)
+kauth_install_actions(org.kde.kcontrol.kcmkdm kcmkdm_actions.actions)
 
 ########### install files ###############
 
