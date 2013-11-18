@@ -102,8 +102,11 @@ class KDE_EXPORT Gesture
         void set_exclude( Windowdef_list* windows_P );
         void register_handler( QObject* receiver_P, const char* slot_P );
         void unregister_handler( QObject* receiver_P, const char* slot_P );
+#warning needs porting to QAbstractNativeEventFilter to replace x11Event filtering
+#if 0
     protected:
         virtual bool x11Event( XEvent* ev_P );
+#endif
     private Q_SLOTS:
         void stroke_timeout();
         void active_window_changed( WId window_P );

@@ -154,6 +154,7 @@ void Gesture::unregister_handler( QObject* receiver_P, const char* slot_P )
         update_grab();
     }
 
+#if 0
 bool Gesture::x11Event( XEvent* ev_P )
     {
 /*      kDebug() << "   ( type = " << ev_P->type << " )" << KeyRelease << " " << KeyPress ;
@@ -224,6 +225,7 @@ bool Gesture::x11Event( XEvent* ev_P )
         }
     return false;
     }
+#endif
 
 
 void Gesture::stroke_timeout()
