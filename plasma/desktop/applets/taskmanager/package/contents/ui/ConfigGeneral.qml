@@ -83,7 +83,7 @@ QtControls.GroupBox {
                         text: i18n("Grouping:")
                     }
 
-o                }
+                }
 
                 QtControls.CheckBox {
                     id: onlyGroupWhenFull
