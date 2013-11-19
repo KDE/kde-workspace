@@ -29,12 +29,23 @@ Item {
     property int minimumHeight: 340
     property string devicesType: "removable"
     property string expandedDevice
+    property string popupIcon: "device-notifier"
 
     PlasmaCore.DataSource {
         id: hpSource
         engine: "hotplug"
         connectedSources: sources
         interval: 0
+    }
+
+    property Component compactRepresentation: PlasmaCore.IconItem {
+        source: devicenotifier.popupIcon
+        width: 22;
+        height: 22;
+        MouseArea {
+            anchors.fill: parent
+            onClicked: plasmoid.expanded = !plasmoid.expanded
+        }
     }
 
     PlasmaCore.DataSource {
@@ -90,6 +101,13 @@ Item {
         }
     }
 
+    Connections {
+        target: plasmoid
+        onExpandedChanged: {
+            popupEventSlot(plasmoid.expanded);
+        }
+    }
+
     PlasmaCore.DataSource {
         id: statusSource
         engine: "devicenotifications"
@@ -108,9 +126,7 @@ Item {
     }
 
     Component.onCompleted: {
-        plasmoid.addEventListener ('ConfigChanged', configChanged);
-        plasmoid.popupEvent.connect(popupEventSlot);
-
+        //plasmoid.addEventListener ('ConfigChanged', configChanged);
         if (notifierDialog.count == 0) {
             plasmoid.status = PlasmaCore.Types.PassiveStatus;
         }
@@ -145,7 +161,7 @@ Item {
         // (versus only hovered) for autohide purposes
         notifierDialog.itemClicked = false;
 
-        plasmoid.setPopupIconByName("preferences-desktop-notification")
+        devicenotifier.popupIcon = "preferences-desktop-notification";
         plasmoid.expanded = true;
         popupIconTimer.restart()
     }
@@ -161,13 +177,13 @@ Item {
             tooltip["mainText"] = i18n("Most recent device")
             tooltip["subText"] = sdSource.data[sdSource.last]["Description"]
         }
-        plasmoid.popupIconToolTip = tooltip
+        //plasmoid.popupIconToolTip = tooltip // FIXME
     }
 
     Timer {
         id: popupIconTimer
         interval: 2500
-        onTriggered: plasmoid.setPopupIconByName("device-notifier");
+        onTriggered: devicenotifier.popupIcon  = "device-notifier";
     }
 
     Timer {
@@ -207,7 +223,6 @@ Item {
             }
             height: lineSvg.elementSize("horizontal-line").height
         }
-
         PlasmaExtras.ScrollArea {
             anchors {
                 top : headerSeparator.bottom
@@ -216,6 +231,7 @@ Item {
                 left: parent.left
                 right: parent.right
             }
+
             ListView {
                 id: notifierDialog
 
@@ -226,19 +242,27 @@ Item {
                     }
                     filterRole: "Removable"
                     filterRegExp: {
-		      var all = plasmoid.configuration.allDevices;
-		      var removable = plasmoid.configuration.removableDevices;
-		      if (all == true) {
-			  devicesType = "all";
-			  return "";
-		      } else if (removable == true) {
-			  devicesType = "removable";
-			  return "true";
-		      } else {
-			  devicesType = "nonRemovable";
-			  return "false";
-		      }
-		    }
+                        // FIXME: This crashes
+                        //var all = plasmoid.configuration.allDevices;
+                        //var removable = plasmoid.configuration.removableDevices;
+                        print("FIXME: Disabled reading from config due to crash");
+                        var all = true;
+                        var removable = true;
+
+                        if (all == true) {
+                            devicesType = "all";
+                            print("ST2P all");
+                            return "";
+                        } else if (removable == true) {
+                            print("ST2P rem true");
+                            devicesType = "removable";
+                            return "true";
+                        } else {
+                            print("ST2P nonRemovable");
+                            devicesType = "nonRemovable";
+                            return "false";
+                        }
+                    }
                     sortRole: "Timestamp"
                     sortOrder: Qt.DescendingOrder
                 }
@@ -258,7 +282,7 @@ Item {
                         passiveTimer.restart()
                     } else {
                         passiveTimer.stop()
-                        plasmoid.status = "ActiveStatus"
+                        plasmoid.status = PlasmaCore.Types.ActiveStatus
                     }
                 }
 
@@ -311,6 +335,7 @@ Item {
 
                 Component.onCompleted: currentIndex=-1
             }
+
         }
 
         Component {
