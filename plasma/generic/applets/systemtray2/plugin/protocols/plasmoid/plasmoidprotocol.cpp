@@ -62,10 +62,10 @@ void PlasmoidProtocol::init()
     QStringList ownApplets;
 
     QStringList blacklist;
-    //blacklist << "notifier";
-    blacklist << "org.kde.devicenotifier";
+    blacklist << "notifier";
+    //blacklist << "org.kde.devicenotifier";
     //blacklist << "org.kde.notifications";
-    blacklist << "org.kde.systrayplasmoidtest";
+    //blacklist << "org.kde.systrayplasmoidtest";
 
     QMap<QString, KPluginInfo> sortedApplets;
     foreach (const KPluginInfo &info, applets) {
