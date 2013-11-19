@@ -83,6 +83,10 @@ QtControls.GroupBox {
                         text: i18n("Grouping:")
                     }
 
+                    QtControls.ComboBox {
+                        id: groupingStrategy
+                        model: [i18n("Do Not Group"), i18n("Manually"), i18n("By Program Name")]
+                    }
                 }
 
                 QtControls.CheckBox {
