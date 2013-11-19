@@ -48,9 +48,9 @@ PlasmoidTask::PlasmoidTask(QQuickItem* rootItem, const QString &packageName, con
     }
     connect(m_taskItem, &PlasmoidInterface::statusChanged, this, &PlasmoidTask::updateStatus);
     connect(m_taskItem, &PlasmoidInterface::defaultRepresentationChanged, this, &PlasmoidTask::taskItemExpandedChanged);
-    KPluginInfo info = m_taskItem->pluginInfo();
-    if (!pluginInfo().isValid()) {
-        setName(info.name());
+
+    if (pluginInfo().isValid()) {
+        setName(pluginInfo().name());
     } else {
         qWarning() << "Invalid Plasmoid: " << packageName;
     }
