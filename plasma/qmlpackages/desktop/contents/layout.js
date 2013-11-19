@@ -1,7 +1,7 @@
 
 var panel = new Panel
 panel.screen = 0
-panel.location = 'top'
+panel.location = 'bottom'
 panel.addWidget("org.kde.kickoff")
 panel.addWidget("org.kde.plasma.taskmanager")
 panel.addWidget("org.kde.systemtray")
@@ -13,5 +13,5 @@ for (var i = 0; i < screenCount; ++i) {
     desktop.screen = i
     desktop.wallpaperPlugin = 'org.kde.image'
 
-    var clock = desktop.addWidget("org.kde.analogclock");
+    //var clock = desktop.addWidget("org.kde.analogclock");
 }
