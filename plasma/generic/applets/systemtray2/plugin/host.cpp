@@ -22,6 +22,7 @@
 #include "host.h"
 #include "manager.h"
 #include "task.h"
+#include "debug.h"
 #include "protocols/plasmoid/plasmoidinterface.h"
 
 #include <klocalizedstring.h>
@@ -29,7 +30,7 @@
 #include <Plasma/Package>
 #include <Plasma/PluginLoader>
 
-#include <QDebug>
+#include <QLoggingCategory>
 #include <QQuickItem>
 #include <QTimer>
 #include <QVariant>
@@ -125,7 +126,7 @@ void Host::init()
 
 void Host::compressionTimeout()
 {
-    qDebug() << "ST2 tasksChanged";
+    qCDebug(SYSTEMTRAY) << "ST2 tasksChanged";
     emit tasksChanged();
     d->compressionTimer.stop();
 
@@ -153,13 +154,13 @@ void Host::initTasks()
 
     QQmlListProperty<SystemTray::Task> _hidden(this, d->hiddenTasks);
     d->hiddenTasksDeclarative = _hidden;
-    qDebug() << "ST2 init starting timer" << TIMEOUT;
+    qCDebug(SYSTEMTRAY) << "ST2 init starting timer" << TIMEOUT;
     d->compressionTimer.start(TIMEOUT);
 }
 
 void Host::setRootItem(QQuickItem* rootItem)
 {
-    //qDebug() << "Set root item";
+    //qCDebug(SYSTEMTRAY) << "Set root item";
     if (s_manager && s_manager->rootItem() != rootItem) {
         s_manager->setRootItem(rootItem);
         //emit rootItemChanged();
@@ -218,7 +219,7 @@ void Host::taskStatusChanged(SystemTray::Task *task)
     if (task) {
         if (d->shownTasks.contains(task)) {
             if (!d->showTask(task)) {
-                qDebug() << "ST2 Migrating shown -> hidden" << task->name();
+                qCDebug(SYSTEMTRAY) << "ST2 Migrating shown -> hidden" << task->name();
                 d->shownTasks.removeAll(task);
                 d->hiddenTasks.append(task);
                 qSort(d->hiddenTasks.begin(), d->hiddenTasks.end(), taskLessThan);
@@ -226,7 +227,7 @@ void Host::taskStatusChanged(SystemTray::Task *task)
             }
         } else if (d->hiddenTasks.contains(task)) {
             if (d->showTask(task)) {
-                qDebug() << "ST2 Migrating hidden -> shown" << task->name();
+                qCDebug(SYSTEMTRAY) << "ST2 Migrating hidden -> shown" << task->name();
                 d->hiddenTasks.removeAll(task);
                 d->shownTasks.append(task);
                 qSort(d->shownTasks.begin(), d->shownTasks.end(), taskLessThan);
@@ -260,7 +261,7 @@ QStringList Host::categories() const
             cats.append(i18n("Hardware"));
         }
     }
-    qDebug() << "ST2 " << cats;
+    qCDebug(SYSTEMTRAY) << "ST2 " << cats;
     return cats;
 }
 

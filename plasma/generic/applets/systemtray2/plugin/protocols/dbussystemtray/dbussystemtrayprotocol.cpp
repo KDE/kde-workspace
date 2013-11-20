@@ -21,8 +21,7 @@
 
 #include "dbussystemtraytask.h"
 #include "dbussystemtrayprotocol.h"
-
-#include <QDebug>
+#include "debug.h"
 
 
 namespace SystemTray
@@ -44,7 +43,7 @@ DBusSystemTrayProtocol::~DBusSystemTrayProtocol()
 
 void DBusSystemTrayProtocol::init()
 {
-    qDebug() << "ST Dataengine" << m_dataEngine->isValid();
+    qCDebug(SYSTEMTRAY) << "ST Dataengine" << m_dataEngine->isValid();
     if (m_dataEngine->isValid()) {
         initRegisteredServices();
         connect(m_dataEngine, SIGNAL(sourceAdded(QString)),
@@ -56,7 +55,7 @@ void DBusSystemTrayProtocol::init()
 
 void DBusSystemTrayProtocol::newTask(const QString &service)
 {
-    qDebug() << "ST new task " << service;
+    qCDebug(SYSTEMTRAY) << "ST new task " << service;
     if (m_tasks.contains(service)) {
         return;
     }

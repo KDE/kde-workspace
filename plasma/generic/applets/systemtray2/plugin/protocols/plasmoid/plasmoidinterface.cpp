@@ -20,6 +20,7 @@
  */
 
 #include "plasmoidinterface.h"
+#include "debug.h"
 
 #include <QAction>
 #include <QDir>
@@ -34,7 +35,7 @@
 #include <QTimer>
 
 #include <KActionCollection>
-#include <QDebug>
+#include <QLoggingCategory>
 #include <KGlobalSettings>
 #include <KService>
 #include <KServiceTypeTrader>
@@ -108,7 +109,7 @@ PlasmoidInterface::PlasmoidInterface(const QString &plugin, const QString &systr
 
 PlasmoidInterface::~PlasmoidInterface()
 {
-    qDebug() << "!!! Plasmoid is gone";
+    qCDebug(SYSTEMTRAY) << "!!! Plasmoid is gone";
 }
 
 
@@ -132,10 +133,10 @@ void PlasmoidInterface::init()
     if (m_qmlObject && m_qmlObject->rootObject()) {
         return;
     }
-    qDebug() << "INIT" << m_plugin;
+    qCDebug(SYSTEMTRAY) << "INIT" << m_plugin;
     // Set up the runtime: security, url-based schemes, etc
     m_qmlObject = new QmlObject(parent());
-    //qDebug() << " rootitem: " << rootItem->objectName();
+    //qCDebug(SYSTEMTRAY) << " rootitem: " << rootItem->objectName();
     m_qmlObject->setInitializationDelayed(true);
 
 
@@ -158,7 +159,7 @@ void PlasmoidInterface::init()
 
     KPluginInfo i = pkg.metadata();
     if (!i.isValid()) {
-        qDebug() << (i18n("Error: Can't find plugin metadata: %1", m_plugin));
+        qCDebug(SYSTEMTRAY) << (i18n("Error: Can't find plugin metadata: %1", m_plugin));
         m_qmlObject->completeInitialization(initialProperties);
         return;
     }
@@ -168,7 +169,7 @@ void PlasmoidInterface::init()
         QString reason;
         foreach (QQmlError error, m_qmlObject->mainComponent()->errors()) {
             reason += error.toString()+'\n';
-            qDebug() << error.toString();
+            qCDebug(SYSTEMTRAY) << error.toString();
         }
         reason = i18n("Error loading QML file: %1", reason);
         const QUrl appletError = QUrl::fromLocalFile(m_systrayPackageRoot+QStringLiteral("/contents/ui/CompactApplet.qml"));
@@ -184,7 +185,7 @@ void PlasmoidInterface::init()
         }
 
         //m_appletScriptEngine->setLaunchErrorMessage(reason);
-        qDebug() << "ERROR: " << reason;
+        qCDebug(SYSTEMTRAY) << "ERROR: " << reason;
     }
 
     m_qmlObject->engine()->rootContext()->setContextProperty("plasmoid", this);
@@ -197,13 +198,13 @@ void PlasmoidInterface::init()
 
     //m_qmlObject->rootObject()->setParent(rootItem);
     //m_taskItem->setProperty("parent", QVariant::fromValue(rootItem));
-    //qDebug() << " ST2 Parent object : " << parent()->objectName() << parent();
-    qDebug() << " ST2 Plasmoidobject: " << m_qmlObject->rootObject();
+    //qCDebug(SYSTEMTRAY) << " ST2 Parent object : " << parent()->objectName() << parent();
+    qCDebug(SYSTEMTRAY) << " ST2 Plasmoidobject: " << m_qmlObject->rootObject();
     if (!m_qmlObject->rootObject()) {
-        qDebug() << " PROBLEM!";
+        qCDebug(SYSTEMTRAY) << " PROBLEM!";
         foreach (QQmlError error, m_qmlObject->mainComponent()->errors()) {
             //reason += error.toString()+'\n';
-            qDebug() << " ERROR: " << error.toString();
+            qCDebug(SYSTEMTRAY) << " ERROR: " << error.toString();
         }
 
     }
@@ -253,7 +254,7 @@ void PlasmoidInterface::init()
 //     initialProperties["height"] = height();
 //     m_qmlObject->completeInitialization(initialProperties);
 //
-//     qDebug() << "Graphic object created:" << applet() << applet()->property("graphicObject");
+//     qCDebug(SYSTEMTRAY) << "Graphic object created:" << applet() << applet()->property("graphicObject");
 //
 //     //Create the ToolBox
 //     Plasma::Containment *pc = qobject_cast<Plasma::Containment *>(applet());
@@ -284,7 +285,7 @@ void PlasmoidInterface::init()
 //             } else {
 //                 delete toolBoxObject;
 //             }
-//             qDebug() << "Loaded toolbox package" << pkg.path();
+//             qCDebug(SYSTEMTRAY) << "Loaded toolbox package" << pkg.path();
 //         } else {
 //             qWarning() << "Could not load toolbox package." << pkg.path();
 //         }
@@ -397,7 +398,7 @@ void PlasmoidInterface::setExpanded(bool expanded)
         m_expanded = expanded;
         //m_defaultRepresentation = 0;
         QTimer::singleShot(500, this, SLOT(hideDefaultRepresenation()));
-        qDebug() << "ST2P PI expandedItem (visible):" << m_plugin << expanded;
+        qCDebug(SYSTEMTRAY) << "ST2P PI expandedItem (visible):" << m_plugin << expanded;
 
         emit expandedChanged();
         //emit defaultRepresentationChanged();
@@ -455,7 +456,7 @@ void PlasmoidInterface::setActiveConfig(const QString &name)
         QString path;
 
         if (path.isEmpty()) {
-            qDebug() << "Path is empty.";
+            qCDebug(SYSTEMTRAY) << "Path is empty.";
             return;
         }
 
@@ -819,8 +820,8 @@ void PlasmoidInterface::compactRepresentationCheck()
 //         //package.setPath(path);
 //         package.setPath("org.kde.systemtray");
 //
-//         qDebug() << "ST2 PackagePathQml: " << package.path();
-//         qDebug() << "ST2 PackagePathQml mainScript: " << package.filePath("mainScript");
+//         qCDebug(SYSTEMTRAY) << "ST2 PackagePathQml: " << package.path();
+//         qCDebug(SYSTEMTRAY) << "ST2 PackagePathQml mainScript: " << package.filePath("mainScript");
 //
 //         const QString _p = package.path();
 //         if (_p.isEmpty()) {
@@ -838,8 +839,8 @@ void PlasmoidInterface::compactRepresentationCheck()
 
         // m_compactUiObject = m_qmlObject->createObjectFromSource(QUrl::fromLocalFile(applet()->containment()->corona()->package().filePath("compactapplet")));
 
-        qDebug() << "ST2 compactQml: " << compactQml;
-        qDebug() << "ST2 defaultcompactQml: " << defaultQml;
+        qCDebug(SYSTEMTRAY) << "ST2 compactQml: " << compactQml;
+        qCDebug(SYSTEMTRAY) << "ST2 defaultcompactQml: " << defaultQml;
 
         QObject *compactRepresentation = 0;
 
@@ -902,7 +903,7 @@ void PlasmoidInterface::compactRepresentationCheck()
             m_defaultRepresentation->setProperty("visible", m_expanded);
             m_defaultRepresentation->setProperty("y", 48);
 
-            qDebug() << "ST2P defaultRepresentation" << m_defaultRepresentation;
+            qCDebug(SYSTEMTRAY) << "ST2P defaultRepresentation" << m_defaultRepresentation;
 //             QQmlExpression expr(m_qmlObject->engine()->rootContext(), m_qmlObject->rootObject(), "y");
 //             QQmlProperty prop(m_qmlObject->rootObject(), "48");
 //             prop.write(expr.evaluate());
@@ -965,7 +966,7 @@ void PlasmoidInterface::compactRepresentationCheck()
 
     //show the full UI
     } else {
-        qDebug() << "ST2P expanded NOW";
+        qCDebug(SYSTEMTRAY) << "ST2P expanded NOW";
         m_expanded = true;
         emit expandedChanged();
 

@@ -27,6 +27,8 @@
 #include <QtGui/QIcon>
 #include <QQuickItem>
 
+#include "debug.h"
+
 namespace SystemTray
 {
 

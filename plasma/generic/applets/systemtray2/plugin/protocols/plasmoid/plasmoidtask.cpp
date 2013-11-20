@@ -21,13 +21,14 @@
 #include "plasmoidprotocol.h"
 #include "plasmoidinterface.h"
 #include "../../host.h"
+#include "debug.h"
 
 #include <QtCore/QMetaEnum>
 #include <kdeclarative/qmlobject.h>
 
 #include <KPluginInfo>
 
-#include <QDebug>
+#include <QLoggingCategory>
 
 namespace SystemTray
 {
@@ -39,10 +40,10 @@ PlasmoidTask::PlasmoidTask(QQuickItem* rootItem, const QString &packageName, con
       m_rootItem(rootItem),
       m_valid(true)
 {
-    qDebug() << "Loading applet: " << packageName;
+    qCDebug(SYSTEMTRAY) << "Loading applet: " << packageName;
     m_taskItem = new PlasmoidInterface(packageName, systrayPackageRoot, m_rootItem);
     if (!m_taskItem) {
-        qDebug() << "Invalid applet taskitem";
+        qCDebug(SYSTEMTRAY) << "Invalid applet taskitem";
         m_valid = false;
         return;
     }
@@ -90,7 +91,7 @@ void PlasmoidTask::setExpanded(bool expanded)
 {
     //if (m_taskItem->isExpanded() != expanded) {
     if (m_taskItem && m_taskItem->isExpanded() != expanded) {
-        qDebug() << "ST2P plasmoid.expand = " << expanded;
+        qCDebug(SYSTEMTRAY) << "ST2P plasmoid.expand = " << expanded;
         m_taskItem->setExpanded(expanded);
         //m_taskItem->setCollapsed();
     }
@@ -100,7 +101,7 @@ void PlasmoidTask::setExpanded(bool expanded)
 bool PlasmoidTask::expanded() const
 {
     if (m_taskItem) {
-        qDebug() << "S2TP expanded " << m_taskItem->isExpanded();
+        qCDebug(SYSTEMTRAY) << "S2TP expanded " << m_taskItem->isExpanded();
         //return SystemTray::Task::expanded();
         return m_taskItem->isExpanded();
     }

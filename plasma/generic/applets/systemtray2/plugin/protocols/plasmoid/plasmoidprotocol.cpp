@@ -21,6 +21,8 @@
 #include "plasmoidprotocol.h"
 #include "plasmoidinterface.h"
 
+#include "debug.h"
+
 #include "../../manager.h"
 
 #include <Plasma/PluginLoader>
@@ -28,7 +30,7 @@
 #include <KLocalizedString>
 #include <kplugintrader.h>
 
-#include <QDebug>
+#include <QLoggingCategory>
 #include <QQmlContext>
 #include <QQmlEngine>
 #include <QQuickItem>
@@ -52,7 +54,7 @@ void PlasmoidProtocol::init()
     package.setPath("org.kde.systemtray");
     m_systrayPackageRoot = package.path();
 
-    qDebug() << "ST2 PackagePathQml: " << m_systrayPackageRoot;
+    qCDebug(SYSTEMTRAY) << "ST2 PackagePathQml: " << m_systrayPackageRoot;
 
     //X-Plasma-NotificationArea
     KPluginInfo::List applets = Plasma::PluginLoader::self()->listAppletInfo(QString());
@@ -97,8 +99,8 @@ void PlasmoidProtocol::init()
     }
 
     foreach (const KPluginInfo &info, sortedApplets) {
-        //qDebug() << " Adding applet: " << info.name();
-        qDebug() << "\n\n ==========================================================================================";
+        //qCDebug(SYSTEMTRAY) << " Adding applet: " << info.name();
+        qCDebug(SYSTEMTRAY) << "\n\n ==========================================================================================";
         if (!blacklist.contains(info.pluginName())) {
             newTask(info.pluginName());
         }
@@ -108,7 +110,7 @@ void PlasmoidProtocol::init()
 
 void PlasmoidProtocol::newTask(const QString &service)
 {
-    qDebug() << "ST new task " << service;
+    qCDebug(SYSTEMTRAY) << "ST new task " << service;
     if (m_tasks.contains(service)) {
         return;
     }

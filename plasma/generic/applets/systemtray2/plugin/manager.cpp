@@ -22,13 +22,14 @@
 
 #include "manager.h"
 
-#include <QDebug>
+#include <QLoggingCategory>
 #include <KGlobal>
 
 #include <plasma/applet.h>
 
 #include "protocol.h"
 #include "task.h"
+#include "debug.h"
 
 //#include "../protocols/fdo/fdoprotocol.h"
 #include "protocols/plasmoid/plasmoidprotocol.h"
@@ -94,7 +95,7 @@ void Manager::addTask(Task *task)
     connect(task, SIGNAL(destroyed(SystemTray::Task*)), this, SLOT(removeTask(SystemTray::Task*)));
     connect(task, SIGNAL(changedStatus()), this, SLOT(slotTaskStatusChanged()));
 
-    qDebug() << "ST2" << task->name() << "(" << task->taskId() << ")";
+    qCDebug(SYSTEMTRAY) << "ST2" << task->name() << "(" << task->taskId() << ")";
 
     d->tasks.append(task);
     emit taskAdded(task);
@@ -106,10 +107,10 @@ void Manager::slotTaskStatusChanged()
     Task* task = qobject_cast<Task*>(sender());
 
     if (task) {
-        qDebug() << "ST2 emit taskStatusChanged(task);";
+        qCDebug(SYSTEMTRAY) << "ST2 emit taskStatusChanged(task);";
         emit taskStatusChanged(task);
     } else {
-        qDebug() << "ST2 changed, but invalid cast";
+        qCDebug(SYSTEMTRAY) << "ST2 changed, but invalid cast";
     }
 }
 void Manager::removeTask(Task *task)

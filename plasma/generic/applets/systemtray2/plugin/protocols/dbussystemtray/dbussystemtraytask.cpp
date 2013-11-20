@@ -19,6 +19,7 @@
  ***************************************************************************/
 
 #include "dbussystemtraytask.h"
+#include "debug.h"
 
 #include "dbussystemtrayprotocol.h"
 
@@ -27,7 +28,7 @@
 #include <QtCore/QCoreApplication>
 #include <QtWidgets/QMenu>
 #include <QtGui/QIcon>
-#include <QDebug>
+#include <QLoggingCategory>
 
 #include <KDE/KJob>
 #include <KDE/KIconLoader>
@@ -49,7 +50,7 @@ DBusSystemTrayTask::DBusSystemTrayTask(const QString &serviceName, Plasma::DataE
       m_isMenu(false),
       m_valid(false)
 {
-    //qDebug();
+    //qCDebug(SYSTEMTRAY);
     m_service->setParent(this);
 
     m_dataEngine->connectSource(serviceName, this);
@@ -394,7 +395,7 @@ void DBusSystemTrayTask::syncToolTip(const QString &title, const QString &subTit
 void DBusSystemTrayTask::syncStatus(QString newStatus)
 {
     Task::Status status = (Task::Status)metaObject()->enumerator(metaObject()->indexOfEnumerator("Status")).keyToValue(newStatus.toLatin1());
-    qDebug() << "ST2 status changed " << this->status() << status;
+    qCDebug(SYSTEMTRAY) << "ST2 status changed " << this->status() << status;
 
     if (this->status() == status) {
         return;

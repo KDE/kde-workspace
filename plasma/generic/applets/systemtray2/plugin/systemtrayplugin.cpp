@@ -27,6 +27,8 @@
 
 #include <QtQml>
 
+#include "debug.h"
+
 Q_LOGGING_CATEGORY(SYSTEMTRAY, "systemtray")
 
 namespace SystemTray {

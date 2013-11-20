@@ -25,8 +25,6 @@
 #include <QQmlExtensionPlugin>
 #include <QLoggingCategory>
 
-Q_DECLARE_LOGGING_CATEGORY(SYSTEMTRAY)
-
 namespace SystemTray {
 
 class SystemTrayPlugin : public QQmlExtensionPlugin
