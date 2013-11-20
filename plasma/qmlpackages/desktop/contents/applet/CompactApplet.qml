@@ -68,6 +68,7 @@ Item {
         color: Qt.rgba(0,0,0,0)
         visible: plasmoid.expanded
         visualParent: compactRepresentation
+        location: plasmoid.location
         mainItem: Item {
             id: appletParent
 
