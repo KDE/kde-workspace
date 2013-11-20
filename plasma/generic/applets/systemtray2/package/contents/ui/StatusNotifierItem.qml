@@ -99,7 +99,8 @@ Item {
         height: parent.height
         //visible: false
         anchors {
-            horizontalCenter: parent.horizontalCenter
+            //horizontalCenter: parent.horizontalCenter
+            left: parent.left
             verticalCenter: parent.verticalCenter
         }
         source: iconName != "" ? iconName : (typeof(icon) != "undefined" ? icon : "")

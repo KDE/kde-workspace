@@ -29,13 +29,13 @@ import org.kde.private.systemtray 2.0 as SystemTray
 QtExtraComponents.MouseEventListener {
     id: compactRepresenation
 
-    property int minimumWidth: !vertical ? computeDimension() : undefined
-    property int minimumHeight: vertical ? computeDimension() : undefined
-    property int maximumWidth: !vertical ? minimumWidth : computeDimension()
-    property int maximumHeight: vertical ? minimumWidth : computeDimension()
+    property int minimumWidth: !vertical ? computeDimension() : computeDimensionHeight()
+    property int minimumHeight: vertical ? computeDimension() : computeDimensionHeight()
+    property int maximumWidth: minimumWidth
+    property int maximumHeight: minimumHeight
 
-    property bool fillWidth: !vertical
-    property bool fillHeight: vertical
+    property bool fillWidth: true
+    property bool fillHeight: true
 
     property QtObject systrayhost: undefined
 
@@ -63,8 +63,19 @@ QtExtraComponents.MouseEventListener {
         var dim = root.vertical ? compactRepresenation.width : compactRepresenation.height
         var rows = Math.floor(dim / root.itemSize);
         var cols = Math.ceil(systrayhost.shownTasks.length / rows);
-        var res = cols * (root.itemSize + root.smallSpacing) + arrow.width;
+        var res = cols * (root.itemSize) + arrow.width;
+        print(" computeDimension()  " + res);
         return res;
+    }
+
+    function computeDimensionHeight() {
+        var dim = root.vertical ? compactRepresenation.width : compactRepresenation.height
+        var rows = Math.floor(dim / root.itemSize);
+        //var cols = Math.ceil(systrayhost.shownTasks.length / rows);
+        var rr = rows * (root.itemSize + theme.smallSpacing);
+        //var res = cols * (root.itemSize + root.smallSpacing) + arrow.width;
+        print(" computeDimensionHeight()  " + rr);
+        return rr;
     }
 
     function togglePopup() {
@@ -83,6 +94,8 @@ QtExtraComponents.MouseEventListener {
             plasmoid.expanded = true;
             root.currentTask = "";
             root.expandedItem = null
+            print("!! compactRepresenation w/h : " + compactRepresenation.width + " / " + compactRepresenation.height);
+            print("!! compactRepresenation: x/y" + compactRepresenation.x + " / " + compactRepresenation.y);
         }
     }
 
@@ -115,14 +128,17 @@ QtExtraComponents.MouseEventListener {
         objectName: "gridView"
         flow: !root.vertical ? GridView.LeftToRight : GridView.TopToBottom
 
+//         y: (parent.height - root.itemSize) / 2
         anchors {
             top: parent.top
             bottom: parent.bottom
+            topMargin: (parent.height - root.itemSize) / 2
+//             verticalCenter: parent.verticalCenter
             left: parent.left
             leftMargin: root.vertical ? 0 : root.smallSpacing
             right: arrow.left
         }
-        cellWidth: root.itemSize
+        cellWidth: root.itemSize + theme.smallSpacing
         cellHeight: cellWidth
         interactive: false
 
