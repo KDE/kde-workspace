@@ -32,15 +32,15 @@ Item {
     property bool fillWidth: !vertical
     property bool fillHeight: vertical
 
-    property int dim: 256
+    property int dim: 128
 
-    property int preferredWidth: dim
+    property int preferredWidth: dim * 2
     property int preferredHeight: dim
 
-    property int implicitWidth: dim
+    property int implicitWidth: dim * 2
     property int implicitHeight: dim
 
-    property int minimumWidth: dim
+    property int minimumWidth: dim * 2
     property int minimumHeight: dim
 
     //
