@@ -23,7 +23,7 @@
 #include <QWidget>
 #include <QPixmap>
 #include <QTimer>
-#include <QX11Info>
+#include <QtX11Extras/QX11Info>
 #include <QDebug>
 
 #include <solid/device.h>

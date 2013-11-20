@@ -103,12 +103,12 @@ void KSMServer::restoreSession( const QString &sessionName )
     kDebug( 1218 ) << "KSMServer::restoreSession " << sessionName;
     KSharedConfig::Ptr config = KGlobal::config();
 
-    sessionGroup = "Session: " + sessionName;
+    sessionGroup = QStringLiteral("Session: ") + sessionName;
     KConfigGroup configSessionGroup( config, sessionGroup);
 
     int count =  configSessionGroup.readEntry( "count", 0 );
     appsToStart = count;
-    upAndRunning( "ksmserver" );
+    upAndRunning( QStringLiteral( "ksmserver" ) );
     connect( klauncherSignals, SIGNAL(autoStart0Done()), SLOT(autoStart0Done()));
     connect( klauncherSignals, SIGNAL(autoStart1Done()), SLOT(autoStart1Done()));
     connect( klauncherSignals, SIGNAL(autoStart2Done()), SLOT(autoStart2Done()));
@@ -116,12 +116,12 @@ void KSMServer::restoreSession( const QString &sessionName )
     // find all commands to launch the wm in the session
     QList<QStringList> wmStartCommands;
     if ( !wm.isEmpty() ) {
-	for ( int i = 1; i <= count; i++ ) {
-	    QString n = QString::number(i);
-	    if ( wm == configSessionGroup.readEntry( QString("program")+n, QString() ) ) {
-		wmStartCommands << configSessionGroup.readEntry( QString("restartCommand")+n, QStringList() );
-	    }
-	}
+        for ( int i = 1; i <= count; i++ ) {
+            QString n = QString::number(i);
+            if ( wm == configSessionGroup.readEntry( QStringLiteral("program")+n, QString() ) ) {
+                wmStartCommands << configSessionGroup.readEntry( QStringLiteral("restartCommand")+n, QStringList() );
+            }
+        }
     } 
     if( wmStartCommands.isEmpty()) // otherwise use the configured default
         wmStartCommands << wmCommands;
@@ -142,8 +142,8 @@ void KSMServer::startDefaultSession()
 #ifdef KSMSERVER_STARTUP_DEBUG1
     t.start();
 #endif
-    sessionGroup = "";
-    upAndRunning( "ksmserver" );
+    sessionGroup = QString();
+    upAndRunning( QStringLiteral( "ksmserver" ) );
     connect( klauncherSignals, SIGNAL(autoStart0Done()), SLOT(autoStart0Done()));
     connect( klauncherSignals, SIGNAL(autoStart1Done()), SLOT(autoStart1Done()));
     connect( klauncherSignals, SIGNAL(autoStart2Done()), SLOT(autoStart2Done()));
@@ -172,18 +172,18 @@ void KSMServer::clientSetProgram( KSMClient* client )
     if( state == Idle )
         {
         static int cnt = 0;
-        if( client->program() == "gedit" && ( cnt == 0 ))
+        if( client->program() == QStringLiteral( "gedit" ) && ( cnt == 0 ))
             ++cnt;
-        else if( client->program() == "konqueror" && ( cnt == 1 ))
+        else if( client->program() == QStringLiteral( "konqueror" ) && ( cnt == 1 ))
             ++cnt;
-        else if( client->program() == "kspaceduel" && ( cnt == 2 ))
+        else if( client->program() == QStringLiteral( "kspaceduel" ) && ( cnt == 2 ))
             ++cnt;
-        else if( client->program() == "gedit" && ( cnt == 3 ))
+        else if( client->program() == QStringLiteral( "gedit" ) && ( cnt == 3 ))
             ++cnt;
         else
             cnt = 0;
         if( cnt == 4 )
-            KMessageBox::information( NULL, "drat" );
+            KMessageBox::information( NULL, QStringLiteral( "drat" ) );
         }
 #endif
 }
@@ -198,11 +198,11 @@ void KSMServer::wmProcessChange()
     if( wmProcess->state() == QProcess::NotRunning )
     { // wm failed to launch for some reason, go with kwin instead
         kWarning( 1218 ) << "Window manager" << wm << "failed to launch";
-        if( wm == "kwin" )
+        if( wm == QStringLiteral( "kwin" ) )
             return; // uhoh, kwin itself failed
         kDebug( 1218 ) << "Launching KWin";
-        wm = "kwin";
-        wmCommands = ( QStringList() << "kwin" ); 
+        wm = QStringLiteral( "kwin" );
+        wmCommands = ( QStringList() << QStringLiteral( "kwin" ) );
         // launch it
         launchWM( QList< QStringList >() << wmCommands );
         return;
@@ -219,7 +219,7 @@ void KSMServer::autoStart0()
 #ifdef KSMSERVER_STARTUP_DEBUG1
     kDebug() << t.elapsed();
 #endif
-    org::kde::KLauncher klauncher("org.kde.klauncher", "/KLauncher", QDBusConnection::sessionBus());
+    org::kde::KLauncher klauncher(QStringLiteral("org.kde.klauncher"), QStringLiteral("/KLauncher"), QDBusConnection::sessionBus());
     klauncher.autoStart((int)0);
 }
 
@@ -234,9 +234,12 @@ void KSMServer::autoStart0Done()
 #ifdef KSMSERVER_STARTUP_DEBUG1
     kDebug() << t.elapsed();
 #endif
-    upAndRunning( "desktop" );
+    upAndRunning( QStringLiteral( "desktop" ) );
     state = KcmInitPhase1;
-    kcminitSignals = new QDBusInterface("org.kde.kcminit", "/kcminit", "org.kde.KCMInit", QDBusConnection::sessionBus(), this );
+    kcminitSignals = new QDBusInterface( QStringLiteral( "org.kde.kcminit"),
+                                         QStringLiteral( "/kcminit" ),
+                                         QStringLiteral( "org.kde.KCMInit" ),
+                                         QDBusConnection::sessionBus(), this );
     if( !kcminitSignals->isValid()) {
         kWarning() << "kcminit not running? If we are running with mobile profile or in another platform other than X11 this is normal.";
         delete kcminitSignals;
@@ -247,7 +250,9 @@ void KSMServer::autoStart0Done()
     connect( kcminitSignals, SIGNAL(phase1Done()), SLOT(kcmPhase1Done()));
     QTimer::singleShot( 10000, this, SLOT(kcmPhase1Timeout())); // protection
 
-    org::kde::KCMInit kcminit("org.kde.kcminit", "/kcminit" , QDBusConnection::sessionBus());
+    org::kde::KCMInit kcminit(QStringLiteral("org.kde.kcminit"),
+                              QStringLiteral("/kcminit"),
+                              QDBusConnection::sessionBus());
     kcminit.runPhase1();
 }
 
@@ -278,7 +283,9 @@ void KSMServer::autoStart1()
 #ifdef KSMSERVER_STARTUP_DEBUG1
     kDebug() << t.elapsed();
 #endif
-    org::kde::KLauncher klauncher("org.kde.klauncher", "/KLauncher", QDBusConnection::sessionBus());
+    org::kde::KLauncher klauncher(QStringLiteral("org.kde.klauncher"),
+                                  QStringLiteral("/KLauncher"),
+                                  QDBusConnection::sessionBus());
     klauncher.autoStart((int)1);
 }
 
@@ -306,7 +313,7 @@ void KSMServer::autoStart1Done()
 
 void KSMServer::clientRegistered( const char* previousId )
 {
-    if ( previousId && lastIdStarted == previousId )
+    if ( previousId && lastIdStarted == QString::fromLocal8Bit( previousId ) )
         tryRestoreNext();
 }
 
@@ -321,10 +328,10 @@ void KSMServer::tryRestoreNext()
     while ( lastAppStarted < appsToStart ) {
         lastAppStarted++;
         QString n = QString::number(lastAppStarted);
-        QString clientId = config.readEntry( QString("clientId")+n, QString() );
+        QString clientId = config.readEntry( QStringLiteral("clientId")+n, QString() );
         bool alreadyStarted = false;
         foreach ( KSMClient *c, clients ) {
-            if ( c->clientId() == clientId ) {
+            if ( QString::fromLocal8Bit( c->clientId() ) == clientId ) {
                 alreadyStarted = true;
                 break;
             }
@@ -332,18 +339,18 @@ void KSMServer::tryRestoreNext()
         if ( alreadyStarted )
             continue;
 
-        QStringList restartCommand = config.readEntry( QString("restartCommand")+n, QStringList() );
+        QStringList restartCommand = config.readEntry( QStringLiteral("restartCommand")+n, QStringList() );
         if ( restartCommand.isEmpty() ||
-             (config.readEntry( QString("restartStyleHint")+n, 0 ) == SmRestartNever)) {
+             (config.readEntry( QStringLiteral("restartStyleHint")+n, 0 ) == SmRestartNever)) {
             continue;
         }
-        if ( wm == config.readEntry( QString("program")+n, QString() ) )
+        if ( wm == config.readEntry( QStringLiteral("program")+n, QString() ) )
             continue; // wm already started
-        if( config.readEntry( QString( "wasWm" )+n, false ))
+        if( config.readEntry( QStringLiteral( "wasWm" )+n, false ))
             continue; // it was wm before, but not now, don't run it (some have --replace in command :(  )
         startApplication( restartCommand,
-                          config.readEntry( QString("clientMachine")+n, QString() ),
-                          config.readEntry( QString("userId")+n, QString() ));
+                          config.readEntry( QStringLiteral("clientMachine")+n, QString() ),
+                          config.readEntry( QStringLiteral("userId")+n, QString() ));
         lastIdStarted = clientId;
         if ( !lastIdStarted.isEmpty() ) {
             restoreTimer.setSingleShot( true );
@@ -376,15 +383,19 @@ void KSMServer::autoStart2()
 #endif
     waitAutoStart2 = true;
     waitKcmInit2 = true;
-    org::kde::KLauncher klauncher("org.kde.klauncher", "/KLauncher", QDBusConnection::sessionBus());
+    org::kde::KLauncher klauncher(QStringLiteral("org.kde.klauncher"),
+                                  QStringLiteral("/KLauncher"),
+                                  QDBusConnection::sessionBus());
     klauncher.autoStart((int)2);
 
 #ifdef KSMSERVER_STARTUP_DEBUG1
     kDebug() << "klauncher" << t.elapsed();
 #endif
 
-    QDBusInterface kded( "org.kde.kded5", "/kded", "org.kde.kded5" );
-    kded.call( "loadSecondPhase" );
+    QDBusInterface kded( QStringLiteral( "org.kde.kded5" ),
+                         QStringLiteral( "/kded" ),
+                         QStringLiteral( "org.kde.kded5" ) );
+    kded.call( QStringLiteral( "loadSecondPhase" ) );
 
 #ifdef KSMSERVER_STARTUP_DEBUG1
     kDebug() << "kded" << t.elapsed();
@@ -395,14 +406,18 @@ void KSMServer::autoStart2()
     if (kcminitSignals) {
         connect( kcminitSignals, SIGNAL(phase2Done()), SLOT(kcmPhase2Done()));
         QTimer::singleShot( 10000, this, SLOT(kcmPhase2Timeout())); // protection
-        org::kde::KCMInit kcminit("org.kde.kcminit", "/kcminit" , QDBusConnection::sessionBus());
+        org::kde::KCMInit kcminit(QStringLiteral("org.kde.kcminit"),
+                                  QStringLiteral("/kcminit"),
+                                  QDBusConnection::sessionBus());
         kcminit.runPhase2();
     } else {
         QTimer::singleShot(0, this, SLOT(kcmPhase2Done()));
     }
     if( !defaultSession())
         restoreLegacySession(KGlobal::config().data());
-    KNotification::event( "startkde" , QString() , QPixmap() , 0l , KNotification::DefaultEvent  ); // this is the time KDE is up, more or less
+    KNotification::event( QStringLiteral( "startkde" ),
+                          QString(), QPixmap(), 0l,
+                          KNotification::DefaultEvent ); // this is the time KDE is up, more or less
 }
 
 void KSMServer::runUserAutostart()
@@ -410,22 +425,23 @@ void KSMServer::runUserAutostart()
     // now let's execute all the stuff in the autostart folder.
     // the stuff will actually be really executed when the event loop is
     // entered, since KRun internally uses a QTimer
-    QDir dir( KGlobalSettings::autostartPath() );
+    QDir dir(QStandardPaths::locate( QStandardPaths::ConfigLocation, QStringLiteral("autostart"), QStandardPaths::LocateDirectory));
     if (dir.exists()) {
         const QStringList entries = dir.entryList( QDir::Files );
         foreach (const QString& file, entries) {
             // Don't execute backup files
-            if ( !file.endsWith('~') && !file.endsWith(".bak") &&
-                 ( file[0] != '%' || !file.endsWith('%') ) &&
-                 ( file[0] != '#' || !file.endsWith('#') ) )
+            if ( !file.endsWith( QLatin1Char( '~' ) ) && !file.endsWith( QStringLiteral( ".bak" ) ) &&
+                 ( file[0] != QLatin1Char( '%' ) || !file.endsWith( QLatin1Char( '%' ) ) ) &&
+                 ( file[0] != QLatin1Char( '#' ) || !file.endsWith( QLatin1Char( '#' ) ) ) )
             {
-                KUrl url( dir.absolutePath() + '/' + file );
+                QUrl url( dir.absolutePath() + QLatin1Char( '/' ) + file );
                 (void) new KRun( url, 0, true );
             }
         }
     } else {
         // Create dir so that users can find it :-)
-        dir.mkpath( KGlobalSettings::autostartPath() );
+        dir.mkpath(QStandardPaths::writableLocation(QStandardPaths::ConfigLocation)
+                   + QDir::separator() + QStringLiteral("autostart"));
     }
 }
 
@@ -468,7 +484,7 @@ void KSMServer::finishStartup()
     if( waitAutoStart2 || waitKcmInit2 )
         return;
 
-    upAndRunning( "ready" );
+    upAndRunning( QStringLiteral( "ready" ) );
 #ifdef KSMSERVER_STARTUP_DEBUG1
     kDebug() << t.elapsed();
 #endif
@@ -550,7 +566,7 @@ void KSMServer::upAndRunning( const QString& msg )
 
 void KSMServer::restoreSubSession( const QString& name )
 {
-    sessionGroup = "SubSession: " + name;
+    sessionGroup = QStringLiteral( "SubSession: " ) + name;
 
     KConfigGroup configSessionGroup( KGlobal::config(), sessionGroup);
     int count =  configSessionGroup.readEntry( "count", 0 );

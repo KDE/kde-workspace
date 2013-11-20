@@ -29,6 +29,8 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 ******************************************************************/
 
+#include <QtX11Extras/QX11Info>
+
 #include <config-workspace.h>
 
 #ifdef HAVE_SYS_TIME_H
@@ -42,6 +44,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include <kconfig.h>
 #include <kconfiggroup.h>
+#include <kglobal.h>
 #include <kshell.h>
 #include <kdebug.h>
 #include <kwindowsystem.h>
@@ -120,8 +123,8 @@ void KSMServer::performLegacySessionSave()
             data.type = wtype;
             XClassHint classHint;
             if( XGetClassHint( QX11Info::display(), leader, &classHint ) ) {
-                data.wmclass1 = classHint.res_name;
-                data.wmclass2 = classHint.res_class;
+                data.wmclass1 = QString::fromLocal8Bit( classHint.res_name );
+                data.wmclass2 = QString::fromLocal8Bit( classHint.res_class );
                 XFree( classHint.res_name );
                 XFree( classHint.res_class );
             }
@@ -220,8 +223,8 @@ void KSMServer::storeLegacySession( KConfig* config )
     if (state == ClosingSubSession)
         return; //FIXME implement later
     // Write LegacySession data
-    config->deleteGroup( "Legacy" + sessionGroup );
-    KConfigGroup group( config, "Legacy" + sessionGroup );
+    config->deleteGroup( QStringLiteral( "Legacy" ) + sessionGroup );
+    KConfigGroup group( config, QStringLiteral( "Legacy" ) + sessionGroup );
     int count = 0;
     for (WindowMap::ConstIterator it = legacyWindows.constBegin(); it != legacyWindows.constEnd(); ++it) {
         if ( (*it).type != SM_ERROR) {
@@ -231,8 +234,8 @@ void KSMServer::storeLegacySession( KConfig* config )
             if ( !(*it).wmCommand.isEmpty() && !(*it).wmClientMachine.isEmpty() ) {
                 count++;
                 QString n = QString::number(count);
-                group.writeEntry( QString("command")+n, (*it).wmCommand );
-                group.writeEntry( QString("clientMachine")+n, (*it).wmClientMachine );
+                group.writeEntry( QStringLiteral("command")+n, (*it).wmCommand );
+                group.writeEntry( QStringLiteral("clientMachine")+n, (*it).wmClientMachine );
             }
         }
     }
@@ -244,25 +247,26 @@ Restores legacy session management data (i.e. restart applications)
 */
 void KSMServer::restoreLegacySession( KConfig* config )
 {
-    if( config->hasGroup( "Legacy" + sessionGroup )) {
-        KConfigGroup group( config, "Legacy" + sessionGroup );
+    if( config->hasGroup( QStringLiteral( "Legacy" ) + sessionGroup )) {
+        KConfigGroup group( config, QStringLiteral( "Legacy" ) + sessionGroup );
         restoreLegacySessionInternal( &group );
-    } else if( wm == "kwin" ) { // backwards comp. - get it from kwinrc
+    } else if( wm == QStringLiteral( "kwin" ) ) { // backwards comp. - get it from kwinrc
         KConfigGroup group( config, sessionGroup );
         int count =  group.readEntry( "count", 0 );
         for ( int i = 1; i <= count; i++ ) {
             QString n = QString::number(i);
-            if ( group.readEntry( QString("program")+n, QString() ) != wm )
+            if ( group.readEntry( QStringLiteral("program")+n, QString() ) != wm )
                 continue;
             QStringList restartCommand =
-                group.readEntry( QString("restartCommand")+n, QStringList() );
+                group.readEntry( QStringLiteral("restartCommand")+n, QStringList() );
             for( QStringList::ConstIterator it = restartCommand.constBegin();
                 it != restartCommand.constEnd();
                 ++it ) {
-                if( (*it) == "-session" ) {
+                if( (*it) == QStringLiteral( "-session" ) ) {
                     ++it;
                     if( it != restartCommand.constEnd()) {
-                        KConfig cfg( "session/" + wm + '_' + (*it) );
+                        KConfig cfg( QStringLiteral( "session/" ) + wm +
+                                     QLatin1Char( '_' ) + (*it) );
                         KConfigGroup group(&cfg, "LegacySession");
                         restoreLegacySessionInternal( &group, ' ' );
                     }
@@ -278,15 +282,15 @@ void KSMServer::restoreLegacySessionInternal( KConfigGroup* config, char sep )
     for ( int i = 1; i <= count; i++ ) {
         QString n = QString::number(i);
         QStringList wmCommand = (sep == ',') ?
-                config->readEntry( QString("command")+n, QStringList() ) :
-                KShell::splitArgs( config->readEntry( QString("command")+n, QString() ) ); // close enough(?)
+                config->readEntry( QStringLiteral("command")+n, QStringList() ) :
+                KShell::splitArgs( config->readEntry( QStringLiteral("command")+n, QString() ) ); // close enough(?)
         if( wmCommand.isEmpty())
             continue;
         if( isWM( wmCommand.first()))
             continue;
         startApplication( wmCommand,
-                        config->readEntry( QString("clientMachine")+n, QString() ),
-                        config->readEntry( QString("userId")+n, QString() ));
+                        config->readEntry( QStringLiteral("clientMachine")+n, QString() ),
+                        config->readEntry( QStringLiteral("userId")+n, QString() ));
     }
 }
 
@@ -342,16 +346,16 @@ QStringList KSMServer::windowWmCommand(WId w)
         // Mozilla is launched using wrapper scripts, so it's launched using "mozilla",
         // but the actual binary is "mozilla-bin" or "<path>/mozilla-bin", and that's what
         // will be also in WM_COMMAND - using this "mozilla-bin" doesn't work at all though
-        if( command.endsWith( "mozilla-bin" ))
-            return QStringList() << "mozilla";
-        if( command.endsWith( "firefox-bin" ))
-            return QStringList() << "firefox";
-        if( command.endsWith( "thunderbird-bin" ))
-            return QStringList() << "thunderbird";
-        if( command.endsWith( "sunbird-bin" ))
-            return QStringList() << "sunbird";
-        if( command.endsWith( "seamonkey-bin" ))
-            return QStringList() << "seamonkey";
+        if( command.endsWith( QStringLiteral( "mozilla-bin" )))
+            return QStringList() << QStringLiteral( "mozilla" );
+        if( command.endsWith( QStringLiteral( "firefox-bin" )))
+            return QStringList() << QStringLiteral( "firefox" );
+        if( command.endsWith( QStringLiteral( "thunderbird-bin" )))
+            return QStringList() << QStringLiteral( "thunderbird" );
+        if( command.endsWith( QStringLiteral( "sunbird-bin" )))
+            return QStringList() << QStringLiteral( "sunbird" );
+        if( command.endsWith( QStringLiteral( "seamonkey-bin" )))
+            return QStringList() << QStringLiteral( "seamonkey" );
     }
     return ret;
 }

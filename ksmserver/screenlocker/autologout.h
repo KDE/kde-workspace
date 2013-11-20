@@ -10,7 +10,7 @@
 #define AUTOLOGOUT_H
 
 #include <QtCore/QTimer>
-#include <QtGui/QDialog>
+#include <QtWidgets/QDialog>
 #include <QtGui/QLayout>
 
 namespace ScreenLocker

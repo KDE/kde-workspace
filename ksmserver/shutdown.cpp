@@ -75,6 +75,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <solid/powermanagement.h>
 
 #include <kdebug.h>
+#include <klocalizedstring.h>
 
 #include <QDesktopWidget>
 #include <QX11Info>
@@ -174,10 +175,12 @@ void KSMServer::shutdown( KWorkSpace::ShutdownConfirm confirm,
         bootOption = bopt;
 
         // shall we save the session on logout?
-        saveSession = ( cg.readEntry( "loginMode", "restorePreviousLogout" ) == "restorePreviousLogout" );
+        saveSession = ( cg.readEntry( "loginMode",
+                                      QStringLiteral( "restorePreviousLogout" ) )
+                        == QStringLiteral( "restorePreviousLogout" ) );
 
         if ( saveSession )
-            sessionGroup = QString("Session: ") + SESSION_PREVIOUS_LOGOUT;
+            sessionGroup = QStringLiteral( "Session: " ) + QString::fromLocal8Bit( SESSION_PREVIOUS_LOGOUT );
 
         // Set the real desktop background to black so that exit looks
         // clean regardless of what was on "our" desktop.
@@ -239,8 +242,8 @@ void KSMServer::saveCurrentSession()
     if ( state != Idle || dialogActive )
         return;
 
-    if ( currentSession().isEmpty() || currentSession() == SESSION_PREVIOUS_LOGOUT )
-        sessionGroup = QString("Session: ") + SESSION_BY_USER;
+    if ( currentSession().isEmpty() || currentSession() == QString::fromLocal8Bit( SESSION_PREVIOUS_LOGOUT ) )
+        sessionGroup = QStringLiteral("Session: ") + QString::fromLocal8Bit( SESSION_BY_USER );
 
     state = Checkpoint;
     wmPhase1WaitingCount = 0;
@@ -271,7 +274,7 @@ void KSMServer::saveCurrentSessionAs( const QString &session )
 {
     if ( state != Idle || dialogActive )
         return;
-    sessionGroup = "Session: " + session;
+    sessionGroup = QStringLiteral( "Session: " ) + session;
     saveCurrentSession();
 }
 
@@ -385,7 +388,8 @@ void KSMServer::cancelShutdown( KSMClient* c )
         Solid::PowerManagement::stopSuppressingSleep(inhibitCookie);
         kDebug( 1218 ) << "Client " << c->program() << " (" << c->clientId() << ") canceled shutdown.";
         KSMShutdownFeedback::logoutCanceled(); // make the screen become normal again
-        KNotification::event( "cancellogout" , i18n( "Logout canceled by '%1'", c->program()),
+        KNotification::event( QStringLiteral( "cancellogout" ),
+                              i18n( "Logout canceled by '%1'", c->program()),
                               QPixmap() , 0l , KNotification::DefaultEvent  );
         foreach( KSMClient* c, clients ) {
             SmsShutdownCancelled( c->connection() );
@@ -470,7 +474,9 @@ void KSMServer::completeShutdownOrCheckpoint()
         discardSession();
 
     if ( state == Shutdown ) {
-        KNotification *n = KNotification::event( "exitkde" , QString() , QPixmap() , 0l ,  KNotification::DefaultEvent  ); // KDE says good bye
+        KNotification *n = KNotification::event( QStringLiteral( "exitkde" ),
+                                                 QString(), QPixmap(), 0l,
+                                                 KNotification::DefaultEvent ); // KDE says good bye
         connect(n, SIGNAL(closed()) , this, SLOT(logoutSoundFinished()) );
         // https://bugs.kde.org/show_bug.cgi?id=228005
         // if sound is not working for some reason (e.g. no phonon
@@ -611,19 +617,14 @@ void KSMServer::createLogoutEffectWidget()
 // the logout fade effect again.
     logoutEffectWidget = new QWidget( NULL, Qt::X11BypassWindowManagerHint );
     logoutEffectWidget->winId(); // workaround for Qt4.3 setWindowRole() assert
-    logoutEffectWidget->setWindowRole( "logouteffect" );
-//#if !(QT_VERSION >= QT_VERSION_CHECK(4, 3, 3) || defined(QT_KDE_QT_COPY))
-// Qt doesn't set this on unmanaged windows
-    QByteArray appName = qAppName().toLatin1();
-    XClassHint class_hint;
-    class_hint.res_name = appName.data(); // application name
-    class_hint.res_class = const_cast<char *>(QX11Info::appClass());   // application class
-    XSetWMProperties( QX11Info::display(), logoutEffectWidget->winId(),
-        NULL, NULL, NULL, 0, NULL, NULL, &class_hint );
+    logoutEffectWidget->setWindowRole( QStringLiteral( "logouteffect" ) );
+
+    // Qt doesn't set this on unmanaged windows
+    //FIXME: or does it?
     XChangeProperty( QX11Info::display(), logoutEffectWidget->winId(),
         XInternAtom( QX11Info::display(), "WM_WINDOW_ROLE", False ), XA_STRING, 8, PropModeReplace,
         (unsigned char *)"logouteffect", strlen( "logouteffect" ));
-//#endif
+
     logoutEffectWidget->setGeometry( -100, -100, 1, 1 );
     logoutEffectWidget->show();
 }
@@ -638,7 +639,7 @@ void KSMServer::saveSubSession(const QString &name, QStringList saveAndClose, QS
     state = ClosingSubSession;
     saveType = SmSaveBoth; //both or local? what oes it mean?
     saveSession = true;
-    sessionGroup = "SubSession: " + name;
+    sessionGroup = QStringLiteral( "SubSession: " ) + name;
 
 #ifndef NO_LEGACY_SESSION_MANAGEMENT
     //performLegacySessionSave(); FIXME
@@ -646,13 +647,13 @@ void KSMServer::saveSubSession(const QString &name, QStringList saveAndClose, QS
 
     startProtection();
     foreach( KSMClient* c, clients ) {
-        if (saveAndClose.contains(c->clientId())) {
+        if (saveAndClose.contains(QString::fromLocal8Bit(c->clientId()))) {
             c->resetState();
             SmsSaveYourself( c->connection(), saveType,
                              true, SmInteractStyleAny, false );
             clientsToSave << c;
             clientsToKill << c;
-        } else if (saveOnly.contains(c->clientId())) {
+        } else if (saveOnly.contains(QString::fromLocal8Bit(c->clientId()))) {
             c->resetState();
             SmsSaveYourself( c->connection(), saveType,
                              true, SmInteractStyleAny, false );
