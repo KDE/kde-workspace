@@ -169,7 +169,7 @@ void DeviceWrapper::runAction(QAction * action)
         if (!desktopAction.isEmpty()) {
             QStringList desktopFiles;
             desktopFiles.append(desktopAction);
-            QDBusInterface soliduiserver("org.kde.kded", "/modules/soliduiserver", "org.kde.SolidUiServer");
+            QDBusInterface soliduiserver("org.kde.kded5", "/modules/soliduiserver", "org.kde.SolidUiServer");
             soliduiserver.asyncCall("showActionsDialog", id(), desktopFiles);
         }
     } else {

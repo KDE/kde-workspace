@@ -375,7 +375,7 @@ void KCMHotkeysPrivate::save()
     // Inform kdedkhotkeys demon to reload settings
     QDBusConnection bus = QDBusConnection::sessionBus();
     QPointer<OrgKdeKhotkeysInterface> iface = new OrgKdeKhotkeysInterface(
-        "org.kde.kded",
+        "org.kde.kded5",
         "/modules/khotkeys",
         bus,
         q);

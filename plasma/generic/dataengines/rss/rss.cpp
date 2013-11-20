@@ -54,7 +54,7 @@ RssEngine::RssEngine(QObject* parent, const QVariantList& args)
 {
     Q_UNUSED(args)
     setMinimumPollingInterval(MINIMUM_INTERVAL);
-    m_favIconsModule = new QDBusInterface("org.kde.kded", "/modules/favicons",
+    m_favIconsModule = new QDBusInterface("org.kde.kded5", "/modules/favicons",
                                           FAVICONINTERFACE);
     m_signalMapper = new QSignalMapper(this);
     connect(m_favIconsModule, SIGNAL(iconChanged(bool,QString,QString)),

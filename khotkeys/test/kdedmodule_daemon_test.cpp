@@ -67,7 +67,7 @@ void Test::testLoading()
     QVERIFY(KHotKeys::KdedModuleDaemon::start());
     QVERIFY(KHotKeys::KdedModuleDaemon::isRunning());
     // Ensure kded is still there
-    QVERIFY(QDBusInterface( "org.kde.kded", "/kded","org.kde.kded" ).isValid());
+    QVERIFY(QDBusInterface( "org.kde.kded5", "/kded","org.kde.kded5" ).isValid());
     QVERIFY(KHotKeys::KdedModuleDaemon::stop());
     }
 

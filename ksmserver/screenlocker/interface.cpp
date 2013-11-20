@@ -58,7 +58,7 @@ Interface::Interface(KSldApp *parent)
 
     // Also receive updates triggered through the DBus (from powerdevil) see Bug #177123
     QStringList modules;
-    QDBusInterface kdedInterface(QLatin1String( "org.kde.kded" ), QLatin1String( "/kded" ), QLatin1String( "org.kde.kded" ));
+    QDBusInterface kdedInterface(QLatin1String( "org.kde.kded5" ), QLatin1String( "/kded" ), QLatin1String( "org.kde.kded5" ));
     QDBusReply<QStringList> reply = kdedInterface.call(QLatin1String( "loadedModules" ));
 
     if (!reply.isValid()) {
@@ -68,7 +68,7 @@ Interface::Interface(KSldApp *parent)
     modules = reply.value();
 
     if (modules.contains(QLatin1String( "powerdevil" ))) {
-      if (!QDBusConnection::sessionBus().connect(QLatin1String( "org.kde.kded" ), QLatin1String( "/modules/powerdevil" ), QLatin1String( "org.kde.PowerDevil" ),
+      if (!QDBusConnection::sessionBus().connect(QLatin1String( "org.kde.kded5" ), QLatin1String( "/modules/powerdevil" ), QLatin1String( "org.kde.PowerDevil" ),
                           QLatin1String( "DPMSconfigUpdated" ), this, SLOT(configure()))) {
             kDebug() << "error!";
         }

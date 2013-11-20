@@ -383,7 +383,7 @@ void KSMServer::autoStart2()
     kDebug() << "klauncher" << t.elapsed();
 #endif
 
-    QDBusInterface kded( "org.kde.kded", "/kded", "org.kde.kded" );
+    QDBusInterface kded( "org.kde.kded5", "/kded", "org.kde.kded5" );
     kded.call( "loadSecondPhase" );
 
 #ifdef KSMSERVER_STARTUP_DEBUG1

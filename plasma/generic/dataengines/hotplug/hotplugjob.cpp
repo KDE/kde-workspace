@@ -34,7 +34,7 @@ void HotplugJob::start()
 
         QStringList desktopFiles;
         desktopFiles << action;
-        QDBusInterface soliduiserver("org.kde.kded", "/modules/soliduiserver", "org.kde.SolidUiServer");
+        QDBusInterface soliduiserver("org.kde.kded5", "/modules/soliduiserver", "org.kde.SolidUiServer");
         QDBusReply<void> reply = soliduiserver.call("showActionsDialog", udi, desktopFiles);
     }
 

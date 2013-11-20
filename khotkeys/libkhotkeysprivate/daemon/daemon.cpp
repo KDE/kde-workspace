@@ -42,7 +42,7 @@ bool isEnabled()
 
 static QDBusInterface* Kded()
     {
-    QDBusInterface *iface = new QDBusInterface( "org.kde.kded", "/kded","org.kde.kded" );
+    QDBusInterface *iface = new QDBusInterface( "org.kde.kded5", "/kded","org.kde.kded5" );
     if (!iface->isValid())
         {
         QDBusError err = iface->lastError();
@@ -82,7 +82,7 @@ bool reload()
     // Inform kdedkhotkeys demon to reload settings
     QDBusConnection bus = QDBusConnection::sessionBus();
     QDBusInterface iface(
-        "org.kde.kded",
+        "org.kde.kded5",
         "/modules/khotkeys",
         "org.kde.khotkeys",
         bus );

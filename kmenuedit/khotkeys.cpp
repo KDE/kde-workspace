@@ -37,7 +37,7 @@ bool KHotKeys::init()
     // Check if khotkeys is running
     QDBusConnection bus = QDBusConnection::sessionBus();
     khotkeysInterface = new OrgKdeKhotkeysInterface(
-        "org.kde.kded",
+        "org.kde.kded5",
         "/modules/khotkeys",
         bus,
         NULL);

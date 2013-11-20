@@ -54,7 +54,7 @@ TimeEngine::~TimeEngine()
 
 void TimeEngine::init()
 {
-    //QDBusInterface *ktimezoned = new QDBusInterface("org.kde.kded", "/modules/ktimezoned", "org.kde.KTimeZoned");
+    //QDBusInterface *ktimezoned = new QDBusInterface("org.kde.kded5", "/modules/ktimezoned", "org.kde.KTimeZoned");
     QDBusConnection dbus = QDBusConnection::sessionBus();
     dbus.connect(QString(), QString(), "org.kde.KTimeZoned", "configChanged", this, SLOT(tzConfigChanged()));
     dbus.connect(QString(), "/org/kde/kcmshell_clock", "org.kde.kcmshell_clock", "clockUpdated", this, SLOT(clockSkewed()));

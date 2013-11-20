@@ -160,9 +160,9 @@ void FreeSpaceNotifier::configDialogClosed()
  */
 void FreeSpaceNotifier::disableFSNotifier()
 {
-    QDBusInterface iface( QStringLiteral("org.kde.kded"),
+    QDBusInterface iface( QStringLiteral("org.kde.kded5"),
                           QStringLiteral("/kded"),
-                          QStringLiteral("org.kde.kded") );
+                          QStringLiteral("org.kde.kded5") );
     if ( dbusError( iface ) ) return;
 
     // Disable current module autoload
