@@ -161,6 +161,7 @@ Item {
                     width: parent.width / 3
                 }
                 QtControls.ComboBox {
+                    width: 200
                     currentIndex: 0
                     model: ListModel {
                         id: cbItems
@@ -168,7 +169,7 @@ Item {
                         ListElement { text: "Shown"; val: 2 }
                         ListElement { text: "Hidden"; val: 0 }
                     }
-                    onCurrentIndexChanged {
+                    onCurrentIndexChanged: {
                         if (index == 0) {
                             print(name + "Now Hidden")
                         } else if (index == 1) {
@@ -176,9 +177,8 @@ Item {
                         } else {
                             print(name + "Now Shown")
                         }
+                        console.debug(cbItems.get(currentIndex).text + ", " + cbItems.get(currentIndex).val)
                     }
-                    width: 200
-                    onCurrentIndexChanged: console.debug(cbItems.get(currentIndex).text + ", " + cbItems.get(currentIndex).val)
                 }
             }
         }
