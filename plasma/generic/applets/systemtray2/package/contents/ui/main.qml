@@ -44,8 +44,8 @@ Item {
     // Sizes depend on the font, and thus on DPI
     property int baseSize: theme.mSize(theme.defaultFont).height
     property int itemSize: Layout.alignedSize(Math.min(baseSize * 2, cHeight))
-    property int smallSpacing: Math.ceil(baseSize / 10)
-    property int largeSpacing: Math.ceil(baseSize / 2)
+    property int smallSpacing: theme.smallSpacing
+    property int largeSpacing: theme.largeSpacing
 
     property bool debug: plasmoid.configuration.debug
 
