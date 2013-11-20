@@ -40,8 +40,8 @@ Item {
 
     property Component compactRepresentation: PlasmaCore.IconItem {
         source: devicenotifier.popupIcon
-        width: 22;
-        height: 22;
+        width: 36;
+        height: 36;
         MouseArea {
             anchors.fill: parent
             onClicked: plasmoid.expanded = !plasmoid.expanded

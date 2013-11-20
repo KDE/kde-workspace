@@ -63,7 +63,7 @@ QtExtraComponents.MouseEventListener {
         var dim = root.vertical ? compactRepresenation.width : compactRepresenation.height
         var rows = Math.floor(dim / root.itemSize);
         var cols = Math.ceil(systrayhost.shownTasks.length / rows);
-        var res = cols * (root.itemSize) + arrow.width;
+        var res = cols * (root.itemSize + theme.smallSpacing*4) + theme.smallSpacing + arrow.width;
         print(" computeDimension()  " + res);
         return res;
     }
@@ -132,14 +132,14 @@ QtExtraComponents.MouseEventListener {
         anchors {
             top: parent.top
             bottom: parent.bottom
-            topMargin: (parent.height - root.itemSize) / 2
+            topMargin: ((parent.height - root.itemSize) / 2) - 1
 //             verticalCenter: parent.verticalCenter
             left: parent.left
             leftMargin: root.vertical ? 0 : root.smallSpacing
             right: arrow.left
         }
-        cellWidth: root.itemSize + theme.smallSpacing
-        cellHeight: cellWidth
+        cellWidth: !root.vertical ? root.itemSize + theme.smallSpacing * 4 : root.itemSize
+        cellHeight: root.vertical ? root.itemSize + theme.smallSpacing * 4 : root.itemSize
         interactive: false
 
         model: systrayhost.shownTasks
