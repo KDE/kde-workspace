@@ -24,6 +24,7 @@ import org.kde.plasma.components 2.0 as PlasmaComponents
 
 Item {
     id: root
+    objectName: "org.kde.desktop-CompactApplet"
 
     property int minimumWidth: compactRepresentation && compactRepresentation.minimumWidth !== undefined ? compactRepresentation.minimumWidth : -1
     property int minimumHeight: compactRepresentation && compactRepresentation.minimumHeight !== undefined ? compactRepresentation.minimumHeight : -1
@@ -62,15 +63,17 @@ Item {
 
     PlasmaCore.Dialog {
         id: popupWindow
+        objectName: "popupWindow"
         //windowFlags: Qt.Popup
         color: Qt.rgba(0,0,0,0)
         visible: plasmoid.expanded
-        visualParent: root
+        visualParent: compactRepresentation
         mainItem: Item {
             id: appletParent
 
-            width: applet && applet.implicitHeight > 0 ? applet.implicitHeight : theme.mSize(theme.defaultFont).width * 35
+            width: applet && applet.implicitWidth > 0 ? applet.implicitWidth : theme.mSize(theme.defaultFont).width * 35
             height: applet && applet.implicitHeight > 0 ? applet.implicitHeight : theme.mSize(theme.defaultFont).height * 25
+
         }
 
         onActiveWindowChanged: {
