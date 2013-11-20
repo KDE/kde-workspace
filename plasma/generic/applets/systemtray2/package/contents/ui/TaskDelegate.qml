@@ -56,10 +56,10 @@ QtExtraComponents.MouseEventListener {
     Rectangle {
         anchors.fill: parent;
         border.width: 1;
-        border.color: "violet";
-        color: "pink";
+        border.color: "black";
+        color: "yellow";
         visible: root.debug;
-        opacity: 0.5;
+        opacity: 0.8;
     }
 
     Component {
@@ -151,7 +151,9 @@ QtExtraComponents.MouseEventListener {
             taskItem.x = _m;
             taskItem.height = _size;
             taskItem.width = _size;
+            print("taskitem w/h: " + taskItem.width + "/" + taskItem.height);
         }
+        print("taskitemContainer w/h: " + taskItemContainer.width + "/" + taskItemContainer.height);
     }
 
     Component.onCompleted: {
