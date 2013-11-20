@@ -33,6 +33,8 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "global.h"
 #include "client.h"
 #include "ksmserverinterfaceadaptor.h"
+#include "klocalizedstring.h"
+#include "kglobalaccel.h"
 
 #include <config-workspace.h>
 #include <config-unix.h> // HAVE_LIMITS_H
@@ -113,13 +115,13 @@ KProcess* KSMServer::startApplication( const QStringList& cmd, const QString& cl
     if ( !userId.isEmpty()) {
         struct passwd* pw = getpwuid( getuid());
         if( pw != NULL && userId != QString::fromLocal8Bit( pw->pw_name )) {
-            command.prepend( "--" );
+            command.prepend( QStringLiteral("--") );
             command.prepend( userId );
-            command.prepend( "-u" );
-            command.prepend( KStandardDirs::findExe("kdesu") );
+            command.prepend( QStringLiteral("-u") );
+            command.prepend( KStandardDirs::findExe(QStringLiteral("kdesu")) );
         }
     }
-    if ( !clientMachine.isEmpty() && clientMachine != "localhost" ) {
+    if ( !clientMachine.isEmpty() && clientMachine != QStringLiteral("localhost") ) {
         command.prepend( clientMachine );
         command.prepend( xonCommand ); // "xon" by default
     }
@@ -138,7 +140,8 @@ KProcess* KSMServer::startApplication( const QStringList& cmd, const QString& cl
         return process;
     } else {
         int n = command.count();
-        org::kde::KLauncher klauncher("org.kde.klauncher", "/KLauncher", QDBusConnection::sessionBus());
+        org::kde::KLauncher klauncher(QStringLiteral("org.kde.klauncher"),
+                                      QStringLiteral("/KLauncher"), QDBusConnection::sessionBus());
         QString app = command[0];
         QStringList argList;
         for ( int i=1; i < n; i++)
@@ -422,8 +425,8 @@ Status SetAuthentication (int count, IceListenObj *listenObjs,
                          count * 2 * sizeof (IceAuthDataEntry))) == NULL)
         return 0;
 
-    FILE *addAuthFile = fopen(QFile::encodeName(addTempFile.fileName()), "r+");
-    FILE *remAuthFile = fopen(QFile::encodeName(remTempFile->fileName()), "r+");
+    FILE *addAuthFile = fopen(QFile::encodeName(addTempFile.fileName()).constData(), "r+");
+    FILE *remAuthFile = fopen(QFile::encodeName(remTempFile->fileName()).constData(), "r+");
 
     for (int i = 0; i < numTransports * 2; i += 2) {
         (*authDataEntries)[i].network_id =
@@ -454,7 +457,7 @@ Status SetAuthentication (int count, IceListenObj *listenObjs,
     fclose(addAuthFile);
     fclose(remAuthFile);
 
-    QString iceAuth = KGlobal::dirs()->findExe("iceauth");
+    QString iceAuth = KGlobal::dirs()->findExe(QStringLiteral("iceauth"));
     if (iceAuth.isEmpty())
     {
         qWarning("KSMServer: could not find iceauth");
@@ -462,7 +465,7 @@ Status SetAuthentication (int count, IceListenObj *listenObjs,
     }
 
     KProcess p;
-    p << iceAuth << "source" << addTempFile.fileName();
+    p << iceAuth << QStringLiteral("source") << addTempFile.fileName();
     p.execute();
 
     return (1);
@@ -484,7 +487,7 @@ void FreeAuthenticationData(int count, IceAuthDataEntry *authDataEntries)
 
     free (authDataEntries);
 
-    QString iceAuth = KGlobal::dirs()->findExe("iceauth");
+    QString iceAuth = KGlobal::dirs()->findExe(QStringLiteral("iceauth"));
     if (iceAuth.isEmpty())
     {
         qWarning("KSMServer: could not find iceauth");
@@ -494,7 +497,7 @@ void FreeAuthenticationData(int count, IceAuthDataEntry *authDataEntries)
     if (remTempFile)
     {
         KProcess p;
-        p << iceAuth << "source" << remTempFile->fileName();
+        p << iceAuth << QStringLiteral("source") << remTempFile->fileName();
         p.execute();
     }
 
@@ -605,7 +608,7 @@ extern "C" int _IceTransNoListen(const char * protocol);
 
 KSMServer::KSMServer( const QString& windowManager, bool _only_local, bool lockscreen )
   : wmProcess( NULL )
-  , sessionGroup( "" )
+  , sessionGroup( QStringLiteral( "" ) )
   , logoutEffectWidget( NULL )
 {
 #ifdef COMPILE_SCREEN_LOCKER
@@ -620,7 +623,7 @@ KSMServer::KSMServer( const QString& windowManager, bool _only_local, bool locks
 #endif
 
     new KSMServerInterfaceAdaptor( this );
-    QDBusConnection::sessionBus().registerObject("/KSMServer", this);
+    QDBusConnection::sessionBus().registerObject(QStringLiteral("/KSMServer"), this);
     klauncherSignals = new OrgKdeKLauncherInterface(QLatin1String("org.kde.klauncher"),
             QLatin1String("/KLauncher"), QDBusConnection::sessionBus());
     kcminitSignals = NULL;
@@ -670,14 +673,17 @@ KSMServer::KSMServer( const QString& windowManager, bool _only_local, bool locks
 
     {
         // publish available transports.
-        QByteArray fName = QFile::encodeName(KStandardDirs::locateLocal("socket", "KSMserver"));
-        QString display = ::getenv("DISPLAY");
+        QByteArray fName = QFile::encodeName(QStandardPaths::writableLocation(QStandardPaths::RuntimeLocation)
+                                             + QDir::separator()
+                                             + QStringLiteral("KSMserver"));
+        qDebug() << fName;
+        QString display = QString::fromLocal8Bit(::getenv("DISPLAY"));
         // strip the screen number from the display
-        display.replace(QRegExp("\\.[0-9]+$"), "");
+        display.replace(QRegExp(QStringLiteral("\\.[0-9]+$")), QStringLiteral(""));
         int i;
-        while( (i = display.indexOf(':')) >= 0)
+        while( (i = display.indexOf(QLatin1Char(':'))) >= 0)
            display[i] = '_';
-        while( (i = display.indexOf('/')) >= 0)
+        while( (i = display.indexOf(QLatin1Char('/'))) >= 0)
            display[i] = '_';
 
         fName += '_'+display.toLocal8Bit();
@@ -694,9 +700,9 @@ KSMServer::KSMServer( const QString& windowManager, bool _only_local, bool locks
         fclose(f);
         setenv( "SESSION_MANAGER", session_manager, true  );
 
-       // Pass env. var to kdeinit.
-       org::kde::KLauncher klauncher("org.kde.klauncher", "/KLauncher", QDBusConnection::sessionBus());
-       klauncher.setLaunchEnv( "SESSION_MANAGER", (const char*) session_manager );
+        // Pass env. var to kdeinit.
+        org::kde::KLauncher klauncher( QStringLiteral( "org.kde.klauncher" ), QStringLiteral( "/KLauncher" ), QDBusConnection::sessionBus());
+        klauncher.setLaunchEnv( QStringLiteral( "SESSION_MANAGER" ), QString::fromLocal8Bit( (const char*) session_manager ) );
 
         free(session_manager);
     }
@@ -742,14 +748,14 @@ void KSMServer::cleanUp()
     clean = true;
     IceFreeListenObjs (numTransports, listenObjs);
 
-    QByteArray fName = QFile::encodeName(KStandardDirs::locateLocal("socket", "KSMserver"));
+    QByteArray fName = QFile::encodeName(KStandardDirs::locateLocal("socket", QStringLiteral("KSMserver")));
     QString display  = QString::fromLocal8Bit(::getenv("DISPLAY"));
     // strip the screen number from the display
-    display.replace(QRegExp("\\.[0-9]+$"), "");
+    display.replace(QRegExp(QStringLiteral("\\.[0-9]+$")), QStringLiteral(""));
     int i;
-    while( (i = display.indexOf(':')) >= 0)
+    while( (i = display.indexOf(QLatin1Char(':'))) >= 0)
          display[i] = '_';
-    while( (i = display.indexOf('/')) >= 0)
+    while( (i = display.indexOf(QLatin1Char('/'))) >= 0)
          display[i] = '_';
 
     fName += '_'+display.toLocal8Bit();
@@ -860,9 +866,9 @@ void KSMServer::newConnection( int /*socket*/ )
 
 QString KSMServer::currentSession()
 {
-    if ( sessionGroup.startsWith( "Session: " ) )
+    if ( sessionGroup.startsWith( QLatin1String( "Session: " ) ) )
         return sessionGroup.mid( 9 );
-    return ""; // empty, not null, since used for KConfig::setGroup
+    return QStringLiteral( "" ); // empty, not null, since used for KConfig::setGroup
 }
 
 void KSMServer::discardSession()
@@ -878,7 +884,7 @@ void KSMServer::discardSession()
         // case up to KDE and Qt < 3.1
         int i = 1;
         while ( i <= count &&
-                config.readPathEntry( QString("discardCommand") + QString::number(i), QStringList() ) != discardCommand )
+                config.readPathEntry( QStringLiteral("discardCommand") + QString::number(i), QStringList() ) != discardCommand )
             i++;
         if ( i <= count )
             executeCommand( discardCommand );
@@ -890,7 +896,8 @@ void KSMServer::storeSession()
     KSharedConfig::Ptr config = KGlobal::config();
     config->reparseConfiguration(); // config may have changed in the KControl module
     KConfigGroup generalGroup(config, "General");
-    excludeApps = generalGroup.readEntry( "excludeApps" ).toLower().split( QRegExp( "[,:]" ), QString::SkipEmptyParts );
+    excludeApps = generalGroup.readEntry( "excludeApps" ).toLower()
+                  .split( QRegExp( QStringLiteral("[,:]") ), QString::SkipEmptyParts );
     KConfigGroup configSessionGroup(config, sessionGroup);
     int count =  configSessionGroup.readEntry( "count", 0 );
     for ( int i = 1; i <= count; i++ ) {
@@ -945,13 +952,13 @@ void KSMServer::storeSession()
 
         count++;
         QString n = QString::number(count);
-        cg.writeEntry( QString("program")+n, program );
-        cg.writeEntry( QString("clientId")+n, c->clientId() );
-        cg.writeEntry( QString("restartCommand")+n, restartCommand );
-        cg.writePathEntry( QString("discardCommand")+n, c->discardCommand() );
-        cg.writeEntry( QString("restartStyleHint")+n, restartHint );
-        cg.writeEntry( QString("userId")+n, c->userId() );
-        cg.writeEntry( QString("wasWm")+n, isWM( c ));
+        cg.writeEntry( QStringLiteral("program")+n, program );
+        cg.writeEntry( QStringLiteral("clientId")+n, c->clientId() );
+        cg.writeEntry( QStringLiteral("restartCommand")+n, restartCommand );
+        cg.writePathEntry( QStringLiteral("discardCommand")+n, c->discardCommand() );
+        cg.writeEntry( QStringLiteral("restartStyleHint")+n, restartHint );
+        cg.writeEntry( QStringLiteral("userId")+n, c->userId() );
+        cg.writeEntry( QStringLiteral("wasWm")+n, isWM( c ));
     }
     cg.writeEntry( "count", count );
 
@@ -964,11 +971,11 @@ void KSMServer::storeSession()
 
 QStringList KSMServer::sessionList()
 {
-    QStringList sessions ( "default" );
+    QStringList sessions( QStringLiteral( "default" ) );
     KSharedConfig::Ptr config = KGlobal::config();
     const QStringList groups = config->groupList();
     for ( QStringList::ConstIterator it = groups.constBegin(); it != groups.constEnd(); ++it )
-        if ( (*it).startsWith( "Session: " ) )
+        if ( (*it).startsWith( QLatin1String( "Session: " ) ) )
             sessions << (*it).mid( 9 );
     return sessions;
 }
@@ -994,8 +1001,8 @@ bool KSMServer::defaultSession() const
 // - if that fails, just use KWin
 void KSMServer::selectWm( const QString& kdewm )
 {
-    wm = "kwin"; // defaults
-    wmCommands = ( QStringList() << "kwin" ); 
+    wm = QStringLiteral( "kwin" ); // defaults
+    wmCommands = ( QStringList() << QStringLiteral( "kwin" ) );
     if( qstrcmp( getenv( "KDE_FAILSAFE" ), "1" ) == 0 )
         return; // failsafe, force kwin
     if( !kdewm.isEmpty())
@@ -1006,7 +1013,8 @@ void KSMServer::selectWm( const QString& kdewm )
     }
     KConfigGroup config(KGlobal::config(), "General");
     QString cfgwm = config.readEntry( "windowManager", "kwin" );
-    KDesktopFile file( "windowmanagers", cfgwm + ".desktop" );
+    KDesktopFile file( QStandardPaths::ApplicationsLocation,
+                       QStringLiteral( "ksmserver/windowmanagers/" ) + cfgwm + QStringLiteral( ".desktop" ) );
     if( file.noDisplay())
         return;
     if( !file.tryExec())
@@ -1031,32 +1039,32 @@ void KSMServer::selectWm( const QString& kdewm )
 void KSMServer::wmChanged()
 {
     KGlobal::config()->reparseConfiguration();
-    selectWm( "" );
+    selectWm( QStringLiteral( "" ) );
 }
 
 void KSMServer::setupShortcuts()
 {
-    if (KAuthorized::authorize("logout")) {
+    if (KAuthorized::authorize( QStringLiteral( "logout" ))) {
         KActionCollection* actionCollection = new KActionCollection(this);
-        KAction* a;
-        a = actionCollection->addAction("Log Out");
+        QAction* a;
+        a = actionCollection->addAction(QStringLiteral("Log Out"));
         a->setText(i18n("Log Out"));
-        a->setGlobalShortcut(KShortcut(Qt::ALT+Qt::CTRL+Qt::Key_Delete));
+        KGlobalAccel::self()->setShortcut(a, QList<QKeySequence>() << Qt::ALT+Qt::CTRL+Qt::Key_Delete);
         connect(a, SIGNAL(triggered(bool)), SLOT(defaultLogout()));
 
-        a = actionCollection->addAction("Log Out Without Confirmation");
+        a = actionCollection->addAction(QStringLiteral("Log Out Without Confirmation"));
         a->setText(i18n("Log Out Without Confirmation"));
-        a->setGlobalShortcut(KShortcut(Qt::ALT+Qt::CTRL+Qt::SHIFT+Qt::Key_Delete));
+        KGlobalAccel::self()->setShortcut(a, QList<QKeySequence>() << Qt::ALT+Qt::CTRL+Qt::SHIFT+Qt::Key_Delete);
         connect(a, SIGNAL(triggered(bool)), SLOT(logoutWithoutConfirmation()));
 
-        a = actionCollection->addAction("Halt Without Confirmation");
+        a = actionCollection->addAction(QStringLiteral("Halt Without Confirmation"));
         a->setText(i18n("Halt Without Confirmation"));
-        a->setGlobalShortcut(KShortcut(Qt::ALT+Qt::CTRL+Qt::SHIFT+Qt::Key_PageDown));
+        KGlobalAccel::self()->setShortcut(a, QList<QKeySequence>() << Qt::ALT+Qt::CTRL+Qt::SHIFT+Qt::Key_PageDown);
         connect(a, SIGNAL(triggered(bool)), SLOT(haltWithoutConfirmation()));
 
-        a = actionCollection->addAction("Reboot Without Confirmation");
+        a = actionCollection->addAction(QStringLiteral("Reboot Without Confirmation"));
         a->setText(i18n("Reboot Without Confirmation"));
-        a->setGlobalShortcut(KShortcut(Qt::ALT+Qt::CTRL+Qt::SHIFT+Qt::Key_PageUp));
+        KGlobalAccel::self()->setShortcut(a, QList<QKeySequence>() << Qt::ALT+Qt::CTRL+Qt::SHIFT+Qt::Key_PageUp);
         connect(a, SIGNAL(triggered(bool)), SLOT(rebootWithoutConfirmation()));
     }
 }

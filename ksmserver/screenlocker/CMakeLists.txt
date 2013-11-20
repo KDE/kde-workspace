@@ -26,11 +26,17 @@ kconfig_add_kcfg_files(ksld_SRCS kcfg/kscreensaversettings.kcfgc)
 qt5_add_dbus_interface(ksld_SRCS ${ksmserver_xml} ksmserver_interface)
 qt5_add_dbus_interface(ksld_SRCS ${powerdevilpolicyagent_xml} powerdevilpolicyagent)
 
-# add_library(screenlocker_static STATIC ${ksld_SRCS})
+add_library(screenlocker_static STATIC ${ksld_SRCS})
 
-# target_link_libraries(screenlocker_static kworkspace ${KDE4_KDEUI_LIBS} ${KDE4_KIDLETIME_LIBS} ${X11_LIBRARIES})
+target_link_libraries(screenlocker_static kworkspace
+   ${KDE4_KDEUI_LIBS}
+   ${KDE4_KIDLETIME_LIBS}
+   ${QT_QTCORE_LIBRARY}
+   ${QT_QTGUI_LIBRARY}
+   ${X11_LIBRARIES}
+)
 
 # Needed to compile on Arm target.
-# set_target_properties(screenlocker_static PROPERTIES COMPILE_FLAGS "-fPIC")
+set_target_properties(screenlocker_static PROPERTIES COMPILE_FLAGS "-fPIC")
 
 install(FILES kscreenlocker.notifyrc  DESTINATION ${DATA_INSTALL_DIR}/ksmserver/ RENAME ksmserver.notifyrc)

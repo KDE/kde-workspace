@@ -25,18 +25,6 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #ifndef SERVER_H
 #define SERVER_H
 
-// needed to avoid clash with INT8 defined in X11/Xmd.h on solaris
-#define QT_CLEAN_NAMESPACE 1
-#include <QStringList>
-#include <QObject>
-
-#include <kapplication.h>
-#include <kworkspace/kworkspace.h>
-#include <kmessagebox.h>
-#include <QTimer>
-#include <QTime>
-#include <QMap>
-
 #define INT32 QINT32
 #include <X11/Xlib.h>
 #include <X11/Xmd.h>
@@ -50,6 +38,19 @@ extern "C" {
 }
 
 #include <fixx11h.h>
+
+// needed to avoid clash with INT8 defined in X11/Xmd.h on solaris
+#define QT_CLEAN_NAMESPACE 1
+#include <QStringList>
+#include <QObject>
+
+#include <kapplication.h>
+#include <kworkspace/kworkspace.h>
+#include <kmessagebox.h>
+#include <QTimer>
+#include <QTime>
+#include <QMap>
+
 
 #define SESSION_PREVIOUS_LOGOUT "saved at previous logout"
 #define SESSION_BY_USER  "saved by user"

@@ -33,10 +33,10 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <KMessageBox>
 #include <QtDBus/QtDBus>
 
-#include <kapplication.h>
+#include <k4aboutdata.h>
 #include <kcmdlineargs.h>
 #include <kconfiggroup.h>
-#include <kaboutdata.h>
+#include <kdbusservice.h>
 #include <kdebug.h>
 #include <klocale.h>
 #include <kglobal.h>
@@ -46,6 +46,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "server.h"
 #include <QX11Info>
 
+#include <QApplication>
 #include <X11/extensions/Xrender.h>
 
 static const char version[] = "0.4";
@@ -130,7 +131,7 @@ void checkComposite()
     dpy = NULL;
 }
 
-void sanity_check( int argc, char* argv[], KAboutData* aboutDataPtr )
+void sanity_check( int argc, char* argv[] )
 {
     QString msg;
     QByteArray path = getenv("HOME");
@@ -142,24 +143,24 @@ void sanity_check( int argc, char* argv[], KAboutData* aboutDataPtr )
     if (msg.isEmpty() && access(path.data(), W_OK))
     {
         if (errno == ENOENT)
-            msg = QLatin1String("$HOME directory (%1) does not exist.");
+            msg = QStringLiteral("$HOME directory (%1) does not exist.");
         else if (readOnly.isEmpty())
-            msg = QLatin1String("No write access to $HOME directory (%1).");
+            msg = QStringLiteral("No write access to $HOME directory (%1).");
     }
     if (msg.isEmpty() && access(path.data(), R_OK))
     {
         if (errno == ENOENT)
-            msg = "$HOME directory (%1) does not exist.";
+            msg = QStringLiteral("$HOME directory (%1) does not exist.");
         else
-            msg = "No read access to $HOME directory (%1).";
+            msg = QStringLiteral("No read access to $HOME directory (%1).");
     }
     if (msg.isEmpty() && readOnly.isEmpty() && !writeTest(path))
     {
         if (errno == ENOSPC)
-            msg = "$HOME directory (%1) is out of disk space.";
+            msg = QStringLiteral("$HOME directory (%1) is out of disk space.");
         else
-            msg = QByteArray("Writing to the $HOME directory (%1) failed with\n    "
-                "the error '")+QByteArray(strerror(errno))+QByteArray("'");
+            msg = QStringLiteral("Writing to the $HOME directory (%1) failed with\n    "
+                "the error '")+QString::fromLocal8Bit(strerror(errno))+QStringLiteral("'");
     }
     if (msg.isEmpty())
     {
@@ -171,9 +172,9 @@ void sanity_check( int argc, char* argv[], KAboutData* aboutDataPtr )
         }
     
         if (access(path.data(), W_OK) && (errno != ENOENT))
-            msg = "No write access to '%1'.";
+            msg = QStringLiteral("No write access to '%1'.");
         else if (access(path.data(), R_OK) && (errno != ENOENT))
-            msg = "No read access to '%1'.";
+            msg = QStringLiteral("No read access to '%1'.");
     }
     if (msg.isEmpty())
     {
@@ -183,10 +184,10 @@ void sanity_check( int argc, char* argv[], KAboutData* aboutDataPtr )
         if (!writeTest(path))
         {
             if (errno == ENOSPC)
-            msg = "Temp directory (%1) is out of disk space.";
+            msg = QStringLiteral("Temp directory (%1) is out of disk space.");
             else
-            msg = "Writing to the temp directory (%1) failed with\n    "
-                    "the error '"+QByteArray(strerror(errno))+QByteArray("'");
+            msg = QStringLiteral("Writing to the temp directory (%1) failed with\n    "
+                    "the error '")+QString::fromLocal8Bit(strerror(errno))+QStringLiteral("'");
         }
     }
     if (msg.isEmpty() && (path != "/tmp"))
@@ -195,19 +196,19 @@ void sanity_check( int argc, char* argv[], KAboutData* aboutDataPtr )
         if (!writeTest(path))
         {
             if (errno == ENOSPC)
-            msg = "Temp directory (%1) is out of disk space.";
+            msg = QStringLiteral("Temp directory (%1) is out of disk space.");
             else
-            msg = "Writing to the temp directory (%1) failed with\n    "
-                    "the error '"+QByteArray(strerror(errno))+QByteArray("'");
+            msg = QStringLiteral("Writing to the temp directory (%1) failed with\n    "
+                    "the error '")+QString::fromLocal8Bit(strerror(errno))+QStringLiteral("'");
         }
     }
     if (msg.isEmpty())
     {
         path += "/.ICE-unix";
         if (access(path.data(), W_OK) && (errno != ENOENT))
-            msg = "No write access to '%1'.";
+            msg = QStringLiteral("No write access to '%1'.");
         else if (access(path.data(), R_OK) && (errno != ENOENT))
-            msg = "No read access to '%1'.";
+            msg = QStringLiteral("No read access to '%1'.");
     }
     if (!msg.isEmpty())
     {
@@ -221,72 +222,82 @@ void sanity_check( int argc, char* argv[], KAboutData* aboutDataPtr )
         fputs(msg_post, stderr);
 
         QApplication a(argc, argv);
-        KComponentData i(aboutDataPtr);
-        QString qmsg = msg_pre+msg.arg(QFile::decodeName(path))+msg_post;
-        KMessageBox::error(0, qmsg, "KDE Installation Problem!");
+        QString qmsg = QString::fromLatin1(msg_pre) +
+                       msg.arg(QFile::decodeName(path)) +
+                       QString::fromLatin1(msg_post);
+        KMessageBox::error(0, qmsg, QStringLiteral("KDE Workspace installation problem!"));
         exit(255);
     }
 }
 
 extern "C" KDE_EXPORT int kdemain( int argc, char* argv[] )
 {
-    KAboutData aboutData( "ksmserver", 0, ki18n("The KDE Session Manager"),
-       version, ki18n(description), KAboutData::License_BSD,
-       ki18n("(C) 2000, The KDE Developers"));
-    aboutData.addAuthor(ki18n("Matthias Ettrich"),KLocalizedString(), "ettrich@kde.org");
-    aboutData.addAuthor(ki18n("Luboš Luňák"), ki18n( "Maintainer" ), "l.lunak@kde.org" );
-
-    sanity_check(argc, argv, &aboutData);
-
-    KCmdLineArgs::init(argc, argv, &aboutData);
-
-    KCmdLineOptions options;
-    options.add("r");
-    options.add("restore", ki18n("Restores the saved user session if available"));
-    options.add("w");
-    options.add("windowmanager <wm>", ki18n("Starts 'wm' in case no other window manager is \nparticipating in the session. Default is 'kwin'"));
-    options.add("nolocal", ki18n("Also allow remote connections"));
-#if COMPILE_SCREEN_LOCKER
-    options.add("lockscreen", ki18n("Starts the session in locked mode"));
-#endif
-    KCmdLineArgs::addCmdLineOptions( options );
+    sanity_check(argc, argv);
 
     putenv((char*)"SESSION_MANAGER=");
     checkComposite();
-    KApplication *a;
 
-    if( dpy != NULL && DefaultDepth(dpy, DefaultScreen(dpy)) >= 24) // 16bpp breaks the software logout effect for some reason???
-        a = new KApplication(dpy, visual ? Qt::HANDLE(visual) : 0, colormap ? Qt::HANDLE(colormap) : 0);
-    else
-        a = new KApplication(true);
+    QApplication *a = new QApplication(argc, argv);
+
+    QApplication::setApplicationName( QStringLiteral( "ksmserver") );
+    QApplication::setApplicationVersion( QString::fromLatin1( version ) );
+    QApplication::setOrganizationDomain( QStringLiteral( "kde.org") );
+
     fcntl(ConnectionNumber(QX11Info::display()), F_SETFD, 1);
 
     a->setQuitOnLastWindowClosed(false); // #169486
 
-    KCmdLineArgs *args = KCmdLineArgs::parsedArgs();
+    QCommandLineParser parser;
+    parser.setApplicationDescription(QString::fromLatin1(description));
+    parser.addHelpOption();
+    parser.addVersionOption();
 
-    if( !QDBusConnection::sessionBus().interface()->registerService( "org.kde.ksmserver", QDBusConnectionInterface::DontQueueService ) )
-    {
-        qWarning("Could not register with D-BUS. Aborting.");
-        return 1;
-    }
+    QCommandLineOption restoreOption(QStringList() << QStringLiteral("r") << QStringLiteral("restore"),
+                                     i18n("Restores the saved user session if available"));
+    parser.addOption(restoreOption);
 
-    QString wm = args->getOption("windowmanager");
+    QCommandLineOption wmOption(QStringList() << QStringLiteral("w") << QStringLiteral("windowmanager"),
+                                i18n("Starts <wm> in case no other window manager is \nparticipating in the session. Default is 'kwin'"),
+                                i18n("wm"));
+    parser.addOption(wmOption);
 
-    bool only_local = args->isSet("local");
+    QCommandLineOption nolocalOption(QStringLiteral("nolocal"),
+                                     i18n("Also allow remote connections"));
+    parser.addOption(nolocalOption);
+
+#if COMPILE_SCREEN_LOCKER
+    QCommandLineOption lockscreenOption(QStringLiteral("lockscreen"),
+                                        i18n("Starts the session in locked mode"));
+    parser.addOption(lockscreenOption);
+#endif
+
+    parser.process(*a);
+
+//TODO: should we still use this?
+//    if( !QDBusConnection::sessionBus().interface()->
+//            registerService( QStringLiteral( "org.kde.ksmserver" ),
+//                             QDBusConnectionInterface::DontQueueService ) )
+//    {
+//        qWarning("Could not register with D-BUS. Aborting.");
+//        return 1;
+//    }
+
+    QString wm = parser.value(wmOption);
+
+    bool only_local = !parser.isSet(nolocalOption);
 #ifndef HAVE__ICETRANSNOLISTEN
     /* this seems strange, but the default is only_local, so if !only_local
      * the option --nolocal was given, and we warn (the option --nolocal
      * does nothing on this platform, as here the default is reversed)
      */
     if (!only_local) {
-        qWarning("--[no]local is not supported on your platform. Sorry.");
+        qWarning("--nolocal is not supported on your platform. Sorry.");
     }
     only_local = false;
 #endif
 
 #if COMPILE_SCREEN_LOCKER
-    KSMServer *server = new KSMServer( wm, only_local, args->isSet("lockscreen") );
+    KSMServer *server = new KSMServer( wm, only_local, parser.isSet(lockscreenOption ) );
 #else
     KSMServer *server = new KSMServer( wm, only_local );
 #endif
@@ -305,16 +316,19 @@ extern "C" KDE_EXPORT int kdemain( int argc, char* argv[] )
 
     QString loginMode = config.readEntry( "loginMode", "restorePreviousLogout" );
 
-    if ( args->isSet("restore") && ! screenCountChanged )
-        server->restoreSession( SESSION_BY_USER );
-    else if ( loginMode == "default" || screenCountChanged )
+    if ( parser.isSet( restoreOption ) && ! screenCountChanged )
+        server->restoreSession( QStringLiteral( SESSION_BY_USER ) );
+    else if ( loginMode == QStringLiteral( "default" ) || screenCountChanged )
         server->startDefaultSession();
-    else if ( loginMode == "restorePreviousLogout" )
-        server->restoreSession( SESSION_PREVIOUS_LOGOUT );
-    else if ( loginMode == "restoreSavedSession" )
-        server->restoreSession( SESSION_BY_USER );
+    else if ( loginMode == QStringLiteral( "restorePreviousLogout" ) )
+        server->restoreSession( QStringLiteral( SESSION_PREVIOUS_LOGOUT ) );
+    else if ( loginMode == QStringLiteral( "restoreSavedSession" ) )
+        server->restoreSession( QStringLiteral( SESSION_BY_USER ) );
     else
         server->startDefaultSession();
+
+    KDBusService service(KDBusService::Unique);
+
     int ret = a->exec();
     kde_running.release(); // needs to be done before QApplication destruction
     delete a;

@@ -25,6 +25,8 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #ifndef SHUTDOWNDLG_H
 #define SHUTDOWNDLG_H
 
+#include <fixx11h.h>
+
 #include <QDialog>
 #include <QPushButton>
 #include <kworkspace/kworkspace.h>
@@ -69,7 +71,7 @@ private:
     bool initialized;
 };
 
-class QDeclarativeView;
+class QQuickView;
 
 // The confirmation dialog
 class KSMShutdownDlg : public QDialog
@@ -97,7 +99,7 @@ private:
     KWorkSpace::ShutdownType m_shutdownType;
     QString m_bootOption;
     QStringList rebootOptions;
-    QDeclarativeView* m_view;
+    QQuickView* m_view;
 };
 
 #endif

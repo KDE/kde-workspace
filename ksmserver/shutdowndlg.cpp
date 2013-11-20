@@ -29,15 +29,18 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include <QApplication>
 #include <QDesktopWidget>
+#include <QQuickItem>
 #include <QTimer>
 #include <QFile>
 #include <QtDBus/QDBusConnection>
 #include <QtDBus/QDBusMessage>
 #include <QtDBus/QDBusPendingCall>
-#include <QDeclarativeView>
-#include <QDeclarativeContext>
-#include <QDeclarativeEngine>
-#include <QDeclarativePropertyMap>
+#include <QQuickView>
+#include <QQmlContext>
+#include <QQmlEngine>
+#include <QQmlPropertyMap>
+#include <QPainter>
+#include <QtX11Extras/qx11info_x11.h>
 
 #include <kdialog.h>
 #include <kiconloader.h>
@@ -47,16 +50,18 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <kwindowsystem.h>
 #include <netwm.h>
 #include <KStandardDirs>
-#include <kdeclarative.h>
+#include <kdeclarative/kdeclarative.h>
 
 #include <stdio.h>
 #include <kxerrorhandler.h>
+#include <X11/Xutil.h>
+#include <X11/Xatom.h>
 
 #include <kworkspace/kdisplaymanager.h>
 
 #include <config-workspace.h>
 
-#include "logouteffect.h"
+//#include "logouteffect.h"
 #include "shutdowndlg.moc"
 
 #include <kjob.h>
@@ -69,7 +74,7 @@ KSMShutdownFeedback::KSMShutdownFeedback()
  : QWidget( 0L, Qt::Popup ),
     m_currentY( 0 ), initialized( false )
 {
-    setObjectName( "feedbackwidget" );
+    setObjectName( QStringLiteral("feedbackwidget") );
     setAttribute( Qt::WA_NoSystemBackground );
     setAttribute( Qt::WA_PaintOnScreen );
     setGeometry( QApplication::desktop()->geometry() );
@@ -90,11 +95,11 @@ void KSMShutdownFeedback::paintEvent( QPaintEvent* )
 
 void KSMShutdownFeedback::slotPaintEffect()
 {
-    effect = LogoutEffect::create(this, &m_pixmap);
-    connect(effect, SIGNAL(initialized()),
-            this,   SLOT  (slotPaintEffectInitialized()));
+//    effect = LogoutEffect::create(this, &m_pixmap);
+//    connect(effect, SIGNAL(initialized()),
+//            this,   SLOT  (slotPaintEffectInitialized()));
 
-    effect->start();
+//    effect->start();
 }
 
 void KSMShutdownFeedback::slotPaintEffectInitialized()
@@ -165,46 +170,42 @@ KSMShutdownDlg::KSMShutdownDlg( QWidget* parent,
     // having a popup here has severe side effects.
 {
     winId(); // workaround for Qt4.3 setWindowRole() assert
-    setWindowRole( "logoutdialog" );
-//#if !(QT_VERSION >= QT_VERSION_CHECK(4, 3, 3) || defined(QT_KDE_QT_COPY))
-// Qt doesn't set this on unmanaged windows
-    QByteArray appName = qAppName().toLatin1();
-    XClassHint class_hint;
-    class_hint.res_name = appName.data(); // application name
-    class_hint.res_class = const_cast<char *>(QX11Info::appClass());   // application class
-    XSetWMProperties( QX11Info::display(), winId(), NULL, NULL, NULL, 0, NULL, NULL, &class_hint );
+    setWindowRole( QStringLiteral("logoutdialog") );
+
+    // Qt doesn't set this on unmanaged windows
+    //FIXME: or does it?
     XChangeProperty( QX11Info::display(), winId(),
         XInternAtom( QX11Info::display(), "WM_WINDOW_ROLE", False ), XA_STRING, 8, PropModeReplace,
         (unsigned char *)"logoutdialog", strlen( "logoutdialog" ));
 
-//#endif
-
     KDialog::centerOnScreen(this, -3);
 
     //kDebug() << "Creating QML view";
-    m_view = new QDeclarativeView(this);
-    QDeclarativeContext *context = m_view->rootContext();
-    context->setContextProperty("maysd", maysd);
-    context->setContextProperty("choose", choose);
-    context->setContextProperty("sdtype", sdtype);
+    m_view = new QQuickView(windowHandle());
+    QQmlContext *context = m_view->rootContext();
+    context->setContextProperty(QStringLiteral("maysd"), maysd);
+    context->setContextProperty(QStringLiteral("choose"), choose);
+    context->setContextProperty(QStringLiteral("sdtype"), sdtype);
 
-    QDeclarativePropertyMap *mapShutdownType = new QDeclarativePropertyMap(this);
-    mapShutdownType->insert("ShutdownTypeDefault", QVariant::fromValue((int)KWorkSpace::ShutdownTypeDefault));
-    mapShutdownType->insert("ShutdownTypeNone", QVariant::fromValue((int)KWorkSpace::ShutdownTypeNone));
-    mapShutdownType->insert("ShutdownTypeReboot", QVariant::fromValue((int)KWorkSpace::ShutdownTypeReboot));
-    mapShutdownType->insert("ShutdownTypeHalt", QVariant::fromValue((int)KWorkSpace::ShutdownTypeHalt));
-    mapShutdownType->insert("ShutdownTypeLogout", QVariant::fromValue((int)KWorkSpace::ShutdownTypeLogout));
-    context->setContextProperty("ShutdownType", mapShutdownType);
+    QQmlPropertyMap *mapShutdownType = new QQmlPropertyMap(this);
+    mapShutdownType->insert(QStringLiteral("ShutdownTypeDefault"), QVariant::fromValue((int)KWorkSpace::ShutdownTypeDefault));
+    mapShutdownType->insert(QStringLiteral("ShutdownTypeNone"), QVariant::fromValue((int)KWorkSpace::ShutdownTypeNone));
+    mapShutdownType->insert(QStringLiteral("ShutdownTypeReboot"), QVariant::fromValue((int)KWorkSpace::ShutdownTypeReboot));
+    mapShutdownType->insert(QStringLiteral("ShutdownTypeHalt"), QVariant::fromValue((int)KWorkSpace::ShutdownTypeHalt));
+    mapShutdownType->insert(QStringLiteral("ShutdownTypeLogout"), QVariant::fromValue((int)KWorkSpace::ShutdownTypeLogout));
+    context->setContextProperty(QStringLiteral("ShutdownType"), mapShutdownType);
 
-    QDeclarativePropertyMap *mapSpdMethods = new QDeclarativePropertyMap(this);
+    QQmlPropertyMap *mapSpdMethods = new QQmlPropertyMap(this);
     QSet<Solid::PowerManagement::SleepState> spdMethods = Solid::PowerManagement::supportedSleepStates();
-    mapSpdMethods->insert("StandbyState", QVariant::fromValue(spdMethods.contains(Solid::PowerManagement::StandbyState)));
-    mapSpdMethods->insert("SuspendState", QVariant::fromValue(spdMethods.contains(Solid::PowerManagement::SuspendState)));
-    mapSpdMethods->insert("HibernateState", QVariant::fromValue(spdMethods.contains(Solid::PowerManagement::HibernateState)));
-    context->setContextProperty("spdMethods", mapSpdMethods);
+    mapSpdMethods->insert(QStringLiteral("StandbyState"), QVariant::fromValue(spdMethods.contains(Solid::PowerManagement::StandbyState)));
+    mapSpdMethods->insert(QStringLiteral("SuspendState"), QVariant::fromValue(spdMethods.contains(Solid::PowerManagement::SuspendState)));
+    mapSpdMethods->insert(QStringLiteral("HibernateState"), QVariant::fromValue(spdMethods.contains(Solid::PowerManagement::HibernateState)));
+    context->setContextProperty(QStringLiteral("spdMethods"), mapSpdMethods);
 
-    QString bootManager = KConfig(KDE_CONFDIR "/kdm/kdmrc", KConfig::SimpleConfig).group("Shutdown").readEntry("BootManager", "None");
-    context->setContextProperty("bootManager", bootManager);
+    QString bootManager = KConfig(QStringLiteral(KDE_CONFDIR "/kdm/kdmrc"), KConfig::SimpleConfig)
+                          .group("Shutdown")
+                          .readEntry("BootManager", "None");
+    context->setContextProperty(QStringLiteral("bootManager"), bootManager);
 
     QStringList options;
     int def, cur;
@@ -213,24 +214,24 @@ KSMShutdownDlg::KSMShutdownDlg( QWidget* parent,
             def = cur;
         }
     }
-    QDeclarativePropertyMap *rebootOptionsMap = new QDeclarativePropertyMap(this);
-    rebootOptionsMap->insert("options", QVariant::fromValue(rebootOptions));
-    rebootOptionsMap->insert("default", QVariant::fromValue(def));
-    context->setContextProperty("rebootOptions", rebootOptionsMap);
+    QQmlPropertyMap *rebootOptionsMap = new QQmlPropertyMap(this);
+    rebootOptionsMap->insert(QStringLiteral("options"), QVariant::fromValue(rebootOptions));
+    rebootOptionsMap->insert(QStringLiteral("default"), QVariant::fromValue(def));
+    context->setContextProperty(QStringLiteral("rebootOptions"), rebootOptionsMap);
 
     setModal( true );
 
     // window stuff
-    m_view->setFrameShape(QFrame::NoFrame);
-    m_view->setWindowFlags(Qt::X11BypassWindowManagerHint);
-    m_view->setAttribute(Qt::WA_TranslucentBackground);
+    m_view->setFlags(Qt::X11BypassWindowManagerHint);
+//    m_view->setFrameShape(QFrame::NoFrame);
+//    m_view->setAttribute(Qt::WA_TranslucentBackground);
     setAttribute(Qt::WA_TranslucentBackground);
-    setStyleSheet("background:transparent;");
-    QPalette pal = m_view->palette();
-    pal.setColor(backgroundRole(), Qt::transparent);
-    m_view->setPalette(pal);
-    m_view->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-    m_view->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    setStyleSheet(QStringLiteral("background:transparent;"));
+//    QPalette pal = m_view->palette();
+//    pal.setColor(backgroundRole(), Qt::transparent);
+//    m_view->setPalette(pal);
+//    m_view->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+//    m_view->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     // engine stuff
     KDeclarative kdeclarative;
     kdeclarative.setDeclarativeEngine(m_view->engine());
@@ -238,12 +239,12 @@ KSMShutdownDlg::KSMShutdownDlg( QWidget* parent,
     kdeclarative.setupBindings();
     m_view->installEventFilter(this);
 
-    QString fileName = KStandardDirs::locate("data", QString("ksmserver/themes/%1/main.qml").arg(theme));
+    QString fileName = KStandardDirs::locate("data", QStringLiteral("ksmserver/themes/%1/main.qml").arg(theme));
     if (QFile::exists(fileName)) {
         //kDebug() << "Using QML theme" << fileName;
         m_view->setSource(QUrl::fromLocalFile(fileName));
     }
-    QGraphicsObject *rootObject = m_view->rootObject();
+    QQuickItem *rootObject = m_view->rootObject();
     connect(rootObject, SIGNAL(logoutRequested()), SLOT(slotLogout()));
     connect(rootObject, SIGNAL(haltRequested()), SLOT(slotHalt()));
     connect(rootObject, SIGNAL(suspendRequested(int)), SLOT(slotSuspend(int)) );
@@ -252,7 +253,7 @@ KSMShutdownDlg::KSMShutdownDlg( QWidget* parent,
     connect(rootObject, SIGNAL(cancelRequested()), SLOT(reject()));
     connect(rootObject, SIGNAL(lockScreenRequested()), SLOT(slotLockScreen()));
     m_view->show();
-    m_view->setFocus();
+//    m_view->setFocus();
     adjustSize();
 }
 
@@ -303,10 +304,10 @@ void KSMShutdownDlg::slotReboot(int opt)
 void KSMShutdownDlg::slotLockScreen()
 {
     m_bootOption.clear();
-    QDBusMessage call = QDBusMessage::createMethodCall("org.kde.screensaver",
-                                                       "/ScreenSaver",
-                                                       "org.freedesktop.ScreenSaver",
-                                                       "Lock");
+    QDBusMessage call = QDBusMessage::createMethodCall(QStringLiteral("org.kde.screensaver"),
+                                                       QStringLiteral("/ScreenSaver"),
+                                                       QStringLiteral("org.freedesktop.ScreenSaver"),
+                                                       QStringLiteral("Lock"));
     QDBusConnection::sessionBus().asyncCall(call);
     reject();
 }

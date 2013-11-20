@@ -1,6 +1,6 @@
 #include "shutdowndlg.h"
 #include <kcmdlineargs.h>
-#include <kaboutdata.h>
+#include <k4aboutdata.h>
 #include <kapplication.h>
 #include <kiconloader.h>
 #include <kworkspace/kworkspace.h>
@@ -8,7 +8,7 @@
 int
 main(int argc, char *argv[])
 {
-    KAboutData about("kapptest", 0, ki18n("kapptest"), "version");
+    K4AboutData about("kapptest", 0, ki18n("kapptest"), "version");
     KCmdLineArgs::init(argc, argv, &about);
 
     KCmdLineOptions options;
@@ -20,7 +20,7 @@ main(int argc, char *argv[])
     KCmdLineArgs *args = KCmdLineArgs::parsedArgs();
 
     KApplication a;
-    KIconLoader::global()->addAppDir("ksmserver");
+    KIconLoader::global()->addAppDir(QStringLiteral("ksmserver"));
     KSMShutdownFeedback::start();
 
     QString sdtypeOption = args->getOption("type").toLower();
@@ -31,16 +31,16 @@ main(int argc, char *argv[])
     }
 
     KWorkSpace::ShutdownType sdtype = KWorkSpace::ShutdownTypeDefault;
-    if (sdtypeOption == "reboot") {
+    if (sdtypeOption == QStringLiteral("reboot")) {
         sdtype = KWorkSpace::ShutdownTypeReboot;
-    } else if (sdtypeOption == "halt") {
+    } else if (sdtypeOption == QStringLiteral("halt")) {
         sdtype = KWorkSpace::ShutdownTypeHalt;
-    } else if (sdtypeOption == "logout") {
+    } else if (sdtypeOption == QStringLiteral("logout")) {
         sdtype = KWorkSpace::ShutdownTypeNone;
     }
 
     QString bopt;
-    (void)KSMShutdownDlg::confirmShutdown( true, true, sdtype, bopt, "default" );
+    (void)KSMShutdownDlg::confirmShutdown( true, true, sdtype, bopt, QStringLiteral("default") );
 /*   (void)KSMShutdownDlg::confirmShutdown( false, false, sdtype, bopt ); */
 
     KSMShutdownFeedback::stop();

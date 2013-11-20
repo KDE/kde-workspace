@@ -35,7 +35,7 @@ public:
     CurtainEffect(QWidget *parent, QPixmap *pixmap);
     virtual void start();
 
-private slots:
+private Q_SLOTS:
     void nextFrame();
 
 private:

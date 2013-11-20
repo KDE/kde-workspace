@@ -105,7 +105,7 @@ char * safeSmsGenerateClientID( SmsConn /*c*/ )
                     i < strlen( hostname );
                     ++i, ++pos )
                   addr[ pos % 4 ] += hostname[ i ];
-               *my_addr = "0";
+               *my_addr = QStringLiteral( "0" );
                for( int i = 0;
                     i < 4;
                     ++i )

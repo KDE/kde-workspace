@@ -76,7 +76,7 @@ public:
      */
     void start();
 
-private slots:
+private Q_SLOTS:
     /** @internal */
     void grabImageSection();
 

@@ -26,6 +26,7 @@
 
 #include <kapplication.h>
 #include <kconfig.h>
+#include <kconfiggroup.h>
 #include <klineedit.h>
 #include <kworkspace/kworkspace.h>
 #include <kstandarddirs.h>
@@ -66,16 +67,17 @@ SMServerConfig::SMServerConfig( QWidget *parent, const QVariantList & )
 
 void SMServerConfig::load()
 {
-  KConfigGroup c(KSharedConfig::openConfig("ksmserverrc", KConfig::NoGlobals), "General");
+  KConfigGroup c(KSharedConfig::openConfig(QStringLiteral("ksmserverrc"), KConfig::NoGlobals),
+                 QStringLiteral("General"));
   dialog->confirmLogoutCheck->setChecked(c.readEntry("confirmLogout", true));
   bool en = c.readEntry("offerShutdown", true);
   dialog->offerShutdownCheck->setChecked(en);
   dialog->sdGroup->setEnabled(en);
 
   QString s = c.readEntry( "loginMode" );
-  if ( s == "default" )
+  if ( s == QStringLiteral("default") )
       dialog->emptySessionRadio->setChecked(true);
-  else if ( s == "restoreSavedSession" )
+  else if ( s == QStringLiteral("restoreSavedSession") )
       dialog->savedSessionRadio->setChecked(true);
   else // "restorePreviousLogout"
       dialog->previousSessionRadio->setChecked(true);
@@ -98,15 +100,15 @@ void SMServerConfig::load()
 
 void SMServerConfig::save()
 {
-  KConfig c("ksmserverrc", KConfig::NoGlobals);
-  KConfigGroup group = c.group("General");
+  KConfig c(QStringLiteral("ksmserverrc"), KConfig::NoGlobals);
+  KConfigGroup group = c.group(QStringLiteral("General"));
   group.writeEntry( "confirmLogout", dialog->confirmLogoutCheck->isChecked());
   group.writeEntry( "offerShutdown", dialog->offerShutdownCheck->isChecked());
-  QString s = "restorePreviousLogout";
+  QString s = QStringLiteral("restorePreviousLogout");
   if ( dialog->emptySessionRadio->isChecked() )
-      s = "default";
+      s = QStringLiteral("default");
   else if ( dialog->savedSessionRadio->isChecked() )
-      s = "restoreSavedSession";
+      s = QStringLiteral("restoreSavedSession");
   group.writeEntry( "loginMode", s );
 
   group.writeEntry( "shutdownType",

@@ -21,7 +21,7 @@
 
 #include <QWidget>
 #include <QPixmap>
-#include <QX11Info>
+#include <QtX11Extras/QX11Info>
 #include <X11/Xlib.h>
 
 #include "logouteffect.h"
