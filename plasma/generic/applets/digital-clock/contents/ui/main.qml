@@ -25,8 +25,11 @@ Item {
     id: main
 //     property int minimumWidth: units.gridUnit * 90
 //     property int minimumHeight: units.gridUnit * 30
-    property int minimumWidth: 640
-    property int minimumHeight: 400
+    property int minimumWidth: minimumHeight * 2.2
+    property int minimumHeight: theme.mSize(theme.defaultFont).height * 14
+    property int implicitWidth: minimumWidth * 1.5
+    property int implicitHeight: minimumHeight * 1.5
+
     property int formFactor: plasmoid.formFactor
 
     property alias calendarLoader: calendarLoader

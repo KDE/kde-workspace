@@ -31,11 +31,16 @@ Item {
 
     property bool vertical: (plasmoid.formFactor == PlasmaCore.Types.Vertical)
 
-    property int minimumWidth: implicitWidth // just needs to run out of space in the panel ...
-    property int minimumHeight: implicitHeight // ... but not too big to screw up initial layouts
+    property int minimumWidth: minimumHeight * 1.333
+    property int minimumHeight: theme.mSize(theme.defaultFont).height * 14
+    property int implicitWidth: minimumWidth * 1.5
+    property int implicitHeight: minimumHeight * 1.5
 
-    property int implicitWidth: baseSize * 32
-    property int implicitHeight: baseSize * 24
+//     property int minimumWidth: implicitWidth // just needs to run out of space in the panel ...
+//     property int minimumHeight: implicitHeight // ... but not too big to screw up initial layouts
+//
+//     property int implicitWidth: baseSize * 32
+//     property int implicitHeight: baseSize * 24
 
     property int cHeight: 100
 

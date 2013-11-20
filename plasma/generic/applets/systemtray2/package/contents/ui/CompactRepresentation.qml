@@ -132,7 +132,7 @@ QtExtraComponents.MouseEventListener {
         anchors {
             top: parent.top
             bottom: parent.bottom
-            topMargin: ((parent.height - root.itemSize) / 2) - 1
+            topMargin: !root.vertical ? ((parent.height - root.itemSize) / 2) - 1 : theme.smallSpacing
 //             verticalCenter: parent.verticalCenter
             left: parent.left
             leftMargin: root.vertical ? 0 : root.smallSpacing
