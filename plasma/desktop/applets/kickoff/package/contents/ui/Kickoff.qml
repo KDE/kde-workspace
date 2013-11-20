@@ -87,9 +87,9 @@ PlasmaExtras.ConditionalLoader {
                     }
                     bottom: {
                         switch (plasmoid.location) {
-                            case Kickoff.TopEdge:
-                            case Kickoff.LeftEdge:
-                            case Kickoff.RightEdge:
+                            case PlasmaCore.Types.TopEdge:
+                            case PlasmaCore.Types.LeftEdge:
+                            case PlasmaCore.Types.RightEdge:
                                 return footer.top;
                             default:
                                 return undefined;
