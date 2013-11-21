@@ -15,8 +15,6 @@ add_subdirectory(keystate)
 #add_subdirectory(mpris2)
 #add_subdirectory(network)
 add_subdirectory(notifications)
-## KDE5: remove the nowplaying engine
-#add_subdirectory(nowplaying)
 add_subdirectory(places)
 add_subdirectory(powermanagement)
 add_subdirectory(soliddevice)
