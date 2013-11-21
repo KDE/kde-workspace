@@ -11,6 +11,8 @@ set(mpris2_engine_SRCS
     playercontainer.cpp
 )
 
+kservice_desktop_to_json(plasma-dataengine-mpris2.desktop)
+
 set_source_files_properties(
    org.freedesktop.DBus.Properties.xml
    org.mpris.MediaPlayer2.Player.xml
@@ -23,6 +25,10 @@ qt5_add_dbus_interface(mpris2_engine_SRCS org.mpris.MediaPlayer2.xml mprisroot)
 
 plasma_add_plugin(plasma_engine_mpris2 ${mpris2_engine_SRCS})
 target_link_libraries(plasma_engine_mpris2
+   Qt5::DBus
+   KF5::KConfigCore
+   KF5::KI18n
+   KF5::KService
    KF5::Plasma
 )
 

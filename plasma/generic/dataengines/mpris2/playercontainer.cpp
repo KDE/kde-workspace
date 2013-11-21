@@ -26,12 +26,12 @@
 #define MPRIS2_PATH "/org/mpris/MediaPlayer2"
 #define POS_UPD_STRING "Position last updated (UTC)"
 
-#include <QDebug>
 #include <KDesktopFile>
-#include <KStandardDirs>
 
 #include <QtDBus>
 #include <QDateTime>
+
+#include "debug.h"
 
 static QVariant::Type expPropType(const QString& propName)
 {
@@ -171,7 +171,7 @@ void PlayerContainer::copyProperty(const QString& propName, const QVariant& _val
         if (expType == QVariant::Map) {
             QDBusArgument arg = value.value<QDBusArgument>();
             if (arg.currentType() != QDBusArgument::MapType) {
-                kWarning() << m_dbusAddress << "exports" << propName
+                qCWarning(MPRIS2) << m_dbusAddress << "exports" << propName
                     << "with the wrong type; it should be D-Bus type \"a{sv}\"";
                 return;
             }
@@ -179,10 +179,10 @@ void PlayerContainer::copyProperty(const QString& propName, const QVariant& _val
             arg >> map;
             if (propName == QLatin1String("Metadata")) {
                 if (!decodeUri(map, QLatin1String("mpris:artUrl"))) {
-                    kWarning() << m_dbusAddress << "has an invalid URL for the mpris:artUrl entry of the \"Metadata\" property";
+                    qCWarning(MPRIS2) << m_dbusAddress << "has an invalid URL for the mpris:artUrl entry of the \"Metadata\" property";
                 }
                 if (!decodeUri(map, QLatin1String("xesam:url"))) {
-                    kWarning() << m_dbusAddress << "has an invalid URL for the xesam:url entry of the \"Metadata\" property";
+                    qCWarning(MPRIS2) << m_dbusAddress << "has an invalid URL for the xesam:url entry of the \"Metadata\" property";
                 }
             }
             value = QVariant(map);
@@ -194,7 +194,7 @@ void PlayerContainer::copyProperty(const QString& propName, const QVariant& _val
         const char * expTypeCh = QDBusMetaType::typeToSignature(expType);
         QString expType = expTypeCh ? QString::fromAscii(expTypeCh) : "<unknown>";
 
-        kWarning() << m_dbusAddress << "exports" << propName
+        qCWarning(MPRIS2) << m_dbusAddress << "exports" << propName
             << "as D-Bus type" << gotType
             << "but it should be D-Bus type" << expType;
     }
@@ -255,7 +255,7 @@ void PlayerContainer::copyProperty(const QString& propName, const QVariant& _val
             }
         } else if (propName == QLatin1String("DesktopEntry")) {
             QString filename = value.toString() + QLatin1String(".desktop");
-            KDesktopFile desktopFile("xdgdata-apps", filename);
+            KDesktopFile desktopFile(filename);
             QString iconName = desktopFile.readIcon();
             if (!iconName.isEmpty()) {
                 setData("Desktop Icon Name", iconName);
@@ -286,7 +286,7 @@ void PlayerContainer::updateFromMap(const QVariantMap& map, UpdateType updType)
                 const char * gotTypeCh = QDBusMetaType::typeToSignature(i.value().userType());
                 QString gotType = gotTypeCh ? QString::fromAscii(gotTypeCh) : "<unknown>";
 
-                kWarning() << m_dbusAddress << "exports" << i.key()
+                qCWarning(MPRIS2) << m_dbusAddress << "exports" << i.key()
                     << "as D-Bus type" << gotType
                     << "but it should be D-Bus type \"b\"";
             }
@@ -294,10 +294,10 @@ void PlayerContainer::updateFromMap(const QVariantMap& map, UpdateType updType)
         // fake the CanStop capability
         if (cap == CanControl || i.key() == QLatin1String("PlaybackStatus")) {
             if ((m_caps & CanControl) && i.value().toString() != QLatin1String("Stopped")) {
-                qDebug() << "Enabling stop action";
+                qCDebug(MPRIS2) << "Enabling stop action";
                 m_caps |= CanStop;
             } else {
-                qDebug() << "Disabling stop action";
+                qCDebug(MPRIS2) << "Disabling stop action";
                 m_caps &= ~CanStop;
             }
         }
@@ -316,10 +316,10 @@ void PlayerContainer::getPropsFinished(QDBusPendingCallWatcher* watcher)
     }
 
     if (propsReply.isError()) {
-        kWarning() << m_dbusAddress << "does not implement"
+        qCWarning(MPRIS2) << m_dbusAddress << "does not implement"
             << OrgFreedesktopDBusPropertiesInterface::staticInterfaceName()
             << "correctly";
-        qDebug() << "Error message was" << propsReply.error().name() << propsReply.error().message();
+        qCDebug(MPRIS2) << "Error message was" << propsReply.error().name() << propsReply.error().message();
         m_fetchesPending = 0;
         emit initialFetchFailed(this);
         return;
@@ -348,10 +348,10 @@ void PlayerContainer::getPositionFinished(QDBusPendingCallWatcher* watcher)
     watcher->deleteLater();
 
     if (propsReply.isError()) {
-        kWarning() << m_dbusAddress << "does not implement"
+        qCWarning(MPRIS2) << m_dbusAddress << "does not implement"
             << OrgFreedesktopDBusPropertiesInterface::staticInterfaceName()
             << "correctly";
-        qDebug() << "Error message was" << propsReply.error().name() << propsReply.error().message();
+        qCDebug(MPRIS2) << "Error message was" << propsReply.error().name() << propsReply.error().message();
         return;
     }
 
@@ -394,4 +394,3 @@ void PlayerContainer::recalculatePosition()
     setData(POS_UPD_STRING, now);
 }
 
-#include "playercontainer.moc"

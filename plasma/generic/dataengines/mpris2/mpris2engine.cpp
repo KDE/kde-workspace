@@ -25,21 +25,19 @@
 #include <QDBusPendingReply>
 #include <QStringList>
 
-#include <QDebug>
-#include <KLocale>
-
+#include "debug.h"
 #include "playercontrol.h"
 #include "playercontainer.h"
 #include "multiplexer.h"
 #include "multiplexedservice.h"
+
+Q_LOGGING_CATEGORY(MPRIS2, "plasma.engine.mpris2")
 
 Mpris2Engine::Mpris2Engine(QObject* parent,
                                    const QVariantList& args)
     : Plasma::DataEngine(parent)
 {
     Q_UNUSED(args)
-
-    setName("mpris2");
 
     QDBusServiceWatcher *serviceWatcher = new QDBusServiceWatcher(
             QString(), QDBusConnection::sessionBus(),
@@ -89,7 +87,7 @@ void Mpris2Engine::serviceOwnerChanged(
     QString sourceName = serviceName.mid(23);
 
     if (!oldOwner.isEmpty()) {
-        qDebug() << "MPRIS service" << serviceName << "just went offline";
+        qCDebug(MPRIS2) << "MPRIS service" << serviceName << "just went offline";
         if (m_multiplexer) {
             m_multiplexer.data()->removePlayer(sourceName);
         }
@@ -97,7 +95,7 @@ void Mpris2Engine::serviceOwnerChanged(
     }
 
     if (!newOwner.isEmpty()) {
-        qDebug() << "MPRIS service" << serviceName << "just came online";
+        qCDebug(MPRIS2) << "MPRIS service" << serviceName << "just came online";
         addMediaPlayer(serviceName, sourceName);
     }
 }
@@ -128,7 +126,7 @@ bool Mpris2Engine::sourceRequestEvent(const QString& source)
 
 void Mpris2Engine::initialFetchFinished(PlayerContainer* container)
 {
-    qDebug() << "Props fetch for" << container->objectName() << "finished; adding";
+    qCDebug(MPRIS2) << "Props fetch for" << container->objectName() << "finished; adding";
     addSource(container);
     if (m_multiplexer) {
         m_multiplexer.data()->addPlayer(container);
@@ -142,7 +140,7 @@ void Mpris2Engine::initialFetchFinished(PlayerContainer* container)
 
 void Mpris2Engine::initialFetchFailed(PlayerContainer* container)
 {
-    kWarning() << "Failed to find working MPRIS2 interface for" << container->dbusAddress();
+    qCWarning(MPRIS2) << "Failed to find working MPRIS2 interface for" << container->dbusAddress();
     container->deleteLater();
 }
 
@@ -152,11 +150,11 @@ void Mpris2Engine::serviceNameFetchFinished(QDBusPendingCallWatcher* watcher)
     watcher->deleteLater();
 
     if (propsReply.isError()) {
-        kWarning() << "Could not get list of available D-Bus services";
+        qCWarning(MPRIS2) << "Could not get list of available D-Bus services";
     } else {
         foreach (const QString& serviceName, propsReply.value()) {
             if (serviceName.startsWith("org.mpris.MediaPlayer2.")) {
-                qDebug() << "Found MPRIS2 service" << serviceName;
+                qCDebug(MPRIS2) << "Found MPRIS2 service" << serviceName;
                 // watch out for race conditions; the media player could
                 // have appeared between starting the service watcher and
                 // this call being dealt with
@@ -165,7 +163,7 @@ void Mpris2Engine::serviceNameFetchFinished(QDBusPendingCallWatcher* watcher)
                 QString sourceName = serviceName.mid(23);
                 PlayerContainer *container = qobject_cast<PlayerContainer*>(containerForSource(sourceName));
                 if (!container) {
-                    qDebug() << "Haven't already seen" << serviceName;
+                    qCDebug(MPRIS2) << "Haven't already seen" << serviceName;
                     addMediaPlayer(serviceName, sourceName);
                 }
             }
@@ -198,4 +196,7 @@ void Mpris2Engine::createMultiplexer()
     addSource(m_multiplexer.data());
 }
 
+K_EXPORT_PLASMA_DATAENGINE_WITH_JSON(mpris2, Mpris2Engine, "plasma-dataengine-mpris2.json")
+
 #include "mpris2engine.moc"
+

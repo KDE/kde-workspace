@@ -25,11 +25,14 @@
 #include <mprisplayer.h>
 #include <mprisroot.h>
 
+#define TRANSLATION_DOMAIN "plasma_engine_mpris2"
+#include <KLocalizedString>
+
 #include <QDBusPendingCallWatcher>
 #include <QDBusPendingReply>
 #include <QDBusVariant>
 
-#include <QDebug>
+#include "debug.h"
 
 PlayerActionJob::PlayerActionJob(const QString& operation,
                                  QMap<QString,QVariant>& parameters,
@@ -43,7 +46,7 @@ void PlayerActionJob::start()
 {
     const QString operation(operationName());
 
-    qDebug() << "Trying to perform the action" << operationName();
+    qCDebug(MPRIS2) << "Trying to perform the action" << operationName();
     if (!m_controller->isOperationEnabled(operation)) {
         setError(Denied);
         emitResult();
@@ -79,11 +82,11 @@ void PlayerActionJob::start()
             emitResult();
         }
     } else if (operation == "OpenUri") {
-        if (parameters().value("uri").canConvert<KUrl>()) {
+        if (parameters().value("uri").canConvert<QUrl>()) {
             listenToCall(m_controller->playerInterface()->OpenUri(
                              QString::fromLatin1(parameters()["uri"].toUrl().toEncoded())));
         } else {
-            qDebug() << "uri was of type" << parameters().value("uri").userType();
+            qCDebug(MPRIS2) << "uri was of type" << parameters().value("uri").userType();
             setErrorText("uri");
             setError(MissingArgument);
             emitResult();
@@ -174,7 +177,5 @@ QString PlayerActionJob::errorString() const
     }
     return i18n("Unknown error.");
 }
-
-#include "playeractionjob.moc"
 
 // vim: sw=4 sts=4 et tw=100

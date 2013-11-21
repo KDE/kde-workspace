@@ -60,6 +60,4 @@ private:
     QWeakPointer<Multiplexer> m_multiplexer;
 };
 
-K_EXPORT_PLASMA_DATAENGINE(mpris2, Mpris2Engine)
-
 #endif // MPRIS2ENGINE_H

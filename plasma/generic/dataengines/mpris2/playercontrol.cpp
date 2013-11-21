@@ -27,7 +27,6 @@
 #include <mprisroot.h>
 
 #include <QDBusConnection>
-#include <QDebug>
 
 PlayerControl::PlayerControl(PlayerContainer* container, QObject* parent)
     : Plasma::Service(parent)
@@ -88,7 +87,5 @@ Plasma::ServiceJob* PlayerControl::createJob(const QString& operation,
         return 0;
     return new PlayerActionJob(operation, parameters, this);
 }
-
-#include "playercontrol.moc"
 
 // vim: sw=4 sts=4 et tw=100
