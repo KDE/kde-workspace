@@ -86,7 +86,19 @@ static bool notEmpty(const ConfigItem* item)
 template<class T>
 void removeEmptyItems(QList<T*>& list)
 {
-  QtConcurrent::blockingFilter(list, notEmpty);
+#ifdef __GNUC__
+#if __GNUC__ == 4 && __GNUC_MINOR__ == 8 && __GNUC_PATCHLEVEL__ == 2
+#warning Compiling with a workaround for GCC 4.8.2 http://gcc.gnu.org/bugzilla/show_bug.cgi?id=58800
+    Q_FOREACH(T* x, list) {
+        ConfigItem *y = static_cast<ConfigItem*>(x);
+        if (y->name.isEmpty()) {
+            list.removeAll(x);
+        }
+    }
+#else
+    QtConcurrent::blockingFilter(list, notEmpty);
+#endif
+#endif
 }
 
 static
