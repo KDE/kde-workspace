@@ -64,7 +64,6 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <klocale.h>
 #include <kglobal.h>
 #include <kconfig.h>
-#include <kstandarddirs.h>
 #include <kapplication.h>
 #include <ktemporaryfile.h>
 #include <knotification.h>
@@ -80,6 +79,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 //#include "kdesktop_interface.h"
 #include <klauncher_iface.h>
+#include <qstandardpaths.h>
 #include "kcminit_interface.h"
 
 //#define KSMSERVER_STARTUP_DEBUG1
@@ -101,7 +101,7 @@ void KSMServer::restoreSession( const QString &sessionName )
     state = LaunchingWM;
 
     kDebug( 1218 ) << "KSMServer::restoreSession " << sessionName;
-    KSharedConfig::Ptr config = KGlobal::config();
+    KSharedConfig::Ptr config = KSharedConfig::openConfig();
 
     sessionGroup = QStringLiteral("Session: ") + sessionName;
     KConfigGroup configSessionGroup( config, sessionGroup);
@@ -323,7 +323,7 @@ void KSMServer::tryRestoreNext()
         return;
     restoreTimer.stop();
     startupSuspendTimeoutTimer.stop();
-    KConfigGroup config(KGlobal::config(), sessionGroup );
+    KConfigGroup config(KSharedConfig::openConfig(), sessionGroup );
 
     while ( lastAppStarted < appsToStart ) {
         lastAppStarted++;
@@ -414,7 +414,7 @@ void KSMServer::autoStart2()
         QTimer::singleShot(0, this, SLOT(kcmPhase2Done()));
     }
     if( !defaultSession())
-        restoreLegacySession(KGlobal::config().data());
+        restoreLegacySession(KSharedConfig::openConfig().data());
     KNotification::event( QStringLiteral( "startkde" ),
                           QString(), QPixmap(), 0l,
                           KNotification::DefaultEvent ); // this is the time KDE is up, more or less
@@ -568,7 +568,7 @@ void KSMServer::restoreSubSession( const QString& name )
 {
     sessionGroup = QStringLiteral( "SubSession: " ) + name;
 
-    KConfigGroup configSessionGroup( KGlobal::config(), sessionGroup);
+    KConfigGroup configSessionGroup( KSharedConfig::openConfig(), sessionGroup);
     int count =  configSessionGroup.readEntry( "count", 0 );
     appsToStart = count;
     lastAppStarted = 0;

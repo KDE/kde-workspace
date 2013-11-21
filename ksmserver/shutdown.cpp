@@ -95,7 +95,7 @@ void KSMServer::logout( int confirm, int sdtype, int sdmode )
 
 bool KSMServer::canShutdown()
 {
-    KSharedConfig::Ptr config = KGlobal::config();
+    KSharedConfig::Ptr config = KSharedConfig::openConfig();
     config->reparseConfiguration(); // config may have changed in the KControl module
     KConfigGroup cg( config, "General");
 
@@ -123,7 +123,7 @@ void KSMServer::shutdown( KWorkSpace::ShutdownConfirm confirm,
         return;
     }
 
-    KSharedConfig::Ptr config = KGlobal::config();
+    KSharedConfig::Ptr config = KSharedConfig::openConfig();
     config->reparseConfiguration(); // config may have changed in the KControl module
 
 	KConfigGroup cg( config, "General");
@@ -406,7 +406,7 @@ void KSMServer::cancelShutdown( KSMClient* c )
 
 void KSMServer::startProtection()
 {
-    KSharedConfig::Ptr config = KGlobal::config();
+    KSharedConfig::Ptr config = KSharedConfig::openConfig();
     config->reparseConfiguration(); // config may have changed in the KControl module
     KConfigGroup cg( config, "General" );
 

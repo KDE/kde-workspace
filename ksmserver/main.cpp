@@ -308,7 +308,7 @@ extern "C" KDE_EXPORT int kdemain( int argc, char* argv[] )
 
     IceSetIOErrorHandler( IoErrorHandler );
 
-    KConfigGroup config(KGlobal::config(), "General");
+    KConfigGroup config(KSharedConfig::openConfig(), "General");
 
     int realScreenCount = ScreenCount( QX11Info::display() );
     bool screenCountChanged =
