@@ -7,13 +7,11 @@ set(taskmanagerplugin_SRCS
     plugin/textlabel.cpp
 )
 
-qt4_automoc(${taskmanagerplugin_SRCS})
-
 install(FILES plugin/qmldir DESTINATION ${QML_INSTALL_DIR}/org/kde/plasma/private/taskmanager)
 
 add_library(taskmanagerplugin SHARED ${taskmanagerplugin_SRCS})
 
-# FIXME TODO HACK: The last two are temp, see commend in Backend::activateItem().
+# FIXME TODO HACK: The last two are temp, see comment in Backend::activateItem().
 target_link_libraries(taskmanagerplugin
                       taskmanager
                       Qt5::Core
