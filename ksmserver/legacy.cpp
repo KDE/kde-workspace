@@ -81,7 +81,7 @@ void KSMServer::performLegacySessionSave()
     if (state == ClosingSubSession)
         return; //FIXME implement later
 
-    KSharedConfig::Ptr config = KGlobal::config();
+    KSharedConfig::Ptr config = KSharedConfig::openConfig();
     config->reparseConfiguration(); // config may have changed in the KControl module
     KConfigGroup cg( config, "General" );
 

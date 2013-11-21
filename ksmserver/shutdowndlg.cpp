@@ -40,6 +40,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <QQmlEngine>
 #include <QQmlPropertyMap>
 #include <QPainter>
+#include <QStandardPaths>
 #include <QtX11Extras/qx11info_x11.h>
 
 #include <kdialog.h>
@@ -49,7 +50,6 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <Solid/PowerManagement>
 #include <kwindowsystem.h>
 #include <netwm.h>
-#include <KStandardDirs>
 #include <kdeclarative/kdeclarative.h>
 
 #include <stdio.h>
@@ -65,6 +65,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "shutdowndlg.moc"
 
 #include <kjob.h>
+#include <qstandardpaths.h>
 
 #define FONTCOLOR "#bfbfbf"
 
@@ -239,7 +240,7 @@ KSMShutdownDlg::KSMShutdownDlg( QWidget* parent,
     kdeclarative.setupBindings();
     m_view->installEventFilter(this);
 
-    QString fileName = KStandardDirs::locate("data", QStringLiteral("ksmserver/themes/%1/main.qml").arg(theme));
+    QString fileName = QStandardPaths::locate(QStandardPaths::GenericDataLocation, QStringLiteral("ksmserver/themes/%1/main.qml").arg(theme));
     if (QFile::exists(fileName)) {
         //kDebug() << "Using QML theme" << fileName;
         m_view->setSource(QUrl::fromLocalFile(fileName));

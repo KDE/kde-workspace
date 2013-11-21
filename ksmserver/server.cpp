@@ -68,6 +68,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <QRegExp>
 #include <QtDBus/QtDBus>
 #include <QSocketNotifier>
+#include <QStandardPaths>
 
 #include <kaction.h>
 #include <kactioncollection.h>
@@ -76,7 +77,6 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <kglobal.h>
 #include <kconfig.h>
 #include <kdesktopfile.h>
-#include <kstandarddirs.h>
 #include <kapplication.h>
 #include <ktemporaryfile.h>
 #include <kconfiggroup.h>
@@ -95,6 +95,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <QX11Info>
 #include <krandom.h>
 #include <klauncher_iface.h>
+#include <qstandardpaths.h>
 
 KSMServer* the_server = 0;
 
@@ -118,7 +119,7 @@ KProcess* KSMServer::startApplication( const QStringList& cmd, const QString& cl
             command.prepend( QStringLiteral("--") );
             command.prepend( userId );
             command.prepend( QStringLiteral("-u") );
-            command.prepend( KStandardDirs::findExe(QStringLiteral("kdesu")) );
+            command.prepend( QStandardPaths::findExecutable(QStringLiteral("kdesu")));
         }
     }
     if ( !clientMachine.isEmpty() && clientMachine != QStringLiteral("localhost") ) {
@@ -457,7 +458,7 @@ Status SetAuthentication (int count, IceListenObj *listenObjs,
     fclose(addAuthFile);
     fclose(remAuthFile);
 
-    QString iceAuth = KGlobal::dirs()->findExe(QStringLiteral("iceauth"));
+    QString iceAuth = QStandardPaths::findExecutable(QStringLiteral("iceauth"));
     if (iceAuth.isEmpty())
     {
         qWarning("KSMServer: could not find iceauth");
@@ -487,7 +488,7 @@ void FreeAuthenticationData(int count, IceAuthDataEntry *authDataEntries)
 
     free (authDataEntries);
 
-    QString iceAuth = KGlobal::dirs()->findExe(QStringLiteral("iceauth"));
+    QString iceAuth = QStandardPaths::findExecutable(QStringLiteral("iceauth"));
     if (iceAuth.isEmpty())
     {
         qWarning("KSMServer: could not find iceauth");
@@ -636,11 +637,12 @@ KSMServer::KSMServer( const QString& windowManager, bool _only_local, bool locks
     dialogActive = false;
     saveSession = false;
     wmPhase1WaitingCount = 0;
-    KConfigGroup config(KGlobal::config(), "General");
+    KConfigGroup config(KSharedConfig::openConfig(), "General");
     clientInteracting = 0;
     xonCommand = config.readEntry( "xonCommand", "xon" );
 
-    KGlobal::dirs()->addResourceType( "windowmanagers", "data", "ksmserver/windowmanagers" );
+    //TODO: do we still need this?
+    //KGlobal::dirs()->addResourceType( "windowmanagers", "data", "ksmserver/windowmanagers" );
     selectWm( windowManager );
 
     connect( &startupSuspendTimeoutTimer, SIGNAL(timeout()), SLOT(startupSuspendTimeout()));
@@ -748,7 +750,7 @@ void KSMServer::cleanUp()
     clean = true;
     IceFreeListenObjs (numTransports, listenObjs);
 
-    QByteArray fName = QFile::encodeName(KStandardDirs::locateLocal("socket", QStringLiteral("KSMserver")));
+    QByteArray fName = QFile::encodeName(QStandardPaths::writableLocation(QStandardPaths::RuntimeLocation) + QLatin1Char('/') + QStringLiteral("KSMserver"));
     QString display  = QString::fromLocal8Bit(::getenv("DISPLAY"));
     // strip the screen number from the display
     display.replace(QRegExp(QStringLiteral("\\.[0-9]+$")), QStringLiteral(""));
@@ -873,7 +875,7 @@ QString KSMServer::currentSession()
 
 void KSMServer::discardSession()
 {
-    KConfigGroup config(KGlobal::config(), sessionGroup );
+    KConfigGroup config(KSharedConfig::openConfig(), sessionGroup );
     int count =  config.readEntry( "count", 0 );
 	foreach ( KSMClient *c, clients ) {
         QStringList discardCommand = c->discardCommand();
@@ -893,7 +895,7 @@ void KSMServer::discardSession()
 
 void KSMServer::storeSession()
 {
-    KSharedConfig::Ptr config = KGlobal::config();
+    KSharedConfig::Ptr config = KSharedConfig::openConfig();
     config->reparseConfiguration(); // config may have changed in the KControl module
     KConfigGroup generalGroup(config, "General");
     excludeApps = generalGroup.readEntry( "excludeApps" ).toLower()
@@ -972,7 +974,7 @@ void KSMServer::storeSession()
 QStringList KSMServer::sessionList()
 {
     QStringList sessions( QStringLiteral( "default" ) );
-    KSharedConfig::Ptr config = KGlobal::config();
+    KSharedConfig::Ptr config = KSharedConfig::openConfig();
     const QStringList groups = config->groupList();
     for ( QStringList::ConstIterator it = groups.constBegin(); it != groups.constEnd(); ++it )
         if ( (*it).startsWith( QLatin1String( "Session: " ) ) )
@@ -1011,7 +1013,7 @@ void KSMServer::selectWm( const QString& kdewm )
         wm = kdewm;
         return;
     }
-    KConfigGroup config(KGlobal::config(), "General");
+    KConfigGroup config(KSharedConfig::openConfig(), "General");
     QString cfgwm = config.readEntry( "windowManager", "kwin" );
     KDesktopFile file( QStandardPaths::ApplicationsLocation,
                        QStringLiteral( "ksmserver/windowmanagers/" ) + cfgwm + QStringLiteral( ".desktop" ) );
@@ -1038,7 +1040,7 @@ void KSMServer::selectWm( const QString& kdewm )
 
 void KSMServer::wmChanged()
 {
-    KGlobal::config()->reparseConfiguration();
+    KSharedConfig::openConfig()->reparseConfiguration();
     selectWm( QStringLiteral( "" ) );
 }
 
