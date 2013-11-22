@@ -245,7 +245,7 @@ void UnlockApp::getFocus()
 
 void UnlockApp::setLockedPropertyOnViews()
 {
-    foreach (QDeclarativeView *view, m_views) {
+    foreach (QQuickView *view, m_views) {
         QQmlProperty lockProperty(view->rootObject(), QStringLiteral("locked"));
         lockProperty.write(true);
     }
