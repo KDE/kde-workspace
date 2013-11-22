@@ -235,36 +235,36 @@ bool Greeter::loadGreetPlugin()
         GreeterPluginHandle plugin;
         KLibrary *lib = new KLibrary( (*it)[0] == QLatin1Char( '/' ) ? *it : QLatin1String( "kgreet_" ) + *it );
         if (lib->fileName().isEmpty()) {
-            kWarning(1212) << "GreeterPlugin " << *it << " does not exist" ;
+            kWarning() << "GreeterPlugin " << *it << " does not exist" ;
             delete lib;
             continue;
         }
         if (!lib->load()) {
-            kWarning(1212) << "Cannot load GreeterPlugin " << *it << " (" << lib->fileName() << ")" ;
+            kWarning() << "Cannot load GreeterPlugin " << *it << " (" << lib->fileName() << ")" ;
             delete lib;
             continue;
         }
         plugin.library = lib;
         plugin.info = (KGreeterPluginInfo *)lib->resolveSymbol( "kgreeterplugin_info" );
         if (!plugin.info ) {
-            kWarning(1212) << "GreeterPlugin " << *it << " (" << lib->fileName() << ") is no valid greet widget plugin" ;
+            kWarning() << "GreeterPlugin " << *it << " (" << lib->fileName() << ") is no valid greet widget plugin" ;
             lib->unload();
             delete lib;
             continue;
         }
         if (plugin.info->method && !m_method.isEmpty() && m_method != QLatin1String(  plugin.info->method )) {
-            kDebug(1212) << "GreeterPlugin " << *it << " (" << lib->fileName() << ") serves " << plugin.info->method << ", not " << m_method;
+            kDebug() << "GreeterPlugin " << *it << " (" << lib->fileName() << ") serves " << plugin.info->method << ", not " << m_method;
             lib->unload();
             delete lib;
             continue;
         }
         if (!plugin.info->init( m_method, getConf, this )) {
-            kDebug(1212) << "GreeterPlugin " << *it << " (" << lib->fileName() << ") refuses to serve " << m_method;
+            kDebug() << "GreeterPlugin " << *it << " (" << lib->fileName() << ") refuses to serve " << m_method;
             lib->unload();
             delete lib;
             continue;
         }
-        kDebug(1212) << "GreeterPlugin " << *it << " (" << plugin.info->method << ", " << plugin.info->name << ") loaded";
+        kDebug() << "GreeterPlugin " << *it << " (" << plugin.info->method << ", " << plugin.info->name << ") loaded";
         m_pluginHandle = plugin;
         return true;
     }
