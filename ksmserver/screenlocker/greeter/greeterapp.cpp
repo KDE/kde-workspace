@@ -169,6 +169,18 @@ void UnlockApp::desktopResized()
 
         connect(view->rootObject(), SIGNAL(unlockRequested()), SLOT(quit()));
 
+        QQmlProperty lockProperty(view->rootObject(), QStringLiteral("locked"));
+        if (KScreenSaverSettings::lock()) {
+            if (KScreenSaverSettings::lockGrace() < 1) {
+                lockProperty.write(true);
+            } else {
+                QTimer::singleShot(KScreenSaverSettings::lockGrace(),
+                                   this, SLOT(setLockedPropertyOnViews()));
+            }
+        } else{
+            lockProperty.write(false);
+        }
+
         QQmlProperty sleepProperty(view->rootObject(), QStringLiteral("suspendToRamSupported"));
         sleepProperty.write(spdMethods.contains(Solid::PowerManagement::SuspendState));
         if (spdMethods.contains(Solid::PowerManagement::SuspendState) &&
@@ -228,6 +240,14 @@ void UnlockApp::getFocus()
     if (!m_views.isEmpty()) {
         //FIXME
 //         m_views.first()->activateWindow();
+    }
+}
+
+void UnlockApp::setLockedPropertyOnViews()
+{
+    foreach (QDeclarativeView *view, m_views) {
+        QQmlProperty lockProperty(view->rootObject(), QStringLiteral("locked"));
+        lockProperty.write(true);
     }
 }
 

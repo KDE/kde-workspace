@@ -29,6 +29,7 @@ Item {
     id: lockScreen
     signal unlockRequested()
 //     property alias capsLockOn: unlockUI.capsLockOn
+    property bool locked: false
 
     // if there's no image, have a near black background
     Rectangle {
@@ -46,6 +47,7 @@ Item {
 
     PlasmaCore.FrameSvgItem {
         id: dialog
+        visible: lockScreen.locked
         anchors.centerIn: parent
         imagePath: "widgets/background"
         width: mainStack.currentPage.implicitWidth + margins.left + margins.right

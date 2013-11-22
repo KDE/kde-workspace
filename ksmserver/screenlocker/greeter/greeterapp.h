@@ -56,6 +56,7 @@ private Q_SLOTS:
     void suspendToDisk();
     void shutdown();
     void getFocus();
+    void setLockedPropertyOnViews();
 
 private:
     void initialize();
