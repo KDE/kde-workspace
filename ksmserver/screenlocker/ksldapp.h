@@ -82,6 +82,7 @@ public:
 
 public Q_SLOTS:
     Q_SCRIPTABLE void lock();
+    void lock(bool immediateLock);
     void lockProcessFinished(int exitCode, QProcess::ExitStatus exitStatus);
     void lockProcessReady();
 
@@ -99,7 +100,7 @@ private:
     bool establishGrab();
     bool grabKeyboard();
     bool grabMouse();
-    bool startLockProcess();
+    bool startLockProcess(bool immediateLock);
     void showLockWindow();
     void hideLockWindow();
     void doUnlock();

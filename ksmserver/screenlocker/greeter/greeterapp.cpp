@@ -61,10 +61,13 @@ static const char *DEFAULT_MAIN_PACKAGE = "org.kde.passworddialog";
 UnlockApp::UnlockApp()
     : KApplication()
     , m_resetRequestIgnoreTimer(new QTimer(this))
+    , m_delayedLockTimer(0)
     , m_testing(false)
     , m_capsLocked(false)
     , m_ignoreRequests(false)
     , m_showScreenSaver(false)
+    , m_immediateLock(false)
+    , m_runtimeInitialized(false)
 {
     initialize();
     connect(desktop(), SIGNAL(resized(int)), SLOT(desktopResized()));
@@ -163,14 +166,25 @@ void UnlockApp::desktopResized()
         connect(view->rootObject(), SIGNAL(unlockRequested()), SLOT(quit()));
 
         QDeclarativeProperty lockProperty(view->rootObject(), "locked");
-        if (KScreenSaverSettings::lock()) {
+        if (m_immediateLock) {
+            lockProperty.write(true);
+        } else if (KScreenSaverSettings::lock()) {
             if (KScreenSaverSettings::lockGrace() < 1) {
                 lockProperty.write(true);
+            } else if (m_runtimeInitialized) {
+                // if we have new views and we are waiting on the
+                // delayed lock timer still, we don't want to show
+                // the lock UI just yet
+                lockProperty.write(!m_delayedLockTimer);
             } else {
-                QTimer::singleShot(KScreenSaverSettings::lockGrace(),
-                                   this, SLOT(setLockedPropertyOnViews()));
+                if (!m_delayedLockTimer) {
+                    m_delayedLockTimer = new QTimer(this);
+                    m_delayedLockTimer->setSingleShot(true);
+                    connect(m_delayedLockTimer, SIGNAL(timeout()), this, SLOT(setLockedPropertyOnViews()));
+                }
+                m_delayedLockTimer->start(KScreenSaverSettings::lockGrace());
             }
-        } else{
+        } else {
             lockProperty.write(false);
         }
 
@@ -203,6 +217,8 @@ void UnlockApp::desktopResized()
             m_screensaverWindows << screensaverWindow;
         }
     }
+
+    m_runtimeInitialized = true;
 
     // update geometry of all views and savers
     for (int i = 0; i < nScreens; ++i) {
@@ -240,6 +256,9 @@ void UnlockApp::getFocus()
 
 void UnlockApp::setLockedPropertyOnViews()
 {
+    delete m_delayedLockTimer;
+    m_delayedLockTimer = 0;
+
     foreach (QDeclarativeView *view, m_views) {
         QDeclarativeProperty lockProperty(view->rootObject(), "locked");
         lockProperty.write(true);
@@ -307,6 +326,11 @@ void UnlockApp::setTesting(bool enable)
             view->setWindowFlags(view->windowFlags() | Qt::X11BypassWindowManagerHint);
         }
     }
+}
+
+void UnlockApp::setImmediateLock(bool immediate)
+{
+    m_immediateLock = immediate;
 }
 
 bool UnlockApp::eventFilter(QObject *obj, QEvent *event)

@@ -165,17 +165,24 @@ void KSldApp::configure()
 
 void KSldApp::lock()
 {
+    lock(true);
+}
+
+void KSldApp::lock(bool immediateLock)
+{
     if (lockState() != Unlocked) {
         // already locked or acquiring lock, no need to lock again
         // but make sure it's really locked
         endGraceTime();
         return;
     }
+
     kDebug() << "lock called";
     if (!establishGrab()) {
         kError() << "Could not establish screen lock";
         return;
     }
+
     KDisplayManager().setLock(true);
     KNotification::event(QLatin1String( "locked" ));
 
@@ -185,7 +192,7 @@ void KSldApp::lock()
     m_lockState = AcquiringLock;
 
     // start unlock screen process
-    if (!startLockProcess()) {
+    if (!startLockProcess(immediateLock)) {
         doUnlock();
         kError() << "Greeter Process not available";
     }
@@ -266,7 +273,7 @@ void KSldApp::lockProcessFinished(int exitCode, QProcess::ExitStatus exitStatus)
         return;
     }
     // failure, restart lock process
-    startLockProcess();
+    startLockProcess(true);
 }
 
 void KSldApp::lockProcessReady()
@@ -276,13 +283,17 @@ void KSldApp::lockProcessReady()
     emit locked();
 }
 
-bool KSldApp::startLockProcess()
+bool KSldApp::startLockProcess(bool immediateLock)
 {
     if (m_plasmaEnabled) {
         m_lockProcess->start(KStandardDirs::findExe(QLatin1String("plasma-overlay")),
                              QStringList() << QLatin1String("--nofork"));
     } else {
-        m_lockProcess->start(KStandardDirs::findExe(QLatin1String("kscreenlocker_greet")));
+        QStringList args;
+        if (immediateLock) {
+            args << "--immediateLock";
+        }
+        m_lockProcess->start(KStandardDirs::findExe(QLatin1String("kscreenlocker_greet")), args);
     }
     // we wait one minute
     if (!m_lockProcess->waitForStarted(60000)) {
@@ -337,7 +348,8 @@ void KSldApp::idleTimeout(int identifier)
     } else if (m_lockGrace == -1) {
         m_inGraceTime = true;  // if no timeout configured, grace time lasts forever
     }
-    lock();
+
+    lock(false);
 }
 
 bool KSldApp::isGraceTime() const

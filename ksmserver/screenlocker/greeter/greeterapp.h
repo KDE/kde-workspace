@@ -43,6 +43,7 @@ public:
     virtual ~UnlockApp();
 
     void setTesting(bool enable);
+    void setImmediateLock(bool immediateLock);
 
 public Q_SLOTS:
     void desktopResized();
@@ -67,12 +68,15 @@ private:
     QList<QDeclarativeView*> m_views;
     QList<ScreenSaverWindow*> m_screensaverWindows;
     QTimer *m_resetRequestIgnoreTimer;
+    QTimer *m_delayedLockTimer;
     Plasma::PackageStructure::Ptr m_structure;
     Plasma::Package *m_package;
     bool m_testing;
     bool m_capsLocked;
     bool m_ignoreRequests;
     bool m_showScreenSaver;
+    bool m_immediateLock;
+    bool m_runtimeInitialized;
 };
 } // namespace
 
