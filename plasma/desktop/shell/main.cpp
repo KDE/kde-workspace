@@ -31,10 +31,10 @@
 #include <config-workspace.h>
 #include "plasmaapp.h"
 
-#ifdef Q_WS_X11
+// #ifdef Q_WS_X11
 #include <X11/Xlib.h>
 #include <fixx11h.h>
-#endif
+// #endif
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -53,7 +53,7 @@ KDE_EXPORT int kdemain(int argc, char **argv)
     plasmaLocale = KLocale("libplasma").language();
     // dual head support
     int associatedScreen = 0;
-#ifdef Q_WS_X11
+// #ifdef Q_WS_X11
     {
     if (KGlobalSettings::isMultiHead()) {
         Display *dpy = XOpenDisplay(NULL);
@@ -96,7 +96,7 @@ KDE_EXPORT int kdemain(int argc, char **argv)
         }
     }
     }
-#endif
+// #endif
 
     QByteArray appName = "plasma-desktop";
     if (associatedScreen > 0) {
@@ -117,6 +117,8 @@ KDE_EXPORT int kdemain(int argc, char **argv)
 
     PlasmaApp *app = PlasmaApp::self();
     QApplication::setWindowIcon(KIcon("plasma"));
+    QGuiApplication::setApplicationName(appName);
+    QGuiApplication::setApplicationVersion(KDE_VERSION_STRING);
     app->disableSessionManagement(); // autostarted
 
 #ifndef QT_NO_ACCESSIBILITY
