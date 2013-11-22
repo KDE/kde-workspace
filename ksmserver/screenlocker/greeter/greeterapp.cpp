@@ -163,7 +163,6 @@ void UnlockApp::desktopResized()
         connect(view->rootObject(), SIGNAL(unlockRequested()), SLOT(quit()));
 
         QDeclarativeProperty lockProperty(view->rootObject(), "locked");
-            KScreenSaverSettings::lockGrace();
         if (KScreenSaverSettings::lock()) {
             if (KScreenSaverSettings::lockGrace() < 1) {
                 lockProperty.write(true);
