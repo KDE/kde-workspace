@@ -27,6 +27,7 @@ Item {
     id: lockScreen
     signal unlockRequested()
     property alias capsLockOn: unlockUI.capsLockOn
+    property bool locked: false
 
     PlasmaCore.Theme {
         id: theme
@@ -48,6 +49,7 @@ Item {
 
     PlasmaCore.FrameSvgItem {
         id: dialog
+        visible: lockScreen.locked
         anchors.centerIn: parent
         imagePath: "widgets/background"
         width: mainStack.currentPage.implicitWidth + margins.left + margins.right
