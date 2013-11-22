@@ -100,7 +100,7 @@ uint Interface::GetSessionIdleTime()
 
 void Interface::Lock()
 {
-    m_daemon->lock();
+    m_daemon->lock(calledFromDBus());
 
     if (calledFromDBus() && m_daemon->lockState() == KSldApp::AcquiringLock) {
         m_lockReplies << message().createReply();

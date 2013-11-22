@@ -60,6 +60,7 @@ int main(int argc, char* argv[])
     KCmdLineArgs::init(argc, argv, &aboutData);
     KCmdLineOptions options;
     options.add("testing", ki18n("Starts the greeter in testing mode"));
+    options.add("immediateLock", ki18n("Lock immediately, ignoring any grace time etc."));
     KCmdLineArgs::addCmdLineOptions(options);
 
     ScreenLocker::UnlockApp app;
@@ -67,6 +68,9 @@ int main(int argc, char* argv[])
     KCmdLineArgs *args = KCmdLineArgs::parsedArgs();
     if (args->isSet("testing")) {
         app.setTesting(true);
+        app.setImmediateLock(true);
+    } else {
+        app.setImmediateLock(args->isSet("immediateLock"));
     }
     args->clear();
     app.desktopResized();
