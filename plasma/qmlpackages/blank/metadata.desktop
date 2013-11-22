@@ -2,6 +2,7 @@
 Comment=Blank desktop view furniture
 Comment[de]=Einrichtung der Ansicht einer leeren Arbeitsfläche
 Comment[es]=Accesorio de vista del escritorio vacío
+Comment[gl]=Baleira de contidos a vista do escritorio
 Comment[ia]=Blanchi le vista de accessorios de scriptorio
 Comment[kk]=Бос үстел көрініс әбзелдері
 Comment[nl]=Meubilair voor weergave op blanco bureaublad
@@ -23,7 +24,7 @@ Name[cs]=Prázdná pracovní plocha
 Name[de]=Leere Arbeitsfläche
 Name[es]=Escritorio vacío
 Name[fi]=Tyhjä työpöytä
-Name[gl]=Esvaer o escritorio
+Name[gl]=Baleirar o escritorio
 Name[ia]=Blanchi scriptorio
 Name[kk]=Бос жұмыс үстелі
 Name[nl]=Blanco bureaublad
