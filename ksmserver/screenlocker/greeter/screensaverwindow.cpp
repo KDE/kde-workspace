@@ -92,7 +92,7 @@ void ScreenSaverWindow::readSaver()
             QLatin1String( "DesktopEntryName == '" ) + entryName.toLower() + QLatin1Char( '\'' ) );
         if( offers.isEmpty() )
         {
-            kDebug(1204) << "Cannot find screesaver: " << m_saver;
+            kDebug() << "Cannot find screesaver: " << m_saver;
             return;
         }
         const QString file = KStandardDirs::locate("services", offers.first()->entryPath());
@@ -104,19 +104,19 @@ void ScreenSaverWindow::readSaver()
         foreach (const QString &type, desktopGroup.readEntry("X-KDE-Type").split(QLatin1Char(';'))) {
             if (type == QLatin1String("ManipulateScreen")) {
                 if (!manipulatescreen) {
-                    kDebug(1204) << "Screensaver is type ManipulateScreen and ManipulateScreen is forbidden";
+                    kDebug() << "Screensaver is type ManipulateScreen and ManipulateScreen is forbidden";
                     m_forbidden = true;
                 }
             } else if (type == QLatin1String("OpenGL")) {
                 m_openGLVisual = true;
                 if (!opengl) {
-                    kDebug(1204) << "Screensaver is type OpenGL and OpenGL is forbidden";
+                    kDebug() << "Screensaver is type OpenGL and OpenGL is forbidden";
                     m_forbidden = true;
                 }
             }
         }
 
-        kDebug(1204) << "m_forbidden: " << (m_forbidden ? "true" : "false");
+        kDebug() << "m_forbidden: " << (m_forbidden ? "true" : "false");
 
         if (config.hasActionGroup(QLatin1String( "InWindow" )))
         {
@@ -188,7 +188,7 @@ void ScreenSaverWindow::paintEvent(QPaintEvent *event)
 bool ScreenSaverWindow::startXScreenSaver()
 {
     //QString m_saverExec("kannasaver.kss --window-id=%w");
-    kDebug(1204) << "Starting hack:" << m_saverExec;
+    kDebug() << "Starting hack:" << m_saverExec;
 
     if (m_saverExec.isEmpty() || m_forbidden) {
         return false;
