@@ -2,6 +2,7 @@
 Name=Declarative Toolbox
 Name[ca]=Quadre d'eines declaratiu
 Name[de]=Deklarativer Werkzeugkasten
+Name[el]=Εργαλεία
 Name[es]=Caja de herramientas declarativa
 Name[fi]=Deklaratiivinen työkalupakki
 Name[gl]=Caixa de ferramentas declarativa
@@ -25,6 +26,7 @@ Name[zh_TW]=宣告元件工具盒
 Comment=Manage Plasma
 Comment[ca]=Gestió del Plasma
 Comment[de]=Plasma verwalten
+Comment[el]=Διαχείριση Plasma
 Comment[es]=Gestión de Plasma
 Comment[fi]=Plasman hallinta
 Comment[gl]=Xestionar Plasma
