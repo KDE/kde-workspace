@@ -419,7 +419,7 @@ bool UnlockApp::eventFilter(QObject *obj, QEvent *event)
             }
         }
         if (!saverVisible) {
-            shareEvent(event, qobject_cast<QDeclarativeView*>(obj));
+            shareEvent(event, qobject_cast<QQuickView*>(obj));
             return false; // we don't care
         }
         ignoreNextEscape = bool(static_cast<QKeyEvent *>(event)->key() == Qt::Key_Escape);
@@ -436,7 +436,7 @@ bool UnlockApp::eventFilter(QObject *obj, QEvent *event)
             return false;
         }
         if (ke->key() != Qt::Key_Escape) {
-            shareEvent(event, qobject_cast<QDeclarativeView*>(obj));
+            shareEvent(event, qobject_cast<QQuickView*>(obj));
             return false; // irrelevant
         }
         if (ignoreNextEscape) {
@@ -496,18 +496,18 @@ void UnlockApp::capsLocked()
  * even if the focus is actually on a powered off screen.
  */
 
-void UnlockApp::shareEvent(QEvent *e, QDeclarativeView *from)
+void UnlockApp::shareEvent(QEvent *e, QQuickView *from)
 {
     // from can be NULL any time (because the parameter is passed as qobject_cast)
     // m_views.contains(from) is atm. supposed to be true but required if any further
-    // QDeclarativeViews are added (which are not part of m_views)
+    // QQuickView are added (which are not part of m_views)
     // this makes "from" an optimization (nullptr check aversion)
     if (from && m_views.contains(from)) {
         // NOTICE any recursion in the event sharing will prevent authentication on multiscreen setups!
         // Any change in regarded event processing shall be tested thoroughly!
         removeEventFilter(this); // prevent recursion!
         const bool accepted = e->isAccepted(); // store state
-        foreach (QDeclarativeView *view, m_views) {
+        foreach (QQuickView *view, m_views) {
             if (view != from) {
                 QApplication::sendEvent(view, e);
                 e->setAccepted(accepted);
