@@ -24,20 +24,13 @@
 
 #include <QClipboard>
 #include <QObject>
-#include <QProcess>
-#include <QTimer>
 #include <QtDBus/QtDBus>
-#include <QLineEdit>
 
 #include <KAction>
 #include <KActionCollection>
 #include <KCrash>
-#include <KDialog>
 #include <KAuthorized>
-#include <KGlobalAccel>
-#include <KGlobalSettings>
 #include <KLocale>
-#include <KMessageBox>
 #include <KWindowSystem>
 
 #include <Plasma/RunnerManager>
