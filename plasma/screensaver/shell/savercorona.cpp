@@ -27,6 +27,7 @@
 
 #include <QtDeclarative/QDeclarativeComponent>
 #include <QtDeclarative/QDeclarativeEngine>
+#include <QtDeclarative/QDeclarativeProperty>
 
 #include <KDebug>
 #include <KDialog>
@@ -210,6 +211,9 @@ void SaverCorona::createGreeter()
     QDeclarativeComponent component(m_engine, QUrl::fromLocalFile(mainQmlPath));
 
     m_greeterItem = qobject_cast<QGraphicsObject *>(component.create());
+    QDeclarativeProperty lockProperty(m_greeterItem, "locked");
+    lockProperty.write(true);
+
     addItem(m_greeterItem);
     m_greeterItem->setFocus();
     connect(m_greeterItem, SIGNAL(unlockRequested()), SLOT(greeterAccepted()));
