@@ -414,8 +414,7 @@ void KCMStyle::save()
     KConfigGroup g( &_config, "KDE-Global GUI Settings" );
     g.writeEntry( "GraphicEffectsLevel", fineTuningUi.comboGraphicEffectsLevel->itemData(fineTuningUi.comboGraphicEffectsLevel->currentIndex()));
 
-    KConfigGroup generalGroup(&_config, "General");
-    generalGroup.writeEntry("widgetStyle", currentStyle());
+    config.writeEntry("widgetStyle", currentStyle());
 
     KConfigGroup toolbarStyleGroup(&_config, "Toolbar style");
     toolbarStyleGroup.writeEntry("ToolButtonStyle",
