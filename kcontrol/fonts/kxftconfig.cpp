@@ -34,7 +34,7 @@
 #include <QX11Info>
 #include <QByteArray>
 
-#include <KLocale>
+#include <KLocalizedString>
 #include <kde_file.h>
 #include <KGlobal>
 #include <KStandardDirs>

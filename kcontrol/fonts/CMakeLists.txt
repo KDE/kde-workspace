@@ -7,7 +7,7 @@ include_directories(${FREETYPE_INCLUDE_DIRS})
 
 set(kcm_fonts_PART_SRCS ../krdb/krdb.cpp fonts.cpp)
 
-if(Q_WS_X11)
+if(HAVE_X11)
     set(kcm_fonts_PART_SRCS ${kcm_fonts_PART_SRCS} ${libkxftconfig_SRCS})
 endif()
 
@@ -19,7 +19,9 @@ add_library(kcm_fonts MODULE ${kcm_fonts_PART_SRCS})
 
 target_link_libraries(kcm_fonts Qt5::DBus Qt5::Xml KF5::KCMUtils KF5::KI18n KF5::KDE4Support ${FREETYPE_LIBRARIES})
 
-if(Q_WS_X11)
+if(HAVE_X11)
+    set_target_properties(kcm_fonts PROPERTIES COMPILE_FLAGS -DHAVE_X11)
+    target_link_libraries(kcm_fonts Qt5::X11Extras)
     if(FONTCONFIG_FOUND)
         target_link_libraries(kcm_fonts ${FONTCONFIG_LIBRARIES})
     endif()

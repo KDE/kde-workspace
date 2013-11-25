@@ -54,7 +54,7 @@ class FontAASettings : public KDialog
 
 public:
 
-#if defined(HAVE_FONTCONFIG) && defined (Q_WS_X11)
+#if defined(HAVE_FONTCONFIG) && defined (HAVE_X11)
     FontAASettings(QWidget *parent);
 
     bool save( bool useAA );
@@ -72,7 +72,7 @@ protected Q_SLOTS:
 
     void changed();
 
-#if defined(HAVE_FONTCONFIG) && defined (Q_WS_X11)
+#if defined(HAVE_FONTCONFIG) && defined (HAVE_X11)
 private:
 
     QCheckBox *excludeRange;
@@ -108,14 +108,14 @@ protected Q_SLOTS:
     void slotCfgAa();
 
 private:
-#if defined(HAVE_FONTCONFIG) && defined (Q_WS_X11)
+#if defined(HAVE_FONTCONFIG) && defined (HAVE_X11)
     enum AASetting { AAEnabled, AASystem, AADisabled };
     AASetting useAA, useAA_original;
     QComboBox *cbAA;
     QPushButton *aaSettingsButton;
     FontAASettings *aaSettings;
 #endif
-#ifdef Q_WS_X11
+#ifdef HAVE_X11
     int dpi_original;
     QCheckBox *checkboxForceDpi;
     QSpinBox* spinboxDpi;
