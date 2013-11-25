@@ -17,9 +17,8 @@
  *   51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-import QtQuick 1.1
-import org.kde.plasma.core 0.1 as PlasmaCore
-import org.kde.plasma.graphicswidgets 0.1 as PlasmaWidgets
+import QtQuick 2.0
+import org.kde.plasma.core 2.0 as PlasmaCore
 
 Item {
     id: iconContainer
@@ -47,10 +46,10 @@ Item {
         image: "preferences-activities"
     }
 
-    PlasmaWidgets.IconWidget
+    PlasmaCore.IconItem
     {
         id: icon
-        svg: "widgets/activities"
+        source: "widgets/activities"
         width: parent.width
         height: parent.height
         onClicked:
