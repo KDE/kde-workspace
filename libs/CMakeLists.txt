@@ -1,4 +1,3 @@
-#add_subdirectory(kephal)
 add_subdirectory(kworkspace)
 add_subdirectory(oxygen)
 #add_subdirectory(plasmaclock)

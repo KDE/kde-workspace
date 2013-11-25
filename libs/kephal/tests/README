@@ -1,3 +1,0 @@
-This is a little command-line client to kephal.
-Currently it allows to query kephal for current screens and outputs and to listen
-for kephal-messages. This allows for better understanding where errors occur.

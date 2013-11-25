@@ -1,8 +1,6 @@
 macro_bool_to_01(KdepimLibs_FOUND HAVE_KDEPIMLIBS)
 configure_file(config-calendartable.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/config-calendartable.h)
 
-include_directories(${KDEBASE_WORKSPACE_SOURCE_DIR}/libs/kephal)
-
 set(plasmaclock_LIB_SRCS
     clockapplet.cpp
     calendar.cpp
@@ -22,7 +20,7 @@ target_link_libraries(plasmaclock
                       KF5::Plasma
                       ${KDE4_KDEUI_LIBS}
                       KF5::KIOCore KF5::KIOWidgets
-                      kephal)
+                      )
 
 if(KdepimLibs_FOUND)
     include_directories(${KDEPIMLIBS_INCLUDE_DIRS})

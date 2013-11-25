@@ -12,7 +12,7 @@ set(appletexplorer_SRCS
    main.cpp
    )
 add_executable(plasmaappletexplorer ${appletexplorer_SRCS})
-target_link_libraries(plasmaappletexplorer KF5::Plasma ${KDE4_KDEUI_LIBS} ${KDE4_KFILE_LIBRARY} Qt5::Declarative kephal)
+target_link_libraries(plasmaappletexplorer KF5::Plasma ${KDE4_KDEUI_LIBS} ${KDE4_KFILE_LIBRARY} Qt5::Declarative)
 
 set(backgrounddialog_SRCS
     background.cpp

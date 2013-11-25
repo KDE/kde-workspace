@@ -61,11 +61,6 @@ if (HAVE_X11)
     endif ()
 endif()
 
-# if (NOT KDE_PLATFORM_FEATURE_BINARY_COMPATIBLE_FEATURE_REDUCTION)
-#     include_directories(${KDEBASE_WORKSPACE_SOURCE_DIR}/libs/kephal)
-#     target_link_libraries(taskmanager kephal)
-#  endif ()
-
 set_target_properties(taskmanager PROPERTIES VERSION ${GENERIC_LIB_VERSION} SOVERSION ${GENERIC_LIB_SOVERSION} )
 install(TARGETS taskmanager EXPORT kdeworkspaceLibraryTargets ${INSTALL_TARGETS_DEFAULT_ARGS} )
 
