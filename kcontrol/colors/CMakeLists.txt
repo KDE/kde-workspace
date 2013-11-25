@@ -16,6 +16,11 @@ target_link_libraries(kcm_colors
     KF5::KDE4Support
     ${X11_LIBRARIES})
 
+if(HAVE_X11)
+    set_target_properties(kcm_colors PROPERTIES COMPILE_FLAGS -DHAVE_X11)
+    target_link_libraries(kcm_colors Qt5::X11Extras)
+endif()
+
 install(TARGETS kcm_colors  DESTINATION ${PLUGIN_INSTALL_DIR})
 install( FILES colors.desktop  DESTINATION  ${SERVICES_INSTALL_DIR} )
 install( FILES colorschemes.knsrc DESTINATION  ${CONFIG_INSTALL_DIR} )

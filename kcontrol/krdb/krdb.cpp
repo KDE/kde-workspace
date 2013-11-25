@@ -48,7 +48,7 @@
 #include <kstyle.h>
 
 #include "krdb.h"
-#ifdef Q_WS_X11
+#ifdef HAVE_X11
 #include <X11/Xlib.h>
 #include <QX11Info>
 #endif
@@ -559,31 +559,33 @@ void runRdb( uint flags )
 
     delete settings;
     QApplication::flush();
-#ifdef Q_WS_X11
-    // We let KIPC take care of ourselves, as we are in a KDE app with
-    // QApp::setDesktopSettingsAware(false);
-    // Instead of calling QApp::x11_apply_settings() directly, we instead
-    // modify the timestamp which propagates the settings changes onto
-    // Qt-only apps without adversely affecting ourselves.
+#ifdef HAVE_X11
+    if (qApp->platformName() == QStringLiteral("xcb")) {
+        // We let KIPC take care of ourselves, as we are in a KDE app with
+        // QApp::setDesktopSettingsAware(false);
+        // Instead of calling QApp::x11_apply_settings() directly, we instead
+        // modify the timestamp which propagates the settings changes onto
+        // Qt-only apps without adversely affecting ourselves.
 
-    // Cheat and use the current timestamp, since we just saved to qtrc.
-    QDateTime settingsstamp = QDateTime::currentDateTime();
+        // Cheat and use the current timestamp, since we just saved to qtrc.
+        QDateTime settingsstamp = QDateTime::currentDateTime();
 
-    static Atom qt_settings_timestamp = 0;
-    if (!qt_settings_timestamp) {
-	 QString atomname("_QT_SETTINGS_TIMESTAMP_");
-	 atomname += XDisplayName( 0 ); // Use the $DISPLAY envvar.
-	 qt_settings_timestamp = XInternAtom( QX11Info::display(), atomname.toLatin1(), False);
+        static Atom qt_settings_timestamp = 0;
+        if (!qt_settings_timestamp) {
+            QString atomname("_QT_SETTINGS_TIMESTAMP_");
+            atomname += XDisplayName( 0 ); // Use the $DISPLAY envvar.
+            qt_settings_timestamp = XInternAtom( QX11Info::display(), atomname.toLatin1(), False);
+        }
+
+        QBuffer stamp;
+        QDataStream s(&stamp.buffer(), QIODevice::WriteOnly);
+        s << settingsstamp;
+        XChangeProperty( QX11Info::display(), QX11Info::appRootWindow(), qt_settings_timestamp,
+                        qt_settings_timestamp, 8, PropModeReplace,
+                        (unsigned char*) stamp.buffer().data(),
+                        stamp.buffer().size() );
+        QApplication::flush();
     }
-
-    QBuffer stamp;
-    QDataStream s(&stamp.buffer(), QIODevice::WriteOnly);
-    s << settingsstamp;
-    XChangeProperty( QX11Info::display(), QX11Info::appRootWindow(), qt_settings_timestamp,
-		     qt_settings_timestamp, 8, PropModeReplace,
-		     (unsigned char*) stamp.buffer().data(),
-		     stamp.buffer().size() );
-    QApplication::flush();
 #endif
   }
 }

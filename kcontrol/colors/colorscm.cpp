@@ -1248,12 +1248,12 @@ void KColorCm::save()
 
     m_config->sync();
     KGlobalSettings::self()->emitChange(KGlobalSettings::PaletteChanged);
-#ifdef Q_WS_X11
-    // Send signal to all kwin instances
-    QDBusMessage message =
-       QDBusMessage::createSignal("/KWin", "org.kde.KWin", "reloadConfig");
-    QDBusConnection::sessionBus().send(message);
-#endif
+    if (qApp->platformName() == QStringLiteral("xcb")) {
+        // Send signal to all kwin instances
+        QDBusMessage message =
+        QDBusMessage::createSignal("/KWin", "org.kde.KWin", "reloadConfig");
+        QDBusConnection::sessionBus().send(message);
+    }
 
     KConfig      cfg("kcmdisplayrc", KConfig::NoGlobals);
     KConfigGroup displayGroup(&cfg, "X11");

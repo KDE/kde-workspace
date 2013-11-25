@@ -53,6 +53,7 @@ kde4_add_ui_files(kcm_input_PART_SRCS kmousedlg.ui logitechmouse_base.ui )
 qt5_add_dbus_interface(kcm_input_PART_SRCS ${klauncher_xml} klauncher_iface)
 
 add_library(kcm_input MODULE ${kcm_input_PART_SRCS})
+set_target_properties(kcm_input PROPERTIES COMPILE_FLAGS -DHAVE_X11)
 
 
 target_link_libraries(kcm_input
@@ -81,6 +82,7 @@ install(TARGETS kcm_input  DESTINATION ${PLUGIN_INSTALL_DIR} )
 set(kcm_cursortheme_PART_SRCS kcmcursortheme.cpp ${libnoinst_SRCS})
 
 add_library(kcm_cursortheme MODULE ${kcm_cursortheme_PART_SRCS})
+set_target_properties(kcm_cursortheme PROPERTIES COMPILE_FLAGS -DHAVE_X11)
 
 
 target_link_libraries(kcm_cursortheme
