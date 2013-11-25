@@ -670,7 +670,7 @@ void KCMStyle::loadStyle( KConfig& config )
     cbStyle->addItems( styles );
 
     // Find out which style is currently being used
-    KConfigGroup configGroup = config.group( "General" );
+    KConfigGroup configGroup = config.group( "KDE" );
     QString defaultStyle = KCMStyle::defaultStyle();
     QString cfgStyle = configGroup.readEntry( "widgetStyle", defaultStyle );
 
