@@ -23,6 +23,10 @@
 
 #include "kworkspace.h"
 
+#ifdef HAVE_X11
+#include <X11/SM/SMlib.h>
+#endif
+
 class QSocketNotifier;
 
 namespace KWorkSpace
@@ -40,7 +44,7 @@ class KRequestShutdownHelper
     private Q_SLOTS:
         void processData();
     private:
-#ifdef Q_WS_X11
+#ifdef HAVE_X11
         SmcConn connection() const { return conn; }
         SmcConn conn;
 #endif

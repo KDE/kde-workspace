@@ -33,9 +33,6 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <klocale.h>
 #include <KLocalizedString>
 #include <kstringhandler.h>
-#ifdef Q_WS_X11
-#include <fixx11h.h>
-#endif
 #include <kstyle.h>
 #include <kwindowsystem.h>
 #include <netwm.h>
@@ -73,7 +70,7 @@ KWindowListMenu::~KWindowListMenu()
 
 static bool standaloneDialog( const KWindowInfo* info, const QList<KWindowInfo*>& list )
 {
-#ifdef Q_WS_X11
+#ifdef HAVE_X11
   WId group = info->groupLeader();
 
   if ( group == 0 )
