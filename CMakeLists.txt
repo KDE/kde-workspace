@@ -64,6 +64,8 @@ find_package(KIO REQUIRED NO_MODULE)
 
 find_package(KInit)
 
+find_package(UDev) #PowerDevil upower/udev backend
+
 # needed for set_package_properties macro
 find_package(KDE4Support REQUIRED NO_MODULE)
 find_package(KDELibs4 REQUIRED NO_MODULE)
