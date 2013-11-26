@@ -305,7 +305,7 @@ endif()
 #
 if(${KDE_PLATFORM_PROFILE} STREQUAL "Desktop")
    ecm_optional_add_subdirectory(kcontrol)
-#    macro_optional_add_subdirectory(klipper)
+   ecm_optional_add_subdirectory(klipper)
    ecm_optional_add_subdirectory(kmenuedit)
 #    macro_optional_add_subdirectory(krunner)
 #    macro_optional_add_subdirectory(solid)
