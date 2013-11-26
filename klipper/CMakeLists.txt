@@ -1,5 +1,3 @@
-kde4_no_enable_final(klipper)
-
 set(libklipper_common_SRCS
     klipper.cpp
     urlgrabber.cpp
