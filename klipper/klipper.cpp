@@ -29,6 +29,7 @@
 #include <QDBusConnection>
 
 #include <k4aboutdata.h>
+#include <KGlobalAccel>
 #include <KLocale>
 #include <KMessageBox>
 #include <KSaveFile>
@@ -144,7 +145,7 @@ Klipper::Klipper(QObject* parent, const KSharedConfigPtr& config)
     m_toggleURLGrabAction = new KToggleAction( this );
     m_collection->addAction( "clipboard_action", m_toggleURLGrabAction );
     m_toggleURLGrabAction->setText(i18n("Enable Clipboard Actions"));
-    m_toggleURLGrabAction->setGlobalShortcut(KShortcut(Qt::ALT+Qt::CTRL+Qt::Key_X));
+    KGlobalAccel::self()->setShortcut(m_toggleURLGrabAction, QList<QKeySequence>() << QKeySequence(Qt::ALT+Qt::CTRL+Qt::Key_X));
     connect( m_toggleURLGrabAction, SIGNAL(toggled(bool)),
              this, SLOT(setURLGrabberEnabled(bool)));
 
@@ -184,38 +185,38 @@ Klipper::Klipper(QObject* parent, const KSharedConfigPtr& config)
 
     m_repeatAction = m_collection->addAction("repeat_action");
     m_repeatAction->setText(i18n("Manually Invoke Action on Current Clipboard"));
-    m_repeatAction->setGlobalShortcut(KShortcut(Qt::ALT+Qt::CTRL+Qt::Key_R));
+    KGlobalAccel::self()->setShortcut(m_repeatAction, QList<QKeySequence>() << QKeySequence(Qt::ALT+Qt::CTRL+Qt::Key_R));
     connect(m_repeatAction, SIGNAL(triggered()), SLOT(slotRepeatAction()));
 
     // add an edit-possibility
     m_editAction = m_collection->addAction("edit_clipboard");
     m_editAction->setIcon(QIcon::fromTheme("document-properties"));
     m_editAction->setText(i18n("&Edit Contents..."));
-    m_editAction->setGlobalShortcut(KShortcut());
+    KGlobalAccel::self()->setShortcut(m_editAction, QList<QKeySequence>());
     connect(m_editAction, SIGNAL(triggered()), SLOT(slotEditData()));
 
 #ifdef HAVE_PRISON
     // add barcode for mobile phones
     m_showBarcodeAction = m_collection->addAction("show-barcode");
     m_showBarcodeAction->setText(i18n("&Show Barcode..."));
-    m_showBarcodeAction->setGlobalShortcut(KShortcut());
+    KGlobalAccel::self()->setShortcut(m_showBarcodeAction, QList<QKeySequence>());
     connect(m_showBarcodeAction, SIGNAL(triggered()), SLOT(slotShowBarcode()));
 #endif
 
     // Cycle through history
     m_cycleNextAction = m_collection->addAction("cycleNextAction");
     m_cycleNextAction->setText(i18n("Next History Item"));
-    m_cycleNextAction->setGlobalShortcut(KShortcut());
+    KGlobalAccel::self()->setShortcut(m_cycleNextAction, QList<QKeySequence>());
     connect(m_cycleNextAction, SIGNAL(triggered(bool)), SLOT(slotCycleNext()));
     m_cyclePrevAction = m_collection->addAction("cyclePrevAction");
     m_cyclePrevAction->setText(i18n("Previous History Item"));
-    m_cyclePrevAction->setGlobalShortcut(KShortcut());
+    KGlobalAccel::self()->setShortcut(m_cyclePrevAction, QList<QKeySequence>());
     connect(m_cyclePrevAction, SIGNAL(triggered(bool)), SLOT(slotCyclePrev()));
 
     // Action to show Klipper popup on mouse position
     m_showOnMousePos = m_collection->addAction("show-on-mouse-pos");
     m_showOnMousePos->setText(i18n("Open Klipper at Mouse Position"));
-    m_showOnMousePos->setGlobalShortcut(KShortcut());
+    KGlobalAccel::self()->setShortcut(m_showOnMousePos, QList<QKeySequence>());
     connect(m_showOnMousePos, SIGNAL(triggered(bool)), this, SLOT(slotPopupMenu()));
 
     KlipperPopup* popup = history()->popup();
