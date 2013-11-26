@@ -214,6 +214,7 @@ Item {
             var d = new Date();
             print(" ????? " + Qt.formatDate(d, "yyyy") + " == " + date.yearNumber)
             if (Qt.formatDate(d, "yyyy") == date.yearNumber) {
+            if (Qt.formatDate(d, "yyyy") == date.getFullYear()) {
                 return true;
             }
             return false;
@@ -232,7 +233,7 @@ Item {
             level: 1
             opacity: 0.6
             //text: monthCalendar.monthName + ", " + monthCalendar.year
-            text: cal.isCurrentYear(monthView.date) ?  monthView.selectedMonth :  monthView.selectedMonth + ", " + monthView.selectedYear
+            text: cal.isCurrentYear(monthView.startDate) ?  monthView.selectedMonth :  monthView.selectedMonth + ", " + monthView.selectedYear
             elide: Text.ElideRight
             Loader {
                 id: menuLoader
