@@ -22,7 +22,7 @@
 
 #include <KLocale>
 #include <KCmdLineArgs>
-#include <KAboutData>
+#include <k4aboutdata.h>
 #include <KUniqueApplication>
 #include <KConfigDialogManager>
 
