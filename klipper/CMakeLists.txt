@@ -35,8 +35,8 @@ set(klipper_KDEINIT_SRCS ${libklipper_common_SRCS} main.cpp tray.cpp)
 
 kf5_add_kdeinit_executable(klipper ${klipper_KDEINIT_SRCS})
 
-target_link_libraries(kdeinit_klipper ${KDE4_KDEUI_LIBS} ${X11_LIBRARIES} ${ZLIB_LIBRARY})
 set_target_properties(kdeinit_klipper PROPERTIES COMPILE_FLAGS -DHAVE_X11)
+target_link_libraries(kdeinit_klipper Qt5::X11Extras KF5::KWindowSystem KF5::KDE4Support ${X11_LIBRARIES} ${ZLIB_LIBRARY})
 if (X11_Xfixes_FOUND)
   target_link_libraries(kdeinit_klipper ${X11_Xfixes_LIB})
 endif ()
