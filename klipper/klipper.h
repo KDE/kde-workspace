@@ -31,7 +31,7 @@
 
 class KAction;
 class KToggleAction;
-class KAboutData;
+class K4AboutData;
 class KActionCollection;
 class URLGrabber;
 class QTime;
@@ -71,7 +71,7 @@ public:
 
     static void createAboutData();
     static void destroyAboutData();
-    static KAboutData* aboutData();
+    static K4AboutData* aboutData();
 
     void saveSettings() const;
 
@@ -196,7 +196,7 @@ private:
     QTimer m_overflowClearTimer;
     QTimer m_pendingCheckTimer;
     bool m_pendingContentsCheck;
-    static KAboutData* m_about_data;
+    static K4AboutData* m_about_data;
 
     bool blockFetchingNewData();
     QString cycleText() const;

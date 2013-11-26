@@ -28,7 +28,7 @@
 #include <QMenu>
 #include <QDBusConnection>
 
-#include <KAboutData>
+#include <k4aboutdata.h>
 #include <KLocale>
 #include <KMessageBox>
 #include <KSaveFile>
@@ -912,8 +912,8 @@ static const char * const description =
 
 void Klipper::createAboutData()
 {
-  m_about_data = new KAboutData("klipper", 0, ki18n("Klipper"),
-    klipper_version, ki18n(description), KAboutData::License_GPL,
+  m_about_data = new K4AboutData("klipper", 0, ki18n("Klipper"),
+    klipper_version, ki18n(description), K4AboutData::License_GPL,
 		       ki18n("(c) 1998, Andrew Stanley-Jones\n"
 		       "1998-2002, Carsten Pfeiffer\n"
 		       "2001, Patrick Dubroy"));
@@ -945,9 +945,9 @@ void Klipper::destroyAboutData()
   m_about_data = NULL;
 }
 
-KAboutData* Klipper::m_about_data;
+K4AboutData* Klipper::m_about_data;
 
-KAboutData* Klipper::aboutData()
+K4AboutData* Klipper::aboutData()
 {
   return m_about_data;
 }
