@@ -154,11 +154,6 @@ void KlipperPopup::buildFromScratch() {
 
         addAction(m_actions.at(i));
     }
-
-    if ( KGlobalSettings::insertTearOffHandle() ) {
-        setTearOffEnabled(true);
-    }
-
 }
 
 void KlipperPopup::rebuild( const QString& filter ) {
