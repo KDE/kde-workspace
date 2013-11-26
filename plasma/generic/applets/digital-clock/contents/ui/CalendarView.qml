@@ -213,8 +213,7 @@ Item {
         function isCurrentYear(date) {
             var d = new Date();
             print(" ????? " + Qt.formatDate(d, "yyyy") + " == " + date.yearNumber)
-            if (Qt.formatDate(d, "yyyy") == date.yearNumber) {
-            if (Qt.formatDate(d, "yyyy") == date.getFullYear()) {
+            if (d.getFullYear() == date.getFullYear()) {
                 return true;
             }
             return false;
