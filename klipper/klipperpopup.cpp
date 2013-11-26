@@ -91,7 +91,7 @@ KlipperPopup::KlipperPopup( History* history )
       m_textForEmptyHistory( i18n( "<empty clipboard>" ) ),
       m_textForNoMatch( i18n( "<no matches>" ) ),
       m_history( history ),
-      m_helpMenu( new KHelpMenu( this, Klipper::aboutData(), false ) ),
+      m_helpMenu( new KHelpMenu( this, i18n("KDE cut & paste history utility"), false ) ),
       m_popupProxy( 0 ),
       m_filterWidget( 0 ),
       m_filterWidgetAction( 0 ),
