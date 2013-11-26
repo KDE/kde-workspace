@@ -62,10 +62,10 @@ public:
 
     void resetModifiedState();
 
-signals:
+Q_SIGNALS:
     void changed();
 
-private slots:
+private Q_SLOTS:
     void onItemChanged();
 
 private:

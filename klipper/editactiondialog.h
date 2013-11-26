@@ -43,7 +43,7 @@ public:
      */
     void setAction(ClipAction* act, int commandIdxToSelect = -1);
 
-private slots:
+private Q_SLOTS:
     void onAddCommand();
     void onRemoveCommand();
     void onSelectionChanged();

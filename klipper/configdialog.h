@@ -59,7 +59,7 @@ public:
 
     void resetModifiedState();
 
-private slots:
+private Q_SLOTS:
     void onSelectionChanged();
     void onAddAction();
     void onEditAction();

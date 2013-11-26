@@ -32,7 +32,7 @@ class ClipCommandProcess : public KProcess
     Q_OBJECT
 public:
     ClipCommandProcess(const ClipAction& action, const ClipCommand& command, const QString& clip, History* history = 0L, const HistoryItem* original_item = 0L);
-public slots:
+public Q_SLOTS:
     void slotStdOutputAvailable();
     void slotFinished(int exitCode, QProcess::ExitStatus newState);
 private:

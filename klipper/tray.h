@@ -34,7 +34,7 @@ class KlipperTray : public KStatusNotifierItem
 public:
     KlipperTray();
 
-public slots:
+public Q_SLOTS:
     void slotSetToolTipFromHistory();
     void slotPassivePopup(const QString& caption, const QString& text);
 
