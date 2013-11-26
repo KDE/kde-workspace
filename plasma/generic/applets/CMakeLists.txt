@@ -4,6 +4,7 @@ add_subdirectory(icon)
 #    add_subdirectory(panelspacer)
 #
 plasma_install_package(analog-clock org.kde.analogclock)
+plasma_install_package(mediacontroller org.kde.mediacontroller)
 
 add_subdirectory(batterymonitor)
 # add_subdirectory(calendar)
