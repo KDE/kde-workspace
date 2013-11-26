@@ -22,9 +22,9 @@
 #include <QCryptographicHash>
 
 namespace {
-    QByteArray compute_uuid(const KUrl::List& _urls, KUrl::MetaDataMap _metaData, bool _cut ) {
+    QByteArray compute_uuid(const QList<QUrl>& _urls, KUrlMimeData::MetaDataMap _metaData, bool _cut ) {
         QCryptographicHash hash(QCryptographicHash::Sha1);
-        foreach(const KUrl& url, _urls) {
+        foreach(const QUrl& url, _urls) {
             hash.addData(url.toEncoded());
             hash.addData("\0", 1); // Use binary zero as that is not a valid path character
         }
@@ -36,7 +36,7 @@ namespace {
     }
 }
 
-HistoryURLItem::HistoryURLItem( const KUrl::List& _urls, KUrl::MetaDataMap _metaData, bool _cut )
+HistoryURLItem::HistoryURLItem( const QList<QUrl>& _urls, KUrlMimeData::MetaDataMap _metaData, bool _cut )
     : HistoryItem(compute_uuid(_urls, _metaData, _cut))
     , m_urls( _urls )
     , m_metaData( _metaData )
@@ -51,12 +51,22 @@ void HistoryURLItem::write( QDataStream& stream ) const
 }
 
 QString HistoryURLItem::text() const {
-    return m_urls.toStringList().join( " " );
+    QString ret;
+    bool first = true;
+    for (const QUrl &url : m_urls) {
+        if (!first) {
+            ret.append(QStringLiteral(" "));
+            first = false;
+        }
+        ret.append(url.toString(QUrl::FullyEncoded));
+    }
+    return ret;
 }
 
 QMimeData* HistoryURLItem::mimeData() const {
     QMimeData *data = new QMimeData();
-    m_urls.populateMimeData(data, m_metaData);
+    data->setUrls(m_urls);
+    KUrlMimeData::setMetaData(m_metaData, data);
     data->setData("application/x-kde-cutselection", QByteArray(m_cut ? "1" : "0"));
     return data;
 }

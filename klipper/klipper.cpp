@@ -711,7 +711,7 @@ void Klipper::checkClipData( bool selectionMode )
     if( selectionMode && m_bSelectionTextOnly && !data->hasText())
         return;
 
-    if( KUrl::List::canDecode( data ) )
+    if( data->hasUrls() )
         ; // ok
     else if( data->hasText() )
         ; // ok

@@ -22,6 +22,7 @@
 #include <QPixmap>
 
 #include <KDebug>
+#include <kurlmimedata.h>
 
 #include "historystringitem.h"
 #include "historyimageitem.h"
@@ -43,10 +44,10 @@ HistoryItem* HistoryItem::create( const QMimeData* data )
         kDebug() << "format(" << i++ <<"): " << format;
     }
 #endif
-    if (KUrl::List::canDecode(data))
+    if (data->hasUrls())
     {
-        KUrl::MetaDataMap metaData;
-        KUrl::List urls = KUrl::List::fromMimeData(data, &metaData);
+        KUrlMimeData::MetaDataMap metaData;
+        QList<QUrl> urls = KUrlMimeData::urlsFromMimeData(data, KUrlMimeData::PreferKdeUrls, &metaData);
         QByteArray bytes = data->data("application/x-kde-cutselection");
         bool cut = !bytes.isEmpty() && (bytes.at(0) == '1'); // true if 1
         return new HistoryURLItem(urls, metaData, cut);
@@ -71,7 +72,7 @@ HistoryItem* HistoryItem::create( QDataStream& dataStream ) {
     QString type;
     dataStream >> type;
     if ( type == "url" ) {
-        KUrl::List urls;
+        QList<QUrl> urls;
         QMap< QString, QString > metaData;
         int cut;
         dataStream >> urls;
