@@ -13,7 +13,7 @@ add_library(iconplugin SHARED ${iconplugin_SRCS})
 
 target_link_libraries(iconplugin
   Qt5::Core
-  ${Qt5Qml_LIBRARIES}
+  Qt5::Qml
   Qt5::Quick
   KF5::KIOCore # KFileItem
 )

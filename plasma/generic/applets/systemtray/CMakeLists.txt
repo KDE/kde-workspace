@@ -83,7 +83,7 @@ add_library(systemtrayplugin SHARED ${systemtrayplugin_SRCS})
 
 target_link_libraries(systemtrayplugin
     Qt5::Quick
-    ${Qt5Qml_LIBRARIES}
+    Qt5::Qml
     ${KCore_LIBRARIES}
     ${KDECLARATIVE_LIBRARIES}
     KF5::Plasma

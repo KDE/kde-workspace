@@ -15,9 +15,9 @@ add_library(taskmanagerplugin SHARED ${taskmanagerplugin_SRCS})
 target_link_libraries(taskmanagerplugin
                       taskmanager
                       Qt5::Core
-                      ${Qt5Qml_LIBRARIES}
+                      Qt5::Qml
                       Qt5::Quick
-                      ${Qt5Widgets_LIBRARIES}
+                      Qt5::Widgets
                       KF5::KIOCore
                       KF5::KWindowSystem
                       Qt5::X11Extras

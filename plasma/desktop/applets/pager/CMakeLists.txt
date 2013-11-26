@@ -15,7 +15,7 @@ target_link_libraries(pagerplugin
                       KF5::Plasma 
                       KF5::KActivities
                       Qt5::Core
-                      ${Qt5Qml_LIBRARIES}
+                      Qt5::Qml
                       Qt5::Quick
                       Qt5::DBus
                       taskmanager)
