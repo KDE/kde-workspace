@@ -500,7 +500,7 @@ void Klipper::slotQuit()
                                                      i18n("Automatically Start Klipper?"), KGuiItem(i18n("Start")),
                                                      KGuiItem(i18n("Do Not Start")), KStandardGuiItem::cancel(), "StartAutomatically");
 
-    KConfigGroup config( KGlobal::config(), "General");
+    KConfigGroup config( KSharedConfig::openConfig(), "General");
     if ( autoStart == KMessageBox::Yes ) {
         config.writeEntry("AutoStart", true);
     } else if ( autoStart == KMessageBox::No) {

@@ -104,7 +104,7 @@ void URLGrabber::setActionList( const ActionList& list )
 void URLGrabber::matchingMimeActions(const QString& clipData)
 {
     KUrl url(clipData);
-    KConfigGroup cg(KGlobal::config(), "Actions");
+    KConfigGroup cg(KSharedConfig::openConfig(), "Actions");
     if(!cg.readEntry("EnableMagicMimeActions",true)) {
         //kDebug() << "skipping mime magic due to configuration";
         return;
@@ -321,25 +321,25 @@ void URLGrabber::loadSettings()
     qDeleteAll(m_myActions);
     m_myActions.clear();
 
-    KConfigGroup cg(KGlobal::config(), "General");
+    KConfigGroup cg(KSharedConfig::openConfig(), "General");
     int num = cg.readEntry("Number of Actions", 0);
     QString group;
     for ( int i = 0; i < num; i++ ) {
         group = QString("Action_%1").arg( i );
-        m_myActions.append( new ClipAction( KGlobal::config(), group ) );
+        m_myActions.append( new ClipAction( KSharedConfig::openConfig(), group ) );
     }
 }
 
 void URLGrabber::saveSettings() const
 {
-    KConfigGroup cg(KGlobal::config(), "General");
+    KConfigGroup cg(KSharedConfig::openConfig(), "General");
     cg.writeEntry( "Number of Actions", m_myActions.count() );
 
     int i = 0;
     QString group;
     foreach (ClipAction* action, m_myActions) {
         group = QString("Action_%1").arg( i );
-        action->save( KGlobal::config(), group );
+        action->save( KSharedConfig::openConfig(), group );
         ++i;
     }
 

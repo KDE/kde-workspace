@@ -282,7 +282,7 @@ EditActionDialog::EditActionDialog(QWidget* parent)
     connect(m_ui->pbAddCommand, SIGNAL(clicked()), SLOT(onAddCommand()) );
     connect(m_ui->pbRemoveCommand, SIGNAL(clicked()), SLOT(onRemoveCommand()) );
 
-    const KConfigGroup grp = KGlobal::config()->group("EditActionDialog");
+    const KConfigGroup grp = KSharedConfig::openConfig()->group("EditActionDialog");
     restoreDialogSize(grp);
     QByteArray hdrState = grp.readEntry("ColumnState", QByteArray());
     if (!hdrState.isEmpty()) {
@@ -352,7 +352,7 @@ void EditActionDialog::slotButtonClicked( int button )
         saveAction();
 
         kDebug() << "Saving dialogue state";
-        KConfigGroup grp = KGlobal::config()->group("EditActionDialog");
+        KConfigGroup grp = KSharedConfig::openConfig()->group("EditActionDialog");
         saveDialogSize(grp);
         grp.writeEntry("ColumnState",
                        m_ui->twCommandList->horizontalHeader()->saveState().toBase64());
