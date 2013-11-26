@@ -14,16 +14,16 @@ set(libklipper_common_SRCS
     clipcommandprocess.cpp
 )
 
-macro_optional_find_package(Prison QUIET CONFIG)
-set_package_properties(Prison PROPERTIES DESCRIPTION "Prison library"
-                       URL "http://projects.kde.org/prison"
-                       TYPE OPTIONAL
-                       PURPOSE "Needed to create mobile barcodes from clipboard data"
-                      )
-if (PRISON_FOUND)
-    add_definitions(-DHAVE_PRISON)
-    include_directories(${PRISON_INCLUDE_DIR})
-endif ()
+# find_package(Prison QUIET CONFIG)
+# set_package_properties(Prison PROPERTIES DESCRIPTION "Prison library"
+#                        URL "http://projects.kde.org/prison"
+#                        TYPE OPTIONAL
+#                        PURPOSE "Needed to create mobile barcodes from clipboard data"
+#                       )
+# if (PRISON_FOUND)
+#     add_definitions(-DHAVE_PRISON)
+#     include_directories(${PRISON_INCLUDE_DIR})
+# endif ()
 
 
 kde4_add_app_icon(libklipper_common_SRCS "${KDE4_ICON_INSTALL_DIR}/oxygen/*/apps/klipper.png")
@@ -39,9 +39,9 @@ target_link_libraries(kdeinit_klipper ${KDE4_KDEUI_LIBS} ${X11_LIBRARIES} ${ZLIB
 if (X11_Xfixes_FOUND)
   target_link_libraries(kdeinit_klipper ${X11_Xfixes_LIB})
 endif ()
-if (PRISON_FOUND)
-  target_link_libraries(kdeinit_klipper ${PRISON_LIBRARIES})
-endif ()
+# if (PRISON_FOUND)
+#   target_link_libraries(kdeinit_klipper ${PRISON_LIBRARIES})
+# endif ()
 
 install(TARGETS kdeinit_klipper ${INSTALL_TARGETS_DEFAULT_ARGS})
 install(TARGETS klipper         ${INSTALL_TARGETS_DEFAULT_ARGS})
