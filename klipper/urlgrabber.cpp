@@ -31,6 +31,7 @@
 #include <KMenu>
 #include <KService>
 #include <KDebug>
+#include <KIconLoader>
 #include <KStringHandler>
 #include <KGlobal>
 #include <KMimeTypeTrader>

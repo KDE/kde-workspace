@@ -36,6 +36,7 @@
 #include <KSessionManager>
 #include <KStandardDirs>
 #include <KDebug>
+#include <KDialog>
 #include <KGlobalSettings>
 #include <KActionCollection>
 #include <KToggleAction>

@@ -20,6 +20,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include <kdemacros.h>
 #include <KLocale>
 #include <KCmdLineArgs>
 #include <k4aboutdata.h>

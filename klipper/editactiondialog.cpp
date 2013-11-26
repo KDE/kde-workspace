@@ -24,6 +24,7 @@
 #include <QComboBox>
 
 #include <KDebug>
+#include <KIconLoader>
 
 #include "urlgrabber.h"
 #include "ui_editactiondialog.h"

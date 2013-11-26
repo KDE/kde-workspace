@@ -20,6 +20,7 @@
 
 #include "configdialog.h"
 
+#include <KConfigSkeleton>
 #include <KLocale>
 #include <KMenu>
 #include <KShortcutsEditor>
