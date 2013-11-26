@@ -19,7 +19,7 @@
 #ifndef KLIPPERPOPUP_H
 #define KLIPPERPOPUP_H
 
-#include <QtCore/QList>
+#include <QList>
 
 #include <KMenu>
 

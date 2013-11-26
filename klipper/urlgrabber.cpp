@@ -20,11 +20,11 @@
 
 #include <netwm.h>
 
-#include <QtCore/QHash>
-#include <QtCore/QTimer>
-#include <QtCore/QUuid>
-#include <QtCore/QFile>
-#include <QtGui/QX11Info>
+#include <QHash>
+#include <QTimer>
+#include <QUuid>
+#include <QFile>
+#include <QX11Info>
 
 #include <KDialog>
 #include <KLocale>

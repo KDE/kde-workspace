@@ -20,7 +20,7 @@
 #ifndef TRAY_H
 #define TRAY_H
 
-#include <QtCore/QPointer>
+#include <QPointer>
 
 #include <KStatusNotifierItem>
 

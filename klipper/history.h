@@ -20,9 +20,9 @@
 #ifndef HISTORY_H
 #define HISTORY_H
 
-#include <QtCore/QObject>
-#include <QtCore/QHash>
-#include <QtCore/QByteArray>
+#include <QObject>
+#include <QHash>
+#include <QByteArray>
 
 #include "historyitem.h"
 

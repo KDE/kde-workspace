@@ -25,8 +25,8 @@
 
 #include <zlib.h>
 
-#include <QtGui/QMenu>
-#include <QtDBus/QDBusConnection>
+#include <QMenu>
+#include <QDBusConnection>
 
 #include <KAboutData>
 #include <KLocale>

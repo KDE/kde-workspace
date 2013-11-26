@@ -18,8 +18,8 @@
 */
 #include "historyitem.h"
 
-#include <QtCore/QMap>
-#include <QtGui/QPixmap>
+#include <QMap>
+#include <QPixmap>
 
 #include <KDebug>
 

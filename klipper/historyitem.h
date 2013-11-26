@@ -19,7 +19,7 @@
 #ifndef HISTORYITEM_H
 #define HISTORYITEM_H
 
-#include <QtGui/QPixmap>
+#include <QPixmap>
 
 class QString;
 class QMimeData;

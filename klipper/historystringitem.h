@@ -19,7 +19,7 @@
 #ifndef HISTORYSTRINGITEM_H
 #define HISTORYSTRINGITEM_H
 
-#include <QtCore/QMimeData>
+#include <QMimeData>
 
 #include "historyitem.h"
 

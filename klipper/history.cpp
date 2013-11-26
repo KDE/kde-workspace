@@ -20,7 +20,7 @@
 */
 #include "history.h"
 
-#include <QtGui/QAction>
+#include <QAction>
 
 #include <KDebug>
 

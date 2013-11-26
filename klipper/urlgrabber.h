@@ -19,9 +19,9 @@
 #ifndef URLGRABBER_H
 #define URLGRABBER_H
 
-#include <QtCore/QHash>
-#include <QtCore/QRegExp>
-#include <QtCore/QStringList>
+#include <QHash>
+#include <QRegExp>
+#include <QStringList>
 
 #include <KSharedConfig>
 

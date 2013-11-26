@@ -20,9 +20,9 @@
 */
 #include "klipperpopup.h"
 
-#include <QtGui/QApplication>
-#include <QtGui/QKeyEvent>
-#include <QtGui/QWidgetAction>
+#include <QApplication>
+#include <QKeyEvent>
+#include <QWidgetAction>
 
 #include <KHelpMenu>
 #include <KLineEdit>

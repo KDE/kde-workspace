@@ -18,7 +18,7 @@
 */
 #include "historystringitem.h"
 
-#include <QtCore/QCryptographicHash>
+#include <QCryptographicHash>
 
 HistoryStringItem::HistoryStringItem( const QString& data )
     : HistoryItem(QCryptographicHash::hash(data.toUtf8(), QCryptographicHash::Sha1))

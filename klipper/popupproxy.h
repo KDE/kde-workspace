@@ -19,8 +19,8 @@
 #ifndef POPUPPROXY_H
 #define POPUPPROXY_H
 
-#include <QtCore/QObject>
-#include <QtCore/QRegExp>
+#include <QObject>
+#include <QRegExp>
 
 #include "history.h"
 

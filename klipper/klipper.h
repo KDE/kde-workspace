@@ -21,9 +21,9 @@
 #ifndef KLIPPER_H
 #define KLIPPER_H
 
-#include <QtCore/QTime>
-#include <QtCore/QTimer>
-#include <QtGui/QClipboard>
+#include <QTime>
+#include <QTimer>
+#include <QClipboard>
 
 #include <KGlobal>
 

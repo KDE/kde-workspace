@@ -20,8 +20,8 @@
 
 #include "editactiondialog.h"
 
-#include <QtGui/QItemDelegate>
-#include <QtGui/QComboBox>
+#include <QItemDelegate>
+#include <QComboBox>
 
 #include <KDebug>
 
