@@ -1,6 +1,7 @@
 /*
  * Copyright 2013  Heena Mahour <heena393@gmail.com>
  * Copyright 2013 Sebastian Kügler <sebas@kde.org>
+ * Copyright 2013 Martin Klapetek <mklapetek@kde.org>
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -50,15 +51,8 @@ Item {
         width: Math.max(paintedWidth,time.paintedWidth)
         opacity: 0.8
         color: "white"
-        text: {
-            if (plasmoid.configuration.showSeconds) {
-                print("WITH Seconds");
-                return Qt.formatTime(dataSource.data["Local"]["Time"], timeFormatCorrection(Qt.locale().timeFormat(Locale.LongFormat)));
-            } else {
-                print("Without Seconds");
-                return Qt.formatTime(dataSource.data["Local"]["Time"], Qt.DefaultLocaleShortDate);
-            }
-        }
+        // We need to adjust the timeformat a bit, see more at timeFormatCorrection(..) comments
+        text: Qt.formatTime(dataSource.data["Local"]["Time"], timeFormatCorrection(Qt.locale().timeFormat(Locale.ShortFormat)));
         horizontalAlignment: main.AlignHCenter
         verticalAlignment: main.AlignVCenter
         anchors {
@@ -117,11 +111,20 @@ Item {
         //if (time.paintedWidth)
     }
 
-    // Qt's locale puts timezone in the long format by default, remove it if it's present
+    // Qt's QLocale does not offer any modular time creating like Klocale did
+    // eg. no "gimme time with seconds" or "gimme time without seconds and with timezone".
+    // QLocale supports only two formats - Long and Short. Long is unusable in many situations
+    // and Short does not provide seconds. So if seconds are enabled, we need to add it here.
+    //
+    // What happens here is that it looks for the delimiter between "h" and "m", takes it
+    // and appends it after "mm" and then appends "ss" for the seconds. Also it checks
+    // if the format string already does not contain the seconds part.
     function timeFormatCorrection(timeFormatString) {
-        var tPosition = timeFormatString.indexOf('t');
-        if (!plasmoid.configuration.showTimezone && tPosition != -1) {
-            timeFormatString = timeFormatString.replace(" t", "");
+        if (plasmoid.configuration.showSeconds && timeFormatString.indexOf('s') == -1) {
+            timeFormatString = timeFormatString.replace(/(.*h)(.+)(mm)(.*)/gi,
+                                                        function(match, firstPart, delimiter, secondPart, rest, offset, original) {
+                return firstPart + delimiter + secondPart + delimiter + "ss" + rest
+            });
         }
 
         return timeFormatString;
