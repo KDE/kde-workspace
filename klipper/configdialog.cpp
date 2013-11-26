@@ -54,10 +54,10 @@ ActionsWidget::ActionsWidget(QWidget* parent)
 {
     m_ui.setupUi(this);
 
-    m_ui.pbAddAction->setIcon(KIcon("list-add"));
-    m_ui.pbDelAction->setIcon(KIcon("list-remove"));
-    m_ui.pbEditAction->setIcon(KIcon("document-edit"));
-    m_ui.pbAdvanced->setIcon(KIcon("configure"));
+    m_ui.pbAddAction->setIcon(QIcon::fromTheme("list-add"));
+    m_ui.pbDelAction->setIcon(QIcon::fromTheme("list-remove"));
+    m_ui.pbEditAction->setIcon(QIcon::fromTheme("document-edit"));
+    m_ui.pbAdvanced->setIcon(QIcon::fromTheme("configure"));
 
     const KConfigGroup grp = KGlobal::config()->group("ActionsWidget");
     QByteArray hdrState = grp.readEntry("ColumnState", QByteArray());
@@ -147,7 +147,7 @@ void ActionsWidget::updateActionItem( QTreeWidgetItem* item, ClipAction* action 
         QStringList cmdProps;
         cmdProps << command.command << command.description;
         QTreeWidgetItem *child = new QTreeWidgetItem(item, cmdProps);
-        child->setIcon(0, KIcon(command.icon.isEmpty() ? "system-run" : command.icon));
+        child->setIcon(0, QIcon::fromTheme(command.icon.isEmpty() ? "system-run" : command.icon));
     }
 }
 

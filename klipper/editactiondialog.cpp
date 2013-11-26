@@ -188,7 +188,7 @@ QVariant ActionDetailModel::decorationData(ClipCommand* command, ActionDetailMod
 {
     switch (column) {
         case COMMAND_COL:
-            return command->icon.isEmpty() ? KIcon( "system-run" ) : KIcon( command->icon );
+            return command->icon.isEmpty() ? QIcon::fromTheme( "system-run" ) : QIcon::fromTheme( command->icon );
         case OUTPUT_COL:
         case DESCRIPTION_COL:
             break;
@@ -270,8 +270,8 @@ EditActionDialog::EditActionDialog(QWidget* parent)
     m_ui->leRegExp->setClearButtonShown(true);
     m_ui->leDescription->setClearButtonShown(true);
 
-    m_ui->pbAddCommand->setIcon(KIcon("list-add"));
-    m_ui->pbRemoveCommand->setIcon(KIcon("list-remove"));
+    m_ui->pbAddCommand->setIcon(QIcon::fromTheme("list-add"));
+    m_ui->pbRemoveCommand->setIcon(QIcon::fromTheme("list-remove"));
 
     // For some reason, the default row height is 30 pixel. Set it to the minimum sectionSize instead,
     // which is the font height+struts.

@@ -25,7 +25,6 @@
 #include <KGlobal>
 #include <KLocalizedString>
 #include <KNotification>
-#include <KIcon>
 
 #include "klipper.h"
 #include "history.h"
@@ -71,7 +70,7 @@ void KlipperTray::slotPassivePopup(const QString& caption, const QString& text)
         m_notification->setText(text);
     } else {
         m_notification = KNotification::event(KNotification::Notification, caption, text,
-                                              KIcon("klipper").pixmap(QSize(16, 16)));
+                                              QIcon::fromTheme("klipper").pixmap(QSize(16, 16)));
     }
 }
 

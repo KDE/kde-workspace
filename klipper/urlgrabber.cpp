@@ -218,7 +218,7 @@ void URLGrabber::actionMenu( const HistoryItem* item, bool automatically_invoked
         connect(m_myMenu, SIGNAL(triggered(QAction*)), SLOT(slotItemSelected(QAction*)));
 
         foreach (ClipAction* clipAct, matchingActionsList) {
-            m_myMenu->addTitle(KIcon( "klipper" ),
+            m_myMenu->addTitle(QIcon::fromTheme( "klipper" ),
                                i18n("%1 - Actions For: %2", clipAct->description(), KStringHandler::csqueeze(text, 45)));
             QList<ClipCommand> cmdList = clipAct->commands();
             int listSize = cmdList.count();
@@ -235,7 +235,7 @@ void URLGrabber::actionMenu( const HistoryItem* item, bool automatically_invoked
                 action->setText(item);
 
                 if (!command.icon.isEmpty())
-                    action->setIcon(KIcon(command.icon));
+                    action->setIcon(QIcon::fromTheme(command.icon));
 
                 m_myCommandMapper.insert(id, qMakePair(clipAct,i));
                 m_myMenu->addAction(action);
@@ -253,7 +253,7 @@ void URLGrabber::actionMenu( const HistoryItem* item, bool automatically_invoked
         }
         m_myMenu->addSeparator();
 
-        QAction *cancelAction = new QAction(KIcon("dialog-cancel"), i18n("&Cancel"), this);
+        QAction *cancelAction = new QAction(QIcon::fromTheme("dialog-cancel"), i18n("&Cancel"), this);
         connect(cancelAction, SIGNAL(triggered()), m_myMenu, SLOT(hide()));
         m_myMenu->addAction(cancelAction);
         m_myClipItem = item;

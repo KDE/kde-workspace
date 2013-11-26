@@ -29,7 +29,6 @@
 #include <KLocalizedString>
 #include <KWindowSystem>
 #include <KDebug>
-#include <KIcon>
 
 #include "history.h"
 #include "klipper.h"
@@ -136,7 +135,7 @@ void KlipperPopup::ensureClean() {
 }
 
 void KlipperPopup::buildFromScratch() {
-    addTitle(KIcon("klipper"), i18n("Klipper - Clipboard Tool"));
+    addTitle(QIcon::fromTheme("klipper"), i18n("Klipper - Clipboard Tool"));
 
     m_filterWidget = new KLineEditBlackKey(this);
     m_filterWidget->setFocusPolicy( Qt::NoFocus );
