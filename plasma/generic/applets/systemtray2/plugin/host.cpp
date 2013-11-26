@@ -197,7 +197,6 @@ void Host::taskAdded(Task* task)
         qSort(d->hiddenTasks.begin(), d->hiddenTasks.end(), taskLessThan);
     }
     d->compressionTimer.start(TIMEOUT);
-    emit tasksChanged();
 }
 
 void Host::taskRemoved(Task* task)
@@ -207,7 +206,9 @@ void Host::taskRemoved(Task* task)
     } else {
         d->hiddenTasks.removeAll(task);
     }
-    d->compressionTimer.start(TIMEOUT);
+    // No compression here, as we delete the pointer to the task
+    // object behind the list's back otherwise
+    emit tasksChanged();
 }
 
 bool HostPrivate::showTask(Task *task) {
