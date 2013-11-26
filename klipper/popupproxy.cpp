@@ -25,7 +25,7 @@
 #include <QStyleOption>
 
 #include <KMenu>
-#include <KLocale>
+#include <KLocalizedString>
 #include <KDebug>
 
 #include "historyitem.h"

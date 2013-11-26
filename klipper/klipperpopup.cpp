@@ -26,7 +26,7 @@
 
 #include <KHelpMenu>
 #include <KLineEdit>
-#include <KLocale>
+#include <KLocalizedString>
 #include <KWindowSystem>
 #include <KDebug>
 #include <KIcon>

@@ -23,7 +23,7 @@
 #include "tray.h"
 
 #include <KGlobal>
-#include <KLocale>
+#include <KLocalizedString>
 #include <KNotification>
 #include <KIcon>
 
