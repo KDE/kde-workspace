@@ -18,7 +18,6 @@
 
 import QtQuick 2.0
 import QtQuick.Controls 1.0 as QtControls
-// import org.kde.locale 2.0
 
 //FIXME this causes a crash in Oxygen style
 //QtControls.GroupBox {

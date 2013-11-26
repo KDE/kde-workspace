@@ -22,7 +22,6 @@ import QtQuick 2.0
 import org.kde.plasma.core 2.0 as PlasmaCore
 import org.kde.plasma.components 2.0 as Components
 import org.kde.qtextracomponents 2.0 as QtExtras
-import org.kde.locale 2.0 as KLocale
 
 FocusScope {
     id: brightnessItem
