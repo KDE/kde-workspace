@@ -40,7 +40,6 @@
 #include <KToggleAction>
 #include <KTextEdit>
 #include <KApplication>
-#include <KIcon>
 
 #include "configdialog.h"
 #include "klippersettings.h"
@@ -169,17 +168,17 @@ Klipper::Klipper(QObject* parent, const KSharedConfigPtr& config)
     }
 
     m_clearHistoryAction = m_collection->addAction( "clear-history" );
-    m_clearHistoryAction->setIcon( KIcon("edit-clear-history") );
+    m_clearHistoryAction->setIcon( QIcon::fromTheme("edit-clear-history") );
     m_clearHistoryAction->setText( i18n("C&lear Clipboard History") );
     connect(m_clearHistoryAction, SIGNAL(triggered()), SLOT(slotAskClearHistory()));
 
     m_configureAction = m_collection->addAction( "configure" );
-    m_configureAction->setIcon( KIcon("configure") );
+    m_configureAction->setIcon( QIcon::fromTheme("configure") );
     m_configureAction->setText( i18n("&Configure Klipper...") );
     connect(m_configureAction, SIGNAL(triggered(bool)), SLOT(slotConfigure()));
 
     m_quitAction = m_collection->addAction( "quit" );
-    m_quitAction->setIcon( KIcon("application-exit") );
+    m_quitAction->setIcon( QIcon::fromTheme("application-exit") );
     m_quitAction->setText( i18nc("@item:inmenu Quit Klipper", "&Quit") );
     connect(m_quitAction, SIGNAL(triggered(bool)), SLOT(slotQuit()));
 
@@ -190,7 +189,7 @@ Klipper::Klipper(QObject* parent, const KSharedConfigPtr& config)
 
     // add an edit-possibility
     m_editAction = m_collection->addAction("edit_clipboard");
-    m_editAction->setIcon(KIcon("document-properties"));
+    m_editAction->setIcon(QIcon::fromTheme("document-properties"));
     m_editAction->setText(i18n("&Edit Contents..."));
     m_editAction->setGlobalShortcut(KShortcut());
     connect(m_editAction, SIGNAL(triggered()), SLOT(slotEditData()));

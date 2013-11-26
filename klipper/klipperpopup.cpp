@@ -148,7 +148,7 @@ void KlipperPopup::buildFromScratch() {
     for (int i = 0; i < m_actions.count(); i++) {
 
         if (i + 1 == m_actions.count()) {
-            addMenu(m_helpMenu->menu())->setIcon(KIcon("help-contents"));
+            addMenu(m_helpMenu->menu())->setIcon(QIcon::fromTheme("help-contents"));
             addSeparator();
         }
 
