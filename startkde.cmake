@@ -70,12 +70,6 @@ kcminputrc Mouse cursorTheme 'Oxygen_White'
 kcminputrc Mouse cursorSize ''
 ksplashrc KSplash Theme Default
 ksplashrc KSplash Engine KSplashX
-krandrrc Display ApplyOnStartup false
-krandrrc Display StartupCommands ''
-krandrrc [Screen0]
-krandrrc [Screen1]
-krandrrc [Screen2]
-krandrrc [Screen3]
 kcmfonts General forceFontDPI 0
 kdeglobals Locale Language '' # trigger requesting languages from KLocale
 EOF
@@ -105,14 +99,11 @@ if test -n "$kcminputrc_mouse_cursortheme" -o -n "$kcminputrc_mouse_cursorsize" 
     fi
 fi
 
-. krandrstartup
-
 if test "$kcmfonts_general_forcefontdpi" -ne 0; then
     xrdb -quiet -merge -nocpp <<EOF
 Xft.dpi: $kcmfonts_general_forcefontdpi
 EOF
 fi
-
 
 dl=$DESKTOP_LOCKED
 unset DESKTOP_LOCKED # Don't want it in the environment
