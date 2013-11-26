@@ -25,6 +25,7 @@
 #include <KShortcutsEditor>
 #include <KDebug>
 #include <KEditListWidget>
+#include <kwindowconfig.h>
 
 #include "klipper.h"
 #include "editactiondialog.h"
@@ -287,7 +288,7 @@ ConfigDialog::ConfigDialog(QWidget* parent, KConfigSkeleton* skeleton, const Kli
     addPage(m_shortcutsWidget, i18nc("Shortcuts Config", "Shortcuts"), "configure-shortcuts", i18n("Shortcuts Configuration"));
 
     const KConfigGroup grp = KSharedConfig::openConfig()->group("ConfigDialog");
-    restoreDialogSize(grp);
+    KWindowConfig::restoreWindowSize(windowHandle(), grp);
 }
 
 
@@ -314,7 +315,7 @@ void ConfigDialog::updateSettings()
     m_klipper->saveSettings();
 
     KConfigGroup grp = KSharedConfig::openConfig()->group("ConfigDialog");
-    saveDialogSize(grp);
+    KWindowConfig::saveWindowSize(windowHandle(), grp);
 }
 
 void ConfigDialog::updateWidgets()
