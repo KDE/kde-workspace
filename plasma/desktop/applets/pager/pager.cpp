@@ -840,8 +840,9 @@ void Pager::updateToolTip(int hoverDesktopId)
     int taskCounter = 0;
     int displayedTaskCounter = 0;
     WindowModel *windows = m_pagerModel->windowsAt(hoverDesktopId);
+    const int windowCount = windows ? windows->rowCount() : 0;
 
-    for (; taskCounter < windows->rowCount(); taskCounter++) {
+    for (; taskCounter < windowCount; taskCounter++) {
         WId id = windows->idAt(taskCounter);
         QString visibleName = windows->visibleNameAt(taskCounter);
 
