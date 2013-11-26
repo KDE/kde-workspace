@@ -120,7 +120,6 @@ protected:
     bool ignoreClipboardChanges() const;
 
     KSharedConfigPtr config() const { return m_config; }
-    bool isApplet() const { return m_config != KSharedConfig::openConfig(); }
 
 Q_SIGNALS:
     void passivePopup(const QString& caption, const QString& text);

@@ -273,16 +273,12 @@ void ActionsWidget::onAdvanced()
     }
 }
 
-ConfigDialog::ConfigDialog(QWidget* parent, KConfigSkeleton* skeleton, const Klipper* klipper, KActionCollection*collection, bool isApplet)
+ConfigDialog::ConfigDialog(QWidget* parent, KConfigSkeleton* skeleton, const Klipper* klipper, KActionCollection*collection)
     : KConfigDialog(parent, "preferences", skeleton),
     m_generalPage(new GeneralWidget(this)),
     m_actionsPage(new ActionsWidget(this)),
     m_klipper(klipper)
 {
-    if ( isApplet ) {
-        setHelp( QString(), "klipper" );
-    }
-
     addPage(m_generalPage, i18nc("General Config", "General"), "klipper", i18n("General Configuration"));
     addPage(m_actionsPage, i18nc("Actions Config", "Actions"), "system-run", i18n("Actions Configuration"));
 

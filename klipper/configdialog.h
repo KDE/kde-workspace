@@ -102,7 +102,7 @@ class ConfigDialog : public KConfigDialog
     Q_OBJECT
 
 public:
-    ConfigDialog( QWidget* parent, KConfigSkeleton* config, const Klipper* klipper, KActionCollection* collection, bool isApplet );
+    ConfigDialog( QWidget* parent, KConfigSkeleton* config, const Klipper* klipper, KActionCollection* collection );
     ~ConfigDialog();
 
 private:

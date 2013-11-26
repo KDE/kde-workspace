@@ -231,9 +231,7 @@ Klipper::Klipper(QObject* parent, const KSharedConfigPtr& config)
 #ifdef HAVE_PRISON
     popup->plugAction( m_showBarcodeAction );
 #endif
-    if ( !isApplet() ) {
-        popup->plugAction( m_quitAction );
-    }
+    popup->plugAction( m_quitAction );
 }
 
 Klipper::~Klipper()
@@ -480,7 +478,7 @@ void Klipper::slotConfigure()
         return;
     }
 
-    ConfigDialog *dlg = new ConfigDialog( 0, KlipperSettings::self(), this, m_collection, isApplet() );
+    ConfigDialog *dlg = new ConfigDialog( 0, KlipperSettings::self(), this, m_collection );
     connect(dlg, SIGNAL(settingsChanged(QString)), SLOT(loadSettings()));
 
     dlg->show();
