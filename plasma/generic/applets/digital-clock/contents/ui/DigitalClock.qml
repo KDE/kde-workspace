@@ -127,6 +127,13 @@ Item {
             });
         }
 
+        //FIXME: this always appends the timezone part at the end, it should probably be
+        //       Locale-driven, however QLocale does not provide any hint about where to
+        //       put it
+        if (plasmoid.configuration.showTimezone && timeFormatString.indexOf('t') == -1) {
+            timeFormatString = timeFormatString + " t";
+        }
+
         return timeFormatString;
     }
 
