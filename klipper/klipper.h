@@ -29,7 +29,6 @@
 
 #include "urlgrabber.h"
 
-class KAction;
 class KToggleAction;
 class K4AboutData;
 class KActionCollection;
@@ -159,17 +158,17 @@ private:
     int m_overflowCounter;
 
     KToggleAction* m_toggleURLGrabAction;
-    KAction* m_clearHistoryAction;
-    KAction* m_repeatAction;
-    KAction* m_editAction;
+    QAction* m_clearHistoryAction;
+    QAction* m_repeatAction;
+    QAction* m_editAction;
 #ifdef HAVE_PRISON
-    KAction* m_showBarcodeAction;
+    QAction* m_showBarcodeAction;
 #endif
-    KAction* m_configureAction;
-    KAction* m_quitAction;
-    KAction* m_cycleNextAction;
-    KAction* m_cyclePrevAction;
-    KAction* m_showOnMousePos;
+    QAction* m_configureAction;
+    QAction* m_quitAction;
+    QAction* m_cycleNextAction;
+    QAction* m_cyclePrevAction;
+    QAction* m_showOnMousePos;
 
     bool m_bKeepContents :1;
     bool m_bURLGrabber   :1;
