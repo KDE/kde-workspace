@@ -57,9 +57,11 @@
 #include <prison/QRCodeBarcode>
 #endif
 
-#ifdef Q_WS_X11
+#ifdef HAVE_X11
+#include <QX11Info>
 #include <X11/Xlib.h>
 #include <X11/Xatom.h>
+#include <fixx11h.h>
 #endif
 
 //#define NOISY_KLIPPER
@@ -597,7 +599,7 @@ const int MAX_CLIPBOARD_CHANGES = 10; // max changes per second
 
 bool Klipper::blockFetchingNewData()
 {
-#ifdef Q_WS_X11
+#ifdef HAVE_X11
 // Hacks for #85198 and #80302.
 // #85198 - block fetching new clipboard contents if Shift is pressed and mouse is not,
 //   this may mean the user is doing selection using the keyboard, in which case
@@ -835,74 +837,9 @@ bool Klipper::ignoreClipboardChanges() const
     return false;
 }
 
-#ifdef Q_WS_X11
-// QClipboard uses qt_x_time as the timestamp for selection operations.
-// It is updated mainly from user actions, but Klipper polls the clipboard
-// without any user action triggering it, so qt_x_time may be old,
-// which could possibly lead to QClipboard reporting empty clipboard.
-// Therefore, qt_x_time needs to be updated to current X server timestamp.
-
-// Call KApplication::updateUserTime() only from functions that are
-// called from outside (DBUS), or from QTimer timeout !
-
-static Time next_x_time;
-static Bool update_x_time_predicate( Display*, XEvent* event, XPointer )
-{
-    if( next_x_time != CurrentTime )
-        return False;
-    // from qapplication_x11.cpp
-    switch ( event->type ) {
-    case ButtonPress:
-      // fallthrough intended
-    case ButtonRelease:
-      next_x_time = event->xbutton.time;
-      break;
-    case MotionNotify:
-      next_x_time = event->xmotion.time;
-      break;
-    case KeyPress:
-      // fallthrough intended
-    case KeyRelease:
-      next_x_time = event->xkey.time;
-      break;
-    case PropertyNotify:
-      next_x_time = event->xproperty.time;
-      break;
-    case EnterNotify:
-    case LeaveNotify:
-      next_x_time = event->xcrossing.time;
-      break;
-    case SelectionClear:
-      next_x_time = event->xselectionclear.time;
-      break;
-    default:
-      break;
-    }
-    return False;
-}
-#endif
-
 void Klipper::updateTimestamp()
 {
-#ifdef Q_WS_X11
-    static QWidget* w = 0;
-    if ( !w )
-        w = new QWidget;
-    unsigned char data[ 1 ];
-    XChangeProperty( QX11Info::display(), w->winId(), XA_ATOM, XA_ATOM, 8, PropModeAppend, data, 1 );
-    next_x_time = CurrentTime;
-    XEvent dummy;
-    XCheckIfEvent( QX11Info::display(), &dummy, update_x_time_predicate, NULL );
-    if( next_x_time == CurrentTime )
-        {
-        XSync( QX11Info::display(), False );
-        XCheckIfEvent( QX11Info::display(), &dummy, update_x_time_predicate, NULL );
-        }
-    Q_ASSERT( next_x_time != CurrentTime );
-    QX11Info::setAppTime( next_x_time );
-    XEvent ev; // remove the PropertyNotify event from the events queue
-    XWindowEvent( QX11Info::display(), w->winId(), PropertyChangeMask, &ev );
-#endif
+    QX11Info::setAppTime(QX11Info::getTimestamp());
 }
 
 static const char * const description =

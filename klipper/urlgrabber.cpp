@@ -44,6 +44,12 @@
 #include "history.h"
 #include "historystringitem.h"
 
+#ifdef HAVE_X11
+#include <X11/Xlib.h>
+#include <X11/Xatom.h>
+#include <fixx11h.h>
+#endif
+
 URLGrabber::URLGrabber(History* history):
     m_myCurrentAction(0L),
     m_myMenu(0L),
@@ -350,7 +356,7 @@ void URLGrabber::saveSettings() const
 // digged a little bit in netwm.cpp
 bool URLGrabber::isAvoidedWindow() const
 {
-#ifdef Q_WS_X11
+#ifdef HAVE_X11
     Display *d = QX11Info::display();
     static Atom wm_class = XInternAtom( d, "WM_CLASS", true );
     static Atom active_window = XInternAtom( d, "_NET_ACTIVE_WINDOW", true );
