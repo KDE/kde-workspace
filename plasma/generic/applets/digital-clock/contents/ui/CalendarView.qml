@@ -122,7 +122,8 @@ Item {
             }
             opacity: 0.6
             elide: Text.ElideRight
-            text: agenda.dateString("MMMM yyyy")
+            text: Qt.locale().standaloneMonthName(agenda.day == null ? new Date().getMonth() : agenda.day.monthNumber - 1)
+                             + agenda.dateString(" yyyy")
 //             text: {
 //                 var day = agenda.day;
 //                 var d;
