@@ -20,9 +20,9 @@ set(ksld_SRCS
    autologout.cpp
    interface.cpp
    lockwindow.cpp)
-qt4_add_dbus_adaptor(ksld_SRCS ${screensaver_dbusXML} interface.h ScreenLocker::Interface)
-qt4_add_dbus_adaptor(ksld_SRCS ${kscreensaver_dbusXML} interface.h ScreenLocker::Interface kscreensaveradaptor KScreenSaverAdaptor)
-kde4_add_kcfg_files(ksld_SRCS kcfg/kscreensaversettings.kcfgc)
+qt5_add_dbus_adaptor(ksld_SRCS ${screensaver_dbusXML} interface.h ScreenLocker::Interface)
+qt5_add_dbus_adaptor(ksld_SRCS ${kscreensaver_dbusXML} interface.h ScreenLocker::Interface kscreensaveradaptor KScreenSaverAdaptor)
+kconfig_add_kcfg_files(ksld_SRCS kcfg/kscreensaversettings.kcfgc)
 qt5_add_dbus_interface(ksld_SRCS ${ksmserver_xml} ksmserver_interface)
 qt5_add_dbus_interface(ksld_SRCS ${powerdevilpolicyagent_xml} powerdevilpolicyagent)
 

@@ -28,7 +28,7 @@ set(libklipper_common_SRCS
 
 kde4_add_app_icon(libklipper_common_SRCS "${KDE4_ICON_INSTALL_DIR}/oxygen/*/apps/klipper.png")
 kde4_add_ui_files(libklipper_common_SRCS generalconfig.ui actionsconfig.ui editactiondialog.ui)
-kde4_add_kcfg_files(libklipper_common_SRCS klippersettings.kcfgc)
+kconfig_add_kcfg_files(libklipper_common_SRCS klippersettings.kcfgc)
 
 set(klipper_KDEINIT_SRCS ${libklipper_common_SRCS} main.cpp tray.cpp)
 

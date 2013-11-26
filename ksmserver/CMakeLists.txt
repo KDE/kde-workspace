@@ -56,7 +56,7 @@ endif()
 # # set(klauncher_xml  ${KDE4_DBUS_INTERFACES_DIR}/org.kde.KLauncher.xml)
 # # qt5_add_dbus_interface( ksmserver_KDEINIT_SRCS ${klauncher_xml} klauncher_interface )
 #
-# qt4_add_dbus_adaptor( ksmserver_KDEINIT_SRCS org.kde.KSMServerInterface.xml server.h KSMServer )
+# qt5_add_dbus_adaptor( ksmserver_KDEINIT_SRCS org.kde.KSMServerInterface.xml server.h KSMServer )
 #
 # kf5_add_kdeinit_executable( ksmserver ${ksmserver_KDEINIT_SRCS})
 #

@@ -12,7 +12,7 @@ set(kded_freespacenotifier_SRCS freespacenotifier.cpp module.cpp)
 
 kde4_add_ui_files(kded_freespacenotifier_SRCS freespacenotifier_prefs_base.ui)
 
-kde4_add_kcfg_files(kded_freespacenotifier_SRCS settings.kcfgc)
+kconfig_add_kcfg_files(kded_freespacenotifier_SRCS settings.kcfgc)
 
 add_library(kded_freespacenotifier MODULE ${kded_freespacenotifier_SRCS})
 

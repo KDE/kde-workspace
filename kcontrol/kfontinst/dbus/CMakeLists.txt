@@ -6,8 +6,8 @@ add_definitions(${QT_DEFINITIONS})
 set(fontinst_bin_SRCS FcConfig.cpp FontInst.cpp Folder.cpp Main.cpp Utils.cpp ${libkfontinstdbusiface_SRCS} )
 set(fontinst_helper_SRCS FcConfig.cpp Helper.cpp Folder.cpp Utils.cpp ${libkfontinstdbusiface_SRCS} )
 
-# qt4_generate_dbus_interface(FontInst.h org.kde.fontinst.xml)
-qt4_add_dbus_adaptor(fontinst_bin_SRCS org.kde.fontinst.xml FontInst.h KFI::FontInst)
+# qt5_generate_dbus_interface(FontInst.h org.kde.fontinst.xml)
+qt5_add_dbus_adaptor(fontinst_bin_SRCS org.kde.fontinst.xml FontInst.h KFI::FontInst)
 # qt5_add_dbus_interface(fontinst_bin_SRCS org.kde.fontinst.xml FontinstIface)
 
 add_executable(fontinst_bin ${fontinst_bin_SRCS})

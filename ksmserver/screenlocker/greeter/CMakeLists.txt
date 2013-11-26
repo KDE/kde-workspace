@@ -11,7 +11,7 @@ set(kscreenlocker_greet_SRCS
    screensaverwindow.cpp
    main.cpp )
 
-kde4_add_kcfg_files(kscreenlocker_greet_SRCS ${CMAKE_CURRENT_SOURCE_DIR}/../kcfg/kscreensaversettings.kcfgc)
+kconfig_add_kcfg_files(kscreenlocker_greet_SRCS ${CMAKE_CURRENT_SOURCE_DIR}/../kcfg/kscreensaversettings.kcfgc)
 
 add_executable(kscreenlocker_greet ${kscreenlocker_greet_SRCS})
 

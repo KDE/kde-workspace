@@ -4,7 +4,7 @@ set(notifications_engine_SRCS
     notificationaction.cpp
 )
 
-qt4_add_dbus_adaptor( notifications_engine_SRCS org.freedesktop.Notifications.xml notificationsengine.h  NotificationsEngine )
+qt5_add_dbus_adaptor( notifications_engine_SRCS org.freedesktop.Notifications.xml notificationsengine.h  NotificationsEngine )
 
 kservice_desktop_to_json(plasma-dataengine-notifications.desktop)
 

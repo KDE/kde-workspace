@@ -2,7 +2,7 @@ project(StatusNotifierWatcher)
 
 set(kded_statusnotifierwatcher_SRCS statusnotifierwatcher.cpp )
 
-qt4_add_dbus_adaptor(kded_statusnotifierwatcher_SRCS     ${KDE4_DBUS_INTERFACES_DIR}/org.kde.StatusNotifierWatcher.xml
+qt5_add_dbus_adaptor(kded_statusnotifierwatcher_SRCS     ${KDE4_DBUS_INTERFACES_DIR}/org.kde.StatusNotifierWatcher.xml
                      statusnotifierwatcher.h StatusNotifierWatcher)
 
 

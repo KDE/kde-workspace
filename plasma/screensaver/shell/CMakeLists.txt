@@ -20,11 +20,11 @@ set(plasma-overlay_SRCS
 
 kde4_add_ui_files(plasma-overlay_SRCS BackgroundDialog.ui)
 
-kde4_add_kcfg_files(plasma-overlay_SRCS ${KDEBASE_WORKSPACE_SOURCE_DIR}/ksmserver/screenlocker/kcfg/kscreensaversettings.kcfgc)
+kconfig_add_kcfg_files(plasma-overlay_SRCS ${KDEBASE_WORKSPACE_SOURCE_DIR}/ksmserver/screenlocker/kcfg/kscreensaversettings.kcfgc)
 
 set(plasmaapp_dbusXML org.kde.plasma-overlay.App.xml)
-#qt4_generate_dbus_interface(plasmaapp.h ${plasmaapp_dbusXML} OPTIONS -S -M)
-qt4_add_dbus_adaptor(plasma-overlay_SRCS ${plasmaapp_dbusXML} plasmaapp.h PlasmaApp)
+#qt5_generate_dbus_interface(plasmaapp.h ${plasmaapp_dbusXML} OPTIONS -S -M)
+qt5_add_dbus_adaptor(plasma-overlay_SRCS ${plasmaapp_dbusXML} plasmaapp.h PlasmaApp)
 
 add_executable(plasma-overlay ${plasma-overlay_SRCS})
 

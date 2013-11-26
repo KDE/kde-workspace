@@ -39,9 +39,9 @@ set(krunner_SRCS
    ${quicksand_interface_SRCS})
 
 kde4_add_ui_files(krunner_SRCS interfaceOptions.ui)
-kde4_add_kcfg_files(krunner_SRCS ${krunner_KCFG_SRCS})
+kconfig_add_kcfg_files(krunner_SRCS ${krunner_KCFG_SRCS})
 
-qt4_add_dbus_adaptor(krunner_SRCS ${krunner_dbusAppXML} krunnerapp.h KRunnerApp)
+qt5_add_dbus_adaptor(krunner_SRCS ${krunner_dbusAppXML} krunnerapp.h KRunnerApp)
 if(WIN32)
 	set(BIN_PREFIX bin)
 else()

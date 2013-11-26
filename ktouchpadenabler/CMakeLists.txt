@@ -9,7 +9,7 @@ if (X11_Xinput_FOUND)
         ktouchpadenabler_daemon.cpp
     )
 
-    kde4_add_kcfg_files(kded_ktouchpadenabler_SRCS settings.kcfgc )
+    kconfig_add_kcfg_files(kded_ktouchpadenabler_SRCS settings.kcfgc )
 
     kde4_add_plugin(kded_ktouchpadenabler
         ${kded_ktouchpadenabler_SRCS}

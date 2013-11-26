@@ -3,7 +3,7 @@ set(device_notifications_engine_SRCS
     devicenotificationsengine.cpp
 )
 
-qt4_add_dbus_adaptor( device_notifications_engine_SRCS org.kde.DeviceNotifications.xml devicenotificationsengine.h DeviceNotificationsEngine )
+qt5_add_dbus_adaptor( device_notifications_engine_SRCS org.kde.DeviceNotifications.xml devicenotificationsengine.h DeviceNotificationsEngine )
 
 kservice_desktop_to_json(plasma-dataengine-devicenotifications.desktop)
 

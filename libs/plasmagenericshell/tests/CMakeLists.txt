@@ -24,7 +24,7 @@ set(backgrounddialog_SRCS
 )
 
 kde4_add_ui_files(backgrounddialog_SRCS ../MousePlugins.ui ../MousePlugins.ui ../BackgroundDialog.ui)
-kde4_add_kcfg_files(backgrounddialog_SRCS ../../../plasma/desktop/shell/data/plasma-shell-desktop.kcfgc)
+kconfig_add_kcfg_files(backgrounddialog_SRCS ../../../plasma/desktop/shell/data/plasma-shell-desktop.kcfgc)
 
 add_executable(plasmabackgrounddialog ${backgrounddialog_SRCS})
 target_link_libraries(plasmabackgrounddialog KF5::Plasma ${QT_QTUITOOLS_LIBRARY} ${KDE4_KFILE_LIBRARY} kworkspace)
