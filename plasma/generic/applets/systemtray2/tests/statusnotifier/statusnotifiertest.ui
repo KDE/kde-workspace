@@ -27,58 +27,51 @@
      </property>
     </widget>
    </item>
-   <item row="2" column="1">
-    <widget class="QCheckBox" name="statusAuto">
-     <property name="text">
-      <string>Automaticox</string>
-     </property>
-    </widget>
-   </item>
-   <item row="3" column="1">
+   <item row="4" column="1">
     <widget class="QRadioButton" name="statusPassive">
      <property name="text">
       <string>Passive</string>
      </property>
     </widget>
    </item>
-   <item row="5" column="1">
+   <item row="6" column="1">
     <widget class="QRadioButton" name="statusActive">
      <property name="text">
       <string>Ac&amp;tive</string>
      </property>
     </widget>
    </item>
-   <item row="6" column="1">
+   <item row="7" column="1">
     <widget class="QRadioButton" name="statusNeedsAttention">
      <property name="text">
-      <string>NeedsAttention</string>
+      <string>&amp;NeedsAttention</string>
      </property>
     </widget>
    </item>
-   <item row="7" column="0">
+   <item row="8" column="0">
     <widget class="QLabel" name="label_3">
      <property name="text">
       <string>&lt;b&gt;Icon&lt;/b&gt;</string>
      </property>
     </widget>
    </item>
-   <item row="8" column="1">
+   <item row="9" column="1">
     <widget class="QLineEdit" name="iconName"/>
    </item>
-   <item row="9" column="0">
+   <item row="10" column="0">
     <widget class="QLabel" name="label_2">
      <property name="text">
       <string>&lt;b&gt;ToolTip&lt;/b&gt;</string>
      </property>
     </widget>
    </item>
-   <item row="10" column="1">
+   <item row="11" column="1">
     <widget class="QLineEdit" name="tooltipText"/>
    </item>
-   <item row="11" column="1">
+   <item row="12" column="1">
     <widget class="QLineEdit" name="tooltipSubtext"/>
    </item>
-   <item row="13" column="1">
+   <item row="14" column="1">
     <spacer name="verticalSpacer">
      <property name="orientation">
       <enum>Qt::Vertical</enum>
@@ -91,15 +84,32 @@
      </property>
     </spacer>
    </item>
-   <item row="14" column="1">
+   <item row="15" column="1">
     <widget class="QPushButton" name="updateButton">
      <property name="text">
       <string>Update</string>
      </property>
     </widget>
    </item>
-   <item row="15" column="1">
+   <item row="16" column="1">
     <layout class="QHBoxLayout" name="horizontalLayout"/>
+   </item>
+   <item row="2" column="1">
+    <widget class="QCheckBox" name="enabledCheck">
+     <property name="text">
+      <string>Enabled</string>
+     </property>
+     <property name="checked">
+      <bool>true</bool>
+     </property>
+    </widget>
+   </item>
+   <item row="3" column="1">
+    <widget class="QCheckBox" name="statusAuto">
+     <property name="text">
+      <string>Automatic</string>
+     </property>
+    </widget>
    </item>
   </layout>
  </widget>

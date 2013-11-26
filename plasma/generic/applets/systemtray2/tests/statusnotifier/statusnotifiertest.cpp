@@ -53,6 +53,16 @@ StatusNotifierTest::StatusNotifierTest(QWidget* parent) :
 {
     d = new StatusNotifierTestPrivate;
 
+    init();
+
+    setupUi(this);
+    connect(updateButton, &QPushButton::clicked, this, &StatusNotifierTest::updateNotifier);
+    updateUi();
+    show();
+}
+
+void StatusNotifierTest::init()
+{
     d->systemNotifier = new KStatusNotifierItem(this);
     //d->systemNotifier->setCategory(KStatusNotifierItem::SystemServices);
     //d->systemNotifier->setCategory(KStatusNotifierItem::Hardware);
@@ -63,15 +73,6 @@ StatusNotifierTest::StatusNotifierTest(QWidget* parent) :
     d->systemNotifier->setTitle(i18nc("title", "StatusNotifierTest"));
     d->systemNotifier->setToolTipSubTitle(i18nc("tooltip subtitle", "Some explanation from the beach."));
 
-    setupUi(this);
-
-    connect(updateButton, &QPushButton::clicked, this, &StatusNotifierTest::updateNotifier);
-
-
-    updateUi();
-
-
-    show();
 }
 
 StatusNotifierTest::~StatusNotifierTest()
@@ -81,6 +82,9 @@ StatusNotifierTest::~StatusNotifierTest()
 
 void StatusNotifierTest::updateUi()
 {
+    if (!d->systemNotifier) {
+        return;
+    }
     statusActive->setChecked(d->systemNotifier->status() == KStatusNotifierItem::Active);
     statusPassive->setChecked(d->systemNotifier->status() == KStatusNotifierItem::Passive);
     statusNeedsAttention->setChecked(d->systemNotifier->status() == KStatusNotifierItem::NeedsAttention);
@@ -97,6 +101,17 @@ void StatusNotifierTest::updateUi()
 
 void StatusNotifierTest::updateNotifier()
 {
+    if (!enabledCheck->isChecked()) {
+        delete d->systemNotifier;
+        return;
+    } else {
+        init();
+    }
+
+
+    if (!d->systemNotifier) {
+        return;
+    }
     if (statusAuto->isChecked()) {
         d->timer->start();
     } else {
@@ -131,6 +146,10 @@ int StatusNotifierTest::runMain()
 
 void StatusNotifierTest::timeout()
 {
+    if (!d->systemNotifier) {
+        return;
+    }
+
     if (d->systemNotifier->status() == KStatusNotifierItem::Passive) {
         d->systemNotifier->setStatus(KStatusNotifierItem::Active);
         qDebug() << " Now Active";

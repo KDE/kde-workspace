@@ -36,6 +36,8 @@ class StatusNotifierTest : public QDialog, public Ui_StatusNotifierTest
         StatusNotifierTest(QWidget* parent = 0);
         virtual ~StatusNotifierTest();
 
+        void init();
+
     public Q_SLOTS:
         int runMain();
         void timeout();
