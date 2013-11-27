@@ -172,11 +172,10 @@ Item {
         anchors {
             //margins: root.largeSpacing
             top: parent.top
-            //left: parent.left
+            leftMargin: root.currentTask != "" ? 0 : -theme.largeSpacing
             left: expandedItemContainer.left
             right: parent.right
         }
-
         text: root.currentName != "" ? root.currentName : i18n("Status & Notifications")
     }
 
