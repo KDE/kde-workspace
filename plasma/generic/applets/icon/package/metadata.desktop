@@ -166,7 +166,7 @@ Type=Service
 
 X-Plasma-API=declarativeappletscript
 X-Plasma-MainScript=ui/main.qml
-X-Plasma-DefaultSize=64,64
+
 NoDisplay=true
 
 X-KDE-PluginInfo-Author=The Plasma Team

@@ -62,6 +62,6 @@ X-KDE-PluginInfo-Version=1
 X-KDE-PluginInfo-Website=
 X-KDE-ServiceTypes=Plasma/Applet
 X-Plasma-API=declarativeappletscript
-X-Plasma-DefaultSize=200,100
+
 X-Plasma-MainScript=code/testbackground.qml
 X-Plasma-RemoteLocation=

@@ -145,7 +145,7 @@ Icon=tab-new
 
 X-Plasma-API=declarativeappletscript
 X-Plasma-MainScript=ui/main.qml
-X-Plasma-DefaultSize=200,50
+
 
 X-KDE-PluginInfo-Author=Bhushan Shah
 X-KDE-PluginInfo-Email=bhush94@gmail.com

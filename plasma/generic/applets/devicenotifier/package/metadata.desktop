@@ -157,7 +157,7 @@ X-KDE-ServiceTypes=Plasma/Applet
 
 X-Plasma-API=declarativeappletscript
 X-Plasma-MainScript=ui/devicenotifier.qml
-X-Plasma-DefaultSize=290,340
+
 X-Plasma-NotificationArea=true
 X-Plasma-ConfigPlugins=solid-actions,device_automounter_kcm
 

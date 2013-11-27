@@ -30,7 +30,7 @@ Icon=user-trash
 X-KDE-ServiceTypes=Plasma/Applet
 X-Plasma-API=declarativeappletscript
 X-Plasma-MainScript=ui/main.qml
-X-Plasma-DefaultSize=100,130
+
 X-Plasma-RequiredExtensions=LaunchApp,localio
 X-Plasma-OptionalExtensions=LaunchApp
 X-Plasma-ConfigPlugins=kcmtrash

@@ -202,7 +202,7 @@ Type=Service
 X-KDE-ServiceTypes=Plasma/Applet,Plasma/PopupApplet
 
 X-Plasma-API=declarativeappletscript
-X-Plasma-DefaultSize=450,300
+
 X-Plasma-MainScript=ui/batterymonitor.qml
 X-Plasma-ConfigPlugins=powerdevilprofilesconfig,powerdevilactivitiesconfig,powerdevilglobalconfig
 X-Plasma-NotificationArea=true

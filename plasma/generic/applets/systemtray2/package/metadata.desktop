@@ -175,5 +175,5 @@ X-KDE-PluginInfo-EnabledByDefault=true
 
 X-KDE-ServiceTypes=Plasma/Applet
 X-Plasma-API=declarativeappletscript
-X-Plasma-DefaultSize=100,100
+
 X-Plasma-MainScript=ui/main.qml
