@@ -20,16 +20,20 @@
 import QtQuick 2.0
 import org.kde.plasma.core 2.0 as PlasmaCore
 
-Item {
+MouseArea {
     id: iconContainer
     property string activeSource: "Status"
+    height: 16
+    width: 16
     property int minimumWidth: 16
     property int minimumHeight: 16
     implicitWidth: theme.iconSizes["panel"]
     implicitHeight: implicitWidth
-
-    Component.onCompleted: {
-        plasmoid.aspectRatioMode = "ConstrainedSquare"
+    onClicked:
+    {
+	var service = dataSource.serviceForSource(activeSource)
+        var operation = service.operationDescription("toggleActivityManager")
+        service.startOperationCall(operation)
     }
 
     PlasmaCore.DataSource {
@@ -42,22 +46,16 @@ Item {
         id: tooltip
         mainText: i18n("Show Activity Manager")
         subText: i18n("Click to show the activity manager")
-        target: icon
+        target: iconContainer
         image: "preferences-activities"
     }
 
     PlasmaCore.IconItem
     {
         id: icon
-        source: "widgets/activities"
+        source: "preferences-activities"
         width: parent.width
         height: parent.height
-        onClicked:
-        {
-            var service = dataSource.serviceForSource(activeSource)
-            var operation = service.operationDescription("toggleActivityManager")
-            service.startOperationCall(operation)
-        }
     }
 }
 
