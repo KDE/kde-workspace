@@ -57,7 +57,6 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <string.h>
 #include <assert.h>
 #include <fcntl.h>
-#include <kdefakes.h>
 
 #ifdef HAVE_LIMITS_H
 #include <limits.h>
@@ -94,7 +93,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <kworkspace/kdisplaymanager.h>
 #include <QX11Info>
 #include <krandom.h>
-#include <klauncher_iface.h>
+#include <klauncher_interface.h>
 #include <qstandardpaths.h>
 
 KSMServer* the_server = 0;

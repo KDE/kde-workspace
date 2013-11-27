@@ -78,7 +78,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <QX11Info>
 
 //#include "kdesktop_interface.h"
-#include <klauncher_iface.h>
+#include <klauncher_interface.h>
 #include <qstandardpaths.h>
 #include "kcminit_interface.h"
 
