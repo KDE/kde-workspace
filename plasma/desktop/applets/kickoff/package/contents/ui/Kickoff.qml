@@ -39,6 +39,9 @@ PlasmaExtras.ConditionalLoader {
         Item {
             property Item currentView: mainStack.currentTab.decrementCurrentIndex ? mainStack.currentTab : mainStack.currentTab.item
 
+            implicitWidth: root.minimumWidth
+            implicitHeight: root.minimumHeight
+
             state: "Normal"
             focus: true
 
