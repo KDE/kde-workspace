@@ -37,39 +37,36 @@ include(KDECompilerSettings)
 include(ECMOptionalAddSubdirectory)
 include(ECMInstallIcons)
 
+#TODO: this was coming from KDELibs4, we need a replacement
+set(KDE_PLATFORM_PROFILE "Desktop")
+
 find_package(Qt5Core REQUIRED NO_MODULE)
 find_package(Qt5DBus REQUIRED NO_MODULE)
 find_package(Qt5Quick REQUIRED NO_MODULE)
 find_package(Qt5Widgets REQUIRED NO_MODULE)
+find_package(Qt5Concurrent REQUIRED NO_MODULE)
 find_package(Qt5X11Extras REQUIRED NO_MODULE)
+find_package(Qt5Test REQUIRED NO_MODULE)
+find_package(Qt5UiTools REQUIRED NO_MODULE)
 
 #include(ConfigureChecks.cmake)
 
 add_definitions(-DQT_DISABLE_DEPRECATED_BEFORE=0)
-
-
-
 
 # Load the frameworks we need
 find_package(KF5 CONFIG REQUIRED
     KIdleTime ItemModels KWidgetsAddons KWindowSystem KCodecs KArchive KCoreAddons Solid ThreadWeaver
     KConfig KAuth KJS KWallet KDBusAddons Sonnet
     KI18n KGuiAddons KService KConfigWidgets ItemViews KNotifications KIconThemes KStyle KCompletion KJobWidgets KTextWidgets XmlGui KCrash
-    KBookmarks KUnitConversion KIO KCMUtils KParts Kross KNotifyConfig KPrintUtils KDESu KDocTools KNewStuff KHtml)
+    KBookmarks KUnitConversion KIO KCMUtils KParts Kross KNotifyConfig KPrintUtils KDESu KDocTools KNewStuff KHtml KDeclarative KInit)
 
 find_package(Plasma REQUIRED NO_MODULE)
 find_package(PlasmaQuick REQUIRED NO_MODULE)
-find_package(KDeclarative REQUIRED NO_MODULE)
-find_package(KIO REQUIRED NO_MODULE)
-
-find_package(KInit)
 
 find_package(UDev) #PowerDevil upower/udev backend
 
 # needed for set_package_properties macro
 find_package(KDE4Support REQUIRED NO_MODULE)
-find_package(KDELibs4 REQUIRED NO_MODULE)
-find_package(Qt5Transitional MODULE)
 
 
 option(WITH_XINERAMA "Xinerama support for multi-headed X displays" ON)
