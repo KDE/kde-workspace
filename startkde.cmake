@@ -116,16 +116,10 @@ if test -z "$dl"; then
   export KLOCALE_LANGUAGES
   # the splashscreen and progress indicator
   case "$ksplashrc_ksplash_engine" in
-    KSplashX)
-      ksplash_pid=`ksplashx "${ksplashrc_ksplash_theme}" --pid`
-      ;;
     KSplashQML)
       ksplash_pid=`ksplashqml "${ksplashrc_ksplash_theme}" --pid`
       ;;
     None)
-      ;;
-    Simple)
-      ksplash_pid=`ksplashsimple "${ksplashrc_ksplash_theme}" --pid`
       ;;
     *)
       ;;
