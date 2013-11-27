@@ -149,7 +149,8 @@ for prefix in `echo "$libpath" | sed -n -e 's,/lib[^/]*/,/env/,p'`; do
 done
 
 # Set the path for Qt plugins provided by KDE
-QT_PLUGIN_PATH=${QT_PLUGIN_PATH+$QT_PLUGIN_PATH:}`kde4-config --path qtplugins`
+QT_PLUGIN_PATH=${QT_PLUGIN_PATH+$QT_PLUGIN_PATH:}`qtpaths --plugin-dir`
+QT_PLUGIN_PATH=$QT_PLUGIN_PATH:$kdehome/lib/kde5/plugins/# TODO: Do we really need this?
 export QT_PLUGIN_PATH
 
 # Activate the kde font directories.
