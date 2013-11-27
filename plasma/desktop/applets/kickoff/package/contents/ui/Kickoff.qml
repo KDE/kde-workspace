@@ -27,8 +27,8 @@ import org.kde.qtextracomponents 2.0
 
 PlasmaExtras.ConditionalLoader {
     id: root
-    property int minimumWidth: theme.mSize(theme.defaultFont).width * 45
-    property int minimumHeight: theme.mSize(theme.defaultFont).height * 30
+    property int minimumWidth: theme.mSize(theme.defaultFont).width * 55
+    property int minimumHeight: theme.mSize(theme.defaultFont).height * 40
     property string previousState
     property bool switchTabsOnHover: plasmoid.configuration.switchTabsOnHover
     property bool showAppsByName: plasmoid.configuration.showAppsByName
