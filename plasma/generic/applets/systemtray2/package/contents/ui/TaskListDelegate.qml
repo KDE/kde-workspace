@@ -30,13 +30,20 @@ TaskDelegate {
 
     property bool expanded: (root.currentTask == "")
 
-    width: parent.width
+    width: snExpanded ? parent.width : height * 1.5 // be a bit more lenient to input
     height: (root.baseSize * 2)
 
 //     MouseArea {
 //         anchors.fill: parent
 //
 //     }
+
+    PlasmaComponents.Highlight {
+        anchors.fill: parent
+        anchors.rightMargin: height / 2
+        opacity: containsMouse && snExpanded ? 1 : 0
+        Behavior on opacity { NumberAnimation {} }
+    }
 
     PlasmaComponents.Label {
         id: mainLabel
@@ -49,7 +56,6 @@ TaskDelegate {
         }
         opacity: taskListDelegate.expanded ? 1 : 0
         Behavior on opacity { NumberAnimation { duration: 250 } }
-        //visible: taskListDelegate.expanded
         text: name
         elide: Text.ElideRight
     }

@@ -37,6 +37,7 @@ QtExtraComponents.MouseEventListener {
     hoverEnabled: true
 
     property variant task: null
+    property bool isCurrentTask: (root.currentTask == taskId)
 
     onTaskChanged: {
         //print("******************* Task changed:" + task.taskId + " " + task.name)
@@ -112,9 +113,14 @@ QtExtraComponents.MouseEventListener {
     }
 
     MouseArea {
-        anchors.fill: parent
+        anchors {
+            left: parent.left
+            top: parent.top
+            bottom: parent.bottom
+        }
+        width: snExpanded ? parent.width : parent.height
         onClicked: {
-            print("ST2PX TaskDelegate clicked ... " + !taskItemContainer.expanded + taskItemContainer.expandedItem);
+            //print("ST2PX TaskDelegate clicked ... " + !taskItemContainer.expanded + taskItemContainer.expandedItem);
             if (taskItemContainer.taskStatus == SystemTray.Task.TypeStatusItem && !taskItemContainer.snExpanded) {
 //                 root.currentTask = "";
 //                 root.expandedItem = null
@@ -127,13 +133,14 @@ QtExtraComponents.MouseEventListener {
                 root.currentName = ""
                 root.expandedItem = null;
                 plasmoid.expanded = false;
-            } else if (taskItemContainer.expanded || taskItemContainer.taskStatus == SystemTray.Task.TypeStatusItem) {
-                print("S2TPX Setting taskitem");
+            } else if (taskItemContainer.expanded || taskItemContainer.taskStatus == SystemTray.Task.TypeStatusItem || !isCurrentTask) {
+                //print("S2TPX Setting taskitem");
                 root.currentTask = taskId;
                 root.currentName = name
                 root.expandedItem = taskItemContainer.expandedItem;
+                // FIXME: expand applet
             } else {
-                print("S2TPX resetting taskitem");
+                //print("S2TPX resetting taskitem");
                 root.currentTask = "";
                 root.currentName = ""
                 root.expandedItem = null;
@@ -151,17 +158,17 @@ QtExtraComponents.MouseEventListener {
             taskItem.x = _m;
             taskItem.height = _size;
             taskItem.width = _size;
-            print("taskitem w/h: " + taskItem.width + "/" + taskItem.height);
+            //print("taskitem w/h: " + taskItem.width + "/" + taskItem.height);
         }
-        print("taskitemContainer w/h: " + taskItemContainer.width + "/" + taskItemContainer.height);
+        //print("taskitemContainer w/h: " + taskItemContainer.width + "/" + taskItemContainer.height);
     }
 
     Component.onCompleted: {
-        print("ST2PX new delegate: " + name);
+        //print("ST2PX new delegate: " + name);
         if (taskType == SystemTray.Task.TypeStatusItem) {
             var component = Qt.createComponent("ExpandedStatusNotifier.qml");
             if (component.status == Component.Ready) {
-                print("ST2P Loading STatusItemExpanded: ");
+                //print("ST2P Loading STatusItemExpanded: ");
                 expandedItem = component.createObject(taskItemContainer, {"x": 300, "y": 300});
             } else {
                 print("Error loading statusitem: " + component.errorString());

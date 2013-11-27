@@ -165,7 +165,7 @@ QtExtraComponents.MouseEventListener {
             var exp = plasmoid.expanded; // flip for bottom edge and right edge
             // ...
             if (!vertical) {
-                return (exp) ? "up-arrow" : "down-arrow"
+                return (exp) ? "down-arrow" : "up-arrow"
             } else {
                 return (exp) ? "left-arrow" : "right-arrow"
             }

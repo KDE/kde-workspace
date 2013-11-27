@@ -118,6 +118,7 @@ Item {
         anchors {
             //top: (loadingItem.visible && !plasmoid.expanded) ? loadingItem.bottom : parent.top
             top: snHeading.bottom
+            topMargin: theme.largeSpacing / 2
             //bottom: (loadingItem.visible && !plasmoid.expanded) ? undefined : parent.bottom
             bottom: parent.bottom
             left: parent.left
@@ -166,7 +167,7 @@ Item {
     PlasmaExtras.Heading {
         id: snHeading
 
-        level: 3
+        level: 2
 
         anchors {
             //margins: root.largeSpacing
