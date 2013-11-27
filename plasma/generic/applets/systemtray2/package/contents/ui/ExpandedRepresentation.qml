@@ -28,6 +28,7 @@ Item {
 
     //property QtObject systrayhost: root.host
     //property Item root: undefined
+    anchors.margins: theme.largeSpacing
     
     function checkTask(task) {
         if (task.taskItemExpanded == null) return;
@@ -76,6 +77,7 @@ Item {
      * does so by simply pushing them out of the viewport, which means the ListView won't
      * render the TaskDelegates until then.
      */
+    /*
     Item {
         id: loadingItem
         anchors.fill: parent
@@ -86,7 +88,7 @@ Item {
             onTriggered: loadingItem.visible = false
         }
     }
-
+    */
     MouseArea {
         anchors {
             top: parent.top
@@ -116,7 +118,8 @@ Item {
         anchors {
             //top: (loadingItem.visible && !plasmoid.expanded) ? loadingItem.bottom : parent.top
             top: snHeading.bottom
-            bottom: (loadingItem.visible && !plasmoid.expanded) ? undefined : parent.bottom
+            //bottom: (loadingItem.visible && !plasmoid.expanded) ? undefined : parent.bottom
+            bottom: parent.bottom
             left: parent.left
         }
         spacing: 4
@@ -135,7 +138,8 @@ Item {
 
         anchors {
             right: expandedItemContainer.left;
-            top: parent.right;
+            rightMargin: theme.largeSpacing
+            //top: parent.right;
             bottom: parent.bottom;
             //rightMargin: root.largeSpacing
         }
@@ -165,7 +169,7 @@ Item {
         level: 3
 
         anchors {
-            margins: root.largeSpacing
+            //margins: root.largeSpacing
             top: parent.top
             //left: parent.left
             left: expandedItemContainer.left
@@ -179,8 +183,9 @@ Item {
         id: expandedItemContainer
         anchors {
             left: parent.left
-            leftMargin: (root.baseSize + root.largeSpacing) * 2
+            leftMargin: (root.baseSize + root.largeSpacing * 3)
             top: snHeading.bottom
+            topMargin: theme.largeSpacing
             bottom: parent.bottom
             right: parent.right
         }
