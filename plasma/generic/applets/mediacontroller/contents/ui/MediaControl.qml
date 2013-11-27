@@ -26,6 +26,7 @@ Item {
     id: mediaControl
 
     property alias source: iconItem.source
+    property bool enabled: !root.noPlayer && root.track != "" && root.state != "off"
 
     signal triggered
 
@@ -34,11 +35,13 @@ Item {
 
     PlasmaCore.IconItem {
         id: iconItem
+        opacity: mediaControl.enabled ? 0.6 : 0.2
         anchors.fill: parent
     }
 
     MouseArea {
         anchors.fill: parent
+        enabled: mediaControl.enabled
         onClicked: mediaControl.triggered()
         onPressed: PlasmaExtras.PressedAnimation { targetItem: mediaControl }
         onReleased: PlasmaExtras.ReleasedAnimation { targetItem: mediaControl }

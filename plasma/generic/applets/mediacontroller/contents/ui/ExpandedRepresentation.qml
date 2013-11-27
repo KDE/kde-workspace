@@ -35,18 +35,20 @@ Item {
     PlasmaExtras.Heading {
         id: song
         level: 1
+        opacity: 0.6
         anchors {
             left: parent.left
             top: parent.top
             right: parent.right
         }
         elide: Text.ElideRight
-        text: root.track
+        text: root.track == "" ? i18n("No media playing") : root.track
     }
 
     PlasmaExtras.Heading {
         id: artist
         level: 3
+        opacity: 0.3
         anchors {
             top: song.bottom
             topMargin: theme.smallSpacing
@@ -54,18 +56,18 @@ Item {
             right: parent.right
         }
         elide: Text.ElideRight
-        text: root.artist
+        text: root.noPlayer ? "" : root.artist
     }
 
     Row {
         id: playerControls
         property int controlsSize: theme.mSize(theme.defaultFont).height * 3
 
-        Rectangle { color: "orange"; anchors.fill: parent }
+        //Rectangle { color: "orange"; anchors.fill: parent }
 
         anchors {
             top: artist.bottom
-            topMargin: theme.largeSpacing
+            topMargin: theme.largeSpacing * 2
             bottom: parent.bottom
             //horizontalCenter: parent.horizontalCenter
             left: parent.left

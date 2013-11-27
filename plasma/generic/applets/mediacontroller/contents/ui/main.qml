@@ -37,6 +37,7 @@ Item {
 
     property int baseSize: theme.mSize(theme.defaultFont).height
     property int controlSize: baseSize * 3
+    property bool noPlayer: true
 
     property alias expandedLoader: expandedLoader
 
@@ -55,11 +56,12 @@ Item {
         onSourceAdded: {
             print("XXX source added: " + source);
             last = source;
-            updateData();
+            //updateData();
         }
 
-        onSourceRemoved: {
-            print("XXX source removed: " + sourceName);
+        onSourcesChanged: {
+            //print("XXX source removed: " + sourceName);
+            updateData();
         }
 
         onDataChanged: {
@@ -71,7 +73,10 @@ Item {
             print("XXX Showing data: " + last);
             var d = data[last];
 
+            var isActive = mpris2Source.sources.length > 1;
+            root.noPlayer = !isActive;
             if (d == undefined) {
+                plasmoid.status = PlasmaCore.Types.PassiveStatus;
                 return;
             }
 
@@ -83,14 +88,14 @@ Item {
             } else {
                 root.state = "off";
             }
-
+            plasmoid.status = root.state != "off" && isActive ? PlasmaCore.Types.ActiveStatus : PlasmaCore.Types.PassiveStatus
             var metadata = d["Metadata"]
 
             var track = metadata["xesam:title"];
             var artist = metadata["xesam:artist"];
 
-            root.track = track;
-            root.artist = artist;
+            root.track = track ? track : "";
+            root.artist = artist ? artist : "";
 
             // other metadata
             var k;
