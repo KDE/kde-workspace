@@ -87,7 +87,7 @@ Rectangle {
                     PropertyChanges {
                         target: sidePanel
                         visible: false
-                        height: containment.availableScreenRegion(containment.screen)[0].height;
+                        height: containment ? containment.availableScreenRegion(containment.screen)[0].height : 1080;
                     }
                 },
                 State {
@@ -114,13 +114,20 @@ Rectangle {
         print("New Containment: " + containment);
         print("Old Containment: " + internal.oldContainment);
         //containment.parent = root;
-        containment.visible = true;
 
         internal.newContainment = containment;
-        if (internal.oldContainment && internal.oldContainment != containment) {
-            switchAnim.running = true;
-        } else {
-            internal.oldContainment = containment;
+
+        if (containment != null) {
+            containment.visible = true;
+        }
+        if (containment != null) {
+            if (internal.oldContainment != null && internal.oldContainment != containment) {
+                if (internal.newContainment != null) {
+                    switchAnim.running = true;
+                }
+            } else {
+                internal.oldContainment = containment;
+            }
         }
     }
 
@@ -128,35 +135,38 @@ Rectangle {
     QtObject {
         id: internal;
 
-        property Item oldContainment;
-        property Item newContainment;
+        property Item oldContainment: null;
+        property Item newContainment: null;
     }
 
     SequentialAnimation {
         id: switchAnim
         ScriptAction {
             script: {
-                containment.anchors.left = undefined;
-                containment.anchors.top = undefined;
-                containment.anchors.right = undefined;
-                containment.anchors.bottom = undefined;
-
+                if (containment) {
+                    containment.anchors.left = undefined;
+                    containment.anchors.top = undefined;
+                    containment.anchors.right = undefined;
+                    containment.anchors.bottom = undefined;
+                }
                 internal.oldContainment.anchors.left = undefined;
                 internal.oldContainment.anchors.top = undefined;
                 internal.oldContainment.anchors.right = undefined;
                 internal.oldContainment.anchors.bottom = undefined;
 
-                internal.oldContainment.z = 0;
-                internal.oldContainment.x = 0;
-                containment.z = 1;
-                containment.x = root.width;
+                if (containment) {
+                    internal.oldContainment.z = 0;
+                    internal.oldContainment.x = 0;
+                    containment.z = 1;
+                    containment.x = root.width;
+                }
             }
         }
         ParallelAnimation {
             NumberAnimation {
                 target: internal.oldContainment
                 properties: "x"
-                to: -root.width
+                to: newContainment != null ? -root.width : 0
                 duration: 400
                 easing.type: Easing.InOutQuad
             }
@@ -170,13 +180,14 @@ Rectangle {
         }
         ScriptAction {
             script: {
-                containment.anchors.left = root.left;
-                containment.anchors.top = root.top;
-                containment.anchors.right = root.right;
-                containment.anchors.bottom = root.bottom;
-
-                internal.oldContainment.visible = false;
-                internal.oldContainment = containment;
+                if (containment) {
+                    containment.anchors.left = root.left;
+                    containment.anchors.top = root.top;
+                    containment.anchors.right = root.right;
+                    containment.anchors.bottom = root.bottom;
+                    internal.oldContainment.visible = false;
+                    internal.oldContainment = containment;
+                }
             }
         }
     }
