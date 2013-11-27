@@ -8,7 +8,7 @@ include_directories (
 ########### next target ###############
 
 set(kcm_style_PART_SRCS ../krdb/krdb.cpp styleconfdialog.cpp kcmstyle.cpp)
-set(klauncher_xml ${KDE4_DBUS_INTERFACES_DIR}/org.kde.KLauncher.xml)
+set(klauncher_xml ${KINIT_DBUS_INTERFACES_DIR}/org.kde.KLauncher.xml)
 qt5_add_dbus_interface(kcm_style_PART_SRCS ${klauncher_xml} klauncher_iface)
 
 

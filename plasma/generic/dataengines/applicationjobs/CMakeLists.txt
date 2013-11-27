@@ -9,8 +9,8 @@ set(kuiserver_engine_SRCS
     jobaction.cpp
 )
 
-qt5_add_dbus_adaptor(kuiserver_engine_SRCS ${KDE4_DBUS_INTERFACES_DIR}/org.kde.JobViewV2.xml kuiserverengine.h JobView jobviewadaptor )
-qt5_add_dbus_adaptor(kuiserver_engine_SRCS ${KDE4_DBUS_INTERFACES_DIR}/org.kde.JobViewServer.xml kuiserverengine.h KuiserverEngine jobviewserveradaptor )
+qt5_add_dbus_adaptor(kuiserver_engine_SRCS ${KJOBWIDGETS_DBUS_INTERFACES_DIR}/org.kde.JobViewV2.xml kuiserverengine.h JobView jobviewadaptor )
+qt5_add_dbus_adaptor(kuiserver_engine_SRCS ${KJOBWIDGETS_DBUS_INTERFACES_DIR}/org.kde.JobViewServer.xml kuiserverengine.h KuiserverEngine jobviewserveradaptor )
 
 kservice_desktop_to_json(plasma-dataengine-applicationjobs.desktop)
 

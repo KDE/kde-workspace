@@ -25,7 +25,7 @@ else()
   include_directories( ${CMAKE_CURRENT_SOURCE_DIR}/core/ )
 endif()
 
-set(klauncher_xml ${KDE4_DBUS_INTERFACES_DIR}/org.kde.KLauncher.xml)
+set(klauncher_xml ${KINIT_DBUS_INTERFACES_DIR}/org.kde.KLauncher.xml)
 qt5_add_dbus_interface(libnoinst_SRCS ${klauncher_xml} klauncher_iface)
 
 
