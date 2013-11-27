@@ -167,7 +167,7 @@ Item {
     PlasmaExtras.Heading {
         id: snHeading
 
-        level: 2
+        level: 1
         opacity: root.currentTask != "" ? 0 : 0.6
         Behavior on opacity { NumberAnimation {} }
 
@@ -184,7 +184,7 @@ Item {
     PlasmaExtras.Heading {
         id: snHeadingExpanded
 
-        level: 2
+        level: 1
         opacity: root.currentTask != "" ? 0.6 : 0
         Behavior on opacity { NumberAnimation {} }
 
