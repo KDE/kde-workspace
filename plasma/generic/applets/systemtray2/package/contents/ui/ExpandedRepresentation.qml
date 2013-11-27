@@ -177,7 +177,7 @@ Item {
             left: expandedItemContainer.left
             right: parent.right
         }
-        text: root.currentName != "" ? root.currentName : i18n("Status & Notifications")
+        text: root.currentTask != "" ? root.currentName : i18n("Status & Notifications")
     }
 
     PlasmaComponents.PageStack {
