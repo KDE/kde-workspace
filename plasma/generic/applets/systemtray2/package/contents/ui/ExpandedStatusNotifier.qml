@@ -44,6 +44,7 @@ Item {
         anchors {
             fill: parent
             margins: root.largeSpacing
+            leftMargin: 0
         }
 
         PlasmaCore.IconItem {

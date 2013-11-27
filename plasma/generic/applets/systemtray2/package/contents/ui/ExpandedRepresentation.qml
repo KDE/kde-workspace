@@ -185,7 +185,7 @@ Item {
             left: parent.left
             leftMargin: (root.baseSize + root.largeSpacing * 3)
             top: snHeading.bottom
-            topMargin: theme.largeSpacing
+            topMargin: theme.largeSpacing / 2
             bottom: parent.bottom
             right: parent.right
         }
