@@ -168,6 +168,7 @@ Item {
         id: snHeading
 
         level: 2
+        opacity: 0.6
 
         anchors {
             //margins: root.largeSpacing
