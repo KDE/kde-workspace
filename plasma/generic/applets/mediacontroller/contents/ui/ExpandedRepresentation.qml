@@ -34,7 +34,7 @@ Item {
 
     PlasmaExtras.Heading {
         id: song
-        level: 1
+        level: 3
         opacity: 0.6
         anchors {
             left: parent.left
@@ -47,7 +47,7 @@ Item {
 
     PlasmaExtras.Heading {
         id: artist
-        level: 3
+        level: 4
         opacity: 0.3
         anchors {
             top: song.bottom
@@ -58,46 +58,58 @@ Item {
         elide: Text.ElideRight
         text: root.noPlayer ? "" : root.artist
     }
-
-    Row {
-        id: playerControls
-        property int controlsSize: theme.mSize(theme.defaultFont).height * 3
-
-        //Rectangle { color: "orange"; anchors.fill: parent }
+    Item {
 
         anchors {
             top: artist.bottom
-            topMargin: theme.largeSpacing * 2
+            //topMargin: (parent.height - artist.height - song.height - root.controlsSize) / 2
             bottom: parent.bottom
+            //bottom: parent.bottom
             //horizontalCenter: parent.horizontalCenter
             left: parent.left
+            right: parent.right
         }
+        Row {
+            id: playerControls
+            property int controlsSize: theme.mSize(theme.defaultFont).height * 3
 
-        height: root.controlsSize
-        //height: 20
-        width: (root.controlsSize * 3) + (theme.largeSpacing * 2)
-        spacing: theme.largeSpacing
+            //Rectangle { color: "orange"; anchors.fill: parent }
 
-        MediaControl {
-            source: "media-skip-backward"
-            onTriggered: root.previous();
-        }
+            anchors {
+                //top: artist.bottom
+                //topMargin: (parent.height - artist.height - song.height - root.controlsSize) / 2
+                verticalCenter: parent.verticalCenter
+                //bottom: parent.bottom
+                horizontalCenter: parent.horizontalCenter
+                //left: parent.left
+            }
 
-        MediaControl {
-            source: root.state == "playing" ? "media-playback-pause" : "media-playback-start"
-            onTriggered: {
-                print("Clicked" + source + " " + root.state);
-                if (root.state == "playing") {
-                    root.pause();
-                } else {
-                    root.play();
+            height: root.controlsSize
+            //height: 20
+            width: (root.controlsSize * 3) + (theme.largeSpacing * 2)
+            spacing: theme.largeSpacing
+
+            MediaControl {
+                source: "media-skip-backward"
+                onTriggered: root.previous();
+            }
+
+            MediaControl {
+                source: root.state == "playing" ? "media-playback-pause" : "media-playback-start"
+                onTriggered: {
+                    print("Clicked" + source + " " + root.state);
+                    if (root.state == "playing") {
+                        root.pause();
+                    } else {
+                        root.play();
+                    }
                 }
             }
-        }
 
-        MediaControl {
-            source: "media-skip-forward"
-            onTriggered: root.next();
+            MediaControl {
+                source: "media-skip-forward"
+                onTriggered: root.next();
+            }
         }
     }
 }

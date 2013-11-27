@@ -25,8 +25,8 @@ import org.kde.plasma.extras 2.0 as PlasmaExtras
 Item {
     id: root
 
-    property string track: "Rockin' in a free world"
-    property string artist: "Pearl Jam & Neil Young"
+    property string track: ""
+    property string artist: ""
     property string playerIcon: ""
 
 
@@ -36,7 +36,7 @@ Item {
     property int implicitHeight: minimumHeight * 1.5
 
     property int baseSize: theme.mSize(theme.defaultFont).height
-    property int controlSize: baseSize * 3
+    property int controlSize: Math.min(parent.height / 3, parent.width / 5)
     property bool noPlayer: true
 
     property alias expandedLoader: expandedLoader
@@ -45,7 +45,6 @@ Item {
     }
 
     state: "off"
-//     Rectangle { color: "blue"; anchors.fill: parent }
 
     PlasmaCore.DataSource {
         id: mpris2Source
@@ -54,23 +53,20 @@ Item {
         interval: 0
         property string last
         onSourceAdded: {
-            print("XXX source added: " + source);
+            //print("XXX source added: " + source);
             last = source;
-            //updateData();
         }
 
         onSourcesChanged: {
-            //print("XXX source removed: " + sourceName);
             updateData();
         }
 
         onDataChanged: {
             updateData();
-            //print("XXX data changed SOURCE: " + source);
         }
 
         function updateData() {
-            print("XXX Showing data: " + last);
+            //print("XXX Showing data: " + last);
             var d = data[last];
 
             var isActive = mpris2Source.sources.length > 1;
@@ -100,35 +96,29 @@ Item {
             // other metadata
             var k;
             for (k in metadata) {
-                print(" -- " + k + " " + metadata[k]);
+                //print(" -- " + k + " " + metadata[k]);
             }
         }
-
     }
 
     function play() {
-        print("PLay!");
         serviceOp(mpris2Source.last, "Play");
-
     }
 
     function pause() {
-        print("Pause!");
         serviceOp(mpris2Source.last, "Pause");
     }
 
     function previous() {
-        print("Previous!");
         serviceOp(mpris2Source.last, "Previous");
     }
 
     function next() {
-        print("Next!");
         serviceOp(mpris2Source.last, "Next");
     }
 
     function serviceOp(src, op) {
-        //print(" serviceOp: " + src + " Op: " + op);
+        print(" serviceOp: " + src + " Op: " + op);
         var service = mpris2Source.serviceForSource(src);
         var operation = service.operationDescription(op);
         return service.startOperationCall(operation);
@@ -162,8 +152,4 @@ Item {
             name: "paused"
         }
     ]
-
-    onStateChanged: {
-        print(">>> XXXX State is now: " + root.state);
-    }
 }
