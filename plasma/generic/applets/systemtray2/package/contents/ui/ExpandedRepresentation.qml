@@ -168,16 +168,34 @@ Item {
         id: snHeading
 
         level: 2
-        opacity: 0.6
+        opacity: root.currentTask != "" ? 0 : 0.6
+        Behavior on opacity { NumberAnimation {} }
 
         anchors {
             //margins: root.largeSpacing
             top: parent.top
-            leftMargin: root.currentTask != "" ? 0 : -theme.largeSpacing
+            leftMargin: -theme.largeSpacing
             left: expandedItemContainer.left
             right: parent.right
         }
-        text: root.currentTask != "" ? root.currentName : i18n("Status & Notifications")
+        text: i18n("Status & Notifications")
+    }
+
+    PlasmaExtras.Heading {
+        id: snHeadingExpanded
+
+        level: 2
+        opacity: root.currentTask != "" ? 0.6 : 0
+        Behavior on opacity { NumberAnimation {} }
+
+        anchors {
+            //margins: root.largeSpacing
+            top: parent.top
+            //leftMargin: root.currentTask != "" ? 0 : -theme.largeSpacing
+            left: expandedItemContainer.left
+            right: parent.right
+        }
+        text: root.currentName
     }
 
     PlasmaComponents.PageStack {
