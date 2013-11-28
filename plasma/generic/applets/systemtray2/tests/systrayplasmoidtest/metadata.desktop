@@ -1,6 +1,7 @@
 [Desktop Entry]
 Name=System Tray Plasmoid Test
 Name[ca]=Prova del plasmoide Safata del sistema
+Name[ca@valencia]=Prova del plasmoide Safata del sistema
 Name[cs]=Test Plasmoidu systémové části panelu
 Name[de]=Plasmoid-Test im Systemabschnitt der Kontrollleiste
 Name[el]=Πλαίσιο συστήματος
@@ -28,6 +29,7 @@ Name[x-test]=xxSystem Tray Plasmoid Testxx
 Name[zh_TW]=Plasmoid 測試系統匣
 Comment=Test the system tray
 Comment[ca]=Prova de la Safata del sistema
+Comment[ca@valencia]=Prova de la Safata del sistema
 Comment[de]=Test des Systemabschnitts der Kontrollleiste
 Comment[es]=Probar la bandeja del sistema
 Comment[fi]=Ilmoitusalueen testi
@@ -40,6 +42,7 @@ Comment[nl]=Test het systeemvak
 Comment[pa]=ਸਿਸਟਮ ਟਰੇ ਟੈਸਟ
 Comment[pt]=Testar a bandeja do sistema
 Comment[pt_BR]=Testar a área de notificação
+Comment[ro]=Testează tava de sistem
 Comment[sk]=Testovať systémovú lištu
 Comment[sl]=Preizkusite sistemsko vrstico
 Comment[sr]=Испробајте системску касету

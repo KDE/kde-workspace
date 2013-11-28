@@ -1,6 +1,7 @@
 [Desktop Entry]
 Name=Panel Toolbox
 Name[ca]=Quadre d'eines del plafó
+Name[ca@valencia]=Quadre d'eines del plafó
 Name[cs]=Nástroje panelu
 Name[de]=Werkzeugkasten für die Kontrollleiste
 Name[el]=Εργαλεία πίνακα
@@ -28,6 +29,7 @@ Name[x-test]=xxPanel Toolboxxx
 Name[zh_TW]=面板工具盒
 Comment=Manage Plasma panel
 Comment[ca]=Gestió del plafó del Plasma
+Comment[ca@valencia]=Gestió del plafó del Plasma
 Comment[de]=Plasma-Kontrollleiste verwalten
 Comment[el]=Διαχείριση πίνακα Plasma
 Comment[es]=Gestión del panel de Plasma
@@ -41,6 +43,7 @@ Comment[nl]=Plasmapaneel beheren
 Comment[pa]=ਪਲਾਜ਼ਮਾ ਪੈਨਲ ਪਰਬੰਧ
 Comment[pt]=Gerir o painel do Plasma
 Comment[pt_BR]=Gerencia o painel do Plasma
+Comment[ro]=Gestionează panoul Plasma
 Comment[sk]=Spravovať panel Plasma
 Comment[sl]=Upravljanje pulta Plasme
 Comment[sr]=Управљајте плазма панелом

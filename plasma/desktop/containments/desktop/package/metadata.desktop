@@ -1,6 +1,7 @@
 [Desktop Entry]
 Name=Default Desktop
 Name[ca]=Escriptori per defecte
+Name[ca@valencia]=Escriptori per defecte
 Name[cs]=Výchozí plocha
 Name[de]=Standard-Arbeitsfläche
 Name[el]=Προκαθορισμένη επιφάνεια εργασίας
@@ -15,6 +16,7 @@ Name[nl]=Standaard bureaublad
 Name[pa]=ਡਿਫਾਲਟ ਡੈਸਕਟਾਪ
 Name[pt]=Ecrã por Omissão
 Name[pt_BR]=Área de trabalho padrão
+Name[ro]=Birou implicit
 Name[ru]=Рабочий стол по умолчанию
 Name[sk]=Predvolená plocha
 Name[sl]=Privzeto namizje

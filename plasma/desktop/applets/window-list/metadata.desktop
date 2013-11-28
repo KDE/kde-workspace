@@ -2,6 +2,7 @@
 Encoding=UTF-8
 Name=Window list
 Name[ca]=Llista de finestres
+Name[ca@valencia]=Llista de finestres
 Name[cs]=Seznam oken
 Name[de]=Fensterliste
 Name[el]=Λίστα παραθύρων
@@ -16,6 +17,7 @@ Name[nl]=Vensterlijst
 Name[pa]=ਵਿੰਡੋ ਲਿਸਟ
 Name[pt]=Lista de janelas
 Name[pt_BR]=Lista de janelas
+Name[ro]=Lista ferestrelor
 Name[sk]=Zoznam okien
 Name[sl]=Seznam oken
 Name[sr]=списак прозора
