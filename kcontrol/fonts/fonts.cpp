@@ -231,6 +231,7 @@ FontAASettings::FontAASettings(QWidget *parent)
 
   QWidget     *mw=new QWidget(this);
   QFormLayout *layout=new QFormLayout(mw);
+  layout->setVerticalSpacing(0);
   layout->setMargin(0);
 
   excludeRange=new QCheckBox(i18n("E&xclude range:"), mw);
