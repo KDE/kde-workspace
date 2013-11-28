@@ -68,7 +68,6 @@ find_package(UDev) #PowerDevil upower/udev backend
 # needed for set_package_properties macro
 find_package(KDE4Support REQUIRED NO_MODULE)
 
-
 option(WITH_XINERAMA "Xinerama support for multi-headed X displays" ON)
 
 # find_package(Strigi)
@@ -278,16 +277,14 @@ add_definitions(-DDISABLE_NEPOMUK_LEGACY)
 # add_subdirectory(cmake)
 add_subdirectory(libs)
 #
- # system settings (kcontrol replacement)
-if(${KDE_PLATFORM_PROFILE} STREQUAL "Desktop")
-   ecm_optional_add_subdirectory( systemsettings )
-endif()
+# system settings (kcontrol replacement)
+ecm_optional_add_subdirectory( systemsettings )
 #
 # # core apps
 if(NOT WIN32)
    ecm_optional_add_subdirectory( kcheckpass )
-  ecm_optional_add_subdirectory( kwin )
-  ecm_optional_add_subdirectory( ksmserver )
+   ecm_optional_add_subdirectory( kwin )
+   ecm_optional_add_subdirectory( ksmserver )
 #
    find_package(JPEG REQUIRED)
    find_package(PNG REQUIRED)
@@ -299,36 +296,34 @@ if(NOT WIN32)
    endif ()
 endif()
 #
-if(${KDE_PLATFORM_PROFILE} STREQUAL "Desktop")
-   ecm_optional_add_subdirectory(kcontrol)
-   ecm_optional_add_subdirectory(klipper)
-   ecm_optional_add_subdirectory(kmenuedit)
+ecm_optional_add_subdirectory(kcontrol)
+ecm_optional_add_subdirectory(klipper)
+ecm_optional_add_subdirectory(kmenuedit)
 #    macro_optional_add_subdirectory(krunner)
 #    macro_optional_add_subdirectory(solid)
 #    macro_optional_add_subdirectory(kstartupconfig)
-   ecm_optional_add_subdirectory(freespacenotifier)
+ecm_optional_add_subdirectory(freespacenotifier)
 #
-#    # data
-   ecm_optional_add_subdirectory(doc)
+# data
+ecm_optional_add_subdirectory(doc)
 #
-   if (NOT WIN32)
-      ecm_optional_add_subdirectory(kinfocenter)
+if (NOT WIN32)
+   ecm_optional_add_subdirectory(kinfocenter)
 #       macro_optional_add_subdirectory(ktouchpadenabler)
-   endif ()
+endif ()
 
-   if(NOT WIN32)
+if(NOT WIN32)
 #       macro_optional_add_subdirectory(kcminit)
-      ecm_optional_add_subdirectory(khotkeys)
+   ecm_optional_add_subdirectory(khotkeys)
 #       macro_optional_add_subdirectory(kwrited)
 #       macro_optional_add_subdirectory(ksystraycmd)
-      ecm_optional_add_subdirectory(appmenu)
-   endif()
+   ecm_optional_add_subdirectory(appmenu)
+endif()
 #
-   if(X11_Xau_FOUND AND X11_Xdmcp_FOUND)
+if(X11_Xau_FOUND AND X11_Xdmcp_FOUND)
 #       macro_optional_add_subdirectory( kdm )
-   else()
+else()
 #       message(STATUS "Xau lib or Xdmcp lib was missing. kdm will not compile")
-   endif()
 endif()
 #
 if(NOT WIN32)
