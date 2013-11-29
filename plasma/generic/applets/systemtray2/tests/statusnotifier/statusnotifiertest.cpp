@@ -188,7 +188,7 @@ void StatusNotifierTest::timeout()
 
 void StatusNotifierTest::activateRequested(bool active, const QPoint& pos)
 {
-    log(active ? "Activated" : "Deactivated");
+    log("Activated");
 }
 
 void StatusNotifierTest::secondaryActivateRequested(const QPoint& pos)
@@ -199,7 +199,12 @@ void StatusNotifierTest::secondaryActivateRequested(const QPoint& pos)
 
 void StatusNotifierTest::scrollRequested(int delta, Qt::Orientation orientation)
 {
-    log("scrollRequested");
+    ///QString msg  = QString("Scrolled " << " by: ");
+    //+     //QString msg  = QString("Scrolled " + ((orientation == Qt::Horizontal) ? "Horizontally" : "Vertically") + " by: " //+ QString::number(delta));
+    QString msg("Scrolled by ");
+    msg.append(QString::number(delta));
+    msg.append((orientation == Qt::Horizontal) ? " Horizontally" : " Vertically");
+    log(msg);
 }
 
 

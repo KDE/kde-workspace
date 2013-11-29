@@ -41,7 +41,7 @@ QtExtraComponents.MouseEventListener {
 
     onClicked: {
         print("ST2P MouseEventListener.clicked!")
-        togglePopup();
+        //togglePopup(); // FIXME reenable;
     }
     onPressed: PlasmaExtras.PressedAnimation { targetItem: arrow }
     onReleased: PlasmaExtras.ReleasedAnimation { targetItem: arrow }

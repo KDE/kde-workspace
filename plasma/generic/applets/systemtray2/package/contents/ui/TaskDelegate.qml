@@ -101,12 +101,6 @@ QtExtraComponents.MouseEventListener {
         source: iconName != "" ? iconName : (typeof(icon) != "undefined" ? icon : "")
     }
 
-    StatusNotifierItem {
-        //task: ListView.view.item
-        anchors.fill: parent
-    }
-
-
     PulseAnimation {
         targetItem: taskItemContainer
         running: status == SystemTray.Task.NeedsAttention
@@ -120,7 +114,8 @@ QtExtraComponents.MouseEventListener {
         }
         width: snExpanded ? parent.width : parent.height
         onClicked: {
-            //print("ST2PX TaskDelegate clicked ... " + !taskItemContainer.expanded + taskItemContainer.expandedItem);
+            print("ST2PX TaskDelegate clicked ... " + !taskItemContainer.expanded + taskItemContainer.expandedItem);
+            return; // FIXME: remove
             if (taskItemContainer.taskStatus == SystemTray.Task.TypeStatusItem && !taskItemContainer.snExpanded) {
 //                 root.currentTask = "";
 //                 root.expandedItem = null
@@ -147,6 +142,7 @@ QtExtraComponents.MouseEventListener {
             }
         }
     }
+
     onWidthChanged: updatePlasmoidGeometry()
     onHeightChanged: updatePlasmoidGeometry()
 
@@ -163,9 +159,16 @@ QtExtraComponents.MouseEventListener {
         //print("taskitemContainer w/h: " + taskItemContainer.width + "/" + taskItemContainer.height);
     }
 
+    Loader {
+        id: sniLoader
+        anchors.fill: parent
+    }
+
     Component.onCompleted: {
         //print("ST2PX new delegate: " + name);
         if (taskType == SystemTray.Task.TypeStatusItem) {
+            sniLoader.source = "StatusNotifierItem.qml";
+
             var component = Qt.createComponent("ExpandedStatusNotifier.qml");
             if (component.status == Component.Ready) {
                 //print("ST2P Loading STatusItemExpanded: ");

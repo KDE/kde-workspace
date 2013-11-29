@@ -95,8 +95,8 @@ Item {
     
     PlasmaCore.IconItem {
         id: itemIcon
-        width: parent.height
-        height: parent.height
+        width: root.itemSize
+        height: root.itemSize
         //visible: false
         anchors {
             //horizontalCenter: parent.horizontalCenter
@@ -172,6 +172,7 @@ Item {
             }
         }
         onWheelMoved: {
+            print("wheel moved by " + wheel.delta);
             if (wheel.orientation === Qt.Horizontal)
                 activateHorzScroll(wheel.delta)
             else
@@ -182,8 +183,8 @@ Item {
             id: tooltip
             target: wheel_area
             mainText: __has_task ? tooltipTitle : ""
-            subText:  __has_task ? tooltipText : ""
-            image:    __has_task ? tooltipIcon : ""
+            //subText:  __has_task ? tooltipText : ""
+            //image:    __has_task ? tooltipIcon : ""
         }
     }
 
@@ -197,11 +198,13 @@ Item {
     }
 
     function __processClick(buttons, item) {
-        var pos = plasmoid.popupPosition(item)
+        print("__processClick");
+        //var pos = plasmoid.popupPosition(item)
+        var pos = {"x" : 100, "y": 200 }
         switch (buttons) {
-        case Qt.LeftButton:    task.activate1(pos.x, pos.y); break
-        case Qt.RightButton:   task.activateContextMenu(pos.x, pos.y); break
-        case Qt.MiddleButton:  task.activate2(pos.x, pos.y); break
+        case Qt.LeftButton:    activate1(pos.x, pos.y); break
+        case Qt.RightButton:   activateContextMenu(pos.x, pos.y); break
+        case Qt.MiddleButton:  activate2(pos.x, pos.y); break
         }
     }
 
