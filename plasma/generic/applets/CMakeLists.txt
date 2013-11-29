@@ -1,9 +1,7 @@
-# if(${KDE_PLATFORM_PROFILE} STREQUAL "Desktop")
-   plasma_install_package(activitybar activitybar)
-   add_subdirectory(icon)
+plasma_install_package(activitybar activitybar)
+add_subdirectory(icon)
 #    add_subdirectory(lock_logout)
 #    add_subdirectory(panelspacer)
-# endif()
 #
 plasma_install_package(analog-clock org.kde.analogclock)
 
@@ -23,7 +21,5 @@ if(NOT WIN32)
 #    #notifications
 #    #should compile also on windows? (even if doesn't really make sense)
     add_subdirectory(notifications)
-    if(${KDE_PLATFORM_PROFILE} STREQUAL "Desktop")
-        add_subdirectory(systemtray2)
-    endif()
+    add_subdirectory(systemtray2)
 endif()

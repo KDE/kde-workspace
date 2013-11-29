@@ -2,9 +2,7 @@ if(NOT KDE_PLATFORM_FEATURE_DISABLE_DEPRECATED)
 	#add_subdirectory(animators)
 endif()
 
-if(${KDE_PLATFORM_PROFILE} STREQUAL "Desktop")
-	   add_subdirectory(containmentactions)
-endif()
+add_subdirectory(containmentactions)
 
 add_subdirectory(applets)
 #add_subdirectory(runners)
