@@ -68,8 +68,6 @@ find_package(UDev) #PowerDevil upower/udev backend
 # needed for set_package_properties macro
 find_package(KDE4Support REQUIRED NO_MODULE)
 
-option(WITH_XINERAMA "Xinerama support for multi-headed X displays" ON)
-
 # find_package(Strigi)
 # set_package_properties(Strigi PROPERTIES DESCRIPTION "Desktop indexing and search support"
 #                        URL "http://strigi.sourceforge.net"
