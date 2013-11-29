@@ -21,8 +21,10 @@
 
 #include "task.h"
 
-#include <QtQuick/QQuickItem>
+#include <QQuickItem>
+#include <QQuickWindow>
 #include <QtCore/QTimer>
+//#include <X11/Xlib.h>
 
 namespace SystemTray
 {
@@ -147,6 +149,23 @@ void Task::setName(QString name)
         d->name = name;
         emit changedName();
     }
+}
+
+QPointF Task::popupPosition(QQuickItem* visualParent, int x, int y)
+{
+    if (!visualParent) {
+        qCDebug(SYSTEMTRAY) << "ST2 invalid item";
+        return QPointF(0, 0);
+    }
+
+    QPointF pos = visualParent->mapToScene(QPointF(x, y));
+
+    if (visualParent->window() && visualParent->window()->screen()) {
+        pos = visualParent->window()->mapToGlobal(pos.toPoint());
+    } else {
+        return QPoint();
+    }
+    return pos;
 }
 
 }

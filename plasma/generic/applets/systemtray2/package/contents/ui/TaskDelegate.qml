@@ -46,6 +46,9 @@ QtExtraComponents.MouseEventListener {
     onClicked: {
         if (taskType == SystemTray.Task.TypePlasmoid) {
             print("_____ SET EXPANDED: " + !plasmoid.expanded);
+
+            var p = popupPosition(taskItemContainer, mouse.x, mouse.y);
+            print("POPUP at : " + p);
             togglePopup();
         }
     }

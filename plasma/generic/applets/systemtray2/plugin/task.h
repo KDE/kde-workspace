@@ -169,6 +169,8 @@ public:
      */
     virtual TaskType type() const = 0;
 
+    Q_INVOKABLE QPointF popupPosition(QQuickItem *visualParent, int x, int y);
+
 Q_SIGNALS:
     /**
      * Emitted when something about the task has changed
