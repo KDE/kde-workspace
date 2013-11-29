@@ -206,6 +206,7 @@ Item {
         case Qt.RightButton:   activateContextMenu(pos.x, pos.y); break
         case Qt.MiddleButton:  activate2(pos.x, pos.y); break
         }
+        plasmoid.expanded = false;
     }
 
     // States =====================================================================================

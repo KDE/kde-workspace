@@ -58,6 +58,17 @@ Item {
     property string currentTask: ""
     property string currentName: ""
 
+    function togglePopup() {
+        print("toggle popup => " + !plasmoid.expanded);
+        if (!plasmoid.expanded) {
+            plasmoid.expanded = true
+        } else {
+            hidePopupTimer.start();
+        }
+    }
+
+
+
     property Component compactRepresentation: CompactRepresentation {
         systrayhost: host
     }

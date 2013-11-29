@@ -43,6 +43,25 @@ QtExtraComponents.MouseEventListener {
         //print("******************* Task changed:" + task.taskId + " " + task.name)
     }
 
+    onClicked: {
+        if (taskType == SystemTray.Task.TypePlasmoid) {
+            print("_____ SET EXPANDED: " + !plasmoid.expanded);
+            togglePopup();
+        }
+    }
+    Timer {
+        id: hidePopupTimer
+        interval: 10
+        running: false
+        repeat: false
+        onTriggered: {
+            print("hidetimer triggered, collapsing " + (root.currentTask == "") )
+            if (root.currentTask == "") {
+                plasmoid.expanded = false
+            }
+        }
+    }
+
     // opacity is raised when: plasmoid is collapsed, we are the current task, or it's hovered
     opacity: (containsMouse || !plasmoid.expanded || root.currentTask == taskId) || (plasmoid.expanded && root.currentTask == "") ? 1.0 : 0.6
     Behavior on opacity { NumberAnimation { duration: 150 } }
@@ -115,7 +134,7 @@ QtExtraComponents.MouseEventListener {
         width: snExpanded ? parent.width : parent.height
         onClicked: {
             print("ST2PX TaskDelegate clicked ... " + !taskItemContainer.expanded + taskItemContainer.expandedItem);
-            return; // FIXME: remove
+            //return; // FIXME: remove
             if (taskItemContainer.taskStatus == SystemTray.Task.TypeStatusItem && !taskItemContainer.snExpanded) {
 //                 root.currentTask = "";
 //                 root.expandedItem = null
@@ -123,6 +142,8 @@ QtExtraComponents.MouseEventListener {
 //                 taskItemContainer.expanded = true;
 //                 clearTasks();
             }
+            //
+
             if (root.currentTask == taskId) {
                 root.currentTask = 0;
                 root.currentName = ""
@@ -177,6 +198,7 @@ QtExtraComponents.MouseEventListener {
                 print("Error loading statusitem: " + component.errorString());
             }
         } else if (taskItem != undefined) {
+            sniLoader.source = "PlasmoidItem.qml";
             taskItem.parent = taskItemContainer;
             updatePlasmoidGeometry();
         }
