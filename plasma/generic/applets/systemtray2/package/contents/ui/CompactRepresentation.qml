@@ -182,7 +182,7 @@ QtExtraComponents.MouseEventListener {
         repeat: false
         onTriggered: {
             var dim = root.vertical ? compactRepresenation.width : compactRepresenation.height;
-            root.cHeight = dim - root.smallSpacing;
+            root.preferredItemSize = dim - root.smallSpacing;
         }
     }
 }

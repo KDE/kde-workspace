@@ -19,8 +19,6 @@
 
 import QtQuick 2.0
 import org.kde.plasma.core 2.0 as PlasmaCore
-import org.kde.plasma.components 2.0 as PlasmaComponents
-import org.kde.plasma.extras 2.0 as PlasmaExtras
 import org.kde.qtextracomponents 2.0 as QtExtraComponents
 
 import org.kde.private.systemtray 2.0 as SystemTray
@@ -45,10 +43,6 @@ QtExtraComponents.MouseEventListener {
 
     onClicked: {
         if (taskType == SystemTray.Task.TypePlasmoid) {
-            print("_____ SET EXPANDED: " + !plasmoid.expanded);
-
-            var p = popupPosition(taskItemContainer, mouse.x, mouse.y);
-            print("POPUP at : " + p);
             togglePopup();
         }
     }
@@ -181,9 +175,7 @@ QtExtraComponents.MouseEventListener {
             taskItem.x = _m;
             taskItem.height = _size;
             taskItem.width = _size;
-            //print("taskitem w/h: " + taskItem.width + "/" + taskItem.height);
         }
-        //print("taskitemContainer w/h: " + taskItemContainer.width + "/" + taskItemContainer.height);
     }
 
     Loader {

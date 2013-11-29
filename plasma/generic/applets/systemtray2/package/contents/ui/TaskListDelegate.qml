@@ -33,11 +33,6 @@ TaskDelegate {
     width: snExpanded ? parent.width : height * 1.5 // be a bit more lenient to input
     height: (root.baseSize * 2)
 
-//     MouseArea {
-//         anchors.fill: parent
-//
-//     }
-
     PlasmaComponents.Highlight {
         anchors.fill: parent
         anchors.rightMargin: height / 2

@@ -33,22 +33,15 @@ Item {
 
     property int minimumWidth: minimumHeight * 1.333
     property int minimumHeight: theme.mSize(theme.defaultFont).height * 14
+
     property int implicitWidth: minimumWidth * 1.5
     property int implicitHeight: minimumHeight * 1.5
 
-//     property int minimumWidth: implicitWidth // just needs to run out of space in the panel ...
-//     property int minimumHeight: implicitHeight // ... but not too big to screw up initial layouts
-//
-//     property int implicitWidth: baseSize * 32
-//     property int implicitHeight: baseSize * 24
-
-    property int cHeight: 100
-
-    property int _h: itemSize // should go away, replace with root.baseSize
+    property int preferredItemSize: 128 // will be set by the grid, just needs a high-enough default
 
     // Sizes depend on the font, and thus on DPI
     property int baseSize: theme.mSize(theme.defaultFont).height
-    property int itemSize: Layout.alignedSize(Math.min(baseSize * 2, cHeight))
+    property int itemSize: Layout.alignedSize(Math.min(baseSize * 2, preferredItemSize))
     property int smallSpacing: theme.smallSpacing
     property int largeSpacing: theme.largeSpacing
 
@@ -66,8 +59,6 @@ Item {
             hidePopupTimer.start();
         }
     }
-
-
 
     property Component compactRepresentation: CompactRepresentation {
         systrayhost: host
