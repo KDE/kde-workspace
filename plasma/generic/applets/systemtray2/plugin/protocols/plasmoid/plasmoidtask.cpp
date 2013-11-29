@@ -89,6 +89,7 @@ void PlasmoidTask::updateStatus()
 
 void PlasmoidTask::setExpanded(bool expanded)
 {
+    qCDebug(SYSTEMTRAY) << "ST2P plasmoid.expand = " << expanded;
     //if (m_taskItem->isExpanded() != expanded) {
     if (m_taskItem && m_taskItem->isExpanded() != expanded) {
         qCDebug(SYSTEMTRAY) << "ST2P plasmoid.expand = " << expanded;

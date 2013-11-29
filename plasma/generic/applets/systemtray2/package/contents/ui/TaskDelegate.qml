@@ -138,7 +138,7 @@ QtExtraComponents.MouseEventListener {
         onClicked: {
             print("ST2PX TaskDelegate clicked ... " + !taskItemContainer.expanded + taskItemContainer.expandedItem);
             //return; // FIXME: remove
-            if (taskItemContainer.taskStatus == SystemTray.Task.TypeStatusItem && !taskItemContainer.snExpanded) {
+            if (taskItemContainer.taskType == SystemTray.Task.TypeStatusItem && !taskItemContainer.snExpanded) {
 //                 root.currentTask = "";
 //                 root.expandedItem = null
 //                 taskItemContainer.snExpanded = true;
@@ -152,12 +152,15 @@ QtExtraComponents.MouseEventListener {
                 root.currentName = ""
                 root.expandedItem = null;
                 plasmoid.expanded = false;
-            } else if (taskItemContainer.expanded || taskItemContainer.taskStatus == SystemTray.Task.TypeStatusItem || !isCurrentTask) {
+            } else if (taskItemContainer.expanded || taskItemContainer.taskType == SystemTray.Task.TypeStatusItem || !isCurrentTask) {
                 //print("S2TPX Setting taskitem");
                 root.currentTask = taskId;
                 root.currentName = name
                 root.expandedItem = taskItemContainer.expandedItem;
+
                 // FIXME: expand applet
+                //task.expanded = true; // crashes?!?!
+
             } else {
                 //print("S2TPX resetting taskitem");
                 root.currentTask = "";
