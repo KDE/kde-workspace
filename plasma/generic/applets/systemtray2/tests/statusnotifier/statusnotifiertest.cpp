@@ -43,6 +43,7 @@ public:
     QString pluginName;
     QTimer* timer;
     int interval = 1500;
+    QStringList loglines;
 
     KStatusNotifierItem* systemNotifier;
 
@@ -59,6 +60,7 @@ StatusNotifierTest::StatusNotifierTest(QWidget* parent) :
     connect(updateButton, &QPushButton::clicked, this, &StatusNotifierTest::updateNotifier);
     updateUi();
     show();
+    log("started");
 }
 
 void StatusNotifierTest::init()
@@ -73,11 +75,28 @@ void StatusNotifierTest::init()
     d->systemNotifier->setTitle(i18nc("title", "StatusNotifierTest"));
     d->systemNotifier->setToolTipSubTitle(i18nc("tooltip subtitle", "Some explanation from the beach."));
 
+    connect(d->systemNotifier, &KStatusNotifierItem::activateRequested,
+            this, &StatusNotifierTest::activateRequested);
+    connect(d->systemNotifier, &KStatusNotifierItem::secondaryActivateRequested,
+            this, &StatusNotifierTest::secondaryActivateRequested);
+    connect(d->systemNotifier, &KStatusNotifierItem::scrollRequested,
+            this, &StatusNotifierTest::scrollRequested);
+
+
 }
 
 StatusNotifierTest::~StatusNotifierTest()
 {
     delete d;
+}
+
+void StatusNotifierTest::log(const QString& msg)
+{
+    qDebug() << "msg: " << msg;
+    d->loglines.prepend(msg);
+
+
+    logEdit->setText(d->loglines.join('\n'));
 }
 
 void StatusNotifierTest::updateUi()
@@ -101,11 +120,15 @@ void StatusNotifierTest::updateUi()
 
 void StatusNotifierTest::updateNotifier()
 {
+    //log("update");
     if (!enabledCheck->isChecked()) {
         delete d->systemNotifier;
+        d->systemNotifier = 0;
         return;
     } else {
-        init();
+        if (!d->systemNotifier) {
+            init();
+        }
     }
 
 
@@ -162,6 +185,23 @@ void StatusNotifierTest::timeout()
     }
     updateUi();
 }
+
+void StatusNotifierTest::activateRequested(bool active, const QPoint& pos)
+{
+    log(active ? "Activated" : "Deactivated");
+}
+
+void StatusNotifierTest::secondaryActivateRequested(const QPoint& pos)
+{
+    log("secondaryActivateRequested");
+}
+
+
+void StatusNotifierTest::scrollRequested(int delta, Qt::Orientation orientation)
+{
+    log("scrollRequested");
+}
+
 
 #include "moc_statusnotifiertest.cpp"
 

@@ -37,12 +37,17 @@ class StatusNotifierTest : public QDialog, public Ui_StatusNotifierTest
         virtual ~StatusNotifierTest();
 
         void init();
+        void log(const QString &msg);
 
     public Q_SLOTS:
         int runMain();
         void timeout();
         void updateUi();
         void updateNotifier();
+
+        void activateRequested (bool active, const QPoint &pos);
+        void scrollRequested (int delta, Qt::Orientation orientation);
+        void secondaryActivateRequested (const QPoint &pos);
 
     private:
         StatusNotifierTestPrivate* d;
