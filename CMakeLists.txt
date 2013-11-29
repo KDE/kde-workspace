@@ -245,12 +245,12 @@ if(${KDE_PLATFORM_PROFILE} STREQUAL "Desktop")
    macro_optional_add_subdirectory(kstartupconfig)
    macro_optional_add_subdirectory(freespacenotifier)
    macro_optional_add_subdirectory(kscreensaver)
+   macro_optional_add_subdirectory(kinfocenter)
 
    # data
    macro_optional_add_subdirectory(doc)
 
    if (Q_WS_X11)
-      macro_optional_add_subdirectory(kinfocenter)
       macro_optional_add_subdirectory(ktouchpadenabler)
    endif (Q_WS_X11)
 
