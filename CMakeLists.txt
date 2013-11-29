@@ -291,7 +291,7 @@ if(NOT WIN32)
 #
     ecm_optional_add_subdirectory( powerdevil )
    if (NOT CMAKE_SYSTEM_NAME MATCHES Darwin)
-#       macro_optional_add_subdirectory( ksysguard )
+      ecm_optional_add_subdirectory( ksysguard )
    endif ()
 endif()
 #
