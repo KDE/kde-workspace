@@ -19,6 +19,7 @@ Comment[sv]=Visa tomma skrivbordsmöbler
 Comment[tr]=Boş masaüstü mobilya görünümü
 Comment[uk]=Компоненти для перегляду порожньої стільниці
 Comment[x-test]=xxBlank desktop view furniturexx
+Comment[zh_TW]=空白桌面檢視設備
 Encoding=UTF-8
 Keywords=
 Name=Blank Desktop
@@ -44,6 +45,7 @@ Name[sv]=Tomt skrivbord
 Name[tr]=Boş Masaüstü
 Name[uk]=Порожня стільниця
 Name[x-test]=xxBlank Desktopxx
+Name[zh_TW]=空白桌面
 Type=Service
 
 X-KDE-ServiceTypes=Plasma/Shell

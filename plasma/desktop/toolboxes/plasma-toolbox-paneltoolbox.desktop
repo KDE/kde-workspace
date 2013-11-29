@@ -68,6 +68,7 @@ Name[sl]=Orodjarna za pult
 Name[sv]=Panelverktygslåda
 Name[uk]=Набір інструментів панелі
 Name[x-test]=xxPanel toolboxxx
+Name[zh_TW]=面板工具盒
 Type=Service
 
 X-KDE-ServiceTypes=Plasma/ToolBox
