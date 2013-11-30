@@ -152,6 +152,11 @@ QSizeF Pager::size() const
     return m_size;
 }
 
+QSize Pager::preferredSize() const
+{
+    return m_preferredSize;
+}
+
 void Pager::setSize(const QSizeF &size)
 {
     if (m_size == size) {
@@ -330,6 +335,11 @@ void Pager::updateSizes()
     m_heightScaleFactor = itemHeight / totalRect.height();
 
     m_pagerModel->clearDesktopRects();
+
+    int pw = (int)(leftMargin + (itemWidth + padding) * m_columns + rightMargin);
+    int ph = (int)(topMargin + (itemHeight + padding) * m_rows + bottomMargin);
+    m_preferredSize = QSize(pw, ph);
+    emit preferredSizeChanged();
 
     QRectF itemRect(QPointF(leftMargin, topMargin) , QSizeF(itemWidth, itemHeight));
     for (int i = 0; i < m_desktopCount; i++) {

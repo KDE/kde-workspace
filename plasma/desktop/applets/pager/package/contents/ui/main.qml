@@ -26,8 +26,16 @@ import "utils.js" as Utils
 Item {
     id: root
 
+    property bool vertical: (plasmoid.formFactor == PlasmaCore.Types.Vertical)
+
     property int minimumWidth
     property int minimumHeight
+
+    property int maximumWidth: !vertical ? pager.preferredSize.width : undefined
+    property int maximumHeight: vertical ? pager.preferredSize.height : undefined
+
+    property bool fillHeight: vertical && visible
+    property bool fillWidth: !vertical && visible
 
     property bool dragging: false
     property int dragId
@@ -35,7 +43,7 @@ Item {
     property int dragSwitchDesktopId: -1
 
     anchors.fill: parent
-    visible: repeater.count > 1
+    //visible: repeater.count > 1 // FIXME: re-enable and fix collapsing
 
     property color windowActiveOnActiveDesktopColor: theme.textColor
     property color windowInactiveOnActiveDesktopColor: theme.textColor

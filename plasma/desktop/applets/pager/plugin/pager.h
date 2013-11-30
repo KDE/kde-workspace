@@ -47,6 +47,7 @@ class Pager : public QObject
     Q_PROPERTY(bool showWindowIcons READ showWindowIcons WRITE setShowWindowIcons NOTIFY showWindowIconsChanged)
     Q_PROPERTY(Qt::Orientation orientation READ orientation WRITE setOrientation NOTIFY orientationChanged)
     Q_PROPERTY(QSizeF size READ size WRITE setSize NOTIFY sizeChanged)
+    Q_PROPERTY(QSize preferredSize READ preferredSize NOTIFY preferredSizeChanged)
     Q_PROPERTY(Pager::CurrentDesktopSelected currentDesktopSelected READ currentDesktopSelected WRITE setCurrentDesktopSelected NOTIFY currentDesktopSelectedChanged)
     Q_PROPERTY(Pager::DisplayedText displayedText READ displayedText WRITE setDisplayedText NOTIFY displayedTextChanged)
 
@@ -85,6 +86,8 @@ class Pager : public QObject
         QSizeF size() const;
         void setSize(const QSizeF &size);
 
+        QSize preferredSize() const;
+
         CurrentDesktopSelected currentDesktopSelected() const;
         void setCurrentDesktopSelected(CurrentDesktopSelected cur);
 
@@ -99,6 +102,7 @@ class Pager : public QObject
         void showWindowIconsChanged();
         void orientationChanged();
         void sizeChanged();
+        void preferredSizeChanged();
         void currentDesktopSelectedChanged();
         void displayedTextChanged();
 
@@ -142,6 +146,7 @@ class Pager : public QObject
         qreal m_widthScaleFactor;
         qreal m_heightScaleFactor;
         QSizeF m_size;
+        QSize m_preferredSize;
         Qt::Orientation m_orientation;
 
         //list of info about animations for each desktop
