@@ -322,7 +322,7 @@ void Pager::updateSizes()
         }
         itemHeight = preferredItemHeight;
         if (itemWidth < itemHeight * ratio) {
-            itemHeight = itemWidth / ratio;
+            itemWidth = itemHeight * ratio;
         }
     }
 
