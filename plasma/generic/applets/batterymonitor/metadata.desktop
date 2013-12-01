@@ -2,11 +2,17 @@
 Name=Battery & Brightness
 Name[cs]=Baterie & Jas
 Name[de]=Akku & Bildschirmhelligkeit
+Name[es]=Batería y brillo
+Name[gl]=Batería e brillo
 Name[ia]=Batteria & Brillantia
 Name[nl]=Batterij & helderheid
 Name[pt]=Bateria & Brilho
 Name[pt_BR]=Bateria e brilho da tela
 Name[sl]=Baterija in svetlost
+Name[sr]=Батерија и осветљај
+Name[sr@ijekavian]=Батерија и освјетљај
+Name[sr@ijekavianlatin]=Baterija i osvjetljaj
+Name[sr@latin]=Baterija i osvetljaj
 Name[sv]=Batteri och ljusstyrka
 Name[uk]=Акумулятор і яскравість дисплея
 Name[x-test]=xxBattery & Brightnessxx
