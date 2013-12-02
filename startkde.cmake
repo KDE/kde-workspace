@@ -55,17 +55,17 @@ fi
 #
 # * Then ksmserver is started which takes control of the rest of the startup sequence
 
-# The user's personal KDE directory is usually ~/.kde, but this setting
-# may be overridden by setting KDEHOME.
+# We need to create config folder so we can write startupconfigkeys
+if [  ${XDG_CONFIG_HOME} ]; then
+  configDir=$XDG_CONFIG_HOME;
+else
+  configDir="~/.config"; #this is the default, http://standards.freedesktop.org/basedir-spec/basedir-spec-latest.html
+fi
 
-kdehome=$HOME/@KDE_DEFAULT_HOME@
-test -n "$KDEHOME" && kdehome=`echo "$KDEHOME"|sed "s,^~/,$HOME/,"`
+mkdir -p $configDir
 
-# see kstartupconfig source for usage
-mkdir -m 700 -p $kdehome
-mkdir -m 700 -p $kdehome/share
-mkdir -m 700 -p $kdehome/share/config
-cat >$kdehome/share/config/startupconfigkeys <<EOF
+#This is basically setting defaults so we can use them with kstartupconfig4
+cat >$configDir/startupconfigkeys <<EOF
 kcminputrc Mouse cursorTheme 'Oxygen_White'
 kcminputrc Mouse cursorSize ''
 ksplashrc KSplash Theme Default
