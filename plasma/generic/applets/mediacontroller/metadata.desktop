@@ -1,6 +1,24 @@
 [Desktop Entry]
 Name=Media Player
+Name[de]=Medienwiedergabe
+Name[gl]=Reprodutor multimedia
+Name[nl]=Mediaspeler
+Name[pt]=Reprodutor Multimédia
+Name[pt_BR]=Reprodutor de mídia
+Name[sl]=Predstavnostni predvajalnik
+Name[sv]=Mediaspelare
+Name[uk]=Мультимедійний програвач
+Name[x-test]=xxMedia Playerxx
 Comment=Media Player Controls
+Comment[de]=Steuerung der Medienwiedergabe
+Comment[gl]=Controles do reprodutor multimedia
+Comment[nl]=Besturing van mediaspeler
+Comment[pt]=Controlos do Leitor Multimédia
+Comment[pt_BR]=Controles do reprodutor de mídia
+Comment[sl]=Nadzorniki predstavnostnega predvajalnika
+Comment[sv]=Kontroller för mediaspelare
+Comment[uk]=Керування мультимедійним програвачем
+Comment[x-test]=xxMedia Player Controlsxx
 Encoding=UTF-8
 Icon=applications-multimedia
 ServiceTypes=Plasma/Applet
