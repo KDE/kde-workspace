@@ -214,10 +214,6 @@ else
     export GS_LIB
 fi
 
-
-# In case of dcop sockets left by a previous session, cleanup
-#dcopserver_shutdown
-
 echo 'startkde: Starting up...'  1>&2
 
 # Make sure that the KDE prefix is first in XDG_DATA_DIRS and that it's set at all.
@@ -341,9 +337,6 @@ test -n "$ksplash_pid" && kill "$ksplash_pid" 2>/dev/null
 
 # Clean up
 kdeinit4_shutdown
-# KDE3 support
-kde3 kdeinit_shutdown 2>/dev/null
-kde3 dcopserver_shutdown --wait 2>/dev/null
 
 echo 'startkde: Running shutdown scripts...'  1>&2
 
