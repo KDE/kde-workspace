@@ -142,6 +142,10 @@ void Backend::activateItem(int id, bool toggle)
         } else {
             taskItem->task()->activate();
         }
+
+        //FIXME TODO HACK This papers over XSendEvent() calls lacking an explicit flush in
+        //KWindowSystem; not addressed there due to pending xcb port.
+        XFlush(QX11Info::display());
     } else if (item->itemType() == TaskManager::LauncherItemType) {
         static_cast<TaskManager::LauncherItem*>(item)->launch();
     }
