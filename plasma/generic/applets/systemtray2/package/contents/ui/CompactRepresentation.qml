@@ -161,14 +161,19 @@ QtExtraComponents.MouseEventListener {
 
         svg: PlasmaCore.Svg { imagePath: "widgets/arrows" }
         elementId: {
-            // FIXME : Account for top, bottom, left, right
+
             var exp = plasmoid.expanded; // flip for bottom edge and right edge
-            // ...
-            if (!vertical) {
-                return (exp) ? "down-arrow" : "up-arrow"
-            } else {
-                return (exp) ? "left-arrow" : "right-arrow"
-            }
+
+            if (plasmoid.location == PlasmaCore.Types.BottomEdge) {
+		return (exp) ? "down-arrow" : "up-arrow"
+	    } else if (plasmoid.location == PlasmaCore.Types.TopEdge) {
+		return (exp) ? "up-arrow" : "down-arrow"
+	    } else if (plasmoid.location == PlasmaCore.Types.LeftEdge) {
+		return (exp) ? "left-arrow" : "right-arrow"
+	    } else {
+		return (exp) ? "right-arrow" : "left-arrow"
+	    }
+
         }
     }
 
