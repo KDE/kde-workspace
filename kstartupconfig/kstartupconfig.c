@@ -151,5 +151,5 @@ int main()
     fclose( keys );
     fclose( config );
   doit:
-    return system( "kdostartupconfig4" );
+    return system( "kdostartupconfig5" );
     }
