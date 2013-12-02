@@ -73,10 +73,10 @@ ksplashrc KSplash Engine KSplashX
 kcmfonts General forceFontDPI 0
 kdeglobals Locale Language '' # trigger requesting languages from KLocale
 EOF
-kstartupconfig4
+kstartupconfig5
 returncode=$?
 if test $returncode -ne 0; then
-    xmessage -geometry 500x100 "kstartupconfig4 does not exist or fails. The error code is $returncode. Check your installation."
+    xmessage -geometry 500x100 "kstartupconfig5 does not exist or fails. The error code is $returncode. Check your installation."
     exit 1
 fi
 [ -r $kdehome/share/config/startupconfig ] && . $kdehome/share/config/startupconfig
