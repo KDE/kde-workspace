@@ -214,29 +214,6 @@ else
     export GS_LIB
 fi
 
-lnusertemp=`kde4-config --path exe --locate lnusertemp`
-if test -z "$lnusertemp"; then
-  # Startup error
-  echo 'startkde: ERROR: Could not locate lnusertemp in '`kde4-config --path exe` 1>&2
-fi
-
-# Link "tmp" "socket" and "cache" resources to directory in /tmp
-# Creates:
-# - a directory /tmp/kde-$USER and links $KDEHOME/tmp-$HOSTNAME to it.
-# - a directory /tmp/ksocket-$USER and links $KDEHOME/socket-$HOSTNAME to it.
-# - a directory /var/tmp/kdecache-$USER and links $KDEHOME/cache-$HOSTNAME to it.
-# Note: temporary locations can be overriden through the KDETMP and KDEVARTMP
-# environment variables
-for resource in tmp cache socket; do
-    if "$lnusertemp" $resource >/dev/null; then
-        : # ok
-    else
-        echo 'startkde: Call to lnusertemp failed (temporary directories full?). Check your installation.'  1>&2
-        test -n "$ksplash_pid" && kill "$ksplash_pid" 2>/dev/null
-        xmessage -geometry 600x100 "Call to lnusertemp failed (temporary directories full?). Check your installation."
-        exit 1
-    fi
-done
 
 # In case of dcop sockets left by a previous session, cleanup
 #dcopserver_shutdown
