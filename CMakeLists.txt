@@ -302,7 +302,11 @@ ecm_optional_add_subdirectory(klipper)
 ecm_optional_add_subdirectory(kmenuedit)
 #    macro_optional_add_subdirectory(krunner)
 #    macro_optional_add_subdirectory(solid)
-ecm_optional_add_subdirectory(kstartupconfig)
+if(LibBSD_FOUND)
+    ecm_optional_add_subdirectory(kstartupconfig)
+else()
+    message(STATUS "LibBSD was not found, kstartupconfig will not be built")
+endif()
 ecm_optional_add_subdirectory(freespacenotifier)
 #
 # data
