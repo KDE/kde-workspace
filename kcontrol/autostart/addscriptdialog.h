@@ -22,13 +22,14 @@
 #ifndef ADDSCRIPTDIALOG_H
 #define ADDSCRIPTDIALOG_H
 
-#include <KDialog>
-#include <KUrl>
+#include <QDialog>
+#include <QUrl>
 
+class QDialogButtonBox;
 class KUrlRequester;
 class QCheckBox;
 
-class AddScriptDialog : public KDialog
+class AddScriptDialog : public QDialog
 {
     Q_OBJECT
 
@@ -36,7 +37,7 @@ public:
     explicit AddScriptDialog(QWidget* parent=0);
     ~AddScriptDialog();
     // Returns the Url of the script to be imported
-    KUrl importUrl() const;
+    QUrl importUrl() const;
     bool symLink() const;
 
 public Q_SLOTS:
@@ -52,6 +53,9 @@ private Q_SLOTS:
 private:
     KUrlRequester *m_url;
     QCheckBox* m_symlink;
+
+    QDialogButtonBox* m_buttons;
 };
 
 #endif
+

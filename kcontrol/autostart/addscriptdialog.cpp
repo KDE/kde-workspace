@@ -33,23 +33,25 @@
 #include <KMessageBox>
 
 AddScriptDialog::AddScriptDialog (QWidget* parent)
-    : KDialog( parent ) {
-    QWidget *w = new QWidget( this );
-    setButtons( Cancel|Ok );
+    : QDialog( parent )
+{
     QVBoxLayout *lay= new QVBoxLayout;
-    w->setLayout( lay );
-    QLabel *lab = new QLabel( i18n( "Shell script path:" ), w );
+    setLayout( lay );
+    QLabel *lab = new QLabel( i18n( "Shell script path:" ), this );
     lay->addWidget( lab );
-    m_url = new KUrlRequester( w );
+    m_url = new KUrlRequester( this );
     lay->addWidget( m_url );
-    m_symlink = new QCheckBox( i18n( "Create as symlink" ), w ); //TODO fix text
+    m_symlink = new QCheckBox( i18n( "Create as symlink" ), this ); //TODO fix text
     m_symlink->setChecked( true );
     lay->addWidget( m_symlink );
     connect( m_url->lineEdit(), SIGNAL(textChanged(QString)), SLOT(textChanged(QString)) );
     m_url->lineEdit()->setFocus();
-    enableButtonOk(false);
 
-    setMainWidget( w );
+    m_buttons = new QDialogButtonBox(QDialogButtonBox::Ok|QDialogButtonBox::Cancel, this);
+    m_buttons->button(QDialogButtonBox::Ok)->setEnabled(false);
+    lay->addWidget(m_buttons);
+    connect(m_buttons, SIGNAL(accepted()), SLOT(accept()));
+    connect(m_buttons, SIGNAL(rejected()), SLOT(reject()));
 }
 
 AddScriptDialog::~AddScriptDialog()
@@ -58,13 +60,13 @@ AddScriptDialog::~AddScriptDialog()
 
 void AddScriptDialog::textChanged(const QString &text)
 {
-    enableButtonOk(!text.isEmpty());
+    m_buttons->button(QDialogButtonBox::Ok)->setEnabled(!text.isEmpty());
 }
 
 void AddScriptDialog::accept()
 {
     if ( doBasicSanityCheck() )
-        KDialog::accept();
+        QDialog::accept();
 }
 
 bool AddScriptDialog::doBasicSanityCheck()
@@ -90,9 +92,9 @@ bool AddScriptDialog::doBasicSanityCheck()
     return true;
 }
 
-KUrl AddScriptDialog::importUrl() const
+QUrl AddScriptDialog::importUrl() const
 {
-    return m_url->lineEdit()->text();
+    return m_url->url();
 }
 
 bool AddScriptDialog::symLink() const

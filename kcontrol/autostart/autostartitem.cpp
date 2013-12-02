@@ -24,15 +24,15 @@
 #include <QTreeWidgetItem>
 #include <QTreeWidget>
 #include <QDir>
+#include <QDebug>
 
 #include <KLocale>
-#include <KDebug>
 #include <KIO/CopyJob>
 
 AutoStartItem::AutoStartItem( const QString &service, QTreeWidgetItem *parent, Autostart* )
     : QTreeWidgetItem( parent )
+    , m_fileName(service)
 {
-    m_fileName = KUrl(service);
 }
 
 AutoStartItem::~AutoStartItem()
@@ -40,7 +40,7 @@ AutoStartItem::~AutoStartItem()
 
 }
 
-KUrl AutoStartItem::fileName() const
+QUrl AutoStartItem::fileName() const
 {
     return m_fileName;
 }
@@ -49,13 +49,13 @@ void AutoStartItem::setPath(const QString &path)
 {
     Q_ASSERT( path.endsWith(QDir::separator()) );
 
-    if (path == m_fileName.directory(KUrl::AppendTrailingSlash))
+    if (QUrl(path) == m_fileName.adjusted(QUrl::RemoveFilename))
         return;
 
     const QString& newFileName = path + m_fileName.fileName();
-    KIO::move(m_fileName, KUrl(newFileName));
+    KIO::move(m_fileName, QUrl(newFileName));
 
-    m_fileName = KUrl(newFileName);
+    m_fileName = QUrl(newFileName);
 }
 
 DesktopStartItem::DesktopStartItem( const QString &service, QTreeWidgetItem *parent, Autostart*autostart )
@@ -103,7 +103,7 @@ void ScriptStartItem::changeStartup(ScriptStartItem::ENV type )
         m_comboBoxStartup->setCurrentIndex( 2 );
         break;
     default:
-        kWarning() << " startup type is not defined :" << type;
+        qWarning() << " startup type is not defined :" << type;
         break;
     }
 }

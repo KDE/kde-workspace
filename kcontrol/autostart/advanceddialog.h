@@ -20,10 +20,10 @@
 #ifndef ADVANCEDDIALOG_H
 #define ADVANCEDDIALOG_H
 
-#include <KDialog>
+#include <QDialog>
 class QCheckBox;
 
-class AdvancedDialog : public KDialog
+class AdvancedDialog : public QDialog
 {
     Q_OBJECT
 

@@ -31,25 +31,22 @@
 #include <KLocale>
 #include <KConfig>
 #include <KConfigGroup>
-#include <KGlobalSettings>
 #include <KShell>
-#include <KStandardDirs>
 #include <KOpenWithDialog>
 #include <KPropertiesDialog>
 #include <KDesktopFile>
 #include <KMessageBox>
 #include <KAboutData>
-#include <KDebug>
 #include <kio/netaccess.h>
 #include <KIO/DeleteJob>
 #include <KIO/CopyJob>
-
+#include <QDebug>
 
 K_PLUGIN_FACTORY(AutostartFactory, registerPlugin<Autostart>();)
-    K_EXPORT_PLUGIN(AutostartFactory( "kcmautostart", "kcm_autostart" ))
+K_EXPORT_PLUGIN(AutostartFactory( "kcmautostart", "kcm_autostart" ))
 
-    Autostart::Autostart( QWidget* parent, const QVariantList& )
-        : KCModule(parent )
+Autostart::Autostart( QWidget* parent, const QVariantList& )
+    : KCModule(parent )
 {
     widget = new Ui_AutostartConfig();
     widget->setupUi(this);
@@ -169,8 +166,9 @@ void Autostart::load()
     widget->listCMD->expandItem( m_scriptItem );
 
     foreach (const QString& path, m_paths) {
-        if (! KStandardDirs::exists(path))
-            KStandardDirs::makeDir(path);
+        QDir d(path);
+        if (!d.exists())
+            d.mkpath(path);
 
         QDir autostartdir( path );
         autostartdir.setFilter( QDir::Files );
@@ -189,7 +187,7 @@ void Autostart::load()
                 }
 
                 const QString exe = commandLine.first();
-                if (exe.isEmpty() || KStandardDirs::findExe(exe).isEmpty()) {
+                if (exe.isEmpty() || QStandardPaths::findExecutable(exe).isEmpty()) {
                     continue;
                 }
 
@@ -204,7 +202,7 @@ void Autostart::load()
                                       notShowList.contains("KDE") ||
                                       (!onlyShowList.isEmpty() && !onlyShowList.contains("KDE"));
 
-                int indexPath = m_paths.indexOf((item->fileName().directory()+'/' ) );
+                int indexPath = m_paths.indexOf((item->fileName().adjusted(QUrl::RemoveFilename).toString() ) );
                 if ( indexPath > 2 )
                     indexPath = 0; //.kde/share/autostart and .config/autostart load destkop at startup
                 addItem(item, config.readName(), m_pathName.value(indexPath),  grp.readEntry("Exec"), disabled );
@@ -212,7 +210,7 @@ void Autostart::load()
             else
             {
                 ScriptStartItem *item = new ScriptStartItem( fi.absoluteFilePath(), m_scriptItem,this );
-                int typeOfStartup = m_paths.indexOf((item->fileName().directory()+'/') );
+                int typeOfStartup = m_paths.indexOf((item->fileName().adjusted(QUrl::RemoveFilename).toString()) );
                 ScriptStartItem::ENV type = ScriptStartItem::START;
                 switch( typeOfStartup )
                 {
@@ -226,7 +224,7 @@ void Autostart::load()
                     type = ScriptStartItem::PRE_START;
                     break;
                 default:
-                    kDebug()<<" type is not defined :"<<type;
+                    qDebug()<<" type is not defined :"<<type;
                     break;
                 }
                 if ( fi.isSymLink() ) {
@@ -266,12 +264,12 @@ void Autostart::slotAddProgram()
     // Also see
     // https://bugs.launchpad.net/ubuntu/+source/kde-workspace/+bug/923360
     QString desktopPath;
-    KUrl desktopTemplate;
+    QUrl desktopTemplate;
     if ( service->desktopEntryName().isEmpty() ) {
         // Build custom desktop file (e.g. when the user entered an executable
         // name in the OpenWithDialog).
         desktopPath = m_paths[4] + service->name() + ".desktop";
-        desktopTemplate = KUrl( desktopPath );
+        desktopTemplate = QUrl( desktopPath );
         KConfig kc(desktopTemplate.path(), KConfig::SimpleConfig);
         KConfigGroup kcg = kc.group("Desktop Entry");
         kcg.writeEntry("Exec",service->exec());
@@ -291,9 +289,9 @@ void Autostart::slotAddProgram()
     {
         // Use existing desktop file and use same file name to enable overrides.
         desktopPath = m_paths[4] + service->desktopEntryName() + ".desktop";
-        desktopTemplate = KUrl( KStandardDirs::locate("apps", service->entryPath()) );
+        desktopTemplate = QUrl( QStandardPaths::locate(QStandardPaths::ApplicationsLocation, service->entryPath()) );
 
-        KPropertiesDialog dlg( desktopTemplate, KUrl(m_paths[4]), service->desktopEntryName() + ".desktop", this );
+        KPropertiesDialog dlg( desktopTemplate, QUrl(m_paths[4]), service->desktopEntryName() + ".desktop", this );
         if ( dlg.exec() != QDialog::Accepted )
             return;
     }
@@ -347,13 +345,13 @@ void Autostart::slotEditCMD(QTreeWidgetItem* ent)
     AutoStartItem *entry = dynamic_cast<AutoStartItem*>( ent );
     if ( entry )
     {
-        const KFileItem kfi = KFileItem( KFileItem::Unknown, KFileItem::Unknown, KUrl( entry->fileName() ), true );
+        const KFileItem kfi = KFileItem( KFileItem::Unknown, KFileItem::Unknown, QUrl( entry->fileName() ), true );
         if (! slotEditCMD( kfi ))
             return;
         DesktopStartItem *desktopEntry = dynamic_cast<DesktopStartItem*>( entry );
         if (desktopEntry) {
             KService service(desktopEntry->fileName().path());
-            addItem( desktopEntry, service.name(), m_pathName.value(m_paths.indexOf((desktopEntry->fileName().directory()+'/') )), service.exec(),false );
+            addItem( desktopEntry, service.name(), m_pathName.value(m_paths.indexOf(desktopEntry->fileName().adjusted(QUrl::RemoveFilename).toString())), service.exec(),false );
         }
     }
 }

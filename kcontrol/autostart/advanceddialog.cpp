@@ -21,20 +21,24 @@
 
 #include <QCheckBox>
 #include <QVBoxLayout>
+#include <QDialogButtonBox>
 
 #include <KLocalizedString>
 
 AdvancedDialog::AdvancedDialog( QWidget *parent, bool status )
-    :KDialog( parent )
+    : QDialog( parent )
 {
-    QWidget *w = new QWidget( this );
-    setButtons( Cancel|Ok );
-    QVBoxLayout *lay= new QVBoxLayout;
-    w->setLayout( lay );
-    m_onlyInKde = new QCheckBox( i18n( "Autostart only in KDE" ), w );
+    QVBoxLayout *lay= new QVBoxLayout(this);
+    m_onlyInKde = new QCheckBox( i18n( "Autostart only in KDE" ), this );
     m_onlyInKde->setChecked( status );
     lay->addWidget( m_onlyInKde );
-    setMainWidget( w );
+
+    QDialogButtonBox* buttons = new QDialogButtonBox(this);
+    buttons->setStandardButtons( QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
+    setLayout( lay );
+
+    connect(buttons, SIGNAL(accepted()), SLOT(accept()));
+    connect(buttons, SIGNAL(rejected()), SLOT(reject()));
 }
 
 AdvancedDialog::~AdvancedDialog()

@@ -22,7 +22,7 @@
 
 #include <QTreeWidgetItem>
 #include <QObject>
-#include <KUrl>
+#include <QUrl>
 
 class QComboBox;
 class QTreeWidget;
@@ -34,12 +34,12 @@ public:
     AutoStartItem( const QString &service, QTreeWidgetItem *parent, Autostart* );
     ~AutoStartItem();
 
-    KUrl fileName() const;
+    QUrl fileName() const;
 
     void setPath(const QString &path);
 
 private:
-    KUrl m_fileName;
+    QUrl m_fileName;
 };
 
 class DesktopStartItem : public AutoStartItem
