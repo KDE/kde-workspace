@@ -63,8 +63,6 @@ Otherwise kdostartupconfig is launched to create or update all the necessary fil
 
 */
 
-#include <kdefakes.h>
-
 #include <config-workspace.h>
 
 #include <sys/types.h>
@@ -75,6 +73,8 @@ Otherwise kdostartupconfig is launched to create or update all the necessary fil
 #include <string.h>
 #include <stdlib.h>
 
+#include <bsd/string.h>
+
 int main()
     {
     time_t config_time;
@@ -84,15 +84,12 @@ int main()
     char kdehome[ 1024 ];
     char filename[ 1024 ];
 
-    if( getenv( "KDEHOME" ))
-        strlcpy( kdehome, getenv( "KDEHOME" ), 1024 );
-    else if( getenv( "HOME" ))
-        {
-        strlcpy( kdehome, getenv( "HOME" ), 1024 );
-        strlcat( kdehome, "/" KDE_DEFAULT_HOME, 1024  );
-        }
-    else
-        return 1;
+    if( getenv( "XDG_CONFIG_HOME" )) {
+        strlcpy( kdehome, getenv( "XDG_CONFIG_HOME" ), 1024 );
+    } else {
+        strcpy( kdehome, "~/.config");
+    }
+
     strlcpy( filename, kdehome, 1024 );
     strlcat( filename, "/share/config/startupconfig", 1024 );
     if( access( filename, R_OK ) != 0 )

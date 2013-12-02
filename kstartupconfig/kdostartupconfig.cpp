@@ -36,6 +36,7 @@ DEALINGS IN THE SOFTWARE.
 #include <kcmdlineargs.h>
 #include <klocale.h>
 #include <kshell.h>
+#include <KGlobal>
 
 
 #if defined _WIN32 || defined _WIN64
@@ -73,13 +74,7 @@ static QString get_entry( QString* ll )
 
 int main( int argc, char **argv )
     {
-    #define I18N_NOEXTRACT( x ) ki18n( x )
-    // Set catalog to "kdelibs4" for KLocale to initialize languages properly.
-    KAboutData about( "kdostartupconfig4", "kdelibs4",
-                      I18N_NOEXTRACT( "kdostartupconfig4" ), "1.0" );
-    KComponentData inst( &about );
-    kDebug() << "Running kdostartupconfig.";
-    KCmdLineArgs::init( argc, argv, &about ); // for KLocale not to complain about encoding
+
     QString keysname = KStandardDirs::locateLocal( "config", "startupconfigkeys" );
     QFile keys( keysname );
     if( !keys.open( QIODevice::ReadOnly ))

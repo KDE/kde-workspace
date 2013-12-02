@@ -2,23 +2,23 @@
 
 set(kstartupconfig_SRCS kstartupconfig.c )
 
-add_executable(kstartupconfig4 NOGUI ${kstartupconfig_SRCS})
+add_executable(kstartupconfig5 ${kstartupconfig_SRCS})
 
 if(WIN32)
-target_link_libraries(kstartupconfig4 ${KDEWIN_LIBRARIES} )
+target_link_libraries(kstartupconfig5 ${KDEWIN_LIBRARIES} )
 else()
-target_link_libraries(kstartupconfig4 ${KDE4_KDEFAKES_LIBS} )
+target_link_libraries(kstartupconfig5 Qt5::Core KF5::KDE4Support ${LIBBSD_LIBRARIES})
 endif()
 
-install(TARGETS kstartupconfig4 ${INSTALL_TARGETS_DEFAULT_ARGS} )
+install(TARGETS kstartupconfig5 ${INSTALL_TARGETS_DEFAULT_ARGS} )
 
 ########### kdostartupconfig ###############
 
 set(kdostartupconfig_SRCS kdostartupconfig.cpp )
 
-add_executable(kdostartupconfig4 NOGUI ${kdostartupconfig_SRCS})
+add_executable(kdostartupconfig5 ${kdostartupconfig_SRCS})
 
-target_link_libraries(kdostartupconfig4  )
+target_link_libraries(kdostartupconfig5 Qt5::Core KF5::KDE4Support ${LIBBSD_LIBRARIES})
 
-install(TARGETS kdostartupconfig4 ${INSTALL_TARGETS_DEFAULT_ARGS} )
+install(TARGETS kdostartupconfig5 ${INSTALL_TARGETS_DEFAULT_ARGS} )
 
