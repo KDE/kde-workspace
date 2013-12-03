@@ -246,7 +246,7 @@ Item {
                         //var all = plasmoid.configuration.allDevices;
                         //var removable = plasmoid.configuration.removableDevices;
                         print("FIXME: Disabled reading from config due to crash");
-                        var all = true;
+                        var all = false;
                         var removable = true;
 
                         if (all == true) {
