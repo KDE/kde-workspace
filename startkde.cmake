@@ -280,12 +280,12 @@ export XDG_CURRENT_DESKTOP
 
 # We set LD_BIND_NOW to increase the efficiency of kdeinit.
 # kdeinit unsets this variable before loading applications.
-LD_BIND_NOW=true @KDE4_LIBEXEC_INSTALL_DIR@/start_kdeinit_wrapper +kcminit_startup
+LD_BIND_NOW=true @CMAKE_INSTALL_PREFIX@/@LIBEXEC_INSTALL_DIR@/start_kdeinit_wrapper +kcminit_startup
 if test $? -ne 0; then
   # Startup error
-  echo 'startkde: Could not start kdeinit4. Check your installation.'  1>&2
+  echo 'startkde: Could not start kdeinit5. Check your installation.'  1>&2
   test -n "$ksplash_pid" && kill "$ksplash_pid" 2>/dev/null
-  xmessage -geometry 500x100 "Could not start kdeinit4. Check your installation."
+  xmessage -geometry 500x100 "Could not start kdeinit5. Check your installation."
   exit 1
 fi
 
