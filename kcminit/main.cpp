@@ -20,6 +20,7 @@
 #include <config-workspace.h>
 
 #include "main.h"
+#include "klauncher_iface.h"
 
 #include <unistd.h>
 
@@ -36,7 +37,6 @@
 #include <kconfiggroup.h>
 #include <klocale.h>
 #include <ktoolinvocation.h>
-// #include <klauncher_iface.h>
 #include <QtDBus/QtDBus>
 
 #include <kservicetypetrader.h>
@@ -190,7 +190,9 @@ KCMInit::KCMInit( KCmdLineArgs* args )
   // Pass env. var to kdeinit.
   QString name = "KDE_MULTIHEAD";
   QString value = multihead ? "true" : "false";
-//   KToolInvocation::klauncher()->setLaunchEnv(name, value);
+  OrgKdeKLauncherInterface *iface = new OrgKdeKLauncherInterface("org.kde.klauncher5", "/KLauncher", QDBusConnection::sessionBus());
+  iface->setLaunchEnv(name, value);
+  iface->deleteLater();
   setenv( name.toLatin1().constData(), value.toLatin1().constData(), 1 ); // apply effect also to itself
 
   if( startup )
