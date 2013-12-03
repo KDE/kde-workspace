@@ -28,7 +28,7 @@
 
 #include <kapplication.h>
 #include <kcmdlineargs.h>
-#include <kaboutdata.h>
+#include <k4aboutdata.h>
 #include <kservice.h>
 #include <klibrary.h>
 #include <kdebug.h>
@@ -36,11 +36,11 @@
 #include <kconfiggroup.h>
 #include <klocale.h>
 #include <ktoolinvocation.h>
-#include <klauncher_iface.h>
+// #include <klauncher_iface.h>
 #include <QtDBus/QtDBus>
 
 #include <kservicetypetrader.h>
-#include <kdefakes.h>
+// #include <kdefakes.h>
 
 static int ready[ 2 ];
 static bool startup = false;
@@ -79,7 +79,7 @@ bool KCMInit::runModule(const QString &libName, KService::Ptr service)
             kcminit = "kcminit_" + libName;
 
         // get the kcminit_ function
-        KLibrary::void_function_ptr init = lib.resolveFunction(kcminit.toUtf8());
+        KLibrary::void_function_ptr init = lib.resolveFunction(kcminit.toUtf8().constData());
         if (init) {
             // initialize the module
             kDebug(1208) << "Initializing " << libName << ": " << kcminit;
@@ -190,7 +190,7 @@ KCMInit::KCMInit( KCmdLineArgs* args )
   // Pass env. var to kdeinit.
   QString name = "KDE_MULTIHEAD";
   QString value = multihead ? "true" : "false";
-  KToolInvocation::klauncher()->setLaunchEnv(name, value);
+//   KToolInvocation::klauncher()->setLaunchEnv(name, value);
   setenv( name.toLatin1().constData(), value.toLatin1().constData(), 1 ); // apply effect also to itself
 
   if( startup )
@@ -230,7 +230,7 @@ void KCMInit::runPhase2()
   qApp->exit( 0 );
 }
 
-extern "C" KDE_EXPORT int kdemain(int argc, char *argv[])
+extern "C" Q_DECL_EXPORT int kdemain(int argc, char *argv[])
 {
   // kdeinit waits for kcminit to finish, but during KDE startup
   // only important kcm's are started very early in the login process,
@@ -244,7 +244,7 @@ extern "C" KDE_EXPORT int kdemain(int argc, char *argv[])
   close( ready[ 0 ] );
 
   startup = ( strcmp( argv[ 0 ], "kcminit_startup" ) == 0 ); // started from startkde?
-  KAboutData aboutData( "kcminit", "kcminit", ki18n("KCMInit"),
+  K4AboutData aboutData( "kcminit", "kcminit", ki18n("KCMInit"),
                         "",
                         ki18n("KCMInit - runs startup initialization for Control Modules."));
 
@@ -258,7 +258,7 @@ extern "C" KDE_EXPORT int kdemain(int argc, char *argv[])
   KApplication app;
   QDBusConnection::sessionBus().interface()->registerService( "org.kde.kcminit",
       QDBusConnectionInterface::DontQueueService );
-  KLocale::setMainCatalog(0);
+//   KLocale::setMainCatalog(0);
   KCMInit kcminit( KCmdLineArgs::parsedArgs());
   return 0;
 }

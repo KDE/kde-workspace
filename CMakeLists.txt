@@ -318,7 +318,7 @@ if (NOT WIN32)
 endif ()
 
 if(NOT WIN32)
-#       macro_optional_add_subdirectory(kcminit)
+   ecm_optional_add_subdirectory(kcminit)
    ecm_optional_add_subdirectory(khotkeys)
 #       macro_optional_add_subdirectory(kwrited)
 #       macro_optional_add_subdirectory(ksystraycmd)
