@@ -28,8 +28,6 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <QtAlgorithms>
 #include <QList>
 
-#include <KDebug>
-
 #include "abstractgroupableitem.h"
 #include "groupmanager.h"
 

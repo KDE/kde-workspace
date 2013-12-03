@@ -23,10 +23,8 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include "launcherproperties.h"
 #include <KDE/KOpenWithDialog>
-#include <KDE/KDebug>
 #include <KDE/KDesktopFile>
 #include <KDE/KLocale>
-#include <KDE/KUrl>
 #include <KDE/KWindowInfo>
 #include <KDE/KWindowSystem>
 #include <KLocalizedString>
@@ -37,19 +35,25 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <X11/Xatom.h>
 #include <X11/Xutil.h>
 #include <fixx11h.h>
+#include <QDialogButtonBox>
 
 namespace TaskManager
 {
 
 LauncherProperties::LauncherProperties(QWidget *parent)
-    : KDialog(parent)
+    : QDialog(parent)
     , grabber(0L)
 {
-    setButtons(Ok | Cancel);
-    setCaption(i18n("Launcher Properties"));
+    setWindowTitle(i18n("Launcher Properties"));
     QWidget *mainWidet = new QWidget(this);
     ui.setupUi(mainWidet);
-    setMainWidget(mainWidet);
+
+    setLayout(new QVBoxLayout(this));
+    layout()->addWidget(mainWidet);
+
+    buttons = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel, this);
+    layout()->addWidget(buttons);
+
     setAttribute(Qt::WA_DeleteOnClose);
     setWindowModality(Qt::WindowModal);
     ui.browse->setIcon(QIcon::fromTheme("document-open"));
@@ -58,6 +62,8 @@ LauncherProperties::LauncherProperties(QWidget *parent)
     connect(ui.classClass, SIGNAL(textChanged(const QString &)), SLOT(check()));
     connect(ui.className, SIGNAL(textChanged(const QString &)), SLOT(check()));
     connect(ui.launcher, SIGNAL(textChanged(const QString &)), SLOT(check()));
+    connect(buttons, SIGNAL(accepted()), SLOT(okClicked()));
+    connect(buttons, SIGNAL(rejected()), SLOT(reject()));
     resize(400, 100);
 }
 
@@ -77,7 +83,7 @@ void LauncherProperties::run(const QString &cc, const QString &cn, const QString
 
 void LauncherProperties::check()
 {
-    enableButtonOk(!ui.classClass->text().isEmpty() && !ui.launcher->text().isEmpty());
+    buttons->button(QDialogButtonBox::Ok)->setEnabled(!ui.classClass->text().isEmpty() && !ui.launcher->text().isEmpty());
 }
 
 void LauncherProperties::detect()
@@ -86,7 +92,7 @@ void LauncherProperties::detect()
     // use a dialog, so that all user input is blocked
     // use WX11BypassWM and moving away so that it's not actually visible
     // grab only mouse, so that keyboard can be used e.g. for switching windows
-    grabber = new KDialog(0, Qt::X11BypassWindowManagerHint);
+    grabber = new QDialog(0, Qt::X11BypassWindowManagerHint);
     grabber->move(-1000, -1000);
     grabber->setModal(true);
     grabber->show();
@@ -96,7 +102,7 @@ void LauncherProperties::detect()
 
 void LauncherProperties::browse()
 {
-    KOpenWithDialog *dlg = new KOpenWithDialog(KUrl::List(), i18n("Select launcher application:"), QString(), this);
+    KOpenWithDialog *dlg = new KOpenWithDialog(QList<QUrl>(), i18n("Select launcher application:"), QString(), this);
     dlg->hideNoCloseOnExit();
     dlg->hideRunInTerminal();
     dlg->setAttribute(Qt::WA_DeleteOnClose);
@@ -113,32 +119,28 @@ void LauncherProperties::launcherSelected()
         KService::Ptr srv = dlg->service();
 
         if (srv && srv->isApplication() && !srv->entryPath().isEmpty()) {
-            KUrl url = KUrl::fromPath(srv->entryPath());
+            QUrl url = QUrl::fromLocalFile(srv->entryPath());
 
             if (url.isLocalFile() && KDesktopFile::isDesktopFile(url.toLocalFile())) {
-                ui.launcher->setText(url.prettyUrl());
+                ui.launcher->setText(url.toDisplayString(QUrl::PrettyDecoded));
             }
         } else {
             QString path = dlg->text();
 
             if (!path.isEmpty()) {
-                KUrl url = KUrl::fromPath(path);
+                QUrl url = QUrl::fromLocalFile(path);
                 if (url.isLocalFile()) {
-                    ui.launcher->setText(url.prettyUrl());
+                    ui.launcher->setText(url.toDisplayString(QUrl::PrettyDecoded));
                 }
             }
         }
     }
 }
 
-void LauncherProperties::slotButtonClicked(int button)
+void LauncherProperties::okClicked()
 {
-    if (KDialog::Ok == button) {
-        emit properties(ui.classClass->text(), ui.className->text(), ui.launcher->text());
-        accept();
-    } else {
-        KDialog::slotButtonClicked(button);
-    }
+    emit properties(ui.classClass->text(), ui.className->text(), ui.launcher->text());
+    accept();
 }
 
 bool LauncherProperties::eventFilter(QObject *o, QEvent *e)

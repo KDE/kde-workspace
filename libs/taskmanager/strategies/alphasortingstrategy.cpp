@@ -28,8 +28,6 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <QtAlgorithms>
 #include <QList>
 
-#include <KDebug>
-
 #include "taskitem.h"
 #include "taskgroup.h"
 #include "taskmanager.h"
@@ -73,12 +71,12 @@ void AlphaSortingStrategy::sortItems(ItemList &items)
 
         TaskItem *item = qobject_cast<TaskItem*>(groupable);
         if (!item)  {
-            kDebug() << "Wrong object type";
+//             kDebug() << "Wrong object type";
             continue;
         }
 
         if (!item->task()) {
-            kDebug() << "Null Pointer";
+//             kDebug() << "Null Task Pointer";
             continue;
         }
 

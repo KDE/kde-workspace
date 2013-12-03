@@ -32,7 +32,7 @@
     <widget class="KLineEdit" name="className"/>
    </item>
    <item row="2" column="1">
-    <widget class="KPushButton" name="detect">
+    <widget class="QPushButton" name="detect">
      <property name="text">
       <string>Detect Window Properties</string>
      </property>
@@ -51,7 +51,7 @@
       <widget class="KLineEdit" name="launcher"/>
      </item>
      <item>
-      <widget class="KPushButton" name="browse"/>
+      <widget class="QPushButton" name="browse"/>
      </item>
     </layout>
    </item>
@@ -64,7 +64,7 @@
    <header>klineedit.h</header>
   </customwidget>
   <customwidget>
-   <class>KPushButton</class>
+   <class>QPushButton</class>
    <extends>QPushButton</extends>
    <header>kpushbutton.h</header>
   </customwidget>

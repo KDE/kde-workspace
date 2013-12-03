@@ -38,7 +38,6 @@ add_library(taskmanager SHARED ${taskmanager_LIB_SRCS})
 
 target_link_libraries(taskmanager
     processcore
-    KF5::KDE4Support
     KF5::KConfigCore
     KF5::KConfigWidgets
     KF5::KIconThemes

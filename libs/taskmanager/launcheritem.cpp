@@ -24,17 +24,14 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "launcheritem.h"
 
 #include <KConfigGroup>
-#include <KDebug>
 #include <KDesktopFile>
 #include <KFileItem>
-#include <KGlobal>
-#include <KMimeType>
 #include <QMimeData>
+#include <QDir>
 #include <KMimeTypeTrader>
 #include <KRun>
 #include <KService>
 #include <KServiceTypeTrader>
-#include <KStandardDirs>
 #include <KToolInvocation>
 
 // KIO
@@ -57,8 +54,8 @@ public:
     void associateDestroyed(QObject *obj);
 
     LauncherItem *q;
-    KUrl        url;
-    KUrl        resolvedUrl;
+    QUrl        url;
+    QUrl        resolvedUrl;
     QIcon       icon;
     QString     name;
     QString     genericName;
@@ -66,7 +63,7 @@ public:
     QSet<QObject *> associates;
 };
 
-LauncherItem::LauncherItem(QObject *parent, const KUrl &url)
+LauncherItem::LauncherItem(QObject *parent, const QUrl &url)
     : AbstractGroupableItem(parent),
       d(new LauncherItemPrivate(this))
 {
@@ -89,7 +86,7 @@ bool LauncherItem::associateItemIfMatches(AbstractGroupableItem *item)
         return false;
     }
 
-    KUrl itemUrl = item->launcherUrl();
+    QUrl itemUrl = item->launcherUrl();
 
     if (!itemUrl.isEmpty()) {
         if (d->url == itemUrl || d->resolvedUrl == itemUrl) {
@@ -194,7 +191,7 @@ QString LauncherItem::wmClass() const
 void LauncherItem::setName(const QString& name)
 {
     //NOTE: preferred is NOT a protocol, it's just a magic string
-    if (d->url.protocol() != "preferred") {
+    if (d->url.scheme() != "preferred") {
         d->name = name;
     }
 }
@@ -202,7 +199,7 @@ void LauncherItem::setName(const QString& name)
 void LauncherItem::setGenericName(const QString& genericName)
 {
     //NOTE: preferred is NOT a protocol, it's just a magic string
-    if (d->url.protocol() != "preferred") {
+    if (d->url.scheme() != "preferred") {
         d->genericName = genericName;
     }
 }
@@ -225,16 +222,16 @@ bool LauncherItem::isGroupItem() const
 void LauncherItem::launch()
 {
     //NOTE: preferred is NOT a protocol, it's just a magic string
-    if (d->url.protocol() == "preferred") {
+    if (d->url.scheme() == "preferred") {
         KService::Ptr service = KService::serviceByStorageId(defaultApplication());
 
         if (!service) {
             return;
         }
 
-        QString desktopFile = KStandardDirs::locate("xdgdata-apps", service->entryPath());
+        QString desktopFile = QStandardPaths::locate(QStandardPaths::ApplicationsLocation, service->entryPath());
         if (desktopFile.isNull()) {
-            desktopFile = KStandardDirs::locate("apps", service->entryPath());
+            desktopFile = QStandardPaths::locate(QStandardPaths::ApplicationsLocation, service->entryPath());
         }
         new KRun(QUrl::fromLocalFile(desktopFile), 0);
     } else {
@@ -247,7 +244,7 @@ void LauncherItem::addMimeData(QMimeData* mimeData) const
     mimeData->setData("text/uri-list", d->url.url().toAscii());
 }
 
-KUrl LauncherItem::launcherUrl() const
+QUrl LauncherItem::launcherUrl() const
 {
     return d->url;
 }
@@ -278,7 +275,7 @@ QString LauncherItem::defaultApplication() const
 
         if (!command.isEmpty()) {
             if (settings.getSetting(KEMailSettings::ClientTerminal) == "true") {
-                KConfigGroup confGroup(KGlobal::config(), "General");
+                KConfigGroup confGroup(KSharedConfig::openConfig(), "General");
                 const QString preferredTerminal = confGroup.readPathEntry("TerminalApplication",
                                                   QString::fromLatin1("konsole"));
                 command = preferredTerminal + QString::fromLatin1(" -e ") + command;
@@ -287,7 +284,7 @@ QString LauncherItem::defaultApplication() const
             return command;
         }
     } else if (application.compare("browser", Qt::CaseInsensitive) == 0) {
-        KConfigGroup config(KGlobal::config(), "General");
+        KConfigGroup config(KSharedConfig::openConfig(), "General");
         QString browserApp = config.readPathEntry("BrowserApplication", QString());
         if (browserApp.isEmpty()) {
             const KService::Ptr htmlApp = KMimeTypeTrader::self()->preferredService(QLatin1String("text/html"));
@@ -300,7 +297,7 @@ QString LauncherItem::defaultApplication() const
 
         return browserApp;
     } else if (application.compare("terminal", Qt::CaseInsensitive) == 0) {
-        KConfigGroup confGroup(KGlobal::config(), "General");
+        KConfigGroup confGroup(KSharedConfig::openConfig(), "General");
         return confGroup.readPathEntry("TerminalApplication", QString::fromLatin1("konsole"));
     } else if (application.compare("filemanager", Qt::CaseInsensitive) == 0) {
         KService::Ptr service = KMimeTypeTrader::self()->preferredService("inode/directory");
@@ -314,8 +311,15 @@ QString LauncherItem::defaultApplication() const
     } else if (KService::Ptr service = KMimeTypeTrader::self()->preferredService(application)) {
         return service->storageId();
     } else {
-        // try the files in share/apps/kcm_componentchooser/
-        const QStringList services = KGlobal::dirs()->findAllResources("data", "kcm_componentchooser/*.desktop", KStandardDirs::NoDuplicates);
+        // try the files in share/apps/kcm_componentchooser/*.desktop
+        QStringList directories = QStandardPaths::locateAll(QStandardPaths::GenericDataLocation, "kcm_componentchooser", QStandardPaths::LocateDirectory);
+        QStringList services;
+        foreach(const QString& directory, directories) {
+            QDir d(directory);
+            foreach(const QString& f, d.entryList(QStringList("*.desktop")))
+                services += d.absoluteFilePath(f);
+        }
+
         //kDebug() << "ok, trying in" << services.count();
         foreach (const QString & service, services) {
             KConfig config(service, KConfig::SimpleConfig);
@@ -339,13 +343,13 @@ QString LauncherItem::defaultApplication() const
     return "";
 }
 
-void LauncherItem::setLauncherUrl(const KUrl &url)
+void LauncherItem::setLauncherUrl(const QUrl& url)
 {
     // Takes care of improperly escaped characters and resolves paths
     // into file:/// URLs
-    KUrl newUrl(url.url());
+    QUrl newUrl(url.url());
 
-    if (d->url.protocol() != "preferred" && newUrl == d->url) {
+    if (d->url.scheme() != "preferred" && newUrl == d->url) {
         return;
     }
 
@@ -359,18 +363,15 @@ void LauncherItem::setLauncherUrl(const KUrl &url)
             d->name = f.readName();
             d->genericName = f.readGenericName();
         } else {
-            d->url = KUrl();
+            d->url = QUrl();
             return;
         }
-    } else if (d->url.protocol() == "preferred") {
+    } else if (d->url.scheme() == "preferred") {
         //NOTE: preferred is NOT a protocol, it's just a magic string
         const KService::Ptr service = KService::serviceByStorageId(defaultApplication());
 
         if (service) {
-            QString desktopFile = KStandardDirs::locate("xdgdata-apps", service->entryPath());
-            if (desktopFile.isNull()) {
-                desktopFile = KStandardDirs::locate("apps", service->entryPath());
-            }
+            QString desktopFile = QStandardPaths::locate(QStandardPaths::ApplicationsLocation, service->entryPath());
 
             KDesktopFile f(desktopFile);
             KConfigGroup cg(&f, "Desktop Entry");
@@ -382,10 +383,9 @@ void LauncherItem::setLauncherUrl(const KUrl &url)
                 d->name = exec.split(' ').at(0);
             }
             d->genericName = f.readGenericName();
-            d->resolvedUrl = desktopFile;
-            d->resolvedUrl.setScheme("file");
+            d->resolvedUrl = QUrl::fromLocalFile(desktopFile);
         } else {
-            d->url = KUrl();
+            d->url = QUrl();
         }
     } else {
         const KFileItem fileItem(d->url);
@@ -409,7 +409,7 @@ bool LauncherItem::isValid() const
 void LauncherItem::setIcon(const QIcon& icon)
 {
     //NOTE: preferred is NOT a protocol, it's just a magic string
-    if (d->url.protocol() != "preferred") {
+    if (d->url.scheme() != "preferred") {
         d->icon = icon;
     }
 }

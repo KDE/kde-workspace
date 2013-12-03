@@ -33,11 +33,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 // KDE
 #include <KConfig>
 #include <KConfigGroup>
-#include <KDebug>
 #include <KDirWatch>
-#include <KGlobal>
-#include <KLocale>
-#include <KStandardDirs>
 #include <NETWinInfo>
 
 #if HAVE_X11
@@ -61,7 +57,7 @@ public:
     TaskManager self;
 };
 
-K_GLOBAL_STATIC(TaskManagerSingleton, privateTaskManagerSelf)
+Q_GLOBAL_STATIC(TaskManagerSingleton, privateTaskManagerSelf)
 
 TaskManager* TaskManager::self()
 {
@@ -145,7 +141,7 @@ TaskManager::TaskManager()
     activeWindowChanged(win);
 
     d->watcher = new KDirWatch(this);
-    d->watcher->addFile(KGlobal::dirs()->locateLocal("config", "klaunchrc"));
+    d->watcher->addFile(QStandardPaths::writableLocation(QStandardPaths::ConfigLocation)+"/klaunchrc");
     connect(d->watcher, SIGNAL(dirty(QString)), this, SLOT(configureStartup()));
     connect(d->watcher, SIGNAL(created(QString)), this, SLOT(configureStartup()));
     connect(d->watcher, SIGNAL(deleted(QString)), this, SLOT(configureStartup()));

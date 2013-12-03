@@ -33,7 +33,6 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <QDesktopWidget>
 
 // KDE
-#include <KDebug>
 #include <KIconLoader>
 #include <KLocalizedString>
 
@@ -494,7 +493,7 @@ void Task::toggleMaximized()
 
 void Task::setIconified(bool iconify)
 {
-    kDebug() <<" going to iconify" << d->win;
+//     kDebug() <<" going to iconify" << d->win;
     if (iconify) {
         KWindowSystem::minimizeWindow(d->win);
     } else {

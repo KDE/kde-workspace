@@ -32,10 +32,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <QtCore/QTimer>
 
 // KDE
-#include <KDE/KDebug>
 #include <ksharedptr.h>
-
-
 
 namespace TaskManager
 {
@@ -87,15 +84,15 @@ TaskGroup::~TaskGroup()
 
 WindowList TaskGroup::winIds() const
 {
-    kDebug() << name() << d->members.size();
+//     kDebug() << name() << d->members.size();
     if (d->members.isEmpty()) {
-        kDebug() << "empty group: " << name();
+//         kDebug() << "empty group: " << name();
     }
     WindowList ids;
     foreach (AbstractGroupableItem * groupable, d->members) {
         ids += groupable->winIds();
     }
-    kDebug() << ids.size();
+//     kDebug() << ids.size();
     return ids;
 }
 
@@ -174,7 +171,7 @@ void TaskGroup::add(AbstractGroupableItem *item, int insertIndex)
         }
     */
     if (!item) {
-        kDebug() << "invalid item";
+//         kDebug() << "invalid item";
         return;
     }
 
@@ -208,7 +205,7 @@ void TaskGroup::add(AbstractGroupableItem *item, int insertIndex)
         index = d->members.count();
         if (d->groupManager->separateLaunchers()) {
             if (item->itemType() == LauncherItemType) {
-                KUrl lUrl = item->launcherUrl();
+                QUrl lUrl = item->launcherUrl();
 
                 int maxIndex = d->groupManager->launcherIndex(lUrl);
 
@@ -223,7 +220,7 @@ void TaskGroup::add(AbstractGroupableItem *item, int insertIndex)
                 }
             }
         } else {
-            KUrl lUrl = item->launcherUrl();
+            QUrl lUrl = item->launcherUrl();
             int urlIdx = d->groupManager->launcherIndex(lUrl);
             if (urlIdx >= 0) {
                 for (index = 0; index < d->members.count(); ++index) {
@@ -317,7 +314,7 @@ void TaskGroup::remove(AbstractGroupableItem *item)
      }*/
 
     if (!d->members.contains(item)) {
-        kDebug() << "couldn't find item";
+//         kDebug() << "couldn't find item";
         return;
     }
 
@@ -424,7 +421,7 @@ AbstractGroupableItem *TaskGroup::directMember(AbstractGroupableItem *item) cons
         tempItem = tempItem->parentGroup();
     }
 
-    kDebug() << "item not found";
+//     kDebug() << "item not found";
     return 0;
 }
 
@@ -491,7 +488,7 @@ void TaskGroup::addMimeData(QMimeData *mimeData) const
     mimeData->setData(Task::groupMimetype(), data);
 }
 
-KUrl TaskGroup::launcherUrl() const
+QUrl TaskGroup::launcherUrl() const
 {
     // Strategy: try to return the first non-group item's launcherUrl,
     // failing that, try to return the  launcherUrl of the first group
@@ -503,7 +500,7 @@ KUrl TaskGroup::launcherUrl() const
     }
 
     if (d->members.isEmpty()) {
-        return KUrl();
+        return QUrl();
     }
 
     return d->members.first()->launcherUrl();
@@ -696,7 +693,7 @@ bool TaskGroup::moveItem(int oldIndex, int newIndex)
     //kDebug() << oldIndex << newIndex;
     if ((d->members.count() <= newIndex) || (newIndex < 0) ||
             (d->members.count() <= oldIndex || oldIndex < 0)) {
-        kDebug() << "index out of bounds";
+//         kDebug() << "index out of bounds";
         return false;
     }
 

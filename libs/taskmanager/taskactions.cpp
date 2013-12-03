@@ -34,10 +34,8 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 // KDE
 #include <KLocalizedString>
-#include <KDebug>
 #include <KService>
 #include <KServiceTypeTrader>
-#include <KStandardDirs>
 #include <KDesktopFile>
 #include <KRun>
 #include <NETRootInfo>
@@ -478,7 +476,7 @@ void ToggleLauncherActionImpl::toggleLauncher()
 }
 
 AppSelectorDialog::AppSelectorDialog(AbstractGroupableItem* item, GroupManager* strategy)
-    : KOpenWithDialog(KUrl::List(), i18n("The application, to which this task is associated with, could not be determined. "
+    : KOpenWithDialog(QList<QUrl>(), i18n("The application, to which this task is associated with, could not be determined. "
                                          "Please select the appropriate application from the list below:"), QString(), 0L),
     m_abstractItem(item),
     m_groupingStrategy(strategy)
@@ -498,7 +496,7 @@ void AppSelectorDialog::launcherSelected()
         QString wmClass = taskItem->task() ? taskItem->task()->classClass() : QString();
 
         if (srv && srv->isApplication() && !srv->entryPath().isEmpty()) {
-            KUrl url = KUrl::fromPath(srv->entryPath());
+            QUrl url = QUrl::fromLocalFile(srv->entryPath());
 
             if (url.isLocalFile() && KDesktopFile::isDesktopFile(url.toLocalFile())) {
                 taskItem->setLauncherUrl(url);
@@ -508,7 +506,7 @@ void AppSelectorDialog::launcherSelected()
             QString path = text();
 
             if (!path.isEmpty()) {
-                KUrl url = KUrl::fromPath(path);
+                QUrl url = QUrl::fromLocalFile(path);
                 if (url.isLocalFile()) {
                     taskItem->setLauncherUrl(url);
                     m_groupingStrategy->addLauncher(url, taskItem->icon(), taskItem->name(), wmClass, wmClass);
@@ -706,7 +704,7 @@ GroupPopupMenu::GroupPopupMenu(QWidget *parent, TaskGroup *group, GroupManager *
     setIcon(group->icon());
     foreach (AbstractGroupableItem * item, group->members()) {
         if (!item) {
-            kDebug() << "invalid Item";
+//             kDebug() << "invalid Item";
             continue;
         }
 

@@ -30,17 +30,16 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #endif
 #include <KConfig>
 #include <KConfigGroup>
-#include <KDebug>
 #include <KDesktopFile>
-#include <KGlobal>
 #include <KService>
 #include <KServiceTypeTrader>
-#include <KStandardDirs>
 #include <ksysguard/processcore/processes.h>
 #include <ksysguard/processcore/process.h>
 
 #include <QtCore/QFile>
 #include <QtCore/QTimer>
+#include <QDir>
+#include <QDebug>
 
 #include "groupmanager.h"
 
@@ -57,7 +56,7 @@ public:
 
     QWeakPointer<Task> task;
     QWeakPointer<Startup> startupTask;
-    KUrl launcherUrl;
+    QUrl launcherUrl;
     bool checkedForLauncher;
     QString taskName;
 };
@@ -156,7 +155,7 @@ bool TaskItem::isStartupItem() const
 WindowList TaskItem::winIds() const
 {
     if (!d->task) {
-        kDebug() << "no winId: probably startup task";
+        qDebug() << "no winId: probably startup task";
         return WindowList();
     }
     WindowList list;
@@ -193,7 +192,7 @@ QString TaskItem::name() const
 QString TaskItem::taskName() const
 {
     if (d->taskName.isEmpty()) {
-        KUrl lUrl = launcherUrl();
+        QUrl lUrl = launcherUrl();
 
         if (!lUrl.isEmpty() && lUrl.isLocalFile() && KDesktopFile::isDesktopFile(lUrl.toLocalFile())) {
             KDesktopFile f(lUrl.toLocalFile());
@@ -435,7 +434,7 @@ void TaskItem::addMimeData(QMimeData *mimeData) const
     d->task.data()->addMimeData(mimeData);
 }
 
-void TaskItem::setLauncherUrl(const KUrl &url)
+void TaskItem::setLauncherUrl(const QUrl &url)
 {
     if (!d->launcherUrl.isEmpty()) {
         return;
@@ -499,18 +498,18 @@ static KService::List getServicesViaPid(int pid)
         }
     }
 
-    if (services.empty() && !KStandardDirs::findExe(cmdline).isEmpty()) {
+    if (services.empty() && !QStandardPaths::findExecutable(cmdline).isEmpty()) {
         // cmdline now exists without arguments if there were any
         services << QExplicitlySharedDataPointer<KService>(new KService(proc->name, cmdline, QString()));
-        kDebug() << "adding for" << proc->name << cmdline;
+        qDebug() << "adding for" << proc->name << cmdline;
     }
     return services;
 }
 
-static KUrl getServiceLauncherUrl(int pid, const QString &type, const QStringList &cmdRemovals = QStringList())
+static QUrl getServiceLauncherUrl(int pid, const QString &type, const QStringList &cmdRemovals = QStringList())
 {
     if (pid == 0) {
-        return KUrl();
+        return QUrl();
     }
 
     KSysGuard::Processes procs;
@@ -520,7 +519,7 @@ static KUrl getServiceLauncherUrl(int pid, const QString &type, const QStringLis
     QString cmdline = proc ? proc->command.simplified() : QString(); // proc->command has a trailing space???
 
     if (cmdline.isEmpty()) {
-        return KUrl();
+        return QUrl();
     }
 
     foreach (const QString & r, cmdRemovals) {
@@ -537,32 +536,28 @@ static KUrl getServiceLauncherUrl(int pid, const QString &type, const QStringLis
         }
 
         if (services.empty()) {
-            return KUrl();
+            return QUrl();
         }
     }
 
     QString path = services[0]->entryPath();
-    if (!path.startsWith("/")) {
-        QStringList dirs = KGlobal::dirs()->resourceDirs("services");
-        foreach (const QString & d, dirs) {
-            if (QFile::exists(d + path)) {
-                path = d + path;
-                break;
-            }
-        }
+    if (!QDir::isAbsolutePath(path)) {
+        QString absolutePath = QStandardPaths::locate(QStandardPaths::GenericDataLocation, "kde5/services/"+path);
+        if (!absolutePath.isEmpty())
+            path = absolutePath;
     }
 
     if (QFile::exists(path)) {
-        return KUrl::fromPath(path);
+        return QUrl::fromLocalFile(path);
     }
 
-    return KUrl();
+    return QUrl();
 }
 
-KUrl TaskItem::launcherUrl() const
+QUrl TaskItem::launcherUrl() const
 {
     if (!d->task && !isStartupItem()) {
-        return KUrl();
+        return QUrl();
     }
 
     if (!d->launcherUrl.isEmpty() || d->checkedForLauncher) {
@@ -611,7 +606,7 @@ KUrl TaskItem::launcherUrl() const
         QString mapped(grp.readEntry(d->task.data()->classClass() + "::" + d->task.data()->className(), QString()));
 
         if (mapped.endsWith(".desktop")) {
-            d->launcherUrl = mapped;
+            d->launcherUrl = QUrl(mapped);
             return d->launcherUrl;
         }
 
@@ -620,7 +615,7 @@ KUrl TaskItem::launcherUrl() const
                 mapped = grp.readEntry(d->task.data()->classClass(), QString());
 
                 if (mapped.endsWith(".desktop")) {
-                    d->launcherUrl = mapped;
+                    d->launcherUrl = QUrl(mapped);
                     return d->launcherUrl;
                 }
             }
@@ -642,7 +637,7 @@ KUrl TaskItem::launcherUrl() const
             }
 
             if (services.empty() && qobject_cast<GroupManager *>(parent())) {
-                KUrl savedUrl = static_cast<GroupManager *>(parent())->launcherForWmClass(d->task.data()->classClass());
+                QUrl savedUrl = static_cast<GroupManager *>(parent())->launcherForWmClass(d->task.data()->classClass());
                 if (savedUrl.isValid()) {
                     d->launcherUrl = savedUrl;
                     return d->launcherUrl;
@@ -675,7 +670,7 @@ KUrl TaskItem::launcherUrl() const
         // Try to match via desktop filename...
         if (!startup()->desktopId().isNull() && startup()->desktopId().endsWith(".desktop")) {
             if (startup()->desktopId().startsWith("/")) {
-                d->launcherUrl = KUrl::fromPath(startup()->desktopId());
+                d->launcherUrl = QUrl::fromLocalFile(startup()->desktopId());
                 return d->launcherUrl;
             } else {
                 QString desktopName = startup()->desktopId();
@@ -706,7 +701,7 @@ KUrl TaskItem::launcherUrl() const
         }
 
         if (!path.isEmpty()) {
-            d->launcherUrl = KUrl::fromPath(path);
+            d->launcherUrl = QUrl::fromLocalFile(path);
         }
     }
 

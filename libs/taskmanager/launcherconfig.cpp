@@ -23,16 +23,14 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include "launcherconfig.h"
 #include "launcherproperties.h"
-#include <KDE/KDebug>
-#include <KDE/KConfig>
 #include <KDE/KConfigDialog>
 #include <KDE/KConfigGroup>
-#include <KDE/KLocale>
 #include <KDE/KMessageBox>
-#include <KDE/KUrl>
 #include <KLocalizedString>
 
 #include <QtWidgets/QWhatsThis>
+#include <QtCore/QUrl>
+#include <kconfig.h>
 
 namespace TaskManager
 {
@@ -78,7 +76,7 @@ void LauncherConfig::load()
         }
 
         if (launcher.endsWith(".desktop")) {
-            launcher = KUrl(launcher).prettyUrl();
+            launcher = QUrl(launcher).toDisplayString(QUrl::PrettyDecoded);
         }
 
         int     sepPos = key.indexOf(SEP);

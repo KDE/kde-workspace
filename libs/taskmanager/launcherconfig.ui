@@ -52,21 +52,21 @@
     </widget>
    </item>
    <item row="0" column="1">
-    <widget class="KPushButton" name="add">
+    <widget class="QPushButton" name="add">
      <property name="text">
       <string>Add</string>
      </property>
     </widget>
    </item>
    <item row="1" column="1">
-    <widget class="KPushButton" name="edit">
+    <widget class="QPushButton" name="edit">
      <property name="text">
       <string>Edit</string>
      </property>
     </widget>
    </item>
    <item row="2" column="1">
-    <widget class="KPushButton" name="remove">
+    <widget class="QPushButton" name="remove">
      <property name="text">
       <string>Remove</string>
      </property>
@@ -111,7 +111,7 @@
    <header>kurllabel.h</header>
   </customwidget>
   <customwidget>
-   <class>KPushButton</class>
+   <class>QPushButton</class>
    <extends>QPushButton</extends>
    <header>kpushbutton.h</header>
   </customwidget>

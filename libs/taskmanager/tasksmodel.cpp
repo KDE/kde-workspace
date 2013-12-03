@@ -27,8 +27,6 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <QMetaEnum>
 #include <QMimeData>
 
-#include <KDebug>
-
 #include "groupmanager.h"
 #include "taskgroup.h"
 

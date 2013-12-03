@@ -25,10 +25,10 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #define ABSTRACTGROUPABLEITEM_H
 
 #include <QtCore/QObject>
+#include <QtCore/QUrl>
 #include <QtGui/QIcon>
 
 #include <KDE/KWindowSystem>
-#include <KDE/KUrl>
 
 #include "taskmanager.h"
 #include "taskmanager_export.h"
@@ -104,7 +104,7 @@ public:
     virtual bool isActive() const = 0;
     virtual bool demandsAttention() const = 0;
     virtual void addMimeData(QMimeData *) const = 0;
-    virtual KUrl launcherUrl() const = 0;
+    virtual QUrl launcherUrl() const = 0;
 
 public Q_SLOTS:
     /** Functions that both, Tasks and Groups have */

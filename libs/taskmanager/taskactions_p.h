@@ -25,7 +25,6 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #define TASKACTIONS_P_H
 
 #include "taskmanager.h"
-#include <KUrl>
 #include <KOpenWithDialog>
 #include <QtCore/QPointer>
 
@@ -69,7 +68,7 @@ private Q_SLOTS:
 private:
     AbstractGroupableItem *m_abstractItem;
     GroupManager *m_groupingStrategy;
-    KUrl m_url;
+    QUrl m_url;
 };
 
 class AppSelectorDialog : public KOpenWithDialog
@@ -98,7 +97,7 @@ private Q_SLOTS:
 
 private:
     AbstractGroupableItem *m_abstractItem;
-    KUrl m_url;
+    QUrl m_url;
 };
 
 /** Resize a window or all windows in a group*/

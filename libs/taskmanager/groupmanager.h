@@ -32,7 +32,6 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <taskmanager/task.h>
 #include <taskmanager/taskitem.h>
 #include <taskmanager/taskmanager_export.h>
-#include <KDE/KUrl>
 #include "launcheritem.h"
 
 class KConfigDialog;
@@ -152,15 +151,15 @@ public:
     void reconnect();
 
     /** Adds a Launcher for the executable/.desktop-file at url and returns a reference to the launcher*/
-    bool addLauncher(const KUrl &url, const QIcon &icon = QIcon(), const QString &name = QString(),
+    bool addLauncher(const QUrl &url, const QIcon &icon = QIcon(), const QString &name = QString(),
                      const QString &genericName = QString(), const QString &wmClass = QString(), int insertPos = -1);
 
     /** Removes the given launcher*/
-    void removeLauncher(const KUrl &url);
+    void removeLauncher(const QUrl &url);
 
     /** @return true if there is a matching launcher */
-    bool launcherExists(const KUrl &url) const;
-    bool launcherExistsForUrl(const KUrl &url) const;
+    bool launcherExists(const QUrl &url) const;
+    bool launcherExistsForUrl(const QUrl &url) const;
 
     /** call when the launcher config should be read or re-read */
     void readLauncherConfig(const KConfigGroup &config = KConfigGroup());
@@ -170,7 +169,7 @@ public:
     void exportLauncherConfig(const KConfigGroup &config);
 
     /** @return position of launcher */
-    int launcherIndex(const KUrl &url) const;
+    int launcherIndex(const QUrl &url) const;
 
     /** @return number of launchers */
     int launcherCount() const;
@@ -182,7 +181,7 @@ public:
     void setLaunchersLocked(bool l);
 
     /** move a launcher */
-    void moveLauncher(const KUrl &url, int newIndex);
+    void moveLauncher(const QUrl &url, int newIndex);
 
     /** should launchers be show separate from tasks? */
     bool separateLaunchers() const;
@@ -200,10 +199,10 @@ public:
     void createConfigurationInterface(KConfigDialog *parent);
 
     /** @return the launcher associated with a window class */
-    KUrl launcherForWmClass(const QString &wmClass) const;
+    QUrl launcherForWmClass(const QString &wmClass) const;
 
     /** @return the window class associated with launcher */
-    QString launcherWmClass(const KUrl &url) const;
+    QString launcherWmClass(const QUrl &url) const;
 
     /** @return true if item is associated with a launcher */
     bool isItemAssociatedWithLauncher(AbstractGroupableItem *item) const;

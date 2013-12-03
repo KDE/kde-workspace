@@ -90,7 +90,7 @@ public:
     bool isOnAllDesktops() const;
     bool isOnCurrentDesktop() const;
     void addMimeData(QMimeData *mimeData) const;
-    KUrl launcherUrl() const;
+    QUrl launcherUrl() const;
 
     /**
      * Sorting strategies may use this to move items around

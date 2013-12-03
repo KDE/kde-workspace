@@ -26,10 +26,6 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "abstractgroupableitem.h"
 #include "taskmanager_export.h"
 
-// KDE
-#include <KDE/KUrl>
-
-
 namespace TaskManager
 {
 
@@ -48,7 +44,7 @@ public:
      * Creates a LauncherItem for a executable
      * @param url the URL to the application or file the launcher gets linked to
      */
-    LauncherItem(QObject *parent, const KUrl &url);
+    LauncherItem(QObject *parent, const QUrl &url);
     ~LauncherItem();
 
     /**
@@ -89,8 +85,8 @@ public:
     bool isActive() const;
     bool demandsAttention() const;
     void addMimeData(QMimeData *mimeData) const;
-    KUrl launcherUrl() const;
-    void setLauncherUrl(const KUrl &url);
+    QUrl launcherUrl() const;
+    void setLauncherUrl(const QUrl &url);
 
     //preferred applications hack
     QString defaultApplication() const;

@@ -31,8 +31,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <QtAlgorithms>
 #include <QList>
 
-#include <KDebug>
-
+#include <QDebug>
 
 namespace TaskManager
 {
@@ -123,7 +122,7 @@ void AbstractSortingStrategy::check(AbstractGroupableItem *itemToCheck)
     }
 
     if (!item) {
-        kDebug() << "invalid item";
+        qWarning() << "invalid item" << itemToCheck;
         return;
     }
     //kDebug() << item->name();
@@ -165,7 +164,7 @@ bool AbstractSortingStrategy::moveItem(AbstractGroupableItem *item, int newIndex
 {
     //kDebug() << "move to " << newIndex;
     if (!item->parentGroup()) {
-        kDebug() << "error: no parentgroup but the item was asked to move";
+        qWarning() << "error: no parentgroup but the item was asked to move";
         return false;
     }
 

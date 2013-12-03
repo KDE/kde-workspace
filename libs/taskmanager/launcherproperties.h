@@ -24,13 +24,14 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #ifndef LAUNCHER_PROPERTIES_H
 #define LAUNCHER_PROPERTIES_H
 
-#include <KDE/KDialog>
+#include <QDialog>
 #include "ui_launcherproperties.h"
 
+class QDialogButtonBox;
 namespace TaskManager
 {
 
-class LauncherProperties : public KDialog
+class LauncherProperties : public QDialog
 {
     Q_OBJECT
 
@@ -48,7 +49,7 @@ private Q_SLOTS:
     void detect();
     void browse();
     void launcherSelected();
-    virtual void slotButtonClicked(int button);
+    void okClicked();
 
 private:
     bool eventFilter(QObject *o, QEvent *e);
@@ -56,7 +57,8 @@ private:
 
 private:
     Ui::LauncherProperties ui;
-    KDialog                *grabber;
+    QDialog                *grabber;
+    QDialogButtonBox       *buttons;
 };
 
 }

@@ -26,7 +26,6 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <QAction>
 #include <QWeakPointer>
 
-#include <KDebug>
 #include <KLocalizedString>
 
 #include "abstractgroupingstrategy.h"
