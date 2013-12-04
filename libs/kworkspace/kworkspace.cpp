@@ -20,13 +20,10 @@
 #include "kworkspace.h"
 #include <QApplication>
 #include <QDataStream>
-#include <kapplication.h>
 #include <QFile>
 #include <QFileInfo>
 #include <QTextStream>
-#include <klocale.h>
 #include <QDateTime>
-#include <kstandarddirs.h>
 #include <QtDBus/QtDBus>
 #include <stdlib.h> // getenv()
 #include <ksmserver_interface.h>
@@ -218,7 +215,7 @@ static QTime smModificationTime;
 void propagateSessionManager()
 {
 #ifdef HAVE_X11
-    QByteArray fName = QFile::encodeName(KStandardDirs::locateLocal("socket", "KSMserver"));
+    QByteArray fName = QFile::encodeName(QStandardPaths::writableLocation(QStandardPaths::RuntimeLocation)+"/KSMserver");
     QString display = QString::fromLocal8Bit( ::getenv(DISPLAY) );
     // strip the screen number from the display
     display.remove(QRegExp("\\.[0-9]+$"));

@@ -61,7 +61,7 @@ target_link_libraries(kworkspace Qt5::DBus Qt5::Core KF5::KI18n KF5::KWindowSyst
 
 if(HAVE_X11)
     set_target_properties(kworkspace PROPERTIES COMPILE_FLAGS -DHAVE_X11)
-    target_link_libraries(kworkspace Qt5::X11Extras ${X11_LIBRARIES} KF5::KDE4Support)
+    target_link_libraries(kworkspace Qt5::X11Extras ${X11_LIBRARIES})
 endif()
 
 #set_target_properties(kworkspace PROPERTIES VERSION ${GENERIC_LIB_VERSION} SOVERSION ${GENERIC_LIB_SOVERSION} DEFINE_SYMBOL MAKE_KWORKSPACE_LIB)

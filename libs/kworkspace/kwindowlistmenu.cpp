@@ -30,10 +30,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <QtX11Extras/QX11Info>
 
 #include <QtDBus/QtDBus>
-#include <klocale.h>
 #include <KLocalizedString>
-#include <kstringhandler.h>
-#include <kstyle.h>
 #include <kwindowsystem.h>
 #include <netwm.h>
 

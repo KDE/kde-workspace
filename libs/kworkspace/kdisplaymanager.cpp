@@ -21,8 +21,6 @@
 
 #ifdef HAVE_X11
 
-#include <kapplication.h>
-#include <klocale.h>
 #include <kuser.h>
 
 #include <KLocalizedString>
