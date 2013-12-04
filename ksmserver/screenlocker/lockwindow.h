@@ -23,6 +23,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************/
 #ifndef SCREENLOCKER_LOCKWINDOW_H
 #define SCREENLOCKER_LOCKWINDOW_H
+#include <QAbstractNativeEventFilter>
 #include <QWidget>
 #include <X11/Xlib.h>
 #include <fixx11h.h>
@@ -30,7 +31,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 class QTimer;
 namespace ScreenLocker
 {
-class LockWindow : public QWidget
+class LockWindow : public QWidget, public QAbstractNativeEventFilter
 {
     Q_OBJECT
 public:
@@ -40,11 +41,12 @@ public:
     void showLockWindow();
     void hideLockWindow();
 
+    virtual bool nativeEventFilter(const QByteArray &eventType, void *message, long *result) override;
+
 Q_SIGNALS:
     void userActivity();
 
 protected:
-    virtual bool x11Event(XEvent *event);
     virtual void paintEvent(QPaintEvent *);
 
 private Q_SLOTS:

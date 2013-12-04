@@ -27,7 +27,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 // KDE
 #include <KDE/KApplication>
 #include <KDE/KDebug>
-#include <KDE/KXErrorHandler>
 // Qt
 #include <QTimer>
 #include <QPointer>
@@ -37,6 +36,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 // X11
 #include <X11/Xatom.h>
 #include <fixx11h.h>
+#include <xcb/xcb.h>
 
 static Window gVRoot = 0;
 static Window gVRootData = 0;
@@ -65,6 +65,7 @@ namespace ScreenLocker
 
 LockWindow::LockWindow()
     : QWidget()
+    , QAbstractNativeEventFilter()
     , m_autoLogoutTimer(new QTimer(this))
 {
     initialize();
@@ -72,11 +73,12 @@ LockWindow::LockWindow()
 
 LockWindow::~LockWindow()
 {
+    qApp->removeNativeEventFilter(this);
 }
 
 void LockWindow::initialize()
 {
-    kapp->installX11EventFilter(this);
+    qApp->installNativeEventFilter(this);
 
     XWindowAttributes rootAttr;
     XGetWindowAttributes(QX11Info::display(), QX11Info::appRootWindow(), &rootAttr);
@@ -99,7 +101,6 @@ void LockWindow::initialize()
     unsigned nreal;
     if( XQueryTree( QX11Info::display(), QX11Info::appRootWindow(), &r, &p, &real, &nreal )
         && real != NULL ) {
-        KXErrorHandler err; // ignore X errors here
         for( unsigned i = 0; i < nreal; ++i ) {
             XWindowAttributes winAttr;
             if (XGetWindowAttributes(QX11Info::display(), real[ i ], &winAttr)) {
@@ -292,16 +293,39 @@ static void fakeFocusIn( WId window )
     XSendEvent( QX11Info::display(), window, False, NoEventMask, &ev );
 }
 
-// Event filter
-bool LockWindow::x11Event(XEvent* event)
+template< typename T>
+void coordFromEvent(xcb_generic_event_t *event, int *x, int *y)
 {
+    T *e = reinterpret_cast<T*>(event);
+    *x = e->event_x;
+    *y = e->event_y;
+}
+
+template<typename T>
+void sendEvent(xcb_generic_event_t *event, xcb_window_t target, int x, int y)
+{
+    T e = *(reinterpret_cast<T*>(event));
+    e.event = target;
+    e.child = target;
+    e.event_x = x;
+    e.event_y = y;
+    xcb_send_event(QX11Info::connection(), false, target, XCB_EVENT_MASK_NO_EVENT, reinterpret_cast<const char*>(&e));
+}
+
+bool LockWindow::nativeEventFilter(const QByteArray &eventType, void *message, long int *)
+{
+    if (eventType != QByteArrayLiteral("xcb_generic_event_t")) {
+        return false;
+    }
+    xcb_generic_event_t *event = reinterpret_cast<xcb_generic_event_t*>(message);
+    const uint8_t responseType = event->response_type & ~0x80;
     bool ret = false;
-    switch (event->type) {
-        case ButtonPress:
-        case ButtonRelease:
-        case KeyPress:
-        case KeyRelease:
-        case MotionNotify:
+    switch (responseType) {
+        case XCB_BUTTON_PRESS:
+        case XCB_BUTTON_RELEASE:
+        case XCB_KEY_PRESS:
+        case XCB_KEY_RELEASE:
+        case XCB_MOTION_NOTIFY:
             if (KSldApp::self()->isGraceTime()) {
                 KSldApp::self()->unlock();
                 return true;
@@ -311,37 +335,48 @@ bool LockWindow::x11Event(XEvent* event)
             }
             emit userActivity();
             if (!m_lockWindows.isEmpty()) {
-                XEvent ev2 = *event;
+                int x = 0;
+                int y = 0;
+                if (responseType == XCB_KEY_PRESS || responseType == XCB_KEY_RELEASE) {
+                    coordFromEvent<xcb_key_press_event_t>(event, &x, &y);
+                } else if (responseType == XCB_BUTTON_PRESS || responseType == XCB_BUTTON_RELEASE) {
+                    coordFromEvent<xcb_button_press_event_t>(event, &x, &y);
+                } else if (responseType == XCB_MOTION_NOTIFY) {
+                    coordFromEvent<xcb_motion_notify_event_t>(event, &x, &y);
+                }
                 Window root_return;
                 int x_return, y_return;
                 unsigned int width_return, height_return, border_width_return, depth_return;
-                WId targetWindow = 0;
-                KXErrorHandler err; // ignore X errors
                 foreach (WId window, m_lockWindows) {
                     if (XGetGeometry(QX11Info::display(), window, &root_return,
                                 &x_return, &y_return,
                                 &width_return, &height_return,
                                 &border_width_return, &depth_return)
                         &&
-                        (event->xkey.x>=x_return && event->xkey.x<=x_return+(int)width_return)
+                        (x>=x_return && x<=x_return+(int)width_return)
                         &&
-                        (event->xkey.y>=y_return && event->xkey.y<=y_return+(int)height_return) ) {
-                        targetWindow = window;
-                        ev2.xkey.window = ev2.xkey.subwindow = targetWindow;
-                        ev2.xkey.x = event->xkey.x - x_return;
-                        ev2.xkey.y = event->xkey.y - y_return;
+                        (y>=y_return && y<=y_return+(int)height_return) ) {
+                        const int targetX = x - x_return;
+                        const int targetY = y - y_return;
+                        if (responseType == XCB_KEY_PRESS || responseType == XCB_KEY_RELEASE) {
+                            sendEvent<xcb_key_press_event_t>(event, window, targetX, targetY);
+                        } else if (responseType == XCB_BUTTON_PRESS || responseType == XCB_BUTTON_RELEASE) {
+                            sendEvent<xcb_button_press_event_t>(event, window, targetX, targetY);
+                        } else if (responseType == XCB_MOTION_NOTIFY) {
+                            sendEvent<xcb_motion_notify_event_t>(event, window, targetX, targetY);
+                        }
                         break;
                     }
                 }
-                XSendEvent(QX11Info::display(), targetWindow, False, NoEventMask, &ev2);
                 ret = true;
             }
             break;
-        case ConfigureNotify: // from SubstructureNotifyMask on the root window
-            if(event->xconfigure.event == QX11Info::appRootWindow()) {
-                int index = findWindowInfo( event->xconfigure.window );
+        case XCB_CONFIGURE_NOTIFY: { // from SubstructureNotifyMask on the root window
+            xcb_configure_notify_event_t *xc = reinterpret_cast<xcb_configure_notify_event_t*>(event);
+            if (xc->event == QX11Info::appRootWindow()) {
+                int index = findWindowInfo( xc->window );
                 if( index >= 0 ) {
-                    int index2 = event->xconfigure.above ? findWindowInfo( event->xconfigure.above ) : 0;
+                    int index2 = xc->above_sibling ? findWindowInfo( xc->above_sibling ) : 0;
                     if( index2 < 0 )
                         kDebug(1204) << "Unknown above for ConfigureNotify";
                     else { // move just above the other window
@@ -354,19 +389,21 @@ bool LockWindow::x11Event(XEvent* event)
                 //kDebug() << "ConfigureNotify:";
                 //the stacking order changed, so let's change the stacking order again to what we want
                 stayOnTop();
+                ret = true;
             }
             break;
-        case MapNotify: // from SubstructureNotifyMask on the root window
-            if( event->xmap.event == QX11Info::appRootWindow()) {
-                kDebug(1204) << "MapNotify:" << event->xmap.window;
-                int index = findWindowInfo( event->xmap.window );
+        }
+        case XCB_MAP_NOTIFY: { // from SubstructureNotifyMask on the root window
+            xcb_map_notify_event_t *xm = reinterpret_cast<xcb_map_notify_event_t*>(event);
+            if (xm->event == QX11Info::appRootWindow()) {
+                kDebug(1204) << "MapNotify:" << xm->window;
+                int index = findWindowInfo( xm->window );
                 if( index >= 0 )
                     m_windowInfo[ index ].viewable = true;
                 else
                     kDebug(1204) << "Unknown toplevel for MapNotify";
-                KXErrorHandler err; // ignore X errors here
-                if (isLockWindow(event->xmap.window)) {
-                    if (m_lockWindows.contains(event->xmap.window)) {
+                if (isLockWindow(xm->window)) {
+                    if (m_lockWindows.contains(xm->window)) {
                         kDebug() << "uhoh! duplicate!";
                     } else {
                         if (!isVisible()) {
@@ -374,75 +411,90 @@ bool LockWindow::x11Event(XEvent* event)
                             show();
                             setCursor(Qt::ArrowCursor);
                         }
-                        m_lockWindows.prepend(event->xmap.window);
-                        fakeFocusIn(event->xmap.window);
+                        m_lockWindows.prepend(xm->window);
+                        fakeFocusIn(xm->window);
                     }
                 }
                 stayOnTop();
+                ret = true;
             }
             break;
-        case UnmapNotify:
-            if (event->xunmap.event == QX11Info::appRootWindow()) {
-                kDebug(1204) << "UnmapNotify:" << event->xunmap.window;
-                int index = findWindowInfo( event->xunmap.window );
+        }
+        case XCB_UNMAP_NOTIFY: {
+            xcb_unmap_notify_event_t *xu = reinterpret_cast<xcb_unmap_notify_event_t*>(event);
+            if (xu->event == QX11Info::appRootWindow()) {
+                kDebug(1204) << "UnmapNotify:" << xu->window;
+                int index = findWindowInfo( xu->window );
                 if( index >= 0 )
                     m_windowInfo[ index ].viewable = false;
                 else
                     kDebug(1204) << "Unknown toplevel for MapNotify";
-                m_lockWindows.removeAll(event->xunmap.window);
+                m_lockWindows.removeAll(xu->event);
+                ret = true;
             }
             break;
-        case CreateNotify:
-            if (event->xcreatewindow.parent == QX11Info::appRootWindow()) {
-                kDebug() << "CreateNotify:" << event->xcreatewindow.window;
-                int index = findWindowInfo( event->xcreatewindow.window );
+        }
+        case XCB_CREATE_NOTIFY: {
+            xcb_create_notify_event_t *xc = reinterpret_cast<xcb_create_notify_event_t*>(event);
+            if (xc->parent == QX11Info::appRootWindow()) {
+                kDebug() << "CreateNotify:" << xc->window;
+                int index = findWindowInfo( xc->window );
                 if( index >= 0 )
                     kDebug() << "Already existing toplevel for CreateNotify";
                 else {
                     WindowInfo info;
-                    info.window = event->xcreatewindow.window;
+                    info.window = xc->window;
                     info.viewable = false;
                     m_windowInfo.append( info );
                 }
+                ret = true;
             }
             break;
-        case DestroyNotify:
-            if (event->xdestroywindow.event == QX11Info::appRootWindow()) {
-                int index = findWindowInfo( event->xdestroywindow.window );
+        }
+        case XCB_DESTROY_NOTIFY: {
+            xcb_destroy_notify_event_t *xd = reinterpret_cast<xcb_destroy_notify_event_t *>(event);
+            if (xd->event == QX11Info::appRootWindow()) {
+                int index = findWindowInfo( xd->window );
                 if( index >= 0 )
                     m_windowInfo.removeAt( index );
                 else
                     kDebug() << "Unknown toplevel for DestroyNotify";
+                ret = true;
             }
             break;
-        case ReparentNotify:
-            if (event->xreparent.event == QX11Info::appRootWindow() && event->xreparent.parent != QX11Info::appRootWindow()) {
-                int index = findWindowInfo( event->xreparent.window );
+        }
+        case XCB_REPARENT_NOTIFY: {
+            xcb_reparent_notify_event_t *xr = reinterpret_cast<xcb_reparent_notify_event_t*>(event);
+            if (xr->event == QX11Info::appRootWindow() && xr->parent != QX11Info::appRootWindow()) {
+                int index = findWindowInfo( xr->window );
                 if( index >= 0 )
                     m_windowInfo.removeAt( index );
                 else
                     kDebug() << "Unknown toplevel for ReparentNotify away";
-            } else if (event->xreparent.parent == QX11Info::appRootWindow()) {
-                int index = findWindowInfo( event->xreparent.window );
+            } else if (xr->parent == QX11Info::appRootWindow()) {
+                int index = findWindowInfo( xr->window );
                 if( index >= 0 )
                     kDebug() << "Already existing toplevel for ReparentNotify";
                 else {
                     WindowInfo info;
-                    info.window = event->xreparent.window;
+                    info.window = xr->window;
                     info.viewable = false;
                     m_windowInfo.append( info );
                 }
             }
             break;
-        case CirculateNotify:
-            if (event->xcirculate.event == QX11Info::appRootWindow()) {
-                int index = findWindowInfo( event->xcirculate.window );
+        }
+        case XCB_CIRCULATE_NOTIFY: {
+            xcb_circulate_notify_event_t *xc = reinterpret_cast<xcb_circulate_notify_event_t*>(event);
+            if (xc->event == QX11Info::appRootWindow()) {
+                int index = findWindowInfo( xc->window );
                 if( index >= 0 ) {
-                    m_windowInfo.move( index, event->xcirculate.place == PlaceOnTop ? m_windowInfo.size() - 1 : 0 );
+                    m_windowInfo.move( index, xc->place == PlaceOnTop ? m_windowInfo.size() - 1 : 0 );
                 } else
                     kDebug() << "Unknown toplevel for CirculateNotify";
             }
             break;
+        }
     }
     return ret;
 }
