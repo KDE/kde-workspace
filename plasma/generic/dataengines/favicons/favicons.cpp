@@ -1,5 +1,6 @@
 /*
  *   Copyright (C) 2007 Marco Martin <notmart@gmail.com>
+ *   Copyright (C) 2013 Andrea Scarpino <scarpino@kde.org>
  *
  *   This program is free software; you can redistribute it and/or modify  
  *   it under the terms of the GNU Library General Public License as published by  
@@ -19,6 +20,9 @@
 
 #include "favicons.h"
 
+#include <QImage>
+#include <QPixmap>
+
 #include "faviconprovider.h"
 
 FaviconsEngine::FaviconsEngine(QObject* parent, const QVariantList& args)
@@ -37,7 +41,7 @@ bool FaviconsEngine::updateSourceEvent( const QString &identifier )
     connect(provider, SIGNAL(finished(FaviconProvider*)), this, SLOT(finished(FaviconProvider*)));
     connect(provider, SIGNAL(error(FaviconProvider*)), this, SLOT(error(FaviconProvider*)));
 
-    if (provider->image() != QImage()) {
+    if (!provider->image().isNull()) {
         setData(provider->identifier(), "Icon", provider->image());
     }
 
@@ -61,5 +65,7 @@ void FaviconsEngine::error(FaviconProvider *provider)
     setData(provider->identifier(), QImage());
     provider->deleteLater();
 }
+
+K_EXPORT_PLASMA_DATAENGINE_WITH_JSON(favicons, FaviconsEngine, "plasma-dataengine-favicons.json")
 
 #include "favicons.moc"

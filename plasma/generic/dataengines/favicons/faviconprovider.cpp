@@ -1,6 +1,7 @@
 /*
  *   Copyright (C) 2007 Tobias Koenig <tokoe@kde.org>
  *   Copyright (C) 2008 Marco Martin <notmart@gmail.com>
+ *   Copyright (C) 2013 Andrea Scarpino <scarpino@kde.org>
  *
  *   This program is free software; you can redistribute it and/or modify  
  *   it under the terms of the GNU Library General Public License as published by  
@@ -21,15 +22,13 @@
 
 #include "faviconprovider.h"
 
-#include <QtGui/QImage>
-#include <QtCore/QFile>
+#include <QImage>
+#include <QUrl>
+#include <QStandardPaths>
 
-#include <KUrl>
 #include <KIO/Job>
 #include <KIO/StoredTransferJob>
-#include <KMimeType>
-#include <QDebug>
-#include <kstandarddirs.h>
+#include <KJob>
 
 class FaviconProvider::Private
 {
@@ -67,19 +66,17 @@ FaviconProvider::FaviconProvider(QObject *parent, const QString &url)
       m_url(url),
       d(new Private(this))
 {
-    KUrl faviconUrl(url);
-    if (faviconUrl.protocol().isEmpty()) {
-        faviconUrl = KUrl("http://" + url);
-    }
-
-    const QString fileName = KMimeType::favIconForUrl(faviconUrl.url());
+    QUrl faviconUrl = QUrl::fromUserInput(url);
+    const QString fileName = KIO::favIconForUrl(faviconUrl);
 
     if (!fileName.isEmpty()) {
-        d->cachePath = KStandardDirs::locateLocal("cache",  fileName + ".png");
+        d->cachePath = QStandardPaths::writableLocation(QStandardPaths::CacheLocation) +
+            '/' + fileName + ".png";
         d->image.load(d->cachePath, "PNG");
     } else {
-        d->cachePath = KStandardDirs::locateLocal("cache",  "favicons/" + faviconUrl.host() + ".png");
-        faviconUrl.setPath("/favicon.ico");
+        d->cachePath = QStandardPaths::writableLocation(QStandardPaths::CacheLocation) +
+            "/favicons/" + faviconUrl.host() + ".png";
+        faviconUrl.setPath(QStringLiteral("/favicon.ico"));
 
         if (faviconUrl.isValid()) {
             KIO::StoredTransferJob *job = KIO::storedGet(faviconUrl, KIO::NoReload, KIO::HideProgressInfo);
@@ -104,4 +101,4 @@ QString FaviconProvider::identifier() const
     return m_url;
 }
 
-#include "faviconprovider.moc"
+#include "moc_faviconprovider.cpp"

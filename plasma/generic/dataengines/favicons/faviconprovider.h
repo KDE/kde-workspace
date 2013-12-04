@@ -1,6 +1,7 @@
 /*
  *   Copyright (C) 2007 Tobias Koenig <tokoe@kde.org>
  *   Copyright (C) 2008 Marco Martin <notmart@gmail.com>
+ *   Copyright (C) 2013 Andrea Scarpino <scarpino@kde.org>
  *
  *   This program is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU Library General Public License version 2 as
@@ -21,9 +22,10 @@
 #ifndef FAVICONPROVIDER_H
 #define FAVICONPROVIDER_H
 
-#include <QtCore/QObject>
+#include <QObject>
 
 class QImage;
+class KJob;
 
 /**
  * This class provides a favicon for a given url

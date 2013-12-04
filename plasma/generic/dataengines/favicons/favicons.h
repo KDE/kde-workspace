@@ -1,6 +1,7 @@
 /*
  *   Copyright (C) 2007 Tobias Koenig <tokoe@kde.org>
  *   Copyright (C) 2008 Marco Martin <notmart@gmail.com>
+ *   Copyright (C) 2013 Andrea Scarpino <scarpino@kde.org>
  *
  *   This program is free software; you can redistribute it and/or modify  
  *   it under the terms of the GNU Library General Public License as published by  
@@ -48,7 +49,5 @@ class FaviconsEngine : public Plasma::DataEngine
         void finished( FaviconProvider* );
         void error( FaviconProvider* );
 };
-
-K_EXPORT_PLASMA_DATAENGINE(favicons, FaviconsEngine)
 
 #endif
