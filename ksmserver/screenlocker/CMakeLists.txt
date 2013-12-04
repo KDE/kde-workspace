@@ -29,11 +29,11 @@ qt5_add_dbus_interface(ksld_SRCS ${powerdevilpolicyagent_xml} powerdevilpolicyag
 add_library(screenlocker_static STATIC ${ksld_SRCS})
 
 target_link_libraries(screenlocker_static kworkspace
-   ${KDE4_KDEUI_LIBS}
-   ${KDE4_KIDLETIME_LIBS}
-   ${QT_QTCORE_LIBRARY}
-   ${QT_QTGUI_LIBRARY}
+   Qt5::X11Extras
+   KF5::KIdleTime
    ${X11_LIBRARIES}
+   ${X11_Xcursor_LIB}
+   ${XCB_XCB_LIBRARY}
 )
 
 # Needed to compile on Arm target.

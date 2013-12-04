@@ -9,9 +9,9 @@ include_directories(
 # add_subdirectory( tests )
 #
 if(NOT WIN32)
-#   add_subdirectory( screenlocker )
-#   set(COMPILE_SCREEN_LOCKER 1)
-#   set(SCREEN_LOCKER "screenlocker_static")
+  add_subdirectory( screenlocker )
+  set(COMPILE_SCREEN_LOCKER 1)
+  set(SCREEN_LOCKER "screenlocker_static")
 endif()
 
 check_library_exists(ICE _IceTransNoListen "" HAVE__ICETRANSNOLISTEN)
