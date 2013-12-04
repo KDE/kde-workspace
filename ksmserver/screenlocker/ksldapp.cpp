@@ -27,7 +27,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 // workspace
 #include <kdisplaymanager.h>
 // KDE
-#include <KDE/KAction>
 #include <KDE/KActionCollection>
 #include <KDE/KAuthorized>
 #include <KDE/KCrash>
@@ -37,7 +36,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <KDE/KNotification>
 #include <KDE/KProcess>
 #include <KDE/KStandardDirs>
+#include <KGlobalAccel>
 // Qt
+#include <QAction>
 #include <QTimer>
 #include <QApplication>
 #include <QDesktopWidget>
@@ -118,9 +119,10 @@ void KSldApp::initialize()
 
     if (KAuthorized::authorize(QLatin1String("lock_screen"))) {
         kDebug() << "Configuring Lock Action";
-        KAction *a = m_actionCollection->addAction(QLatin1String("Lock Session"));
+        QAction *a = m_actionCollection->addAction(QLatin1String("Lock Session"));
         a->setText(i18n("Lock Session"));
-        a->setGlobalShortcut(KShortcut(Qt::ALT+Qt::CTRL+Qt::Key_L));
+        KGlobalAccel::self()->setShortcut(a, QList<QKeySequence>() << Qt::ALT+Qt::CTRL+Qt::Key_L);
+        KGlobalAccel::self()->setDefaultShortcut(a, QList<QKeySequence>() << Qt::ALT+Qt::CTRL+Qt::Key_L);
         connect(a, SIGNAL(triggered(bool)), this, SLOT(lock()));
     }
     m_actionCollection->readSettings();
