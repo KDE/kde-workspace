@@ -337,7 +337,7 @@ if(NOT WIN32)
 endif()
 #
 ecm_optional_add_subdirectory(plasma)
-# macro_optional_add_subdirectory(statusnotifierwatcher)
+ecm_optional_add_subdirectory(statusnotifierwatcher)
 ecm_optional_add_subdirectory(kstyles)
 #
 # ########### install files ###############

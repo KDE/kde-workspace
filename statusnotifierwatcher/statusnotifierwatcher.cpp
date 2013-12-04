@@ -31,16 +31,9 @@
 #include "statusnotifierwatcheradaptor.h"
 #include "statusnotifieritem_interface.h"
 
-
-static inline KAboutData aboutData()
-{
-    return KAboutData("statusnotifierwatcher", 0, ki18n("statusnotifierwatcher"), KDE_VERSION_STRING);
-}
-
 K_PLUGIN_FACTORY(StatusNotifierWatcherFactory,
                  registerPlugin<StatusNotifierWatcher>();
     )
-K_EXPORT_PLUGIN(StatusNotifierWatcherFactory(aboutData()))
 
 StatusNotifierWatcher::StatusNotifierWatcher(QObject *parent, const QList<QVariant>&)
       : KDEDModule(parent)
