@@ -79,9 +79,7 @@ void LockWindow::initialize()
     kapp->installX11EventFilter(this);
 
     XWindowAttributes rootAttr;
-    QX11Info info;
-    XGetWindowAttributes(QX11Info::display(), RootWindow(QX11Info::display(),
-                                                         info.screen()), &rootAttr);
+    XGetWindowAttributes(QX11Info::display(), QX11Info::appRootWindow(), &rootAttr);
     QApplication::desktop(); // make Qt set its event mask on the root window first
 #ifdef CHECK_XSELECTINPUT
     check_xselectinput = true;
@@ -99,7 +97,7 @@ void LockWindow::initialize()
     Window r, p;
     Window* real;
     unsigned nreal;
-    if( XQueryTree( x11Info().display(), x11Info().appRootWindow(), &r, &p, &real, &nreal )
+    if( XQueryTree( QX11Info::display(), QX11Info::appRootWindow(), &r, &p, &real, &nreal )
         && real != NULL ) {
         KXErrorHandler err; // ignore X errors here
         for( unsigned i = 0; i < nreal; ++i ) {
@@ -127,7 +125,7 @@ void LockWindow::showLockWindow()
     int flags = CWOverrideRedirect;
     attrs.override_redirect = 1;
     hide();
-    Window w = XCreateWindow( x11Info().display(), RootWindow( x11Info().display(), x11Info().screen()),
+    Window w = XCreateWindow( QX11Info::display(), QX11Info::appRootWindow(),
         x(), y(), width(), height(), 0, depth, InputOutput, visual, flags, &attrs );
 
     create( w, false, true );
@@ -200,8 +198,7 @@ void LockWindow::saveVRoot()
 {
   Window rootReturn, parentReturn, *children;
   unsigned int numChildren;
-  QX11Info info;
-  Window root = RootWindowOfScreen(ScreenOfDisplay(QX11Info::display(), info.screen()));
+  Window root = QX11Info::appRootWindow();
 
   gVRoot = 0;
   gVRootData = 0;
@@ -248,8 +245,7 @@ void LockWindow::setVRoot(Window win, Window vr)
     if (gVRoot)
         removeVRoot(gVRoot);
 
-        QX11Info info;
-    unsigned long rw = RootWindowOfScreen(ScreenOfDisplay(QX11Info::display(), info.screen()));
+    unsigned long rw = QX11Info::appRootWindow();
     unsigned long vroot_data[1] = { vr };
 
     Window rootReturn, parentReturn, *children;
@@ -476,9 +472,9 @@ void LockWindow::stayOnTop()
     // finally, the lock window
     stack[ count++ ] = winId();
     // do the actual restacking if needed
-    XRaiseWindow( x11Info().display(), stack[ 0 ] );
+    XRaiseWindow( QX11Info::display(), stack[ 0 ] );
     if( count > 1 )
-        XRestackWindows( x11Info().display(), stack.data(), count );
+        XRestackWindows( QX11Info::display(), stack.data(), count );
 }
 
 bool LockWindow::isLockWindow(Window id)

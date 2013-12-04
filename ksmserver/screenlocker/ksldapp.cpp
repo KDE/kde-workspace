@@ -42,7 +42,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <QApplication>
 #include <QDesktopWidget>
 #include <QProcess>
-// #include <QX11Info>
+#include <QX11Info>
 // X11
 #include <X11/Xlib.h>
 // other
