@@ -29,11 +29,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <KDE/KDebug>
 #include <KDE/KXErrorHandler>
 // Qt
-#include <QtCore/QTimer>
-#include <QtCore/QPointer>
-#include <QtGui/QDesktopWidget>
-#include <QtGui/QPainter>
-#include <QtGui/QX11Info>
+#include <QTimer>
+#include <QPointer>
+#include <QDesktopWidget>
+#include <QPainter>
+#include <QX11Info>
 // X11
 #include <X11/Xatom.h>
 #include <fixx11h.h>
