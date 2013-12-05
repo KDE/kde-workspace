@@ -64,7 +64,7 @@ namespace ScreenLocker
 {
 
 LockWindow::LockWindow()
-    : QWidget()
+    : QWidget(nullptr, Qt::X11BypassWindowManagerHint)
     , QAbstractNativeEventFilter()
     , m_autoLogoutTimer(new QTimer(this))
 {
@@ -120,16 +120,7 @@ void LockWindow::initialize()
 
 void LockWindow::showLockWindow()
 {
-    Visual* visual = CopyFromParent;
-    int depth = CopyFromParent;
-    XSetWindowAttributes attrs;
-    int flags = CWOverrideRedirect;
-    attrs.override_redirect = 1;
     hide();
-    Window w = XCreateWindow( QX11Info::display(), QX11Info::appRootWindow(),
-        x(), y(), width(), height(), 0, depth, InputOutput, visual, flags, &attrs );
-
-    create( w, false, true );
 
     // Some xscreensaver hacks check for this property
     const char *version = "KDE 4.0";
@@ -140,16 +131,12 @@ void LockWindow::showLockWindow()
 
 
     XSetWindowAttributes attr;
+    // Qt doesn't want to set our background, so let's just use black
+    attr.background_pixel = 0;
     attr.event_mask = KeyPressMask | ButtonPressMask | PointerMotionMask |
                         VisibilityChangeMask | ExposureMask;
     XChangeWindowAttributes(QX11Info::display(), winId(),
-                            CWEventMask, &attr);
-
-    QPalette p = palette();
-    p.setColor(backgroundRole(), Qt::black);
-    setPalette(p);
-    setAttribute(Qt::WA_PaintOnScreen, true);
-    setAttribute(Qt::WA_NoSystemBackground, false);
+                            CWEventMask | CWBackPixel, &attr);
 
     kDebug() << "Lock window Id: " << winId();
 
