@@ -89,7 +89,7 @@ void LockWindow::initialize()
     XSelectInput( QX11Info::display(), QX11Info::appRootWindow(),
                   SubstructureNotifyMask | rootAttr.your_event_mask );
     // Get root window size
-    updateGeometry();
+    updateGeo();
 
     // virtual root property
     gXA_VROOT = XInternAtom (QX11Info::display(), "__SWM_VROOT", False);
@@ -114,8 +114,8 @@ void LockWindow::initialize()
     }
     m_autoLogoutTimer->setSingleShot(true);
     connect(m_autoLogoutTimer, SIGNAL(timeout()), SLOT(autoLogoutTimeout()));
-    connect(QApplication::desktop(), SIGNAL(resized(int)), SLOT(updateGeometry()));
-    connect(QApplication::desktop(), SIGNAL(screenCountChanged(int)), SLOT(updateGeometry()));
+    connect(QApplication::desktop(), SIGNAL(resized(int)), SLOT(updateGeo()));
+    connect(QApplication::desktop(), SIGNAL(screenCountChanged(int)), SLOT(updateGeo()));
 }
 
 void LockWindow::showLockWindow()
@@ -580,7 +580,7 @@ void LockWindow::autoLogoutTimeout()
     }
 }
 
-void LockWindow::updateGeometry()
+void LockWindow::updateGeo()
 {
     QDesktopWidget *desktop = QApplication::desktop();
     setGeometry(desktop->geometry());
