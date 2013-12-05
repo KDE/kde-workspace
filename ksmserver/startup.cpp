@@ -219,7 +219,7 @@ void KSMServer::autoStart0()
 #ifdef KSMSERVER_STARTUP_DEBUG1
     kDebug() << t.elapsed();
 #endif
-    org::kde::KLauncher klauncher(QStringLiteral("org.kde.klauncher"), QStringLiteral("/KLauncher"), QDBusConnection::sessionBus());
+    org::kde::KLauncher klauncher(QStringLiteral("org.kde.klauncher5"), QStringLiteral("/KLauncher"), QDBusConnection::sessionBus());
     klauncher.autoStart((int)0);
 }
 
@@ -283,7 +283,7 @@ void KSMServer::autoStart1()
 #ifdef KSMSERVER_STARTUP_DEBUG1
     kDebug() << t.elapsed();
 #endif
-    org::kde::KLauncher klauncher(QStringLiteral("org.kde.klauncher"),
+    org::kde::KLauncher klauncher(QStringLiteral("org.kde.klauncher5"),
                                   QStringLiteral("/KLauncher"),
                                   QDBusConnection::sessionBus());
     klauncher.autoStart((int)1);
@@ -383,7 +383,7 @@ void KSMServer::autoStart2()
 #endif
     waitAutoStart2 = true;
     waitKcmInit2 = true;
-    org::kde::KLauncher klauncher(QStringLiteral("org.kde.klauncher"),
+    org::kde::KLauncher klauncher(QStringLiteral("org.kde.klauncher5"),
                                   QStringLiteral("/KLauncher"),
                                   QDBusConnection::sessionBus());
     klauncher.autoStart((int)2);
