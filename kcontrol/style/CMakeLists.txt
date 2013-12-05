@@ -18,6 +18,7 @@ add_library(kcm_style MODULE ${kcm_style_PART_SRCS})
 set_target_properties(kcm_style PROPERTIES COMPILE_FLAGS -DHAVE_X11)
 
 target_link_libraries(kcm_style
+    Qt5::X11Extras
     Qt5::DBus
     KF5::KCMUtils
     KF5::KCompletion
