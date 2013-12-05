@@ -81,6 +81,7 @@ Name[wa]=Pager
 Name[x-test]=xxPagerxx
 Name[zh_CN]=分页器
 Name[zh_TW]=虛擬桌面管理器
+Comment=Switch between virtual desktops
 Icon=user-desktop
 Type=Service
 X-Plasma-API=declarativeappletscript
