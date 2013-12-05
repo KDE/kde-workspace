@@ -336,7 +336,7 @@ echo 'startkde: Shutting down...'  1>&2
 test -n "$ksplash_pid" && kill "$ksplash_pid" 2>/dev/null
 
 # Clean up
-kdeinit4_shutdown
+kdeinit5_shutdown
 
 echo 'startkde: Running shutdown scripts...'  1>&2
 
