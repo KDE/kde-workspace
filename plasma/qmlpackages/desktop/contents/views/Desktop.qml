@@ -166,7 +166,7 @@ Rectangle {
             NumberAnimation {
                 target: internal.oldContainment
                 properties: "x"
-                to: newContainment != null ? -root.width : 0
+                to: internal.newContainment != null ? -root.width : 0
                 duration: 400
                 easing.type: Easing.InOutQuad
             }
