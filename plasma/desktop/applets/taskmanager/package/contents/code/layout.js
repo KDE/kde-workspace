@@ -68,10 +68,10 @@ function full() {
 }
 
 function optimumCapacity(width, height) {
-    var length = tasks.vertical ? height : width - (tasksModel.launcherCount * launcherWidth());
+    var length = tasks.vertical ? height : width - (backend.tasksModel.launcherCount * launcherWidth());
     var maximum = tasks.vertical ? preferredMaxHeight() : preferredMaxWidth();
 
-    return (Math.ceil(length / maximum) * maxStripes()) + tasksModel.launcherCount;
+    return (Math.ceil(length / maximum) * maxStripes()) + backend.tasksModel.launcherCount;
 }
 
 function layoutWidth() {
