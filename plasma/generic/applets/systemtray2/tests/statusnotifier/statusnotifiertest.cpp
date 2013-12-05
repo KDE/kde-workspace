@@ -18,6 +18,7 @@
 *******************************************************************************/
 
 #include "statusnotifiertest.h"
+#include "pumpjob.h"
 
 #include <QDebug>
 #include <kservice.h>
@@ -46,6 +47,7 @@ public:
     QStringList loglines;
 
     KStatusNotifierItem* systemNotifier;
+    PumpJob *job;
 
 };
 
@@ -53,11 +55,13 @@ StatusNotifierTest::StatusNotifierTest(QWidget* parent) :
     QDialog(parent)
 {
     d = new StatusNotifierTestPrivate;
+    d->job = 0;
 
     init();
 
     setupUi(this);
     connect(updateButton, &QPushButton::clicked, this, &StatusNotifierTest::updateNotifier);
+    connect(jobEnabledCheck, &QCheckBox::toggled, this, &StatusNotifierTest::enableJob);
     updateUi();
     show();
     log("started");
@@ -205,6 +209,42 @@ void StatusNotifierTest::scrollRequested(int delta, Qt::Orientation orientation)
     msg.append(QString::number(delta));
     msg.append((orientation == Qt::Horizontal) ? " Horizontally" : " Vertically");
     log(msg);
+}
+
+
+// Jobs
+
+void StatusNotifierTest::enableJob(bool enable)
+{
+    qDebug() << "Job enabled." << enable;
+    if (enable) {
+        d->job = new PumpJob(this);
+        //QObject::connect(d->job, &KJob::percent, this, &StatusNotifierTest::setJobProgress);
+        QObject::connect(d->job, SIGNAL(percent(KJob*, unsigned long)), this, SLOT(setJobProgress(KJob*, unsigned long)));
+        QObject::connect(d->job, &KJob::result, this, &StatusNotifierTest::result);
+        d->job->start();
+    } else {
+        if (d->job) {
+            d->timer->stop();
+            jobEnabledCheck->setChecked(Qt::Unchecked);
+            d->job->kill();
+        }
+    }
+}
+
+void StatusNotifierTest::setJobProgress(KJob *j, unsigned long v)
+{
+    jobProgressBar->setValue(v);
+}
+
+void StatusNotifierTest::result(KJob* job)
+{
+    if (job->error()) {
+        qDebug() << "Job Error:" << job->errorText() << job->errorString();
+    } else {
+        qDebug() << "Job finished successfully.";
+    }
+    jobEnabledCheck->setCheckState(Qt::Unchecked);
 }
 
 

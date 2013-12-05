@@ -17,47 +17,33 @@
 *   Boston, MA 02110-1301, USA.                                               *
 *******************************************************************************/
 
-#ifndef STATUSNOTIFIERTEST_H
-#define STATUSNOTIFIERTEST_H
-
-#include <QDialog>
-#include <QObject>
-#include <QWidget>
+#ifndef PUMPJOB_H
+#define PUMPJOB_H
 
 #include <KJob>
 
-#include "ui_statusnotifiertest.h"
+class PumpJobPrivate;
 
-class StatusNotifierTestPrivate;
-
-class StatusNotifierTest : public QDialog, public Ui_StatusNotifierTest
+class PumpJob : public KJob
 {
     Q_OBJECT
 
     public:
-        StatusNotifierTest(QWidget* parent = 0);
-        virtual ~StatusNotifierTest();
+        PumpJob(QObject* parent = 0);
+        virtual ~PumpJob();
+
+        virtual void start();
+        virtual bool doKill();
+        virtual bool doSuspend();
+        virtual bool doResume();
 
         void init();
-        void log(const QString &msg);
 
     public Q_SLOTS:
-        int runMain();
         void timeout();
-        void updateUi();
-        void updateNotifier();
-
-        void activateRequested (bool active, const QPoint &pos);
-        void scrollRequested (int delta, Qt::Orientation orientation);
-        void secondaryActivateRequested (const QPoint &pos);
-
-        void enableJob(bool enable = true);
-        void setJobProgress(KJob *j, unsigned long v);
-        void result(KJob *job);
-
 
     private:
-        StatusNotifierTestPrivate* d;
+        PumpJobPrivate* d;
 };
 
 #endif

@@ -17,47 +17,91 @@
 *   Boston, MA 02110-1301, USA.                                               *
 *******************************************************************************/
 
-#ifndef STATUSNOTIFIERTEST_H
-#define STATUSNOTIFIERTEST_H
+#include "pumpjob.h"
 
-#include <QDialog>
-#include <QObject>
-#include <QWidget>
+#include <QDebug>
 
-#include <KJob>
+#include <QStringList>
+#include <QTimer>
 
-#include "ui_statusnotifiertest.h"
+static QTextStream cout(stdout);
 
-class StatusNotifierTestPrivate;
+class PumpJobPrivate {
+public:
+    QString name;
+    QString error;
 
-class StatusNotifierTest : public QDialog, public Ui_StatusNotifierTest
-{
-    Q_OBJECT
+    QTimer* timer;
+    int interval = 50;
 
-    public:
-        StatusNotifierTest(QWidget* parent = 0);
-        virtual ~StatusNotifierTest();
-
-        void init();
-        void log(const QString &msg);
-
-    public Q_SLOTS:
-        int runMain();
-        void timeout();
-        void updateUi();
-        void updateNotifier();
-
-        void activateRequested (bool active, const QPoint &pos);
-        void scrollRequested (int delta, Qt::Orientation orientation);
-        void secondaryActivateRequested (const QPoint &pos);
-
-        void enableJob(bool enable = true);
-        void setJobProgress(KJob *j, unsigned long v);
-        void result(KJob *job);
-
-
-    private:
-        StatusNotifierTestPrivate* d;
+    int counter = 0;
 };
 
-#endif
+PumpJob::PumpJob(QObject* parent) :
+    KJob(parent)
+{
+    d = new PumpJobPrivate;
+
+    d->timer = new QTimer(this);
+    d->timer->setInterval(d->interval);
+
+    connect(d->timer, &QTimer::timeout, this, &PumpJob::timeout);
+
+    init();
+}
+
+void PumpJob::init()
+{
+    d->timer->start();
+
+}
+
+PumpJob::~PumpJob()
+{
+    qDebug() << "Bye bye";
+    delete d;
+}
+
+void PumpJob::start()
+{
+    qDebug() << "Starting job / timer";
+    d->timer->start();
+}
+
+bool PumpJob::doKill()
+{
+    d->timer->stop();
+    return KJob::doKill();
+}
+
+bool PumpJob::doResume()
+{
+    d->timer->start();
+    return KJob::doResume();
+}
+
+bool PumpJob::doSuspend()
+{
+    d->timer->stop();
+    return KJob::doSuspend();
+}
+
+
+
+void PumpJob::timeout()
+{
+    d->counter++;
+    setPercent(d->counter);
+    if (d->counter % 10 == 0) {
+        qDebug() << "percent: " << percent();
+    }
+
+    if (d->counter >= 100) {
+        qDebug() << "Job done";
+        emitResult();
+    }
+
+}
+
+#include "moc_pumpjob.cpp"
+
