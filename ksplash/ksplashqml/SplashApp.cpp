@@ -136,6 +136,12 @@ void SplashApp::screenGeometryChanged(int)
         }
         else {
             SplashWindow *w = new SplashWindow(m_testing);
+            // When running into a view error at this point it means that the
+            // theme file could not be loaded. We want to exit as otherwise we
+            // are exposed to nullptr crashes.
+            if (w->status() == QDeclarativeView::Error) {
+                ::exit(2);
+            }
             w->setGeometry(m_desktop->availableGeometry(i));
             w->setStage(m_stage);
             w->show();
