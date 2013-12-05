@@ -150,7 +150,8 @@ done
 
 # Set the path for Qt plugins provided by KDE
 QT_PLUGIN_PATH=${QT_PLUGIN_PATH+$QT_PLUGIN_PATH:}`qtpaths --plugin-dir`
-QT_PLUGIN_PATH=$QT_PLUGIN_PATH:$kdehome/lib/kde5/plugins/# TODO: Do we really need this?
+# TODO: Do we really need this?
+QT_PLUGIN_PATH=$QT_PLUGIN_PATH:$kdehome/lib/kde5/plugins/
 export QT_PLUGIN_PATH
 
 # Activate the kde font directories.
