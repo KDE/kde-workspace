@@ -34,8 +34,7 @@ set(sharepackage_SRCS
 
 add_subdirectory(backends)
 
-plasma_add_plugin(plasma_packagestructure_share
-        ${sharepackage_SRCS})
+add_library(plasma_packagestructure_share MODULE ${sharepackage_SRCS})
 target_link_libraries(plasma_packagestructure_share
         KF5::Plasma)
 
