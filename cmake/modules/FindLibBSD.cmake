@@ -16,7 +16,7 @@ set(LIBBSD_INCLUDE_DIRS ${LIBBSD_INCLUDE_DIR} )
 include(FindPackageHandleStandardArgs)
 # handle the QUIETLY and REQUIRED arguments and set  LIBBSD_FOUND to TRUE
 # if all listed variables are TRUE
-find_package_handle_standard_args(libbsd  DEFAULT_MSG
+find_package_handle_standard_args(LIBBSD  DEFAULT_MSG
                                   LIBBSD_LIBRARY LIBBSD_INCLUDE_DIR)
 
 mark_as_advanced(LIBBSD_INCLUDE_DIR LIBBSD_LIBRARY )
