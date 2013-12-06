@@ -15,8 +15,8 @@
 <!-- TRANS:ROLES_OF_TRANSLATORS -->
 </authorgroup>
 
-<date>2013-02-08</date>
-<releaseinfo>&kde; 4.10</releaseinfo>
+<date>2013-12-05</date>
+<releaseinfo>&kde; 4.12</releaseinfo>
 
 <keywordset>
 <keyword>KDE</keyword>
@@ -30,7 +30,7 @@
 <para>There are three tabs in this module.</para>
 
 <sect1 id="hardware">
-<title>The <guilabel>Hardware</guilabel> tab</title>
+<title>The Hardware tab</title>
 <para>The actual effect of setting these options depends upon the
 features provided by your keyboard hardware and the X server on which
 &kde; is running.  As an example, you may find that changing the key
