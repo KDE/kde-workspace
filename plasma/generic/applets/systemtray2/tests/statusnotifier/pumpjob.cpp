@@ -60,9 +60,9 @@ PumpJob::PumpJob(QObject* parent, int interval) :
 
 void PumpJob::init()
 {
-//     emit description(this, i18n("Copying"),
-//                      qMakePair(i18n("Source"), QStringLiteral("this is the source")),
-//                      qMakePair(i18n("Destination"), QStringLiteral("destination, baby")));
+    emit description(this, i18n("Pump Job"),
+                     qMakePair(i18n("Source"), QStringLiteral("this is the source")),
+                     qMakePair(i18n("Destination"), QStringLiteral("destination, baby")));
     d->timer->start();
 
 }
@@ -117,6 +117,7 @@ void PumpJob::timeout()
 {
     d->counter++;
     setPercent(d->counter);
+    emitSpeed(1024 * 1024 * d->counter / 70); // just something randomly changing
     if (d->counter % 20 == 0) {
         qDebug() << "percent: " << percent();
     }

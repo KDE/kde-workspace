@@ -64,6 +64,7 @@ StatusNotifierTest::StatusNotifierTest(QWidget* parent) :
     connect(jobEnabledCheck, &QCheckBox::toggled, this, &StatusNotifierTest::enableJob);
     updateUi();
     show();
+    raise();
     log("started");
 }
 
@@ -222,7 +223,7 @@ void StatusNotifierTest::enableJob(bool enable)
         //QObject::connect(d->job, &KJob::percent, this, &StatusNotifierTest::setJobProgress);
         QObject::connect(d->job, SIGNAL(percent(KJob*, unsigned long)), this, SLOT(setJobProgress(KJob*, unsigned long)));
         QObject::connect(d->job, &KJob::result, this, &StatusNotifierTest::result);
-        //d->job->start();
+        //d->job->start(); // KIO autostarts jobs
     } else {
         if (d->job) {
             d->timer->stop();
