@@ -112,7 +112,7 @@ void UnlockApp::initialize()
     m_showScreenSaver = KScreenSaverSettings::legacySaverEnabled();
 #endif
 
-    m_package.setPath(QStandardPaths::locate(QStandardPaths::QStandardPaths::GenericDataLocation, QStringLiteral("ksmserver/screenlocker/") + KScreenSaverSettings::greeterQML(), QStandardPaths::LocateDirectory));
+    m_package.setPath(QStandardPaths::locate(QStandardPaths::GenericDataLocation, QStringLiteral("ksmserver/screenlocker/") + KScreenSaverSettings::greeterQML(), QStandardPaths::LocateDirectory));
 
     m_mainQmlPath = m_package.filePath("mainscript");
 
