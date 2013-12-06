@@ -12,8 +12,8 @@
 <!-- TRANS:ROLES_OF_TRANSLATORS -->
 </authorgroup>
 
-<date>2011-08-12</date>
-<releaseinfo>1.0 (&kde; 4.7)</releaseinfo>
+<date>2013-12-05</date>
+<releaseinfo>&kde; 4.12</releaseinfo>
 
 <keywordset>
 <keyword>KDE</keyword>
@@ -25,7 +25,7 @@
 </articleinfo>
 
 <sect1 id="kcm_autostart">
-<title><guilabel>Autostart Manager</guilabel></title>
+<title>Autostart Manager</title>
 
 <para>This module is a configuration tool for managing what programs start up with your personal &kde;. It allows you to add programs or scripts so they automatically start during the startup of your &kde; session and to manage them. </para>
 
