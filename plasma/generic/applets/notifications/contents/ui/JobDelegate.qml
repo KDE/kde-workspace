@@ -26,7 +26,7 @@ import org.kde.qtextracomponents 2.0
 PlasmaComponents.ListItem {
     id: notificationItem
     width: popupFlickable.width
-    height: theme.mSize(theme.defaultFont).height * 3 + theme.largeSpacing * 2
+    //height: theme.mSize(theme.defaultFont).height * 3 + theme.largeSpacing * 2
 
     property int toolIconSize: theme.smallMediumIconSize
     property int layoutSpacing: 4
@@ -54,13 +54,13 @@ PlasmaComponents.ListItem {
             anchors.horizontalCenter: parent.horizontalCenter
         }
         Grid {
-//             anchors {
-//                 left: parent.left
-//                 right: parent.right
-//                 rightMargin: notificationItem.layoutSpacing
-//             }
-            width: parent.width - notificationItem.layoutSpacing
-            x: notificationItem.layoutSpacing
+            anchors {
+                left: parent.left
+                right: parent.right
+                rightMargin: notificationItem.layoutSpacing
+            }
+            //width: parent.width - notificationItem.layoutSpacing
+            //x: 40
             spacing: notificationItem.layoutSpacing
             rows: 4
             columns: 2
@@ -108,36 +108,36 @@ PlasmaComponents.ListItem {
                 icon: getData(jobsSource.data, "appIconName", '')
                 width: notificationItem.toolIconSize
                 height: width
-                anchors {
-                    verticalCenter: progressItem.verticalCenter
-                    right: progressItem.left
-                    rightMargin: notificationItem.layoutSpacing
-                }
+//                 anchors {
+//                     verticalCenter: progressItem.verticalCenter
+//                     right: progressItem.left
+//                     rightMargin: notificationItem.layoutSpacing
+//                 }
             }
             Item {
                 id: progressItem
                 width: parent.width - labelName0Text.width
                 height: childrenRect.height
-                PlasmaComponents.ProgressBar {
-                    width: parent.width - pauseButton.width*2 - theme.largeIconSize - notificationItem.layoutSpacing*3
-                    height: 16
-                    orientation: Qt.Horizontal
-                    minimumValue: 0
-                    maximumValue: 100
-                    //percentage doesn't always exist, so doesn't get in the model
-                    value: getData(jobsSource.data, "percentage", 0)
-
-                    anchors {
-                        left: parent.left
-                        right: buttonsRow.left
-                        verticalCenter: parent.verticalCenter
-                        rightMargin: notificationItem.layoutSpacing
-                    }
-                }
                 Row {
+                    PlasmaComponents.ProgressBar {
+                        width: parent.width - pauseButton.width*2 - theme.largeIconSize - notificationItem.layoutSpacing*3
+                        height: 16
+                        orientation: Qt.Horizontal
+                        minimumValue: 0
+                        maximumValue: 100
+                        //percentage doesn't always exist, so doesn't get in the model
+                        value: getData(jobsSource.data, "percentage", 0)
+
+    //                     anchors {
+    //                         left: parent.left
+    //                         right: buttonsRow.left
+    //                         verticalCenter: parent.verticalCenter
+    //                         rightMargin: notificationItem.layoutSpacing
+    //                     }
+                    }
                     id: buttonsRow
                     spacing: notificationItem.layoutSpacing
-                    anchors.right: parent.right
+//                     anchors.right: parent.right
                     PlasmaComponents.ToolButton {
                         id: pauseButton
                         width: notificationItem.toolIconSize
@@ -175,11 +175,11 @@ PlasmaComponents.ListItem {
                 flat: false
                 iconSource: checked ? "list-remove" : "list-add"
                 checkable: true
-                anchors {
-                    right: speedLabel.left
-                    rightMargin: notificationItem.layoutSpacing
-                    verticalCenter: speedLabel.verticalCenter
-                }
+//                 anchors {
+//                     right: speedLabel.left
+//                     rightMargin: notificationItem.layoutSpacing
+//                     verticalCenter: speedLabel.verticalCenter
+//                 }
             }
             PlasmaComponents.Label {
                 id: speedLabel
