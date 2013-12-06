@@ -81,10 +81,10 @@ Item {
             anchors.horizontalCenter: parent.horizontalCenter
         }
 
-        Item {
-            width: greeter.width
-            height: greeter.height
-            anchors.horizontalCenter: parent.horizontalCenter
+//         Item {
+//             width: greeter.width
+//             height: greeter.height
+//             anchors.horizontalCenter: parent.horizontalCenter
 //             GreeterItem {
 //                 id: greeter
 //                 objectName: "greeter"
@@ -100,16 +100,16 @@ Item {
 //                     bottomMargin: -2
 //                 }
 //             }
-            Timer {
-                id: focusTimer
-                interval: 10
-                running: true
-                onTriggered: {
-                    greeter.forceActiveFocus()
-                    greeter.focus = true
-                }
-            }
-        }
+//             Timer {
+//                 id: focusTimer
+//                 interval: 10
+//                 running: true
+//                 onTriggered: {
+//                     greeter.forceActiveFocus()
+//                     greeter.focus = true
+//                 }
+//             }
+//         }
 
         PlasmaComponents.ButtonRow {
             id: buttonRow
@@ -130,7 +130,7 @@ Item {
                 id: unlock
                 label: i18n("Un&lock")
                 iconSource: "object-unlocked"
-                onClicked: greeter.verify()
+                onClicked: root.accepted() // greeter.verify()
             }
         }
     }
@@ -143,7 +143,7 @@ Item {
             // focus munging is needed otherwise the greet (QWidget)
             // eats all the key events, even if root is added to forwardTo
             // qml property of greeter
-            greeter.focus = false;
+//             greeter.focus = false;
             root.forceActiveFocus();
 
             var buttons = [switchUser, unlock]
@@ -161,21 +161,21 @@ Item {
         buttonRow.showAccel = (event.modifiers & Qt.AltModifier)
     }
 
-    Connections {
-        target: greeter
-        onGreeterFailed: {
-            message.text = i18n("Unlocking failed");
-            greeter.enabled = false;
-            switchUser.enabled = false;
-            unlock.enabled = false;
-        }
-        onGreeterReady: {
-            message.text = "";
-            greeter.enabled = true;
-            switchUser.enabled = true;
-            unlock.enabled = true;
-        }
-        onGreeterMessage: message.text = text
-        onGreeterAccepted: accepted()
-    }
+//     Connections {
+//         target: greeter
+//         onGreeterFailed: {
+//             message.text = i18n("Unlocking failed");
+//             greeter.enabled = false;
+//             switchUser.enabled = false;
+//             unlock.enabled = false;
+//         }
+//         onGreeterReady: {
+//             message.text = "";
+//             greeter.enabled = true;
+//             switchUser.enabled = true;
+//             unlock.enabled = true;
+//         }
+//         onGreeterMessage: message.text = text
+//         onGreeterAccepted: accepted()
+//     }
 }
