@@ -25,7 +25,7 @@ Item {
             fill: parent
         }
         onClicked: {
-            print("PlasmoidItem.qml clicked: "  + plasmoid.expanded):
+            print("PlasmoidItem.qml clicked: "  + plasmoid.expanded);
             plasmoid.expanded = !plasmoid.expanded;
         }
     }
