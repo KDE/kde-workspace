@@ -398,12 +398,11 @@ bool UnlockApp::eventFilter(QObject *obj, QEvent *event)
                 break;
             }
         }
-        //FIXME
-//         if (view && view->testAttribute(Qt::WA_WState_Created) && view->internalWinId()) {
-//             // showing greeter view window, set property
-//             static Atom tag = XInternAtom(QX11Info::display(), "_KDE_SCREEN_LOCKER", False);
-//             XChangeProperty(QX11Info::display(), view->winId(), tag, tag, 32, PropModeReplace, 0, 0);
-//         }
+        if (view && view->winId()) {
+            // showing greeter view window, set property
+            static Atom tag = XInternAtom(QX11Info::display(), "_KDE_SCREEN_LOCKER", False);
+            XChangeProperty(QX11Info::display(), view->winId(), tag, tag, 32, PropModeReplace, 0, 0);
+        }
         // no further processing
         return false;
     }
