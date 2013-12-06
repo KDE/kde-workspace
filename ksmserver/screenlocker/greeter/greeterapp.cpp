@@ -160,9 +160,7 @@ void UnlockApp::desktopResized()
         connect(view, SIGNAL(statusChanged(QQuickView::Status)),
                 this, SLOT(viewStatusChanged(QQuickView::Status)));
 
-        //FIXME
-//         view->setWindowFlags(Qt::X11BypassWindowManagerHint);
-//         view->setFrameStyle(QFrame::NoFrame);
+        view->setFlags(Qt::X11BypassWindowManagerHint);
 
         // engine stuff
         KDeclarative kdeclarative;
