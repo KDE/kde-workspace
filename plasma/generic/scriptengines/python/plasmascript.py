@@ -212,14 +212,14 @@ class Runner(QObject):
     def run(self, search, action):
         pass
 
-    def prepare():
+    def prepare(self):
         pass
 
-    def teardown():
+    def teardown(self):
         pass
 
-    def createRunOptions(widget):
+    def createRunOptions(self, widget):
         pass
 
-    def reloadConfiguration():
+    def reloadConfiguration(self):
         pass
