@@ -14,6 +14,7 @@ target_link_libraries(statusnotifiertest
     Qt5::Widgets
     Qt5::Core
     KF5::KCoreAddons
+    KF5::KIOCore
     KF5::KService
     KF5::KNotifications
     KF5::KI18n

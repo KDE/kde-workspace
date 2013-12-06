@@ -21,6 +21,8 @@
 
 #include <QDebug>
 
+#include <KJobTrackerInterface>
+#include <KLocalizedString>
 #include <QStringList>
 #include <QTimer>
 
@@ -35,12 +37,18 @@ public:
     int interval = 50;
 
     int counter = 0;
+
+    bool suspended = false;
 };
 
-PumpJob::PumpJob(QObject* parent) :
-    KJob(parent)
+PumpJob::PumpJob(QObject* parent, int interval) :
+    KIO::Job()
 {
     d = new PumpJobPrivate;
+    if (interval) {
+        d->interval = interval;
+    }
+    KIO::getJobTracker()->registerJob(this);
 
     d->timer = new QTimer(this);
     d->timer->setInterval(d->interval);
@@ -52,12 +60,16 @@ PumpJob::PumpJob(QObject* parent) :
 
 void PumpJob::init()
 {
+//     emit description(this, i18n("Copying"),
+//                      qMakePair(i18n("Source"), QStringLiteral("this is the source")),
+//                      qMakePair(i18n("Destination"), QStringLiteral("destination, baby")));
     d->timer->start();
 
 }
 
 PumpJob::~PumpJob()
 {
+    KIO::getJobTracker()->unregisterJob(this);
     qDebug() << "Bye bye";
     delete d;
 }
@@ -70,29 +82,42 @@ void PumpJob::start()
 
 bool PumpJob::doKill()
 {
+    qDebug() << "kill";
+    emitResult();
     d->timer->stop();
+    setError(KIO::ERR_USER_CANCELED);
+    setErrorText("You killed the job.");
     return KJob::doKill();
 }
 
 bool PumpJob::doResume()
 {
+    d->suspended = false;
+    qDebug() << "resume";
     d->timer->start();
+    emit resumed(this);
     return KJob::doResume();
+}
+
+bool PumpJob::isSuspended() const
+{
+    return d->suspended;
 }
 
 bool PumpJob::doSuspend()
 {
+    d->suspended = true;
+    qDebug() << "suspend";
     d->timer->stop();
+    emit suspended(this);
     return KJob::doSuspend();
 }
-
-
 
 void PumpJob::timeout()
 {
     d->counter++;
     setPercent(d->counter);
-    if (d->counter % 10 == 0) {
+    if (d->counter % 20 == 0) {
         qDebug() << "percent: " << percent();
     }
 
@@ -100,7 +125,6 @@ void PumpJob::timeout()
         qDebug() << "Job done";
         emitResult();
     }
-
 }
 
 #include "moc_pumpjob.cpp"

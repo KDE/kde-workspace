@@ -22,14 +22,16 @@
 
 #include <KJob>
 
+#include <KIO/Job>
+
 class PumpJobPrivate;
 
-class PumpJob : public KJob
+class PumpJob : public KIO::Job
 {
     Q_OBJECT
 
     public:
-        PumpJob(QObject* parent = 0);
+        PumpJob(QObject* parent = 0, int interval = 0);
         virtual ~PumpJob();
 
         virtual void start();
@@ -37,9 +39,14 @@ class PumpJob : public KJob
         virtual bool doSuspend();
         virtual bool doResume();
 
-        void init();
+        virtual bool isSuspended() const;
 
-    public Q_SLOTS:
+        void init();
+    Q_SIGNALS:
+        void suspended(KJob *job);
+        void resumed(KJob *job);
+
+public Q_SLOTS:
         void timeout();
 
     private:

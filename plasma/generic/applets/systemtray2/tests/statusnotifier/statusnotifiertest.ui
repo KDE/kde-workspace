@@ -150,46 +150,55 @@
          </property>
         </widget>
        </item>
-       <item row="1" column="1">
-        <widget class="QCheckBox" name="jobEnabledCheck">
-         <property name="text">
-          <string>Job Started</string>
-         </property>
-        </widget>
-       </item>
-       <item row="2" column="0">
+       <item row="4" column="0">
         <widget class="QLabel" name="label_6">
          <property name="text">
           <string>&lt;b&gt;Progress&lt;/b&gt;</string>
          </property>
         </widget>
        </item>
-       <item row="3" column="1">
-        <widget class="QSlider" name="progressSlider">
-         <property name="orientation">
-          <enum>Qt::Horizontal</enum>
-         </property>
-        </widget>
-       </item>
-       <item row="4" column="1">
+       <item row="6" column="1">
         <widget class="QProgressBar" name="jobProgressBar">
          <property name="value">
-          <number>24</number>
+          <number>0</number>
          </property>
         </widget>
        </item>
-       <item row="5" column="0">
+       <item row="7" column="0">
         <widget class="QLabel" name="label_7">
          <property name="text">
           <string>&lt;b&gt;Naming&lt;/b&gt;</string>
          </property>
         </widget>
        </item>
-       <item row="6" column="1">
-        <widget class="QLineEdit" name="lineEdit"/>
-       </item>
        <item row="8" column="1">
-        <widget class="QLineEdit" name="lineEdit_2"/>
+        <widget class="QLineEdit" name="nameText"/>
+       </item>
+       <item row="10" column="1">
+        <widget class="QLineEdit" name="subText"/>
+       </item>
+       <item row="2" column="1">
+        <widget class="QSlider" name="speedSlider">
+         <property name="maximum">
+          <number>500</number>
+         </property>
+         <property name="pageStep">
+          <number>10</number>
+         </property>
+         <property name="value">
+          <number>50</number>
+         </property>
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="1">
+        <widget class="QCheckBox" name="jobEnabledCheck">
+         <property name="text">
+          <string>Job Started</string>
+         </property>
+        </widget>
        </item>
       </layout>
      </widget>
@@ -198,22 +207,5 @@
   </layout>
  </widget>
  <resources/>
- <connections>
-  <connection>
-   <sender>progressSlider</sender>
-   <signal>valueChanged(int)</signal>
-   <receiver>jobProgressBar</receiver>
-   <slot>setValue(int)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>310</x>
-     <y>196</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>289</x>
-     <y>230</y>
-    </hint>
-   </hints>
-  </connection>
- </connections>
+ <connections/>
 </ui>
