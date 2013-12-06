@@ -26,6 +26,7 @@ import org.kde.qtextracomponents 2.0
 PlasmaComponents.ListItem {
     id: notificationItem
     width: popupFlickable.width
+    height: theme.mSize(theme.defaultFont).height * 3 + theme.largeSpacing * 2
 
     property int toolIconSize: theme.smallMediumIconSize
     property int layoutSpacing: 4
@@ -43,6 +44,7 @@ PlasmaComponents.ListItem {
     property string speed: getData(jobsSource.data, "speed", '')
 
     Column {
+        anchors.fill: parent
         spacing: notificationItem.layoutSpacing
         width: parent.width
         PlasmaComponents.Label {
@@ -52,11 +54,13 @@ PlasmaComponents.ListItem {
             anchors.horizontalCenter: parent.horizontalCenter
         }
         Grid {
-            anchors {
-                left: parent.left
-                right: parent.right
-                rightMargin: notificationItem.layoutSpacing
-            }
+//             anchors {
+//                 left: parent.left
+//                 right: parent.right
+//                 rightMargin: notificationItem.layoutSpacing
+//             }
+            width: parent.width - notificationItem.layoutSpacing
+            x: notificationItem.layoutSpacing
             spacing: notificationItem.layoutSpacing
             rows: 4
             columns: 2
