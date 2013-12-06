@@ -160,7 +160,9 @@ void UnlockApp::desktopResized()
         connect(view, SIGNAL(statusChanged(QQuickView::Status)),
                 this, SLOT(viewStatusChanged(QQuickView::Status)));
 
-        view->setFlags(Qt::X11BypassWindowManagerHint);
+        if (!m_testing) {
+            view->setFlags(Qt::X11BypassWindowManagerHint);
+        }
 
         // engine stuff
         KDeclarative kdeclarative;
@@ -372,13 +374,11 @@ void UnlockApp::setTesting(bool enable)
     if (enable) {
         // remove bypass window manager hint
         foreach (QQuickView * view, m_views) {
-        //FIXME
-//             view->setWindowFlags(view->windowFlags() & ~Qt::X11BypassWindowManagerHint);
+            view->setFlags(view->flags() & ~Qt::X11BypassWindowManagerHint);
         }
     } else {
         foreach (QQuickView * view, m_views) {
-        //FIXME
-//             view->setWindowFlags(view->windowFlags() | Qt::X11BypassWindowManagerHint);
+            view->setFlags(view->flags() | Qt::X11BypassWindowManagerHint);
         }
     }
 }
