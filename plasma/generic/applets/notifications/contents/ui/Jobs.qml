@@ -20,10 +20,12 @@
 import QtQuick 2.0
 import org.kde.plasma.core 2.0 as PlasmaCore
 import org.kde.plasma.components 2.0 as PlasmaComponents
+import org.kde.plasma.extras 2.0 as PlasmaExtras
 
 Column {
     id: jobsRoot
     property alias count: jobsRepeater.count
+    height: 192 // FIXME: should be dynamic, once childrenRect works again
     anchors {
         left: parent.left
         right: parent.right

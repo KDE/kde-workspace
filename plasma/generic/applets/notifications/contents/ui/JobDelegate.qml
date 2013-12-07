@@ -47,19 +47,20 @@ PlasmaComponents.ListItem {
 
     Rectangle {
         color: "orange"
-        opacity: 0.4
+        opacity: 0.2
         anchors.fill: parent
     }
 
     Item {
+        id: jobGrid
         anchors {
             top: parent.top
             left: parent.left
             right: parent.right
         }
 
-        //property int leftColWidth: Math.max(labelName0Text.paintedWidth, labelName1Text.paintedWidth)
-        property int leftColWidth: theme.mSize(theme.defaultFont).width * 8
+        property int leftColWidth: Math.max(labelName0Text.paintedWidth, labelName1Text.paintedWidth)
+        //property int leftColWidth: theme.mSize(theme.defaultFont).width * 16
 
         PlasmaExtras.Heading {
             id: infoLabel
@@ -75,6 +76,17 @@ PlasmaComponents.ListItem {
             anchors.horizontalCenter: parent.horizontalCenter
         }
 
+        Rectangle {
+            color: "blue"
+            opacity: 0.2
+            anchors {
+                top: infoLabel.bottom
+                left: parent.left
+                bottom: labelName1Text.bottom
+            }
+            width: jobGrid.leftColWidth
+        }
+
         // 1st row
 
         PlasmaComponents.Label {
@@ -82,10 +94,11 @@ PlasmaComponents.ListItem {
             anchors {
                 top: infoLabel.bottom
                 left: parent.left
-                right: parent.right
+                rightMargin: theme.largeSpacing / 4
             }
-            width: leftColWidth
+            width: jobGrid.leftColWidth
 
+            font: theme.smallestFont
             text: labelName0 ? i18n("%1:", labelName0) : ''
             horizontalAlignment: Text.AlignRight
             visible: labelName0 != ''
@@ -97,7 +110,9 @@ PlasmaComponents.ListItem {
                 top: labelName0Text.top
                 left: labelName0Text.right
                 right: parent.right
+                leftMargin: theme.largeSpacing / 4
             }
+            font: theme.smallestFont
             text: label0 ? label0 : ''
             //width: parent.width - labelName0Text.width
             elide: Text.ElideMiddle
@@ -116,20 +131,26 @@ PlasmaComponents.ListItem {
             anchors {
                 top: labelName0Text.bottom
                 left: parent.left
-                right: parent.right
+                rightMargin: theme.largeSpacing / 4
             }
+            width: jobGrid.leftColWidth
+
+            font: theme.smallestFont
             text: labelName1 ? i18n("%1:", labelName1) : ''
-            width: Math.max(paintedWidth, labelName0Text.paintedWidth)
             horizontalAlignment: Text.AlignRight
             visible: labelName1 != ''
         }
         PlasmaComponents.Label {
             id: label1Text
+
             anchors {
                 top: labelName1Text.top
-                left: labelName0Text.right
+                left: labelName1Text.right
                 right: parent.right
+                leftMargin: theme.largeSpacing / 4
             }
+
+            font: theme.smallestFont
             text: label1 ? label1 : ''
             //width: parent.width - labelName0Text.width
             elide: Text.ElideMiddle
