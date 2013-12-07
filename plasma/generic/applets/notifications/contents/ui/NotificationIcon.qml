@@ -145,11 +145,12 @@ Item {
         MouseArea {
             anchors.fill: parent
             onClicked: {
-                if (notificationsApplet.totalCount > 0) {
-                    plasmoid.expanded = !plasmoid.expanded;
-                } else {
-                    plasmoid.expanded = false;
-                }
+                plasmoid.expanded = !plasmoid.expanded;
+//                 if (notificationsApplet.totalCount > 0) {
+//                     plasmoid.expanded = !plasmoid.expanded;
+//                 } else {
+//                     plasmoid.expanded = false;
+//                 }
             }
         }
         states: [
@@ -180,7 +181,7 @@ Item {
                 }
                 PropertyChanges {
                     target: plasmoid
-                    status: ActiveStatus
+                    status: PlasmaCore.Types.ActiveStatus
                 }
             }
         ]
