@@ -2,6 +2,7 @@
 Name=Media Player
 Name[de]=Medienwiedergabe
 Name[gl]=Reprodutor multimedia
+Name[ia]=Media Player (Reproductor de Media)
 Name[nl]=Mediaspeler
 Name[pt]=Reprodutor Multimédia
 Name[pt_BR]=Reprodutor de mídia
@@ -13,6 +14,7 @@ Name[x-test]=xxMedia Playerxx
 Comment=Media Player Controls
 Comment[de]=Steuerung der Medienwiedergabe
 Comment[gl]=Controles do reprodutor multimedia
+Comment[ia]=Controlos de Reproductor de Multimedia
 Comment[nl]=Besturing van mediaspeler
 Comment[pt]=Controlos do Leitor Multimédia
 Comment[pt_BR]=Controles do reprodutor de mídia
