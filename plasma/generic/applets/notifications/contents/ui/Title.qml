@@ -20,19 +20,20 @@
 import QtQuick 2.0
 import org.kde.plasma.core 2.0 as PlasmaCore
 import org.kde.plasma.components 2.0 as PlasmaComponents
+import org.kde.plasma.extras 2.0 as PlasmaExtras
 
-PlasmaComponents.ListItem {
+Item {
     id: root
     property alias text: titleLabel.text
+    height: childrenRect.height
 
-
-    sectionDelegate: true
+    //sectionDelegate: true
 
     width: parent.width
 
-    PlasmaComponents.Label {
+    PlasmaExtras.Heading {
         id: titleLabel
-        horizontalAlignment: Text.AlignHCenter
+        //horizontalAlignment: Text.AlignHCenter
         elide: Text.ElideRight
         anchors {
             verticalCenter: parent.verticalCenter
