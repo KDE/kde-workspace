@@ -20,13 +20,15 @@
 import QtQuick 2.0
 import org.kde.plasma.core 2.0 as PlasmaCore
 import org.kde.plasma.components 2.0 as PlasmaComponents
-//import org.kde.plasma.graphicswidgets 0.1 as PlasmaWidgets
+import org.kde.plasma.extras 2.0 as PlasmaExtras
 import org.kde.qtextracomponents 2.0
 
 PlasmaComponents.ListItem {
     id: notificationItem
     width: popupFlickable.width
     //height: theme.mSize(theme.defaultFont).height * 3 + theme.largeSpacing * 2
+    //height: childrenRect.height
+    height: 200
 
     property int toolIconSize: theme.smallMediumIconSize
     property int layoutSpacing: 4
@@ -43,16 +45,102 @@ PlasmaComponents.ListItem {
     property int eta: getData(jobsSource.data, "eta", 0)
     property string speed: getData(jobsSource.data, "speed", '')
 
-    Column {
+    Rectangle {
+        color: "orange"
+        opacity: 0.4
         anchors.fill: parent
-        spacing: notificationItem.layoutSpacing
-        width: parent.width
-        PlasmaComponents.Label {
+    }
+
+    Item {
+        anchors {
+            top: parent.top
+            left: parent.left
+            right: parent.right
+        }
+
+        //property int leftColWidth: Math.max(labelName0Text.paintedWidth, labelName1Text.paintedWidth)
+        property int leftColWidth: theme.mSize(theme.defaultFont).width * 8
+
+        PlasmaExtras.Heading {
+            id: infoLabel
+            anchors {
+                top: parent.top
+                left: parent.left
+                right: parent.right
+            }
+            level: 3
             text: getData(jobsSource.data, "infoMessage", '')
             font.bold: true
             color: theme.textColor
             anchors.horizontalCenter: parent.horizontalCenter
         }
+
+        // 1st row
+
+        PlasmaComponents.Label {
+            id: labelName0Text
+            anchors {
+                top: infoLabel.bottom
+                left: parent.left
+                right: parent.right
+            }
+            width: leftColWidth
+
+            text: labelName0 ? i18n("%1:", labelName0) : ''
+            horizontalAlignment: Text.AlignRight
+            visible: labelName0 != ''
+        }
+
+        PlasmaComponents.Label {
+            id: label0Text
+            anchors {
+                top: labelName0Text.top
+                left: labelName0Text.right
+                right: parent.right
+            }
+            text: label0 ? label0 : ''
+            //width: parent.width - labelName0Text.width
+            elide: Text.ElideMiddle
+            visible: label0 != ''
+
+            PlasmaCore.ToolTip {
+                target: label0Text
+                subText: label0Text.truncated ? label0 : ""
+            }
+
+        }
+
+        // 2nd row
+        PlasmaComponents.Label {
+            id: labelName1Text
+            anchors {
+                top: labelName0Text.bottom
+                left: parent.left
+                right: parent.right
+            }
+            text: labelName1 ? i18n("%1:", labelName1) : ''
+            width: Math.max(paintedWidth, labelName0Text.paintedWidth)
+            horizontalAlignment: Text.AlignRight
+            visible: labelName1 != ''
+        }
+        PlasmaComponents.Label {
+            id: label1Text
+            anchors {
+                top: labelName1Text.top
+                left: labelName0Text.right
+                right: parent.right
+            }
+            text: label1 ? label1 : ''
+            //width: parent.width - labelName0Text.width
+            elide: Text.ElideMiddle
+            visible: label1 != ''
+
+            PlasmaCore.ToolTip {
+                target: label1Text
+                subText: label1Text.truncated ? label1 : ""
+            }
+        }
+        /*
         Grid {
             anchors {
                 left: parent.left
@@ -65,62 +153,24 @@ PlasmaComponents.ListItem {
             rows: 4
             columns: 2
 
-            PlasmaComponents.Label {
-                id: labelName0Text
-                text: labelName0 ? i18n("%1:", labelName0) : ''
-                width: Math.max(paintedWidth, labelName1Text.paintedWidth)
-                horizontalAlignment: Text.AlignRight
-                visible: labelName0 != ''
-            }
-            PlasmaComponents.Label {
-                id: label0Text
-                text: label0 ? label0 : ''
-                width: parent.width - labelName0Text.width
-                elide: Text.ElideMiddle
-                visible: label0 != ''
-
-                PlasmaCore.ToolTip {
-                    target: label0Text
-                    subText: label0Text.truncated ? label0 : ""
-                }
-
-            }
-            PlasmaComponents.Label {
-                id: labelName1Text
-                text: labelName1 ? i18n("%1:", labelName1) : ''
-                width: Math.max(paintedWidth, labelName0Text.paintedWidth)
-                horizontalAlignment: Text.AlignRight
-                visible: labelName1 != ''
-            }
-            PlasmaComponents.Label {
-                id: label1Text
-                text: label1 ? label1 : ''
-                width: parent.width - labelName0Text.width
-                elide: Text.ElideMiddle
-                visible: label1 != ''
-
-                PlasmaCore.ToolTip {
-                    target: label1Text
-                    subText: label1Text.truncated ? label1 : ""
-                }
-            }
-            QIconItem {
-                icon: getData(jobsSource.data, "appIconName", '')
-                width: notificationItem.toolIconSize
-                height: width
-//                 anchors {
-//                     verticalCenter: progressItem.verticalCenter
-//                     right: progressItem.left
-//                     rightMargin: notificationItem.layoutSpacing
-//                 }
-            }
+//             QIconItem {
+//                 icon: getData(jobsSource.data, "appIconName", '')
+//                 width: notificationItem.toolIconSize
+//                 height: width
+// //                 anchors {
+// //                     verticalCenter: progressItem.verticalCenter
+// //                     right: progressItem.left
+// //                     rightMargin: notificationItem.layoutSpacing
+// //                 }
+//             }
             Item {
                 id: progressItem
                 width: parent.width - labelName0Text.width
                 height: childrenRect.height
                 Row {
                     PlasmaComponents.ProgressBar {
-                        width: parent.width - pauseButton.width*2 - theme.largeIconSize - notificationItem.layoutSpacing*3
+                        //width: parent.width - pauseButton.width*2 - theme.largeIconSize - notificationItem.layoutSpacing*3
+                        width: 200
                         height: 16
                         orientation: Qt.Horizontal
                         minimumValue: 0
@@ -187,7 +237,7 @@ PlasmaComponents.ListItem {
             }
         }
 
-
+        */
         Item {
             id: detailsItem
             state: expandButton.checked ? "expanded" : "collapsed"
@@ -237,23 +287,22 @@ PlasmaComponents.ListItem {
                         anchors.left: parent.left
                         visible: text != ""
                     }
-/* FIXME: find a way to plot the signal
-                    PlasmaWidgets.SignalPlotter {
-                        id: plotter
-                        width: parent.width
-                        useAutoRange: true
-                        showVerticalLines: false
-                        unit: i18n("KiB/s")
-                        height: theme.mSize(theme.defaultFont).height * 5
-                        Component.onCompleted: plotter.addPlot(theme.highlightColor)
-                    }
-                    Connections {
-                        target: jobsSource
-                        onDataChanged: {
-                            plotter.addSample([jobsSource.data[modelData]["numericSpeed"]/1000])
-                        }
-                    }
-*/
+// FIXME: find a way to plot the signal
+//                     PlasmaWidgets.SignalPlotter {
+//                         id: plotter
+//                         width: parent.width
+//                         useAutoRange: true
+//                         showVerticalLines: false
+//                         unit: i18n("KiB/s")
+//                         height: theme.mSize(theme.defaultFont).height * 5
+//                         Component.onCompleted: plotter.addPlot(theme.highlightColor)
+//                     }
+//                     Connections {
+//                         target: jobsSource
+//                         onDataChanged: {
+//                             plotter.addSample([jobsSource.data[modelData]["numericSpeed"]/1000])
+//                         }
+//                     }
                 }
             }
 
