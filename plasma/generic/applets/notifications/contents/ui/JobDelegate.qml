@@ -27,11 +27,11 @@ PlasmaComponents.ListItem {
     id: notificationItem
     width: popupFlickable.width
     //height: theme.mSize(theme.defaultFont).height * 3 + theme.largeSpacing * 2
-    //height: childrenRect.height
-    height: 200
+    height: jobGrid.childrenRect.height + theme.largeSpacing
+    //height: 200
 
     property int toolIconSize: theme.smallMediumIconSize
-    property int layoutSpacing: 4
+    property int layoutSpacing: theme.largeSpacing / 4
 
     function getData(data, name, defaultValue) {
         return data[modelData] ? (data[modelData][name] ? data[modelData][name] : defaultValue) : defaultValue;
@@ -45,7 +45,10 @@ PlasmaComponents.ListItem {
     property int eta: getData(jobsSource.data, "eta", 0)
     property string speed: getData(jobsSource.data, "speed", '')
 
+    property bool debug: true
+
     Rectangle {
+        visible: notificationItem.debug
         color: "orange"
         opacity: 0.2
         anchors.fill: parent
@@ -78,7 +81,8 @@ PlasmaComponents.ListItem {
 
         Rectangle {
             color: "blue"
-            opacity: 0.2
+            visible: notificationItem.debug
+            opacity: 0
             anchors {
                 top: infoLabel.bottom
                 left: parent.left
@@ -94,7 +98,6 @@ PlasmaComponents.ListItem {
             anchors {
                 top: infoLabel.bottom
                 left: parent.left
-                rightMargin: theme.largeSpacing / 4
             }
             width: jobGrid.leftColWidth
 
@@ -110,7 +113,7 @@ PlasmaComponents.ListItem {
                 top: labelName0Text.top
                 left: labelName0Text.right
                 right: parent.right
-                leftMargin: theme.largeSpacing / 4
+                leftMargin: notificationItem.layoutSpacing
             }
             font: theme.smallestFont
             text: label0 ? label0 : ''
@@ -131,7 +134,6 @@ PlasmaComponents.ListItem {
             anchors {
                 top: labelName0Text.bottom
                 left: parent.left
-                rightMargin: theme.largeSpacing / 4
             }
             width: jobGrid.leftColWidth
 
@@ -147,7 +149,7 @@ PlasmaComponents.ListItem {
                 top: labelName1Text.top
                 left: labelName1Text.right
                 right: parent.right
-                leftMargin: theme.largeSpacing / 4
+                leftMargin: notificationItem.layoutSpacing
             }
 
             font: theme.smallestFont
@@ -159,6 +161,90 @@ PlasmaComponents.ListItem {
             PlasmaCore.ToolTip {
                 target: label1Text
                 subText: label1Text.truncated ? label1 : ""
+            }
+        }
+        Item {
+            id: buttonsRow
+            height: notificationItem.toolIconSize
+
+            //spacing: notificationItem.layoutSpacing
+            anchors {
+                top: labelName1Text.bottom
+                left: parent.left
+                right: parent.right
+
+            }
+            Rectangle {
+                visible: notificationItem.debug
+                color: "green"
+                opacity: 0
+                anchors.fill: parent
+            }
+
+            PlasmaComponents.ProgressBar {
+                id: progressBar
+                anchors {
+                    verticalCenter: parent.verticalCenter
+                    left: parent.left
+                    right: pauseButton.left
+
+                }
+                //width: parent.width - pauseButton.width*2 - notificationItem.layoutSpacing*3
+                width: 200
+                height: 16
+                orientation: Qt.Horizontal
+                minimumValue: 0
+                maximumValue: 100
+                //percentage doesn't always exist, so doesn't get in the model
+                value: getData(jobsSource.data, "percentage", 0)
+
+//                     anchors {
+//                         left: parent.left
+//                         right: buttonsRow.left
+//                         verticalCenter: parent.verticalCenter
+//                         rightMargin: notificationItem.layoutSpacing
+//                     }
+            }
+//                     anchors.right: parent.right
+            PlasmaComponents.ToolButton {
+                id: pauseButton
+                width: notificationItem.toolIconSize
+                height: width
+                anchors {
+                    verticalCenter: parent.verticalCenter
+                    right: stopButton.left
+
+                }
+                iconSource: notificationItem.jobstate == "suspended" ? "media-playback-start" : "media-playback-pause"
+                flat: false
+                onClicked: {
+                    print("NNN Current: " + jobstate);
+                    var operationName = "suspend"
+                    if (notificationItem.jobstate == "suspended") {
+                        operationName = "resume"
+                    }
+                    var service = jobsSource.serviceForSource(modelData)
+                    var operation = service.operationDescription(operationName)
+                    service.startOperationCall(operation)
+                    print("NNN now: " + notificationItem.jobstate);
+                }
+            }
+            PlasmaComponents.ToolButton {
+                id: stopButton
+                anchors {
+                    verticalCenter: parent.verticalCenter
+                    right: parent.right
+
+                }
+                width: notificationItem.toolIconSize
+                height: width
+                iconSource: "media-playback-stop"
+                flat: false
+                onClicked: {
+                    var service = jobsSource.serviceForSource(modelData)
+                    var operation = service.operationDescription("stop")
+                    service.startOperationCall(operation)
+                }
             }
         }
         /*
@@ -188,56 +274,6 @@ PlasmaComponents.ListItem {
                 id: progressItem
                 width: parent.width - labelName0Text.width
                 height: childrenRect.height
-                Row {
-                    PlasmaComponents.ProgressBar {
-                        //width: parent.width - pauseButton.width*2 - theme.largeIconSize - notificationItem.layoutSpacing*3
-                        width: 200
-                        height: 16
-                        orientation: Qt.Horizontal
-                        minimumValue: 0
-                        maximumValue: 100
-                        //percentage doesn't always exist, so doesn't get in the model
-                        value: getData(jobsSource.data, "percentage", 0)
-
-    //                     anchors {
-    //                         left: parent.left
-    //                         right: buttonsRow.left
-    //                         verticalCenter: parent.verticalCenter
-    //                         rightMargin: notificationItem.layoutSpacing
-    //                     }
-                    }
-                    id: buttonsRow
-                    spacing: notificationItem.layoutSpacing
-//                     anchors.right: parent.right
-                    PlasmaComponents.ToolButton {
-                        id: pauseButton
-                        width: notificationItem.toolIconSize
-                        height: width
-                        iconSource: jobstate == "suspended" ? "media-playback-start" : "media-playback-pause"
-                        flat: false
-                        onClicked: {
-                            var operationName = "suspend"
-                            if (jobstate == "suspended") {
-                                operationName = "resume"
-                            }
-                            var service = jobsSource.serviceForSource(modelData)
-                            var operation = service.operationDescription(operationName)
-                            service.startOperationCall(operation)
-                        }
-                    }
-                    PlasmaComponents.ToolButton {
-                        id: stopButton
-                        width: notificationItem.toolIconSize
-                        height: width
-                        iconSource: "media-playback-stop"
-                        flat: false
-                        onClicked: {
-                            var service = jobsSource.serviceForSource(modelData)
-                            var operation = service.operationDescription("stop")
-                            service.startOperationCall(operation)
-                        }
-                    }
-                }
             }
             PlasmaComponents.ToolButton {
                 id: expandButton
@@ -382,5 +418,10 @@ PlasmaComponents.ListItem {
                 }
             ]
         }
+    }
+
+    Component.onCompleted: {
+        print("NNN ICON SIZE: " + toolIconSize + " " + theme.smallMediumIconSize);
+        print("NNN JOBSTATE: " + notificationItem.jobstate);
     }
 }
