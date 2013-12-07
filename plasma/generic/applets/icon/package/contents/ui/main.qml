@@ -33,6 +33,8 @@ MouseArea {
 
     property int minimumWidth: formFactor == PlasmaCore.Types.Horizontal ? height : 16
     property int minimumHeight: formFactor == PlasmaCore.Types.Vertical ? width  : 16
+    property int formFactor: plasmoid.formFactor
+    property bool constrained: formFactor == PlasmaCore.Types.Vertical || formFactor == PlasmaCore.Types.Horizontal
     hoverEnabled: true
     onClicked: Qt.openUrlExternally(plasmoid.configuration.url);
 
