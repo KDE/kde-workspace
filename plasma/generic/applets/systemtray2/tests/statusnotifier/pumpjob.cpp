@@ -34,7 +34,7 @@ public:
     QString error;
 
     QTimer* timer;
-    int interval = 50;
+    int interval = 200;
 
     int counter = 0;
 
@@ -45,13 +45,15 @@ PumpJob::PumpJob(QObject* parent, int interval) :
     KIO::Job()
 {
     d = new PumpJobPrivate;
+
     if (interval) {
-        d->interval = interval;
+        d->interval = d->interval * interval;
     }
     KIO::getJobTracker()->registerJob(this);
 
     d->timer = new QTimer(this);
     d->timer->setInterval(d->interval);
+    qDebug() << "Starting job with interval: " << d->interval;
 
     connect(d->timer, &QTimer::timeout, this, &PumpJob::timeout);
 
@@ -121,8 +123,9 @@ void PumpJob::timeout()
     int seconds = (int)((d->interval * 100) - (d->interval * percent())) / 1000;
     emit infoMessage(this, i18n("Testing kuiserver (%1 seconds remaining)", seconds), i18n("Testing kuiserver (%1 seconds remaining)", seconds));
 
+    qDebug() << "percent: " << percent() << "  Seconds: " << seconds;
     if (d->counter % 20 == 0) {
-        qDebug() << "percent: " << percent() << "  Seconds: " << seconds;
+        //qDebug() << "percent: " << percent() << "  Seconds: " << seconds;
     }
 
     if (d->counter >= 100) {
