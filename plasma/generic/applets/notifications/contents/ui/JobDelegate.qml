@@ -27,11 +27,14 @@ PlasmaComponents.ListItem {
     id: notificationItem
     width: popupFlickable.width
     //height: theme.mSize(theme.defaultFont).height * 3 + theme.largeSpacing * 2
-    height: jobGrid.childrenRect.height + theme.largeSpacing
+    //height: jobGrid.childrenRect.height + (detailsItem.state == "expanded" ? theme.largeSpacing : 0)
+    height: jobGrid.childrenRect.height + (detailsItem.state == "expanded" ? theme.largeSpacing : theme.largeSpacing / 2)
     //height: 200
 
     property int toolIconSize: theme.smallMediumIconSize
     property int layoutSpacing: theme.largeSpacing / 4
+
+    //Behavior on height { NumberAnimation {} }
 
     function getData(data, name, defaultValue) {
         return data[modelData] ? (data[modelData][name] ? data[modelData][name] : defaultValue) : defaultValue;
@@ -45,7 +48,7 @@ PlasmaComponents.ListItem {
     property int eta: getData(jobsSource.data, "eta", 0)
     property string speed: getData(jobsSource.data, "speed", '')
 
-    property bool debug: true
+    property bool debug: false
 
     Rectangle {
         visible: notificationItem.debug
@@ -79,6 +82,29 @@ PlasmaComponents.ListItem {
             anchors.horizontalCenter: parent.horizontalCenter
         }
 
+        PlasmaComponents.Label {
+            id: summary
+            anchors {
+                top: infoLabel.bottom
+                left: parent.left
+                right: parent.right
+            }
+            text: "Downloading Alice in Chains - Rooster.mp3"
+        }
+
+        PlasmaComponents.ToolButton {
+            id: expandButton
+            width: notificationItem.toolIconSize
+            height: width
+            flat: true
+            iconSource: checked ? "list-remove" : "list-add"
+            checkable: true
+            anchors {
+                right: summary.right
+                top: summary.top
+            }
+        }
+
         Rectangle {
             color: "blue"
             visible: notificationItem.debug
@@ -91,76 +117,97 @@ PlasmaComponents.ListItem {
             width: jobGrid.leftColWidth
         }
 
-        // 1st row
-
-        PlasmaComponents.Label {
-            id: labelName0Text
+        Item {
+            id: newDetailsItem
+            // 1st row
+            Rectangle {
+                color: "yellow"
+                visible: notificationItem.debug
+                opacity: 0.3
+                anchors {
+                    fill: parent
+                }
+            }
+            opacity: detailsItem.state == "expanded" ? 1 : 0
+            height: detailsItem.expanded ? childrenRect.height : 0
+            Behavior on height { NumberAnimation {} }
+            Behavior on opacity { NumberAnimation {} }
+            clip: true
             anchors {
-                top: infoLabel.bottom
+                top: summary.bottom
                 left: parent.left
-            }
-            width: jobGrid.leftColWidth
-
-            font: theme.smallestFont
-            text: labelName0 ? i18n("%1:", labelName0) : ''
-            horizontalAlignment: Text.AlignRight
-            visible: labelName0 != ''
-        }
-
-        PlasmaComponents.Label {
-            id: label0Text
-            anchors {
-                top: labelName0Text.top
-                left: labelName0Text.right
                 right: parent.right
-                leftMargin: notificationItem.layoutSpacing
-            }
-            font: theme.smallestFont
-            text: label0 ? label0 : ''
-            //width: parent.width - labelName0Text.width
-            elide: Text.ElideMiddle
-            visible: label0 != ''
-
-            PlasmaCore.ToolTip {
-                target: label0Text
-                subText: label0Text.truncated ? label0 : ""
             }
 
-        }
+            PlasmaComponents.Label {
+                id: labelName0Text
+                anchors {
+                    top: parent.top
+                    left: parent.left
+                }
+                width: jobGrid.leftColWidth
 
-        // 2nd row
-        PlasmaComponents.Label {
-            id: labelName1Text
-            anchors {
-                top: labelName0Text.bottom
-                left: parent.left
-            }
-            width: jobGrid.leftColWidth
-
-            font: theme.smallestFont
-            text: labelName1 ? i18n("%1:", labelName1) : ''
-            horizontalAlignment: Text.AlignRight
-            visible: labelName1 != ''
-        }
-        PlasmaComponents.Label {
-            id: label1Text
-
-            anchors {
-                top: labelName1Text.top
-                left: labelName1Text.right
-                right: parent.right
-                leftMargin: notificationItem.layoutSpacing
+                font: theme.smallestFont
+                text: labelName0 ? i18n("%1:", labelName0) : ''
+                horizontalAlignment: Text.AlignRight
+                visible: labelName0 != ''
             }
 
-            font: theme.smallestFont
-            text: label1 ? label1 : ''
-            //width: parent.width - labelName0Text.width
-            elide: Text.ElideMiddle
-            visible: label1 != ''
+            PlasmaComponents.Label {
+                id: label0Text
+                anchors {
+                    top: labelName0Text.top
+                    left: labelName0Text.right
+                    right: parent.right
+                    leftMargin: notificationItem.layoutSpacing
+                }
+                font: theme.smallestFont
+                text: label0 ? label0 : ''
+                //width: parent.width - labelName0Text.width
+                elide: Text.ElideMiddle
+                visible: label0 != ''
 
-            PlasmaCore.ToolTip {
-                target: label1Text
-                subText: label1Text.truncated ? label1 : ""
+                PlasmaCore.ToolTip {
+                    target: label0Text
+                    subText: label0Text.truncated ? label0 : ""
+                }
+
+            }
+
+            // 2nd row
+            PlasmaComponents.Label {
+                id: labelName1Text
+                anchors {
+                    top: labelName0Text.bottom
+                    left: parent.left
+                }
+                width: jobGrid.leftColWidth
+
+                font: theme.smallestFont
+                text: labelName1 ? i18n("%1:", labelName1) : ''
+                horizontalAlignment: Text.AlignRight
+                visible: labelName1 != ''
+            }
+            PlasmaComponents.Label {
+                id: label1Text
+
+                anchors {
+                    top: labelName1Text.top
+                    left: labelName1Text.right
+                    right: parent.right
+                    leftMargin: notificationItem.layoutSpacing
+                }
+
+                font: theme.smallestFont
+                text: label1 ? label1 : ''
+                //width: parent.width - labelName0Text.width
+                elide: Text.ElideMiddle
+                visible: label1 != ''
+
+                PlasmaCore.ToolTip {
+                    target: label1Text
+                    subText: label1Text.truncated ? label1 : ""
+                }
             }
         }
         Item {
@@ -169,7 +216,8 @@ PlasmaComponents.ListItem {
 
             //spacing: notificationItem.layoutSpacing
             anchors {
-                top: labelName1Text.bottom
+                top: detailsItem.state == "collapsed" ? summary.bottom : newDetailsItem.bottom
+                //top: labelName1Text.bottom
                 left: parent.left
                 right: parent.right
 
@@ -187,6 +235,7 @@ PlasmaComponents.ListItem {
                     verticalCenter: parent.verticalCenter
                     left: parent.left
                     right: pauseButton.left
+                    rightMargin: notificationItem.layoutSpacing
 
                 }
                 //width: parent.width - pauseButton.width*2 - notificationItem.layoutSpacing*3
@@ -213,10 +262,10 @@ PlasmaComponents.ListItem {
                 anchors {
                     verticalCenter: parent.verticalCenter
                     right: stopButton.left
-
+                    rightMargin: notificationItem.layoutSpacing
                 }
                 iconSource: notificationItem.jobstate == "suspended" ? "media-playback-start" : "media-playback-pause"
-                flat: false
+                flat: true
                 onClicked: {
                     print("NNN Current: " + jobstate);
                     var operationName = "suspend"
@@ -234,12 +283,11 @@ PlasmaComponents.ListItem {
                 anchors {
                     verticalCenter: parent.verticalCenter
                     right: parent.right
-
                 }
                 width: notificationItem.toolIconSize
                 height: width
                 iconSource: "media-playback-stop"
-                flat: false
+                flat: true
                 onClicked: {
                     var service = jobsSource.serviceForSource(modelData)
                     var operation = service.operationDescription("stop")
@@ -297,8 +345,13 @@ PlasmaComponents.ListItem {
         */
         Item {
             id: detailsItem
+            property bool expanded: state == "expanded"
             state: expandButton.checked ? "expanded" : "collapsed"
+            onStateChanged: {
+                print("NNN expand state is now: " + state);
+            }
             anchors {
+                top: summary.bottom
                 left: parent.left
                 right: parent.right
                 leftMargin: speedLabel.x
