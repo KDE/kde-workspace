@@ -23,7 +23,7 @@ import org.kde.plasma.components 2.0 as PlasmaComponents
 import org.kde.plasma.extras 2.0 as PlasmaExtras
 import org.kde.qtextracomponents 2.0
 
-PlasmaComponents.ListItem {
+Item {
     id: notificationItem
 
     width: popupFlickable.width
@@ -32,6 +32,7 @@ PlasmaComponents.ListItem {
     property int toolIconSize: theme.smallMediumIconSize
     property int layoutSpacing: theme.largeSpacing / 4
     property int animationDuration: 100
+    property bool flatButtons: true
 
     function getData(data, name, defaultValue) {
         return data[modelData] ? (data[modelData][name] ? data[modelData][name] : defaultValue) : defaultValue;
@@ -74,9 +75,6 @@ PlasmaComponents.ListItem {
             }
             level: 3
             text: getData(jobsSource.data, "infoMessage", '')
-            font.bold: true
-            color: theme.textColor
-            anchors.horizontalCenter: parent.horizontalCenter
         }
 
         PlasmaComponents.Label {
@@ -84,34 +82,24 @@ PlasmaComponents.ListItem {
             anchors {
                 top: infoLabel.bottom
                 left: parent.left
-                right: parent.right
+                right: expandButton.left
+                rightMargin: notificationItem.layoutSpacing
             }
-            text: "Downloading Alice in Chains - Rooster.mp3"
+            elide: Text.ElideMiddle
+            text: "Downloading Alice in Chains - Rooster this is a really lnog filename foorbar.mp3"
         }
 
         PlasmaComponents.ToolButton {
             id: expandButton
             width: notificationItem.toolIconSize
             height: width
-            flat: true
+            flat: notificationItem.flatButtons
             iconSource: checked ? "list-remove" : "list-add"
             checkable: true
             anchors {
-                right: summary.right
+                right: parent.right
                 top: summary.top
             }
-        }
-
-        Rectangle {
-            color: "blue"
-            visible: notificationItem.debug
-            opacity: 0
-            anchors {
-                top: infoLabel.bottom
-                left: parent.left
-                bottom: labelName1Text.bottom
-            }
-            width: jobGrid.leftColWidth
         }
 
         Item {
@@ -124,21 +112,22 @@ PlasmaComponents.ListItem {
             }
 
             // 1st row
-            Rectangle {
-                color: "yellow"
-                visible: notificationItem.debug
-                opacity: 0.3
-                anchors {
-                    fill: parent
-                }
-            }
-            opacity: newDetailsItem.state == "expanded" ? 1 : 0
-            height: newDetailsItem.expanded ? childrenRect.height : 0
+//             Rectangle {
+//                 color: "yellow"
+//                 visible: notificationItem.debug
+//                 opacity: 0.3
+//                 anchors {
+//                     fill: parent
+//                 }
+//             }
+            opacity: newDetailsItem.state == "expanded" ? 0.6 : 0
+            //height: newDetailsItem.expanded ? childrenRect.height : 0
             //Behavior on height { NumberAnimation { duration: notificationItem.animationDuration } }
             Behavior on opacity { NumberAnimation { duration: notificationItem.animationDuration } }
             //clip: true
             anchors {
                 top: summary.bottom
+                topMargin: notificationItem.layoutSpacing
                 left: parent.left
                 right: parent.right
             }
@@ -150,6 +139,7 @@ PlasmaComponents.ListItem {
                     left: parent.left
                 }
                 width: jobGrid.leftColWidth
+                height: paintedHeight
 
                 font: theme.smallestFont
                 text: labelName0 ? i18n("%1:", labelName0) : ''
@@ -165,6 +155,7 @@ PlasmaComponents.ListItem {
                     right: parent.right
                     leftMargin: notificationItem.layoutSpacing
                 }
+                height: paintedHeight
                 font: theme.smallestFont
                 text: label0 ? label0 : ''
                 //width: parent.width - labelName0Text.width
@@ -183,9 +174,11 @@ PlasmaComponents.ListItem {
                 id: labelName1Text
                 anchors {
                     top: labelName0Text.bottom
+                    topMargin: notificationItem.layoutSpacing
                     left: parent.left
                 }
                 width: jobGrid.leftColWidth
+                height: paintedHeight
 
                 font: theme.smallestFont
                 text: labelName1 ? i18n("%1:", labelName1) : ''
@@ -203,6 +196,7 @@ PlasmaComponents.ListItem {
                 }
 
                 font: theme.smallestFont
+                height: paintedHeight
                 text: label1 ? label1 : ''
                 //width: parent.width - labelName0Text.width
                 elide: Text.ElideMiddle
@@ -218,9 +212,12 @@ PlasmaComponents.ListItem {
                 id: detailsColumn
                 anchors {
                     top: labelName1Text.bottom
-                    left: parent.left
+                    topMargin: notificationItem.layoutSpacing
                     right: parent.right
+                    left: labelName1Text.right
+                    leftMargin: notificationItem.layoutSpacing
                 }
+                spacing: notificationItem.layoutSpacing
 
                 function formatByteSize(size) {
                     // Per IEC 60027-2
@@ -237,8 +234,10 @@ PlasmaComponents.ListItem {
                     {
                         size = size /1073741824.0;
                         if ( size > 1024 ) { // Tebi-byte
+                            // That's a huge amount, so display 3 digits
                             s = i18n("%1 TiB", Math.round(size / 1024.0 *1000) / 1000);
                         } else {
+                            // Still quite large, display 3 digits
                             s = i18n("%1 GiB", Math.round(size *100) / 100);
                         }
                     }
@@ -285,20 +284,47 @@ PlasmaComponents.ListItem {
                         return ""
                     }
                 }
+
+                function prettyFormatDuration(msec) {
+                    var minutes = Math.floor(msec / 1000 / 60);
+                    var seconds = Math.round((msec % (1000 * 60)) / 1000);
+                    var o;
+                    if (minutes < 3) {
+                        o = i18n("%1 min %2 sec", minutes, seconds);
+
+                    } else {
+                        o = i18n("%1 min", minutes);
+                    }
+                    return o;
+                }
+
                 PlasmaComponents.Label {
                     text: jobsSource.data[modelData] ? detailsColumn.localizeProcessedAmount(0) : ""
                     anchors.left: parent.left
+                    font: theme.smallestFont
+                    height: paintedHeight
                     visible: text != ""
                 }
                 PlasmaComponents.Label {
                     text: jobsSource.data[modelData] ? detailsColumn.localizeProcessedAmount(1) : ""
                     anchors.left: parent.left
+                    font: theme.smallestFont
+                    height: paintedHeight
                     visible: text != ""
                 }
                 PlasmaComponents.Label {
                     text: jobsSource.data[modelData] ? detailsColumn.localizeProcessedAmount(2) : ""
                     anchors.left: parent.left
+                    font: theme.smallestFont
+                    height: paintedHeight
                     visible: text != ""
+                }
+                PlasmaComponents.Label {
+                    id: speedLabel
+                    anchors.left: parent.left
+                    font: theme.smallestFont
+                    height: paintedHeight
+                    text: notificationItem.eta > 0 ? i18nc("Speed and estimated time to completition", "%1 (%2 remaining)", speed, detailsColumn.prettyFormatDuration(notificationItem.eta)) : speed
                 }
 // FIXME: find a way to plot the signal
 //                     PlasmaWidgets.SignalPlotter {
@@ -316,6 +342,11 @@ PlasmaComponents.ListItem {
 //                             plotter.addSample([jobsSource.data[modelData]["numericSpeed"]/1000])
 //                         }
 //                     }
+                Item {
+                    // just for spacing at the bottom
+                    width: parent.width
+                    height: notificationItem.layoutSpacing
+                }
             }
 
             states: [
@@ -343,16 +374,12 @@ PlasmaComponents.ListItem {
                             script: {
                                 newDetailsItem.visible = true
                                 newDetailsItem.clip = true
-                                //create the contents if they don't exist yet
-//                                 if (!newDetailsItem.contentsItem) {
-//                                     newDetailsItem.contentsItem = detailsComponent.createObject(newDetailsItem)
-//                                 }
                             }
                         }
                         NumberAnimation {
-                            duration: notificdetailsItemationItem.animationDuration
+                            duration: notificationItem.animationDuration
                             properties: "height"
-                            easing: PropertyAnimation.EaseInOut
+                            easing.type: Easing.InOutQuad
                         }
                         ScriptAction {script: newDetailsItem.clip = false}
                     }
@@ -365,28 +392,25 @@ PlasmaComponents.ListItem {
                         NumberAnimation {
                             duration: notificationItem.animationDuration
                             properties: "height"
-                            easing: PropertyAnimation.EaseInOut
+                            easing.type: Easing.InOutQuad
                         }
                         //TODO: delete the details?
                         ScriptAction {script: newDetailsItem.visible = false}
                     }
                 }
             ]
-
-
         }
         Item {
             id: buttonsRow
-            height: notificationItem.toolIconSize
 
-            //spacing: notificationItem.layoutSpacing
+            height: notificationItem.toolIconSize
             anchors {
                 top: !newDetailsItem.opacity  ? summary.bottom : newDetailsItem.bottom
-                //top: labelName1Text.bottom
                 left: parent.left
                 right: parent.right
 
             }
+
             Rectangle {
                 visible: notificationItem.debug
                 color: "green"
@@ -430,7 +454,7 @@ PlasmaComponents.ListItem {
                     rightMargin: notificationItem.layoutSpacing
                 }
                 iconSource: notificationItem.jobstate == "suspended" ? "media-playback-start" : "media-playback-pause"
-                flat: true
+                flat: notificationItem.flatButtons
                 onClicked: {
                     print("NNN Current: " + jobstate);
                     var operationName = "suspend"
@@ -452,7 +476,7 @@ PlasmaComponents.ListItem {
                 width: notificationItem.toolIconSize
                 height: width
                 iconSource: "media-playback-stop"
-                flat: true
+                flat: notificationItem.flatButtons
                 onClicked: {
                     var service = jobsSource.serviceForSource(modelData)
                     var operation = service.operationDescription("stop")
@@ -614,7 +638,7 @@ PlasmaComponents.ListItem {
                         NumberAnimation {
                             duration: notificationItem.animationDuration
                             properties: "height"
-                            easing: PropertyAnimation.EaseInOut
+                            easing: Easing.EaseInOut
                         }
                         ScriptAction {script: detailsItem.clip = false}
                     }
@@ -627,7 +651,7 @@ PlasmaComponents.ListItem {
                         NumberAnimation {
                             duration: notificationItem.animationDuration
                             properties: "height"
-                            easing: PropertyAnimation.EaseInOut
+                            easing: Easing.EaseInOut
                         }
                         //TODO: delete the details?
                         ScriptAction {script: detailsItem.visible = false}
