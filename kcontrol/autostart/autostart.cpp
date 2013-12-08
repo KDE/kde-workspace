@@ -137,7 +137,7 @@ void Autostart::load()
     // shutdown and env may *only* contain scripts, links or binaries
     // autostart on the otherhand may contain all of the above.
     // share/autostart is special as it overrides entries found in $KDEDIR/share/autostart
-    m_paths << QStandardPaths::writableLocation(QStandardPaths::ConfigLocation) + QStringLiteral("/autostart/")
+    m_paths << QStandardPaths::writableLocation(QStandardPaths::GenericConfigLocation) + QStringLiteral("/autostart/")
             << QStandardPaths::writableLocation(QStandardPaths::GenericDataLocation) + QStringLiteral("/shutdown/")
             << QStandardPaths::writableLocation(QStandardPaths::GenericDataLocation) + QStringLiteral("/env/")
             << QStandardPaths::writableLocation(QStandardPaths::GenericDataLocation) + QStringLiteral("/share/autostart/"); // For Importing purposes

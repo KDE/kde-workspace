@@ -141,7 +141,7 @@ TaskManager::TaskManager()
     activeWindowChanged(win);
 
     d->watcher = new KDirWatch(this);
-    d->watcher->addFile(QStandardPaths::writableLocation(QStandardPaths::ConfigLocation)+"/klaunchrc");
+    d->watcher->addFile(QStandardPaths::writableLocation(QStandardPaths::GenericConfigLocation)+"/klaunchrc");
     connect(d->watcher, SIGNAL(dirty(QString)), this, SLOT(configureStartup()));
     connect(d->watcher, SIGNAL(created(QString)), this, SLOT(configureStartup()));
     connect(d->watcher, SIGNAL(deleted(QString)), this, SLOT(configureStartup()));

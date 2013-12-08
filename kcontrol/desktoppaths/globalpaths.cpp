@@ -75,7 +75,7 @@ static QUrl desktopLocation()
 
 static QUrl autostartLocation()
 {
-    return QUrl::fromLocalFile(QStandardPaths::writableLocation(QStandardPaths::ConfigLocation) + QStringLiteral("/autostart"));
+    return QUrl::fromLocalFile(QStandardPaths::writableLocation(QStandardPaths::GenericConfigLocation) + QStringLiteral("/autostart"));
 }
 
 static QUrl documentsLocation()
