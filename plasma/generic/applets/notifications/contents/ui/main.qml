@@ -172,6 +172,10 @@ MouseEventListener {
                         right: parent.right
                     }
                 }
+                Connections {
+                    target: jobsLoader.item
+                    onMessage: console.log(msg)
+                }
                 Loader {
                     id: notificationsLoader
                     source: showNotifications ? "Notifications.qml" : ""
