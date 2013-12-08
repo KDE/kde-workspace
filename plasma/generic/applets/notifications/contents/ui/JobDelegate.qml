@@ -48,6 +48,15 @@ Item {
 
     property bool debug: false
 
+    function friendlyLabel() {
+        // Take the filename, might be improved
+        var els = label0.split("/");
+        if (els.length) {
+            return els[els.length-1];
+        }
+        return f;
+    }
+
     Rectangle {
         visible: notificationItem.debug
         color: "orange"
@@ -64,10 +73,10 @@ Item {
         }
 
         property int leftColWidth: Math.max(labelName0Text.paintedWidth, labelName1Text.paintedWidth)
-        //property int leftColWidth: theme.mSize(theme.defaultFont).width * 16
 
         PlasmaExtras.Heading {
             id: infoLabel
+            opacity: 0.6
             anchors {
                 top: parent.top
                 left: parent.left
@@ -86,7 +95,7 @@ Item {
                 rightMargin: notificationItem.layoutSpacing
             }
             elide: Text.ElideMiddle
-            text: "Downloading Alice in Chains - Rooster this is a really lnog filename foorbar.mp3"
+            text: notificationItem.friendlyLabel()
         }
 
         PlasmaComponents.ToolButton {
@@ -270,8 +279,6 @@ Item {
                     //if bytes localise the unit
                     if (jobsSource.data[modelData]["processedUnit"+id] == "bytes") {
                         return i18nc("How much many bytes (or whether unit in the locale has been copied over total", "%1 of %2",
-//                                 locale.formatByteSize(jobsSource.data[modelData]["processedAmount"+id]),
-//                                 locale.formatByteSize(jobsSource.data[modelData]["totalAmount"+id]))
                                 formatByteSize(jobsSource.data[modelData]["processedAmount"+id]),
                                 formatByteSize(jobsSource.data[modelData]["totalAmount"+id]))
                     //else print something only if is interesting data (ie more than one file/directory etc to copy
@@ -291,7 +298,6 @@ Item {
                     var o;
                     if (minutes < 3) {
                         o = i18n("%1 min %2 sec", minutes, seconds);
-
                     } else {
                         o = i18n("%1 min", minutes);
                     }
@@ -343,7 +349,7 @@ Item {
 //                         }
 //                     }
                 Item {
-                    // just for spacing at the bottom
+                    // just for spacing between details and progress bar
                     width: parent.width
                     height: notificationItem.layoutSpacing
                 }

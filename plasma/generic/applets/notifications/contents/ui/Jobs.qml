@@ -84,8 +84,8 @@ Column {
         visible: jobsRepeater.count > 0 && notifications && notifications.count > 0
         text: i18n("Transfers")
     }
-    PlasmaComponents.ListItem {
-        visible: jobsRepeater.count > 1
+    Item {
+        visible: jobsRepeater.count > 3
         PlasmaComponents.ProgressBar {
             anchors {
                 verticalCenter: parent.verticalCenter
