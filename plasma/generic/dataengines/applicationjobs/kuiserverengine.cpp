@@ -192,6 +192,11 @@ void JobView::setProcessedAmount(qlonglong amount, const QString &unit)
     if (prevTotal != amount) {
         if (id == m_bytesUnitId) {
             m_processedBytes = amount;
+            if (!m_totalBytes && m_processedBytes && (m_percent != 0)) {
+                m_totalBytes = m_processedBytes / m_percent * 100;
+                const QString totalAmountString = QString("totalAmount%1").arg(id);
+                setData(totalAmountString, m_totalBytes);
+            }
             updateEta();
         }
 
