@@ -25,16 +25,13 @@ import org.kde.qtextracomponents 2.0
 
 PlasmaComponents.ListItem {
     id: notificationItem
+
     width: popupFlickable.width
-    //height: theme.mSize(theme.defaultFont).height * 3 + theme.largeSpacing * 2
-    //height: jobGrid.childrenRect.height + (detailsItem.state == "expanded" ? theme.largeSpacing : 0)
-    height: jobGrid.childrenRect.height + (detailsItem.state == "expanded" ? theme.largeSpacing : theme.largeSpacing / 2)
-    //height: 200
+    height: jobGrid.childrenRect.height + (newDetailsItem.state == "expanded" ? theme.largeSpacing : theme.largeSpacing / 2)
 
     property int toolIconSize: theme.smallMediumIconSize
     property int layoutSpacing: theme.largeSpacing / 4
-
-    //Behavior on height { NumberAnimation {} }
+    property int animationDuration: 100
 
     function getData(data, name, defaultValue) {
         return data[modelData] ? (data[modelData][name] ? data[modelData][name] : defaultValue) : defaultValue;
@@ -135,11 +132,11 @@ PlasmaComponents.ListItem {
                     fill: parent
                 }
             }
-            opacity: detailsItem.state == "expanded" ? 1 : 0
-            height: detailsItem.expanded ? childrenRect.height : 0
-            Behavior on height { NumberAnimation {} }
-            Behavior on opacity { NumberAnimation {} }
-            clip: true
+            opacity: newDetailsItem.state == "expanded" ? 1 : 0
+            height: newDetailsItem.expanded ? childrenRect.height : 0
+            //Behavior on height { NumberAnimation { duration: notificationItem.animationDuration } }
+            Behavior on opacity { NumberAnimation { duration: notificationItem.animationDuration } }
+            //clip: true
             anchors {
                 top: summary.bottom
                 left: parent.left
@@ -216,18 +213,76 @@ PlasmaComponents.ListItem {
                     subText: label1Text.truncated ? label1 : ""
                 }
             }
+
+            Column {
+                id: detailsColumn
+                anchors {
+                    top: labelName1Text.bottom
+                    left: parent.left
+                    right: parent.right
+                }
+
+                function localizeProcessedAmount(id) {
+                    //if bytes localise the unit
+                    if (jobsSource.data[modelData]["processedUnit"+id] == "bytes") {
+                        return i18nc("How much many bytes (or whether unit in the locale has been copied over total", "%1 of %2",
+                                locale.formatByteSize(jobsSource.data[modelData]["processedAmount"+id]),
+                                locale.formatByteSize(jobsSource.data[modelData]["totalAmount"+id]))
+                    //else print something only if is interesting data (ie more than one file/directory etc to copy
+                    } else if (jobsSource.data[modelData]["totalAmount"+id] > 1) {
+                        return i18n( "%1 of %2 %3",
+                                jobsSource.data[modelData]["processedAmount"+id],
+                                jobsSource.data[modelData]["totalAmount"+id],
+                                jobsSource.data[modelData]["processedUnit"+id])
+                    } else {
+                        return ""
+                    }
+                }
+                PlasmaComponents.Label {
+                    text: jobsSource.data[modelData] ? detailsColumn.localizeProcessedAmount(0) : ""
+                    anchors.left: parent.left
+                    visible: text != ""
+                }
+                PlasmaComponents.Label {
+                    text: jobsSource.data[modelData] ? detailsColumn.localizeProcessedAmount(1) : ""
+                    anchors.left: parent.left
+                    visible: text != ""
+                }
+                PlasmaComponents.Label {
+                    text: jobsSource.data[modelData] ? detailsColumn.localizeProcessedAmount(2) : ""
+                    anchors.left: parent.left
+                    visible: text != ""
+                }
+// FIXME: find a way to plot the signal
+//                     PlasmaWidgets.SignalPlotter {
+//                         id: plotter
+//                         width: parent.width
+//                         useAutoRange: true
+//                         showVerticalLines: false
+//                         unit: i18n("KiB/s")
+//                         height: theme.mSize(theme.defaultFont).height * 5
+//                         Component.onCompleted: plotter.addPlot(theme.highlightColor)
+//                     }
+//                     Connections {
+//                         target: jobsSource
+//                         onDataChanged: {
+//                             plotter.addSample([jobsSource.data[modelData]["numericSpeed"]/1000])
+//                         }
+//                     }
+            }
+
             states: [
                 State {
                     name: "expanded"
                     PropertyChanges {
-                        target: detailsItem
-                        height: detailsItem.childrenRect.height
+                        target: newDetailsItem
+                        height: newDetailsItem.childrenRect.height
                     }
                 },
                 State {
                     name: "collapsed"
                     PropertyChanges {
-                        target: detailsItem
+                        target: newDetailsItem
                         height: 0
                     }
                 }
@@ -239,34 +294,34 @@ PlasmaComponents.ListItem {
                     SequentialAnimation {
                         ScriptAction {
                             script: {
-                                detailsItem.visible = true
-                                detailsItem.clip = true
+                                newDetailsItem.visible = true
+                                newDetailsItem.clip = true
                                 //create the contents if they don't exist yet
-                                if (!detailsItem.contentsItem) {
-                                    detailsItem.contentsItem = detailsComponent.createObject(detailsItem)
+                                if (!newDetailsItem.contentsItem) {
+                                    newDetailsItem.contentsItem = detailsComponent.createObject(newDetailsItem)
                                 }
                             }
                         }
                         NumberAnimation {
-                            duration: 250
+                            duration: notificationItem.animationDuration
                             properties: "height"
                             easing: PropertyAnimation.EaseInOut
                         }
-                        ScriptAction {script: detailsItem.clip = false}
+                        ScriptAction {script: newDetailsItem.clip = false}
                     }
                 },
                 Transition {
                     from: "expanded"
                     to: "collapsed"
                     SequentialAnimation {
-                        ScriptAction {script: detailsItem.clip = true}
+                        ScriptAction {script: newDetailsItem.clip = true}
                         NumberAnimation {
-                            duration: 250
+                            duration: notificationItem.animationDuration
                             properties: "height"
                             easing: PropertyAnimation.EaseInOut
                         }
                         //TODO: delete the details?
-                        ScriptAction {script: detailsItem.visible = false}
+                        ScriptAction {script: newDetailsItem.visible = false}
                     }
                 }
             ]
@@ -405,7 +460,6 @@ PlasmaComponents.ListItem {
             }
         }
 
-        */
         Item {
             id: detailsItem
             property bool expanded: state == "expanded"
@@ -511,7 +565,7 @@ PlasmaComponents.ListItem {
                             }
                         }
                         NumberAnimation {
-                            duration: 250
+                            duration: notificationItem.animationDuration
                             properties: "height"
                             easing: PropertyAnimation.EaseInOut
                         }
@@ -524,7 +578,7 @@ PlasmaComponents.ListItem {
                     SequentialAnimation {
                         ScriptAction {script: detailsItem.clip = true}
                         NumberAnimation {
-                            duration: 250
+                            duration: notificationItem.animationDuration
                             properties: "height"
                             easing: PropertyAnimation.EaseInOut
                         }
@@ -534,6 +588,8 @@ PlasmaComponents.ListItem {
                 }
             ]
         }
+        */
+
     }
 
     Component.onCompleted: {
