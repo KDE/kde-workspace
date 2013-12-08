@@ -119,6 +119,13 @@ PlasmaComponents.ListItem {
 
         Item {
             id: newDetailsItem
+
+            property bool expanded: state == "expanded"
+            state: expandButton.checked ? "expanded" : "collapsed"
+            onStateChanged: {
+                print("NNN expand state is now: " + state);
+            }
+
             // 1st row
             Rectangle {
                 color: "yellow"
@@ -209,6 +216,62 @@ PlasmaComponents.ListItem {
                     subText: label1Text.truncated ? label1 : ""
                 }
             }
+            states: [
+                State {
+                    name: "expanded"
+                    PropertyChanges {
+                        target: detailsItem
+                        height: detailsItem.childrenRect.height
+                    }
+                },
+                State {
+                    name: "collapsed"
+                    PropertyChanges {
+                        target: detailsItem
+                        height: 0
+                    }
+                }
+            ]
+            transitions : [
+                Transition {
+                    from: "collapsed"
+                    to: "expanded"
+                    SequentialAnimation {
+                        ScriptAction {
+                            script: {
+                                detailsItem.visible = true
+                                detailsItem.clip = true
+                                //create the contents if they don't exist yet
+                                if (!detailsItem.contentsItem) {
+                                    detailsItem.contentsItem = detailsComponent.createObject(detailsItem)
+                                }
+                            }
+                        }
+                        NumberAnimation {
+                            duration: 250
+                            properties: "height"
+                            easing: PropertyAnimation.EaseInOut
+                        }
+                        ScriptAction {script: detailsItem.clip = false}
+                    }
+                },
+                Transition {
+                    from: "expanded"
+                    to: "collapsed"
+                    SequentialAnimation {
+                        ScriptAction {script: detailsItem.clip = true}
+                        NumberAnimation {
+                            duration: 250
+                            properties: "height"
+                            easing: PropertyAnimation.EaseInOut
+                        }
+                        //TODO: delete the details?
+                        ScriptAction {script: detailsItem.visible = false}
+                    }
+                }
+            ]
+
+
         }
         Item {
             id: buttonsRow
@@ -216,7 +279,7 @@ PlasmaComponents.ListItem {
 
             //spacing: notificationItem.layoutSpacing
             anchors {
-                top: detailsItem.state == "collapsed" ? summary.bottom : newDetailsItem.bottom
+                top: !newDetailsItem.opacity  ? summary.bottom : newDetailsItem.bottom
                 //top: labelName1Text.bottom
                 left: parent.left
                 right: parent.right
