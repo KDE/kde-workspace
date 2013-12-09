@@ -59,8 +59,8 @@ Item {
         z: plasmoidBackground.z - 10
 
         anchors {
-            verticalCenter: buttonsParent.verticalCenter
-            left: buttonsParent.right
+            verticalCenter: appletHandle.verticalCenter
+            left: appletHandle.right
             leftMargin: handleMerged ? ((1-controlsOpacity) * appletItem.handleWidth) * -1 - appletItem.handleWidth * 2 + 2 : ((1-controlsOpacity) * appletItem.handleWidth) * -1 - appletItem.handleWidth
         }
         smooth: true
