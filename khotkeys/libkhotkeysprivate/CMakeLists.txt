@@ -73,6 +73,7 @@ add_library(khotkeysprivate SHARED ${khotkeysprivate_SRCS})
 target_link_libraries(khotkeysprivate
     kworkspace
     Qt5::X11Extras
+    KF5::GlobalAccel
     KF5::KI18n
     KF5::KIOCore
     KF5::KIOWidgets

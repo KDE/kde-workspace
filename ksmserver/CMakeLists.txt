@@ -65,6 +65,7 @@ target_link_libraries(kdeinit_ksmserver
     kworkspace
     KF5::KDE4Support
     KF5::XmlGui
+    KF5::GlobalAccel
     KF5::KIOCore
     KF5::KIOWidgets
     KF5::KNotifications

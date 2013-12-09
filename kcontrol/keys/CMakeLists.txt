@@ -26,6 +26,7 @@ add_library(kcm_keys MODULE ${kcm_keys_PART_SRCS})
 target_link_libraries(kcm_keys
     Qt5::DBus
     KF5::KCMUtils
+    KF5::GlobalAccel
     KF5::KI18n
     KF5::KIconThemes
     KF5::KIOWidgets

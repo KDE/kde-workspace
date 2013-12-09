@@ -40,6 +40,7 @@ target_link_libraries(kded_keyboard
     KF5::KConfigCore
     KF5::KCoreAddons
     KF5::KDBusAddons
+    KF5::GlobalAccel
     KF5::KI18n
     KF5::KNotifications
     KF5::KService
@@ -149,6 +150,7 @@ target_link_libraries(kcm_keyboard
     Qt5::X11Extras
     Qt5::Xml
     KF5::KCMUtils
+    KF5::GlobalAccel
     KF5::KI18n
     KF5::KIOCore
     KF5::KIOWidgets
