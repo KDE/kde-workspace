@@ -25,7 +25,7 @@ import org.kde.qtextracomponents 2.0 as QtExtras
 
 PlasmaComponents.ToolButton {
     flat: false
-    text: "Height"
+    text: i18n("Height")
     QtExtras.MouseEventListener {
         anchors.fill: parent
         property int startMouseX

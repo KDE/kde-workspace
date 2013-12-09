@@ -27,6 +27,6 @@ Item {
 
     PlasmaComponents.Button {
         iconSource: "settings"
-        text: "None"
+        text: i18n("None")
     }
 }

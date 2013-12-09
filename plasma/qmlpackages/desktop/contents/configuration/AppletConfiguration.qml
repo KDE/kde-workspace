@@ -206,7 +206,7 @@ Rectangle {
             }
             QtControls.Button {
                 iconName: "dialog-ok"
-                text: "Ok"
+                text: i18n("Ok")
                 onClicked: {
                     if (main.currentItem.saveConfig !== undefined) {
                         main.currentItem.saveConfig();
@@ -218,7 +218,7 @@ Rectangle {
             }
             QtControls.Button {
                 iconName: "dialog-ok-apply"
-                text: "Apply"
+                text: i18n("Apply")
                 onClicked: {
                     if (main.currentItem.saveConfig !== undefined) {
                         main.currentItem.saveConfig();
@@ -229,7 +229,7 @@ Rectangle {
             }
             QtControls.Button {
                 iconName: "dialog-cancel"
-                text: "Cancel"
+                text: i18n("Cancel")
                 onClicked: configDialog.close()
             }
         }

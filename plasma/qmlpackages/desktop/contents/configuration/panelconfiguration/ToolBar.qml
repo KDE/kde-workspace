@@ -62,7 +62,7 @@ Item {
     PlasmaComponents.Button {
         id: moreSettingsButton
         property QtObject contextMenu
-        text: "More settings"
+        text: i18n("More settings")
         onClicked: {
             if (!contextMenu) {
                 contextMenu = contextMenuComponent.createObject(moreSettingsButton)
@@ -77,7 +77,7 @@ Item {
             visualParent: moreSettingsButton
             PlasmaComponents.MenuItem {
                 id: leftToggle
-                text: "Left"
+                text: i18n("Left")
                 checkable: true
                 checked: panel.alignment == Qt.AlignLeft
                 onClicked: panel.alignment = Qt.AlignLeft
@@ -90,7 +90,7 @@ Item {
             }
             PlasmaComponents.MenuItem {
                 id: centerToggle
-                text: "Center"
+                text: i18n("Center")
                 checkable: true
                 checked: panel.alignment == Qt.AlignCenter
                 onClicked: panel.alignment = Qt.AlignCenter
@@ -103,7 +103,7 @@ Item {
             }
             PlasmaComponents.MenuItem {
                 id: rightToggle
-                text: "Right"
+                text: i18n("Right")
                 checkable: true
                 checked: panel.alignment == Qt.AlignRight
                 onClicked: panel.alignment = Qt.AlignRight

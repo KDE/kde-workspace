@@ -25,7 +25,7 @@ import org.kde.qtextracomponents 2.0 as QtExtras
 
 PlasmaComponents.ToolButton {
     flat: false
-    text: "Screen edge"
+    text: i18n("Screen edge")
 
     QtExtras.MouseEventListener {
         anchors.fill: parent

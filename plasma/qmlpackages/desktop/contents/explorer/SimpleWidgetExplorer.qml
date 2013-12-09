@@ -31,11 +31,11 @@ Rectangle {
     ListView {
         anchors.fill: parent
         model: widgetExplorer.widgetsModel
-        header: PlasmaExtras.Title { text: "Add Widgets" }
+        header: PlasmaExtras.Title { text: i18n("Add Widgets") }
         delegate: Item {
             width: parent.width
             height: 48
-            Text { text: "Applet: " + pluginName }
+            Text { text: i18n("Applet: ", pluginName) }
 
             MouseArea {
                 anchors.fill: parent

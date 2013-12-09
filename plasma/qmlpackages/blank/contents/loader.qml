@@ -61,7 +61,7 @@ Item {
         Text {
             anchors.fill: parent
             font.pointSize: 32
-            text: "Blank"
+            text: i18n("Blank")
             horizontalAlignment: Text.AlignHCenter
             verticalAlignment:   Text.AlignVCenter
         }

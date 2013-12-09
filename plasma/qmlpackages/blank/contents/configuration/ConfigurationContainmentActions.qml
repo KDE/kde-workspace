@@ -25,6 +25,6 @@ Item {
     implicitHeight: childrenRect.height
 
     PlasmaComponents.Label {
-        text: "Containment actions go here"
+        text: i18n("Containment actions go here")
     }
 }

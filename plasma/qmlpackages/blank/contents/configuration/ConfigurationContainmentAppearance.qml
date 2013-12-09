@@ -27,7 +27,7 @@ Column {
 
     spacing: _m
     PlasmaExtras.Title {
-        text: "Plugins"
+        text: i18n("Plugins")
     }
 
 
