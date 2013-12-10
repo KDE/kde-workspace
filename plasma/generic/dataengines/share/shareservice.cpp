@@ -80,8 +80,8 @@ void ShareJob::start()
     m_package->setPath(path);
     if (m_package->isValid()) {
         const QString mainscript = 
-            m_package->path() + m_package->structure()->contentsPrefixPaths().at(0) +
-            m_package->structure()->path("mainscript");
+            m_package->path() + m_package->contentsPrefixPaths().at(0) +
+            m_package->filePath("mainscript");
 
         if (!QFile::exists(mainscript)) {
             showError(i18n("Selected provider does not have a valid script file"));

@@ -24,7 +24,7 @@ add_subdirectory(time)
 if (DBusMenuQt5_FOUND)
   add_subdirectory(statusnotifieritem)
 endif ()
-#add_subdirectory(share)
+add_subdirectory(share)
 
 if (NepomukCore_FOUND AND Soprano_FOUND)
 	#    add_subdirectory(metadata)

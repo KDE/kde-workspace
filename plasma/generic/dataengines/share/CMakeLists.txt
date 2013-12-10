@@ -6,12 +6,13 @@ set(share_engine_SRCS
         shareservice.cpp
         share_package.cpp)
 
+add_subdirectory(data)
+
 add_library(plasma_engine_share MODULE ${share_engine_SRCS})
 target_link_libraries(plasma_engine_share
-                      KF5::KCore
                       KF5::Plasma
-                      KIOCore
-                      ${KDE4_KROSSCORE_LIBS}
+                      KF5::KIOCore
+                      KF5::KrossCore
                       KF5::KDE4Support
 )
 
@@ -36,7 +37,9 @@ add_subdirectory(backends)
 
 add_library(plasma_packagestructure_share MODULE ${sharepackage_SRCS})
 target_link_libraries(plasma_packagestructure_share
-        KF5::Plasma)
+        KF5::Plasma
+        KF5::KI18n
+        KF5::KService)
 
 install(TARGETS plasma_packagestructure_share
                  DESTINATION ${PLUGIN_INSTALL_DIR}/plasma/packagestructure)

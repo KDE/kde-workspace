@@ -17,7 +17,9 @@
  *   51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA .        *
  ***************************************************************************/
 
-#include "plasma/package.h"
+#include "plasma_version.h"
 #include "share_package.h"
 
 K_EXPORT_PLASMA_PACKAGE(share, SharePackage)
+
+#include "plugin_share_package.moc"

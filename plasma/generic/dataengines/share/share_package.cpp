@@ -23,6 +23,9 @@
 
 #include "share_package.h"
 
+SharePackage::SharePackage(QObject *parent, QVariantList args)
+{
+}
 
 void SharePackage::initPackage(Plasma::Package* package)
 {
