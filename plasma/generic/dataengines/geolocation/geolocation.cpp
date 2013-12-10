@@ -25,8 +25,7 @@
 static const char SOURCE[] = "location";
 
 Geolocation::Geolocation(QObject* parent, const QVariantList& args)
-    : Plasma::DataEngine(parent, args),
-      m_networkStatus(false)
+    : Plasma::DataEngine(parent, args)
 {
     Q_UNUSED(args)
     setMinimumPollingInterval(500);
@@ -39,8 +38,6 @@ Geolocation::Geolocation(QObject* parent, const QVariantList& args)
 
 void Geolocation::init()
 {
-    m_networkStatus = Solid::Networking::status();
-
     //TODO: should this be delayed even further, e.g. when the source is requested?
     const KService::List offers = KServiceTypeTrader::self()->query("Plasma/GeolocationProvider");
     QVariantList args;
@@ -110,9 +107,8 @@ bool Geolocation::sourceRequestEvent(const QString &name)
 void Geolocation::networkStatusChanged()
 {
     kDebug() << "network status changed";
-    m_networkStatus = Solid::Networking::status();
-    if ((m_networkStatus == Solid::Networking::Connected) ||
-        (m_networkStatus == Solid::Networking::Unknown)) {
+    const Solid::Networking::Status netStatus = Solid::Networking::status();
+    if ((netStatus == Solid::Networking::Connected) || (netStatus == Solid::Networking::Unknown)) {
         updatePlugins(GeolocationProvider::NetworkConnected);
     }
 }

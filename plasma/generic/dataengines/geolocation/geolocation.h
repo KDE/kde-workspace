@@ -53,7 +53,6 @@ class Geolocation : public Plasma::DataEngine
         EntryAccuracy m_accuracy;
         QList<GeolocationProvider *> m_plugins;
         QTimer m_updateTimer;
-        bool m_networkStatus;
 };
 
 K_EXPORT_PLASMA_DATAENGINE(geolocation, Geolocation)
