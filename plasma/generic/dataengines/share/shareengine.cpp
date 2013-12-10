@@ -31,6 +31,7 @@ ShareEngine::ShareEngine(QObject *parent, const QVariantList &args)
     : Plasma::DataEngine(parent, args)
 {
     Q_UNUSED(args);
+    init();
 }
 
 void ShareEngine::init()
