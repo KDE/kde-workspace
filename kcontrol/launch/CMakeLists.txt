@@ -19,7 +19,7 @@ add_library(kcm_launch MODULE ${kcm_launch_PART_SRCS})
 target_link_libraries(kcm_launch
     Qt5::DBus
     KF5::KCMUtils
-    KF5::KI18n
+    KF5::I18n
     KF5::KDE4Support
 )
 

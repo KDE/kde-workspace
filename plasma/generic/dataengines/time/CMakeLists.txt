@@ -14,8 +14,8 @@ target_link_libraries(plasma_engine_time
     KF5::Solid
     KF5::Plasma
     KF5::KDE4Support
-    KF5::KI18n
-    KF5::KService
+    KF5::I18n
+    KF5::Service
 )
 
 install(TARGETS plasma_engine_time DESTINATION ${PLUGIN_INSTALL_DIR}/plasma/dataengine)

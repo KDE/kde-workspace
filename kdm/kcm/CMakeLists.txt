@@ -30,7 +30,7 @@ set(kcm_kdm_PART_SRCS ${kcmbackgroundlib_SRCS} ${backgroundlib_SRCS}
 add_library(kcm_kdm MODULE ${kcm_kdm_PART_SRCS})
 
 
-target_link_libraries(kcm_kdm KF5::KIOCore KF5::KIOWidgets ${QIMAGEBLITZ_LIBRARIES} KF5::KNewStuff ${X11_LIBRARIES} kworkspace)
+target_link_libraries(kcm_kdm KF5::KIOCore KF5::KIOWidgets ${QIMAGEBLITZ_LIBRARIES} KF5::NewStuff ${X11_LIBRARIES} kworkspace)
 
 macro_add_file_dependencies(kdm-shut.cpp ${confci})
 add_dependencies(kcm_kdm ConfigCi)

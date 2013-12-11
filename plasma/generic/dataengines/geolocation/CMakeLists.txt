@@ -28,9 +28,9 @@ add_library(plasma_engine_geolocation MODULE ${plasma_dataengine_geolocation_SRC
 target_link_libraries(plasma_engine_geolocation
     plasma-geolocation-interface
     KF5::Plasma
-    KF5::KCoreAddons
+    KF5::CoreAddons
     KF5::KIOCore
-    KF5::KService
+    KF5::Service
     KF5::Solid)
 
 install(TARGETS plasma_engine_geolocation DESTINATION ${PLUGIN_INSTALL_DIR}/plasma/dataengine)

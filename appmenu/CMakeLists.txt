@@ -31,10 +31,10 @@ add_library(kded_appmenu MODULE ${kded_appmenu_SRCS})
 target_link_libraries(kded_appmenu
     Qt5::DBus
     Qt5::X11Extras
-    KF5::KDBusAddons
+    KF5::DBusAddons
     KF5::KIOCore
     KF5::KIOWidgets
-    KF5::KWindowSystem
+    KF5::WindowSystem
     KF5::KDE4Support
     ${X11_LIBRARIES}
     ${DBusMenuQt5_LIBRARY}

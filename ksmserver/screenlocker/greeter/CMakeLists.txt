@@ -19,9 +19,9 @@ target_link_libraries(kscreenlocker_greet
                         kworkspace
                         KF5::Solid
                         KF5::Plasma
-                        KF5::KService
-                        KF5::KDeclarative
-                        KF5::KCrash
+                        KF5::Service
+                        KF5::Declarative
+                        KF5::Crash
                         Qt5::Quick
                         Qt5::Qml
                         Qt5::X11Extras

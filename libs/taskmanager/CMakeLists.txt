@@ -38,14 +38,14 @@ add_library(taskmanager SHARED ${taskmanager_LIB_SRCS})
 
 target_link_libraries(taskmanager
     processcore
-    KF5::KConfigCore
-    KF5::KConfigWidgets
-    KF5::KIconThemes
-    KF5::KI18n
+    KF5::ConfigCore
+    KF5::ConfigWidgets
+    KF5::IconThemes
+    KF5::I18n
     KF5::KIOCore
     KF5::KIOWidgets # KRun
-    KF5::KService
-    KF5::KWindowSystem
+    KF5::Service
+    KF5::WindowSystem
 )
 if (HAVE_X11)
     target_link_libraries(taskmanager ${Qt5X11Extras_LIBRARIES} ${X11_LIBRARIES})

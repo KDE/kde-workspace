@@ -13,11 +13,11 @@ add_executable(statusnotifiertest ${statusnotifiertest_SRCS})
 target_link_libraries(statusnotifiertest
     Qt5::Widgets
     Qt5::Core
-    KF5::KCoreAddons
+    KF5::CoreAddons
     KF5::KIOCore
-    KF5::KService
-    KF5::KNotifications
-    KF5::KI18n
+    KF5::Service
+    KF5::Notifications
+    KF5::I18n
 )
 
 include(ECMMarkAsTest)

@@ -8,7 +8,7 @@ include_directories(${SOPRANO_INCLUDE_DIR} ${NEPOMUK_CORE_INCLUDE_DIR})
 
 target_link_libraries(plasma_engine_metadata
 		      KIOCore
-                      KF5::KCoreAddons
+                      KF5::CoreAddons
                       KF5::Plasma
                       ${NEPOMUK_CORE_LIBRARY}
 		      ${SOPRANO_LIBRARIES} )

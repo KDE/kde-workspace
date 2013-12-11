@@ -20,8 +20,8 @@ set_target_properties(kfontview_bin PROPERTIES OUTPUT_NAME kfontview)
 
 target_link_libraries(kfontinst_bin
     Qt5::X11Extras
-    KF5::KArchive
-    KF5::KIconThemes
+    KF5::Archive
+    KF5::IconThemes
     KF5::KIOCore
     KF5::KIOWidgets
     KF5::XmlGui
@@ -31,15 +31,15 @@ target_link_libraries(kfontinst_bin
 )
 target_link_libraries(kfontprint_bin
     Qt5::PrintSupport
-    KF5::KIconThemes
-    KF5::KPrintUtils
+    KF5::IconThemes
+    KF5::PrintUtils
     KF5::KDE4Support
     ${X11_X11_LIB}
     ${FREETYPE_LIBRARIES}
     kfontinstui
     kfontinst
 )
-target_link_libraries(kfontview_bin KF5::KParts KF5::XmlGui kfontinstui kfontinst )
+target_link_libraries(kfontview_bin KF5::Parts KF5::XmlGui kfontinstui kfontinst )
 
 install(TARGETS kfontinst_bin ${INSTALL_TARGETS_DEFAULT_ARGS} )
 install(TARGETS kfontprint_bin DESTINATION ${LIBEXEC_INSTALL_DIR} )

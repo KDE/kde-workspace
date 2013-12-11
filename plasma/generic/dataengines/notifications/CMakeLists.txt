@@ -12,13 +12,13 @@ add_library(plasma_engine_notifications MODULE ${notifications_engine_SRCS})
 
 target_link_libraries(plasma_engine_notifications
     Qt5::DBus
-    KF5::KI18n
-    KF5::KIconThemes
+    KF5::I18n
+    KF5::IconThemes
     KF5::KIOCore
-    KF5::KNotifications
+    KF5::Notifications
     KF5::Plasma
-    KF5::KService
-    #KF5::KNotifyConfig
+    KF5::Service
+    #KF5::NotifyConfig
 )
 
 install(TARGETS plasma_engine_notifications DESTINATION ${PLUGIN_INSTALL_DIR}/plasma/dataengine)

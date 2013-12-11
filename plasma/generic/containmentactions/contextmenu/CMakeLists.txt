@@ -16,7 +16,7 @@ qt5_add_dbus_interface(contextmenu_SRCS ${screensaver_xml} screensaver_interface
 add_library(plasma_containmentactions_contextmenu MODULE ${contextmenu_SRCS})
 target_link_libraries(plasma_containmentactions_contextmenu
                       Qt5::DBus
-                      KF5::KI18n
+                      KF5::I18n
                       KF5::Plasma
                       KF5::XmlGui
 		      KF5::KIOCore

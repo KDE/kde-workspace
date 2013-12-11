@@ -10,7 +10,7 @@ add_library(kded_khotkeys MODULE ${kded_khotkeys_PART_SRCS})
 target_link_libraries(kded_khotkeys
     khotkeysprivate
     kworkspace
-    KF5::KDBusAddons
+    KF5::DBusAddons
     KF5::KDE4Support)
 
 # I'm not sure if this is needed anymore. Check it

@@ -88,10 +88,10 @@ target_link_libraries(
     kcm_hotkeys
     khotkeysprivate
     KF5::KCMUtils
-    KF5::KI18n
+    KF5::I18n
     KF5::KIOCore
     KF5::KIOWidgets
-    KF5::KTextWidgets
+    KF5::TextWidgets
     KF5::KDE4Support
     Qt5::Gui
     ${X11_X11_LIB}

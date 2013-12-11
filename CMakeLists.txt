@@ -56,18 +56,18 @@ add_definitions(-DQT_DISABLE_DEPRECATED_BEFORE=0)
 
 # Load the frameworks we need
 find_package(KF5 CONFIG REQUIRED
-    KIdleTime ItemModels KWidgetsAddons KWindowSystem KCodecs KArchive KCoreAddons Solid ThreadWeaver
-    KConfig KAuth KJS KWallet KDBusAddons Sonnet KF5GlobalAccel
-    KI18n KGuiAddons KService KConfigWidgets ItemViews KNotifications KIconThemes KStyle KCompletion KJobWidgets KTextWidgets XmlGui KCrash
-    KBookmarks KUnitConversion KIO KCMUtils KParts Kross KNotifyConfig KPrintUtils KDESu KDocTools KNewStuff KHtml KDeclarative KInit)
+    IdleTime ItemModels WidgetsAddons WindowSystem Codecs Archive CoreAddons Solid ThreadWeaver
+    Config Auth JS Wallet DBusAddons Sonnet GlobalAccel
+    I18n GuiAddons Service ConfigWidgets ItemViews Notifications IconThemes Style Completion JobWidgets TextWidgets XmlGui Crash
+    Bookmarks UnitConversion KIO KCMUtils Parts Kross NotifyConfig PrintUtils Su DocTools NewStuff KHtml Declarative Init)
 
-find_package(Plasma REQUIRED NO_MODULE)
-find_package(PlasmaQuick REQUIRED NO_MODULE)
+find_package(KF5Plasma REQUIRED NO_MODULE)
+find_package(KF5PlasmaQuick REQUIRED NO_MODULE)
 
 find_package(UDev) #PowerDevil upower/udev backend
 
 # needed for set_package_properties macro
-find_package(KDE4Support REQUIRED NO_MODULE)
+find_package(KF5KDE4Support REQUIRED NO_MODULE)
 
 # find_package(Strigi)
 # set_package_properties(Strigi PROPERTIES DESCRIPTION "Desktop indexing and search support"
@@ -106,7 +106,7 @@ set_package_properties(QImageBlitz PROPERTIES DESCRIPTION "An image effects libr
                        TYPE OPTIONAL
                       )
 
-# find_package(KDeclarative QUIET CONFIG)
+# find_package(KF5Declarative QUIET CONFIG)
 set_package_properties(KDeclarative PROPERTIES DESCRIPTION "KDE Declarative (QML) support from kdelibs"
                        URL "http://www.kde.org"
                        TYPE REQUIRED

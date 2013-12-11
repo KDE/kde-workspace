@@ -30,9 +30,9 @@ kservice_desktop_to_json(plasma-engine-statusnotifieritem.desktop)
 add_library(plasma_engine_statusnotifieritem MODULE ${statusnotifieritem_engine_SRCS})
 target_link_libraries(plasma_engine_statusnotifieritem
     Qt5::DBus
-    KF5::KService
+    KF5::Service
     KF5::Plasma
-    KF5::KIconThemes
+    KF5::IconThemes
     ${DBusMenuQt5_LIBRARIES}
     KF5::KDE4Support
 )

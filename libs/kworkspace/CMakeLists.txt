@@ -57,7 +57,7 @@ set_target_properties(kworkspace PROPERTIES
                       )
 
 # kdeui is needed for KWindowInfo
-target_link_libraries(kworkspace Qt5::DBus Qt5::Core KF5::KI18n KF5::KWindowSystem Xau KF5::Plasma)
+target_link_libraries(kworkspace Qt5::DBus Qt5::Core KF5::I18n KF5::WindowSystem Xau KF5::Plasma)
 
 if(HAVE_X11)
     set_target_properties(kworkspace PROPERTIES COMPILE_FLAGS -DHAVE_X11)

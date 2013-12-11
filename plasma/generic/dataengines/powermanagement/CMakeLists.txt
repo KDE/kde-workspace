@@ -17,10 +17,10 @@ add_library(plasma_engine_powermanagement MODULE ${powermanagement_engine_SRCS})
 target_link_libraries(plasma_engine_powermanagement
     KF5::Solid
     KF5::Plasma
-    KF5::KIdleTime
-    KF5::KCoreAddons
-    KF5::KI18n
-    KF5::KService
+    KF5::IdleTime
+    KF5::CoreAddons
+    KF5::I18n
+    KF5::Service
     Qt5::DBus
     kworkspace
 )

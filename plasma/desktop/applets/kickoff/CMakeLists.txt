@@ -42,13 +42,13 @@ target_link_libraries(kickoffplugin
                               Qt5::Core
                               Qt5::Qml
                               Qt5::DBus
-                              KF5::KI18n
+                              KF5::I18n
                               KF5::KIOCore
 			      KF5::KIOWidgets
 			      KF5::KIOFileWidgets
                               KF5::Plasma
                               KF5::Solid
-                              KF5::KService
+                              KF5::Service
                               KF5::KDE4Support
                               kworkspace)
 install(TARGETS kickoffplugin DESTINATION ${QML_INSTALL_DIR}/org/kde/plasma/private/kickoff)

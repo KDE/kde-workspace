@@ -11,9 +11,9 @@ kservice_desktop_to_json(plasma-dataengine-tasks.desktop)
 
 add_library(plasma_engine_tasks MODULE ${tasks_engine_SRCS})
 target_link_libraries(plasma_engine_tasks
-                      KF5::KCoreAddons
-                      KF5::KService
-                      KF5::KWindowSystem
+                      KF5::CoreAddons
+                      KF5::Service
+                      KF5::WindowSystem
                       KF5::Plasma
                       Qt5::DBus
                       taskmanager)

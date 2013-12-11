@@ -60,7 +60,7 @@ target_link_libraries(kcm_input
     Qt5::DBus
     Qt5::X11Extras
     KF5::KCMUtils
-    KF5::KI18n
+    KF5::I18n
     KF5::KIOCore
     KF5::KIOWidgets
     KF5::KDE4Support
@@ -88,13 +88,13 @@ set_target_properties(kcm_cursortheme PROPERTIES COMPILE_FLAGS -DHAVE_X11)
 target_link_libraries(kcm_cursortheme
     Qt5::DBus
     Qt5::X11Extras
-    KF5::KArchive
+    KF5::Archive
     KF5::KCMUtils
-    KF5::KI18n
+    KF5::I18n
     KF5::KIOCore
     KF5::KIOWidgets
     KF5::KDE4Support
-    KF5::KNewStuff
+    KF5::NewStuff
     ${X11_LIBRARIES}
     ${XCB_XCB_LIBRARY}
 )

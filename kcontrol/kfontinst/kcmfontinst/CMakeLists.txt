@@ -10,14 +10,14 @@ set(kcm_fontinst_PART_SRCS ${libkfontinstview_SRCS} ${libkfontinstjobrunner_SRCS
 add_library(kcm_fontinst MODULE ${kcm_fontinst_PART_SRCS})
 
 target_link_libraries(kcm_fontinst
-    KF5::KArchive
+    KF5::Archive
     KF5::KCMUtils
-    KF5::KDESu
-    KF5::KIconThemes
+    KF5::Su
+    KF5::IconThemes
     KF5::KIOCore
     KF5::KIOWidgets
     KF5::XmlGui
-    KF5::KNewStuff
+    KF5::NewStuff
     KF5::KDE4Support
     kfontinstui
     kfontinst

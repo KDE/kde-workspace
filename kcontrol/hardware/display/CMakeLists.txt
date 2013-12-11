@@ -11,7 +11,7 @@ add_library(kcm_display MODULE ${kcm_display_PART_SRCS})
 
 target_link_libraries(kcm_display
     KF5::KCMUtils
-    KF5::KI18n
+    KF5::I18n
     KF5::KDE4Support
 )
 

@@ -75,7 +75,7 @@ if (X11_XTest_FOUND)
   target_link_libraries(kdm_greet ${X11_XTest_LIB})
 endif ()
 if (WITH_KDM_XCONSOLE)
-  target_link_libraries(kdm_greet KF5::KPty)
+  target_link_libraries(kdm_greet KF5::Pty)
 endif ()
 
 install(TARGETS kdm_greet DESTINATION ${LIBEXEC_INSTALL_DIR})

@@ -12,7 +12,7 @@ configure_file(config-kwrited.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/config-kwrited
 
 if (BUILD_AS_EXECUTABLE)
     add_executable(kwrited kwrited.cpp)
-    target_link_libraries(kwrited  ${KDE4_KDEUI_LIBS} KF5::KPty)
+    target_link_libraries(kwrited  ${KDE4_KDEUI_LIBS} KF5::Pty)
     install(TARGETS kwrited  ${INSTALL_TARGETS_DEFAULT_ARGS} )
     install(CODE "
                set(KWRITED_PATH \"\$ENV{DESTDIR}${BIN_INSTALL_DIR}/kwrited\")
@@ -34,7 +34,7 @@ if (BUILD_AS_EXECUTABLE)
     install(FILES kwrited-autostart.desktop DESTINATION ${AUTOSTART_INSTALL_DIR})
 else ()
     add_library(kded_kwrited MODULE kwrited.cpp)
-    target_link_libraries(kded_kwrited  ${KDE4_KDEUI_LIBS} KF5::KPty)
+    target_link_libraries(kded_kwrited  ${KDE4_KDEUI_LIBS} KF5::Pty)
     install(TARGETS kded_kwrited  DESTINATION ${PLUGIN_INSTALL_DIR} )
 
     install(FILES kwrited.desktop DESTINATION ${SERVICES_INSTALL_DIR}/kded)

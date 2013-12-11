@@ -37,14 +37,14 @@ target_link_libraries(kded_keyboard
     Qt5::Widgets
     Qt5::X11Extras
     Qt5::Xml
-    KF5::KConfigCore
-    KF5::KCoreAddons
-    KF5::KDBusAddons
+    KF5::ConfigCore
+    KF5::CoreAddons
+    KF5::DBusAddons
     KF5::GlobalAccel
-    KF5::KI18n
-    KF5::KNotifications
-    KF5::KService
-    KF5::KWindowSystem
+    KF5::I18n
+    KF5::Notifications
+    KF5::Service
+    KF5::WindowSystem
     KF5::Plasma
     KF5::XmlGui
     KF5::KDE4Support
@@ -103,8 +103,8 @@ add_library(keyboard_layout_widget MODULE ${keyboard_layout_widget_SRCS})
 target_link_libraries(keyboard_layout_widget
     Qt5::X11Extras
     Qt5::Xml
-    KF5::KI18n
-    KF5::KService
+    KF5::I18n
+    KF5::Service
     KF5::Plasma
     KF5::KDE4Support
     ${X11_LIBRARIES}
@@ -151,10 +151,10 @@ target_link_libraries(kcm_keyboard
     Qt5::Xml
     KF5::KCMUtils
     KF5::GlobalAccel
-    KF5::KI18n
+    KF5::I18n
     KF5::KIOCore
     KF5::KIOWidgets
-    KF5::KWindowSystem
+    KF5::WindowSystem
     KF5::Plasma
     KF5::XmlGui
     KF5::KDE4Support

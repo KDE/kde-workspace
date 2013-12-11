@@ -14,7 +14,7 @@ add_library(plasma_engine_akonadi MODULE ${akonadi_engine_srcs})
 target_link_libraries(
     plasma_engine_akonadi
     ${KDE4_KPIMUTILS_LIBS}
-    KF5::KCoreAddons
+    KF5::CoreAddons
     ${KDE4_AKONADI_LIBS}
     KF5::Plasma
     ${KDE4_KMIME_LIBS}

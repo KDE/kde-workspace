@@ -18,13 +18,13 @@ add_library(systemtrayplugin SHARED ${systemtrayplugin_SRCS})
 target_link_libraries(systemtrayplugin
     Qt5::Quick
     Qt5::Qml
-    KF5::KDeclarative
+    KF5::Declarative
     KF5::Plasma
     KF5::PlasmaQuick
-    KF5::KWindowSystem
-    KF5::KService
-    KF5::KI18n
-    KF5::KIconThemes
+    KF5::WindowSystem
+    KF5::Service
+    KF5::I18n
+    KF5::IconThemes
     KF5::KIOCore
     KF5::KIOWidgets
     )

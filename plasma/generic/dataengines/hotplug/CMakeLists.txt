@@ -9,10 +9,10 @@ kservice_desktop_to_json(plasma-dataengine-hotplug.desktop)
 add_library(plasma_engine_hotplug MODULE ${hotplug_engine_SRCS})
 target_link_libraries(plasma_engine_hotplug
                 Qt5::DBus
-		KF5::KCoreAddons
+		KF5::CoreAddons
 		KF5::Plasma
 		KF5::Solid
-		KF5::KService
+		KF5::Service
 		KF5::KIOCore
 		KF5::KIOWidgets
                 )

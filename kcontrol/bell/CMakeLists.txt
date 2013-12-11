@@ -12,9 +12,9 @@ add_library(kcm_bell MODULE ${kcm_bell_PART_SRCS})
 target_link_libraries(kcm_bell
     Qt5::X11Extras
     KF5::KCMUtils
-    KF5::KI18n
-    KF5::KNotifications
-    KF5::KWindowSystem
+    KF5::I18n
+    KF5::Notifications
+    KF5::WindowSystem
     KF5::KDE4Support
     ${X11_X11_LIB})
 

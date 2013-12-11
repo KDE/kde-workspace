@@ -8,9 +8,9 @@ kservice_desktop_to_json(plasma-dataengine-keystate.desktop)
 add_library(plasma_engine_keystate MODULE ${keystate_engine_SRCS})
 
 target_link_libraries(plasma_engine_keystate
-    KF5::KGuiAddons
+    KF5::GuiAddons
     KF5::Plasma
-    KF5::KService
+    KF5::Service
     KF5::KIOCore
 )
 

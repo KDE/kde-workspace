@@ -23,9 +23,9 @@ kf5_add_kdeinit_executable( kmenuedit ${kmenuedit_KDEINIT_SRCS})
 target_link_libraries(kdeinit_kmenuedit
     Qt5::DBus
     Qt5::Xml
-    KF5::KDBusAddons
-    KF5::KI18n
-    KF5::KIconThemes
+    KF5::DBusAddons
+    KF5::I18n
+    KF5::IconThemes
     KF5::KIOCore
     KF5::KIOWidgets
     KF5::SonnetCore

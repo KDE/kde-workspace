@@ -14,11 +14,11 @@ add_library(kcm_access MODULE ${kcm_access_PART_SRCS})
 target_link_libraries(kcm_access
     Qt5::X11Extras
     KF5::KCMUtils
-    KF5::KI18n
+    KF5::I18n
     KF5::KIOCore
     KF5::KIOWidgets
-    KF5::KNotifyConfig
-    KF5::KWindowSystem
+    KF5::NotifyConfig
+    KF5::WindowSystem
     KF5::KDE4Support
     ${X11_LIBRARIES}
 )
@@ -36,13 +36,13 @@ kf5_add_kdeinit_executable( kaccess ${kaccess_KDEINIT_SRCS})
 target_link_libraries(kdeinit_kaccess
     Qt5::Widgets
     Qt5::X11Extras
-    KF5::KConfigCore
-    KF5::KCompletion
-    KF5::KI18n
-    KF5::KIconThemes
-    KF5::KNotifications
-    KF5::KWidgetsAddons
-    KF5::KWindowSystem
+    KF5::ConfigCore
+    KF5::Completion
+    KF5::I18n
+    KF5::IconThemes
+    KF5::Notifications
+    KF5::WidgetsAddons
+    KF5::WindowSystem
     Phonon::phonon4qt5
     KF5::KDE4Support
     ${X11_LIBRARIES}

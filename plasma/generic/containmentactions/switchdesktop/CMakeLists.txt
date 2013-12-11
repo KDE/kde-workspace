@@ -9,8 +9,8 @@ kservice_desktop_to_json(plasma-containmentactions-switchdesktop.desktop)
 add_library(plasma_containmentactions_switchdesktop MODULE ${switchdesktop_SRCS})
 target_link_libraries(plasma_containmentactions_switchdesktop
                         KF5::Plasma
-                        KF5::KWindowSystem
-                        KF5::KI18n
+                        KF5::WindowSystem
+                        KF5::I18n
 			KF5::KIOCore
                        )
 

@@ -54,13 +54,13 @@ target_link_libraries(plasma_applet_systemtray
     Qt5::DBus
     Qt5::Quick
     KF5::Plasma
-    KF5::KI18n
-    KF5::KConfigWidgets
-    KF5::KIconThemes
-    KF5::KNotifications
-    KF5::KService
+    KF5::I18n
+    KF5::ConfigWidgets
+    KF5::IconThemes
+    KF5::Notifications
+    KF5::Service
     KF5::Solid
-    KF5::KWindowSystem
+    KF5::WindowSystem
     KF5::KIOCore
     KF5::KDE4Support
     ${X11_LIBRARIES}
@@ -87,7 +87,7 @@ target_link_libraries(systemtrayplugin
     ${KCore_LIBRARIES}
     ${KDECLARATIVE_LIBRARIES}
     KF5::Plasma
-    KF5::KWindowSystem
+    KF5::WindowSystem
     )
 
 install(TARGETS systemtrayplugin DESTINATION ${QML_INSTALL_DIR}/org/kde/plasma/private/systemtray)

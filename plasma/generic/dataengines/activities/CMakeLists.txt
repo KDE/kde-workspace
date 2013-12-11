@@ -15,11 +15,11 @@ qt5_add_dbus_interface(
 kservice_desktop_to_json(plasma-engine-activities.desktop)
 add_library(plasma_engine_activities MODULE ${activity_engine_SRCS})
 target_link_libraries(plasma_engine_activities
-                      KF5::KCoreAddons
+                      KF5::CoreAddons
                       KF5::Plasma
                       KF5::KActivities
-                      KF5::KI18n
-                      KF5::KService
+                      KF5::I18n
+                      KF5::Service
                       Qt5::DBus
                       )
 

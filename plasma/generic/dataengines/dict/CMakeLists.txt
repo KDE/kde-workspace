@@ -10,7 +10,7 @@ add_library(plasma_engine_dict MODULE ${dict_engine_SRCS})
 
 target_link_libraries (plasma_engine_dict
   KF5::Plasma
-  KF5::KService
+  KF5::Service
   Qt5::Network
 )
 

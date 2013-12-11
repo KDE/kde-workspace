@@ -21,12 +21,12 @@ target_link_libraries(kcm_style
     Qt5::X11Extras
     Qt5::DBus
     KF5::KCMUtils
-    KF5::KCompletion
-    KF5::KI18n
-    KF5::KNotifications
+    KF5::Completion
+    KF5::I18n
+    KF5::Notifications
     KF5::Plasma
     ${X11_LIBRARIES}
-    KF5::KDE4Support KF5::KNewStuff)
+    KF5::KDE4Support KF5::NewStuff)
 if(NOT WIN32)
     target_link_libraries(kcm_style kdecorations)
 endif()

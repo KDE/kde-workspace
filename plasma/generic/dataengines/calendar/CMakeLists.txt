@@ -23,7 +23,7 @@ add_library(plasma_engine_calendar MODULE ${calendar_engine_srcs})
 target_link_libraries(
     plasma_engine_calendar
     ${KDEPIMLIBS_KHOLIDAYS_LIBRARY}
-    KF5::KCoreAddons
+    KF5::CoreAddons
     KF5::Plasma
     ${KDE4_KMIME_LIBS}
     ${KDE4_KCALCORE_LIBS}

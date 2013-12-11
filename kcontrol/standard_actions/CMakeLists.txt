@@ -4,7 +4,7 @@ add_library(kcm_standard_actions MODULE ${kcm_standard_actions_PART_SRCS})
 
 target_link_libraries(kcm_standard_actions
     KF5::KCMUtils
-    KF5::KI18n
+    KF5::I18n
     KF5::XmlGui
     KF5::KDE4Support
 )

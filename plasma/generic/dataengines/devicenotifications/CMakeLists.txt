@@ -11,7 +11,7 @@ add_library(plasma_engine_devicenotifications MODULE ${device_notifications_engi
 
 target_link_libraries(plasma_engine_devicenotifications 
     Qt5::DBus
-    KF5::KService
+    KF5::Service
     KF5::Plasma
 ) # todo: add kworkspace once ported
 

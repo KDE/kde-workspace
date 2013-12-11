@@ -9,10 +9,10 @@ kde4_add_ui_files(kcm_colors_SRCS colorsettings.ui preview.ui setpreview.ui)
 add_library(kcm_colors MODULE ${kcm_colors_SRCS})
 target_link_libraries(kcm_colors
     KF5::KCMUtils
-    KF5::KGuiAddons
-    KF5::KI18n
+    KF5::GuiAddons
+    KF5::I18n
     Qt5::DBus
-    KF5::KNewStuff
+    KF5::NewStuff
     KF5::KDE4Support
     ${X11_LIBRARIES})
 

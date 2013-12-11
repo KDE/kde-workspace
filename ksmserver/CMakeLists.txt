@@ -68,13 +68,13 @@ target_link_libraries(kdeinit_ksmserver
     KF5::GlobalAccel
     KF5::KIOCore
     KF5::KIOWidgets
-    KF5::KNotifications
+    KF5::Notifications
     ${X11_LIBRARIES}
     ${X11_Xrender_LIB}
     KF5::Solid
     Qt5::Quick
-    KF5::KDeclarative
-    KF5::KDBusAddons
+    KF5::Declarative
+    KF5::DBusAddons
 )
 
 install(TARGETS kdeinit_ksmserver ${INSTALL_TARGETS_DEFAULT_ARGS})

@@ -19,7 +19,7 @@ target_link_libraries(taskmanagerplugin
                       Qt5::Quick
                       Qt5::Widgets
                       KF5::KIOCore
-                      KF5::KWindowSystem
+                      KF5::WindowSystem
                       Qt5::X11Extras
                       ${X11_LIBRARIES})
 

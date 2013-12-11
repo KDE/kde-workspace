@@ -110,7 +110,11 @@ Item {
         anchors {
             top: crumbContainer.bottom
             bottom: parent.bottom
+            rightMargin: -theme.largeSpacing
+            leftMargin: -theme.largeSpacing
         }
+
+
         width: parent.width
 
         function moveRight() {
