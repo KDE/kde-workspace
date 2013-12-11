@@ -47,7 +47,7 @@ Item {
         id: dataSource
         engine: "time"
         connectedSources: ["Local"]
-        interval: 300000
+        interval: 30000
     }
 
 
