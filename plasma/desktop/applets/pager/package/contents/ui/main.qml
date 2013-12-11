@@ -31,11 +31,11 @@ Item {
     property int minimumWidth
     property int minimumHeight
 
-    property int maximumWidth: !vertical ? pager.preferredSize.width : undefined
-    property int maximumHeight: vertical ? pager.preferredSize.height : undefined
+    property int maximumWidth: !root.vertical ? pager.preferredSize.width : undefined
+    property int maximumHeight: root.vertical ? pager.preferredSize.height : undefined
 
-    property bool fillHeight: vertical && visible
-    property bool fillWidth: !vertical && visible
+    property bool fillHeight: root.vertical && root.visible
+    property bool fillWidth: !root.vertical && root.visible
 
     property bool dragging: false
     property int dragId
