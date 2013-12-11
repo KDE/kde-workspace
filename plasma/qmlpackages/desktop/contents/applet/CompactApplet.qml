@@ -69,6 +69,7 @@ Item {
         visible: plasmoid.expanded
         visualParent: compactRepresentation
         location: plasmoid.location
+        hideOnWindowDeactivate: plasmoid.hideOnWindowDeactivate
         mainItem: Item {
             id: appletParent
 
