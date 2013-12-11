@@ -165,15 +165,21 @@ QtExtraComponents.MouseEventListener {
             var exp = plasmoid.expanded; // flip for bottom edge and right edge
 
             if (plasmoid.location == PlasmaCore.Types.BottomEdge) {
-		return (exp) ? "down-arrow" : "up-arrow"
-	    } else if (plasmoid.location == PlasmaCore.Types.TopEdge) {
-		return (exp) ? "up-arrow" : "down-arrow"
-	    } else if (plasmoid.location == PlasmaCore.Types.LeftEdge) {
-		return (exp) ? "left-arrow" : "right-arrow"
-	    } else {
-		return (exp) ? "right-arrow" : "left-arrow"
-	    }
+                return (exp) ? "down-arrow" : "up-arrow"
+            } else if (plasmoid.location == PlasmaCore.Types.TopEdge) {
+                return (exp) ? "up-arrow" : "down-arrow"
+            } else if (plasmoid.location == PlasmaCore.Types.LeftEdge) {
+                return (exp) ? "left-arrow" : "right-arrow"
+            } else {
+                return (exp) ? "right-arrow" : "left-arrow"
+            }
 
+        }
+        MouseArea {
+            width: parent.width + root.smallSpacing
+            height: root.itemSize + root.largeSpacing
+            anchors.centerIn: parent
+            onClicked: plasmoid.expanded = !plasmoid.expanded
         }
     }
 
