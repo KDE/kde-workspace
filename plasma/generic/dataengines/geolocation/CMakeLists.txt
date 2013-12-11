@@ -4,9 +4,9 @@ project(geolocation)
 
 set(plasma_geolocation_interface_SRCS geolocationprovider.cpp)
 add_library(plasma-geolocation-interface SHARED ${plasma_geolocation_interface_SRCS})
-target_link_libraries(plasma-geolocation-interface KIOCore KF5::Plasma)
+target_link_libraries(plasma-geolocation-interface KF5::KIOCore KF5::Plasma)
 target_link_libraries(plasma-geolocation-interface
-                      LINK_INTERFACE_LIBRARIES KIOCore KF5::Plasma)
+                      LINK_INTERFACE_LIBRARIES KF5::KIOCore KF5::Plasma)
 set_target_properties(plasma-geolocation-interface PROPERTIES
    VERSION ${GENERIC_LIB_VERSION}
    SOVERSION ${GENERIC_LIB_SOVERSION}
@@ -23,12 +23,14 @@ install(FILES geolocationprovider.h geolocation_export.h
 # -------------------------------------------------------------------------------------------------
 
 set(plasma_dataengine_geolocation_SRCS geolocation.cpp)
+kservice_desktop_to_json(plasma-dataengine-geolocation.desktop)
 add_library(plasma_engine_geolocation MODULE ${plasma_dataengine_geolocation_SRCS})
 target_link_libraries(plasma_engine_geolocation
     plasma-geolocation-interface
     KF5::Plasma
     KF5::KCoreAddons
-    KIOCore
+    KF5::KIOCore
+    KF5::KService
     KF5::Solid)
 
 install(TARGETS plasma_engine_geolocation DESTINATION ${PLUGIN_INSTALL_DIR}/plasma/dataengine)
@@ -46,7 +48,7 @@ install(TARGETS plasma-geolocation-ip DESTINATION ${PLUGIN_INSTALL_DIR}/plasma/g
 # -------------------------------------------------------------------------------------------------
 
 set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules ${CMAKE_MODULE_PATH})
-macro_optional_find_package(libgps)
+find_package(libgps)
 set_package_properties(libgps PROPERTIES DESCRIPTION "GPS support for geolocation"
                        URL "http://gpsd.berlios.de/"
                        TYPE OPTIONAL

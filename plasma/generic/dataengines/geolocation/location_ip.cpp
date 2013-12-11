@@ -20,6 +20,7 @@
 
 #include "location_ip.h"
 #include <QDebug>
+#include <QUrl>
 #include <KJob>
 #include <KIO/Job>
 #include <KIO/TransferJob>
@@ -81,7 +82,7 @@ Ip::~Ip()
 void Ip::update()
 {
     d->payload.clear();
-    KIO::TransferJob *datajob = KIO::get(KUrl("http://api.hostip.info/get_html.php?position=true"),
+    KIO::TransferJob *datajob = KIO::get(QUrl("http://api.hostip.info/get_html.php?position=true"),
                                          KIO::NoReload, KIO::HideProgressInfo);
 
     if (datajob) {

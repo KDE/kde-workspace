@@ -34,6 +34,7 @@ Geolocation::Geolocation(QObject* parent, const QVariantList& args)
     m_updateTimer.setInterval(100);
     m_updateTimer.setSingleShot(true);
     connect(&m_updateTimer, SIGNAL(timeout()), this, SLOT(actuallySetData()));
+    init();
 }
 
 void Geolocation::init()
@@ -139,5 +140,7 @@ void Geolocation::actuallySetData()
 {
     setData(SOURCE, m_data);
 }
+
+K_EXPORT_PLASMA_DATAENGINE_WITH_JSON(geolocation, Geolocation, "plasma-dataengine-geolocation.json")
 
 #include "geolocation.moc"

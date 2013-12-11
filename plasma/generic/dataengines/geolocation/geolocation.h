@@ -55,7 +55,5 @@ class Geolocation : public Plasma::DataEngine
         QTimer m_updateTimer;
 };
 
-K_EXPORT_PLASMA_DATAENGINE(geolocation, Geolocation)
-
 #endif
 
