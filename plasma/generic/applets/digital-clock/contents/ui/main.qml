@@ -23,12 +23,19 @@ import org.kde.plasma.extras 2.0 as PlasmaExtras
 
 Item {
     id: main
-//     property int minimumWidth: units.gridUnit * 90
-//     property int minimumHeight: units.gridUnit * 30
-    property int minimumWidth: minimumHeight * 2.2
-    property int minimumHeight: theme.mSize(theme.defaultFont).height * 14
-    property int implicitWidth: minimumWidth * 1.5
-    property int implicitHeight: minimumHeight * 1.5
+
+    // Override the minimumwidth to force the collapsed version
+    // Some people want to show a really big digital clock.
+    // Moreover, semantically, the calendar is not a more complete
+    // representation, but really a popup dialog.
+    property int minimumWidth: 4000
+    property int minimumHeight: 2000
+
+    // The "sensible" values
+    property int _minimumWidth: _minimumHeight * 2.2
+    property int _minimumHeight: theme.mSize(theme.defaultFont).height * 14
+    property int implicitWidth: _minimumWidth * 1.5
+    property int implicitHeight: _minimumHeight * 1.5
 
     property int formFactor: plasmoid.formFactor
 
