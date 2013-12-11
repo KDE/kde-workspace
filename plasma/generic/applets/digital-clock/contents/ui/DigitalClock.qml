@@ -23,23 +23,31 @@ import org.kde.plasma.components 2.0 as Components
 
 Item {
     id: main
-    //property int minimumWidth: time.font.pixelSize * (plasmoid.configuration.showSeconds ? 4 : 3)
+
     property int minimumWidth: time.paintedWidth
     property int maximumWidth: minimumWidth
-    property int minimumHeight
+
+    property int minimumHeight: time.paintedHeight
+    property int maximumHeight: minimumHeight
+
     property int formFactor: plasmoid.formFactor
     property int timePixelSize: theme.defaultFont.pixelSize
     property int timezonePixelSize: theme.smallestFont.pixelSize
+
     property bool fillWidth: true
     property bool fillHeight: true
 
     property bool constrained: formFactor == PlasmaCore.Types.Vertical || formFactor == PlasmaCore.Types.Horizontal
 
-    PlasmaCore.DataSource {
-        id: dataSource
-        engine: "time"
-        connectedSources: ["Local"]
-        interval: plasmoid.configuration.showSeconds ? 500 : 300000
+    property bool vertical: plasmoid.formFactor == PlasmaCore.Types.Vertical
+
+    onWidthChanged: geotimer.start()
+    onHeightChanged: geotimer.start()
+
+    Timer {
+        id: geotimer
+        interval: 10 // just to compress resize events of width and height
+        onTriggered: updateSize()
     }
 
     Components.Label  {
@@ -48,7 +56,7 @@ Item {
         font.italic: plasmoid.configuration.italicText
         font.pixelSize: Math.min(main.width/6, main.height)
         style: Text.Raised; styleColor: "black"
-        width: Math.max(paintedWidth,time.paintedWidth)
+        width: Math.max(paintedWidth, time.paintedWidth)
         opacity: 0.8
         color: "white"
         // We need to adjust the timeformat a bit, see more at timeFormatCorrection(..) comments
@@ -86,29 +94,44 @@ Item {
         }
     }
 
-    function updateSize() {
-        //var maxSize = theme.smallestFont.pixelSize;
-        var maxSize = 0;
-        var threshold = theme.mSize(theme.defaultFont).height / 2;
-        var f = theme.defaultFont;
-//         print(" STarting with:  " + theme.mSize(f).height);
-        var stop = false;
-        //var _ps = maxSize;
-        while (!stop) {
-//             print(" maxSize.height: " + maxSize);
-//             print("Main height: " + main.height);
-            if (maxSize + threshold >= main.height) {
-                stop = true;
-            }
-            maxSize = maxSize + 1;
-            //print("_ps = " + _ps);
-            //f.pointSize = _ps;
+    Components.Label {
+        id: sizehelper
+        text: time.text
+        visible: false
+    }
 
+    function updateSize() {
+        // Start at minimum size, and increase the hidden label
+        // size until we fit into the plasmoid with a bit of margin
+        // It would be nice if we had proper font metrics in QML.
+        var maxSize = theme.smallestFont.pixelSize;
+        var threshold = theme.mSize(theme.defaultFont).height / 2;
+        var stop = false;
+
+        while (!stop) {
+            maxSize = maxSize + 1;
+            sizehelper.font.pixelSize = maxSize;
+            var pw = sizehelper.paintedWidth;
+
+            if (!constrained) { // free floating cases
+                if (maxSize + threshold >= main.height) {
+                    stop = true;
+                } else if (pw + threshold >= main.width) {
+                    stop = true;
+                }
+            } else { // panel situations
+                if (main.vertical) {
+                    if (pw + threshold >= main.width) {
+                        stop = true;
+                    }
+                } else {
+                    if (maxSize + threshold >= main.height) {
+                        stop = true;
+                    }
+                }
+            }
         }
-        //maxSize = maxSize - 1;
-//         print(" then with:  " + theme.mSize(f).height);
         time.font.pixelSize = maxSize;
-        //if (time.paintedWidth)
     }
 
     // Qt's QLocale does not offer any modular time creating like Klocale did
@@ -136,7 +159,4 @@ Item {
 
         return timeFormatString;
     }
-
-    onWidthChanged: updateSize()
-    onHeightChanged: updateSize()
 }
