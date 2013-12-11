@@ -29,13 +29,13 @@ import org.kde.private.systemtray 2.0 as SystemTray
 QtExtraComponents.MouseEventListener {
     id: compactRepresenation
 
-    property int minimumWidth: !vertical ? computeDimension() : computeDimensionHeight()
-    property int minimumHeight: vertical ? computeDimension() : computeDimensionHeight()
+    property int minimumWidth: !root.vertical ? computeDimension() : computeDimensionHeight()
+    property int minimumHeight: root.vertical ? computeDimension() : computeDimensionHeight()
     property int maximumWidth: minimumWidth
     property int maximumHeight: minimumHeight
 
-    property bool fillWidth: true
-    property bool fillHeight: true
+    property bool fillWidth: false
+    property bool fillHeight: false
 
     property QtObject systrayhost: undefined
 
