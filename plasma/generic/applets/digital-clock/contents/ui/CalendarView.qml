@@ -271,4 +271,32 @@ Item {
         }
 
     }
+
+    MouseArea {
+        id: pin
+
+        /* Allows the user to keep the calendar open for reference */
+
+        width: theme.largeSpacing
+        height: width
+        anchors {
+            top: parent.top
+            right: parent.right
+        }
+
+        property bool checked: false
+
+        onClicked: {
+            pin.checked = !pin.checked;
+            plasmoid.hideOnWindowDeactivate = !pin.checked;
+        }
+
+        PlasmaComponents.Label {
+            width: paintedWidth
+            height: paintedHeight
+            anchors.centerIn: parent
+            text: "✓"
+            opacity: pin.checked ? 1 : 0.3
+        }
+    }
 }
