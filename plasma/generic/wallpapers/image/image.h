@@ -90,6 +90,7 @@ class Image : public Plasma::Wallpaper
         void pathDeleted(const QString &path);
         void backgroundsFound(const QStringList &paths, const QString &token);
         bool checkSize();
+        void actuallyRenderWallpaper();
 
     protected:
         void init(const KConfigGroup &config);
@@ -120,6 +121,7 @@ class Image : public Plasma::Wallpaper
         QStringList m_slideshowBackgrounds;
         QStringList m_unseenSlideshowBackgrounds;
         QTimer m_timer;
+        QTimer m_delayedRenderTimer;
         QPixmap m_pixmap;
         QPixmap m_oldPixmap;
         QPixmap m_oldFadedPixmap;

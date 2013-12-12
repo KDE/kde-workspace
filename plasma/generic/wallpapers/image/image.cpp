@@ -55,6 +55,8 @@ Image::Image(QObject *parent, const QVariantList &args)
     connect(this, SIGNAL(renderCompleted(QImage)), this, SLOT(wallpaperRenderComplete(QImage)));
     connect(this, SIGNAL(renderHintsChanged()), this, SLOT(checkSize()));
     connect(&m_timer, SIGNAL(timeout()), this, SLOT(nextSlide()));
+    connect(&m_delayedRenderTimer, SIGNAL(timeout()), this, SLOT(actuallyRenderWallpaper()));
+    m_delayedRenderTimer.setSingleShot(true);
 }
 
 Image::~Image()
