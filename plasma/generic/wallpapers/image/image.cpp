@@ -52,7 +52,7 @@ Image::Image(QObject *parent, const QVariantList &args)
       m_nextWallpaperAction(0),
       m_openImageAction(0)
 {
-    connect(this, SIGNAL(renderCompleted(QImage)), this, SLOT(updateBackground(QImage)));
+    connect(this, SIGNAL(renderCompleted(QImage)), this, SLOT(wallpaperRenderComplete(QImage)));
     connect(&m_timer, SIGNAL(timeout()), this, SLOT(nextSlide()));
 }
 

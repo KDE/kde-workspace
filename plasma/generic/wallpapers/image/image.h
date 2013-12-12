@@ -66,7 +66,7 @@ class Image : public Plasma::Wallpaper
          * Open the current slide in the default image application
          */
         void openSlide();
-        void updateBackground(const QImage &img);
+        void wallpaperRenderComplete(const QImage &img);
         void showFileDialog();
         void setFadeValue(qreal value);
         void configWidgetDestroyed();
