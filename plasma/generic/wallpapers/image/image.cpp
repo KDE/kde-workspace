@@ -40,7 +40,7 @@ K_EXPORT_PLASMA_WALLPAPER(image, Image)
 Image::Image(QObject *parent, const QVariantList &args)
     : Plasma::Wallpaper(parent, args),
       m_delay(10),
-      m_dirWatch(new KDirWatch(this)),
+      m_dirWatch(0),
       m_configWidget(0),
       m_wallpaperPackage(0),
       m_currentSlide(-1),
@@ -53,11 +53,6 @@ Image::Image(QObject *parent, const QVariantList &args)
 {
     connect(this, SIGNAL(renderCompleted(QImage)), this, SLOT(updateBackground(QImage)));
     connect(&m_timer, SIGNAL(timeout()), this, SLOT(nextSlide()));
-
-    connect(m_dirWatch, SIGNAL(created(QString)), SLOT(pathCreated(QString)));
-    connect(m_dirWatch, SIGNAL(dirty(QString)),   SLOT(pathDirty(QString)));
-    connect(m_dirWatch, SIGNAL(deleted(QString)), SLOT(pathDeleted(QString)));
-    m_dirWatch->startScan();
 }
 
 Image::~Image()
@@ -420,6 +415,13 @@ void Image::updateDirWatch(const QStringList &newDirs)
         return;
     }
 
+    if (!m_dirWatch) {
+        m_dirWatch = new KDirWatch(this);
+        connect(m_dirWatch, SIGNAL(created(QString)), SLOT(pathCreated(QString)));
+        connect(m_dirWatch, SIGNAL(dirty(QString)),   SLOT(pathDirty(QString)));
+        connect(m_dirWatch, SIGNAL(deleted(QString)), SLOT(pathDeleted(QString)));
+    }
+
     foreach (const QString &oldDir, m_dirs) {
         if (!newDirs.contains(oldDir)) {
             m_dirWatch->removeDir(oldDir);
@@ -432,6 +434,7 @@ void Image::updateDirWatch(const QStringList &newDirs)
         }
     }
 
+    m_dirWatch->startScan();
     m_dirs = newDirs;
 }
 
@@ -724,7 +727,6 @@ void Image::wallpaperBrowseCompleted()
 
     //the full file path, so it isn't broken when dealing with symlinks
     const QString wallpaper = info.canonicalFilePath();
-
 
     if (wallpaper.isEmpty()) {
         return;
