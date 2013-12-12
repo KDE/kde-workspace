@@ -89,6 +89,7 @@ class Image : public Plasma::Wallpaper
         void pathDirty(const QString &path);
         void pathDeleted(const QString &path);
         void backgroundsFound(const QStringList &paths, const QString &token);
+        bool checkSize();
 
     protected:
         void init(const KConfigGroup &config);

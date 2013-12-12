@@ -53,6 +53,7 @@ Image::Image(QObject *parent, const QVariantList &args)
       m_openImageAction(0)
 {
     connect(this, SIGNAL(renderCompleted(QImage)), this, SLOT(wallpaperRenderComplete(QImage)));
+    connect(this, SIGNAL(renderHintsChanged()), this, SLOT(checkSize()));
     connect(&m_timer, SIGNAL(timeout()), this, SLOT(nextSlide()));
 }
 
@@ -310,16 +311,6 @@ void Image::paint(QPainter *painter, const QRectF& exposedRect)
 {
     // Check if geometry changed
     //kDebug() << m_size << boundingRect().size().toSize();
-    if (m_size != boundingRect().size().toSize()) {
-        calculateGeometry();
-        if (!m_size.isEmpty() && !m_img.isEmpty()) { // We have previous image
-            painter->fillRect(exposedRect, QBrush(m_color));
-            renderWallpaper();
-            //kDebug() << "re-rendering";
-            return;
-        }
-    }
-
     if (m_pixmap.isNull()) {
         painter->fillRect(exposedRect, QBrush(m_color));
         //kDebug() << "pixmap null";
@@ -915,8 +906,28 @@ void Image::removeWallpaper(QString name)
         m_usersWallpapers.removeAt(wallpaperIndex);
         m_model->reload(m_usersWallpapers);
         //TODO: save the configuration in the right way
-	emit settingsChanged(true);
+        emit settingsChanged(true);
     }
+}
+
+bool Image::checkSize()
+{
+    if (m_size != boundingRect().size().toSize()) {
+        calculateGeometry();
+        if (!m_size.isEmpty()) { // We have a size set
+            if (m_mode == "SingleImage") {
+                // make sure we pick the best size wallpaper for the new size
+                setSingleImage();
+            } else {
+                renderWallpaper();
+            }
+            //kDebug() << "re-rendering";
+        }
+
+        return false;
+    }
+
+    return true;
 }
 
 #include "image.moc"
