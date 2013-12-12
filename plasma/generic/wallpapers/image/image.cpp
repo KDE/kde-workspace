@@ -106,12 +106,6 @@ void Image::init(const KConfigGroup &config)
         setContextualActions(actions);
         updateWallpaperActions();
     }
-
-    m_animation = new QPropertyAnimation(this, "fadeValue");
-    m_animation->setProperty("easingCurve", QEasingCurve::InQuad);
-    m_animation->setProperty("duration", 500);
-    m_animation->setProperty("startValue", 0.0);
-    m_animation->setProperty("endValue", 1.0);
 }
 
 void Image::useSingleImageDefaults()
@@ -839,29 +833,38 @@ void Image::pathCreated(const QString &path)
 
 void Image::pathDirty(const QString &path)
 {
-    if(path == m_img) {
+    if (path == m_img) {
         renderWallpaper(path);
     }
 }
 
 void Image::pathDeleted(const QString &path)
 {
-    if(m_slideshowBackgrounds.removeAll(path)) {
+    if (m_slideshowBackgrounds.removeAll(path)) {
         m_unseenSlideshowBackgrounds.removeAll(path);
-        if(path == m_img) {
+        if (path == m_img) {
             nextSlide();
         }
     }
 }
 
-void Image::updateBackground(const QImage &img)
+void Image::wallpaperRenderComplete(const QImage &img)
 {
     m_oldPixmap = m_pixmap;
     m_oldFadedPixmap = m_oldPixmap;
     m_pixmap = QPixmap::fromImage(img);
 
     if (!m_oldPixmap.isNull()) {
+        if (!m_animation) {
+            m_animation = new QPropertyAnimation(this, "fadeValue");
+            m_animation->setProperty("easingCurve", QEasingCurve::OutQuad);
+            m_animation->setProperty("duration", 300);
+            m_animation->setProperty("startValue", 0.2);
+            m_animation->setProperty("endValue", 1.0);
+        }
+
         m_animation->start();
+        setFadeValue(0.1);
     } else {
         emit update(boundingRect());
     }
