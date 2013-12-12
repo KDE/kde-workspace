@@ -41,6 +41,7 @@ Image::Image(QObject *parent, const QVariantList &args)
     : Plasma::Wallpaper(parent, args),
       m_delay(10),
       m_dirWatch(0),
+      m_scanDirty(false),
       m_configWidget(0),
       m_wallpaperPackage(0),
       m_currentSlide(-1),
@@ -800,7 +801,7 @@ void Image::openSlide()
 
     // open in image viewer
     KUrl filepath(m_wallpaperPackage->filePath("preferred"));
-    kDebug() << "opening file " << filepath.path();
+    //kDebug() << "opening file " << filepath.path();
     new KRun(filepath, NULL);
 }
 
@@ -814,17 +815,22 @@ void Image::renderWallpaper(const QString& image)
         return;
     }
 
+    m_delayedRenderTimer.start(100);
+}
+
+void Image::actuallyRenderWallpaper()
+{
     render(m_img, m_size, resizeMethodHint(), m_color);
 }
 
 void Image::pathCreated(const QString &path)
 {
-    if(!m_slideshowBackgrounds.contains(path)) {
+    if (!m_slideshowBackgrounds.contains(path)) {
         QFileInfo fileInfo(path);
-        if(fileInfo.isFile() && BackgroundFinder::suffixes().contains(fileInfo.suffix().toLower())) {
+        if (fileInfo.isFile() && BackgroundFinder::suffixes().contains(fileInfo.suffix().toLower())) {
             m_slideshowBackgrounds.append(path);
             m_unseenSlideshowBackgrounds.append(path);
-            if(m_slideshowBackgrounds.count() == 1) {
+            if (m_slideshowBackgrounds.count() == 1) {
                 nextSlide();
             }
         }
