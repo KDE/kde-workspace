@@ -447,6 +447,7 @@ void ControllerWindow::showActivityManager()
         m_activityManager->show();
         setGraphicsWidget(m_activityManager);
     }
+    m_activityManager->setContainment(containment());
     m_view->setFocus();
     m_activityManager->setFlag(QGraphicsItem::ItemIsFocusable);
     m_activityManager->setFocus();

@@ -49,6 +49,9 @@ class ActivityManager : public QGraphicsWidget
      */
     Q_PROPERTY(Qt::Orientation orientation READ orientation NOTIFY orientationChanged)
 
+    Q_PROPERTY(bool canAddActivities READ canAddActivities CONSTANT)
+    Q_PROPERTY(bool canAddWidgets READ canAddWidgets CONSTANT)
+
 public:
    /**
     * The Location enumeration describes where on screen an element, such as an
@@ -92,6 +95,9 @@ public:
     Q_INVOKABLE void createActivityFromScript(const QString &script, const QString &name, const QString &icon, const QStringList &startupApps);
     Q_INVOKABLE void downloadActivityScripts();
     Q_INVOKABLE QString chooseIcon() const;
+
+    bool canAddActivities() const;
+    bool canAddWidgets() const;
 
 Q_SIGNALS:
     void locationChanged(Plasma::Location loc);

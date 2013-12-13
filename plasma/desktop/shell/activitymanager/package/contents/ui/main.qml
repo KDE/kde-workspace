@@ -146,12 +146,14 @@ Item {
                 spacing: 4
                 PlasmaComponents.Button {
                     id: newActivityButton
+                    visible: activityManager.canAddActivities
                     iconSource: "list-add"
                     text: i18n("Create activity...")
                     onClicked: newActivityMenu.open()
                 }
                 PlasmaComponents.Button {
                     iconSource: "plasma"
+                    visible: activityManager.canAddWidgets
                     text: i18n("Add widgets")
                     onClicked: activityManager.addWidgetsRequested()
                 }
@@ -294,6 +296,7 @@ Item {
                     right: parent.right
                 }
                 iconSource: "plasma"
+                visible: activityManager.canAddWidgets
                 text: i18n("Add widgets")
                 onClicked: activityManager.addWidgetsRequested()
             }
