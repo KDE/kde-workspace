@@ -64,12 +64,13 @@ Item {
     PlasmaCore.Dialog {
         id: popupWindow
         objectName: "popupWindow"
-        //windowFlags: Qt.Popup
+        flags: Qt.Popup | Qt.WindowStaysOnTopHint
         color: Qt.rgba(0,0,0,0)
         visible: plasmoid.expanded
         visualParent: compactRepresentation
         location: plasmoid.location
         hideOnWindowDeactivate: plasmoid.hideOnWindowDeactivate
+
         mainItem: Item {
             id: appletParent
 
@@ -78,15 +79,15 @@ Item {
 
         }
 
-        onActiveWindowChanged: {
-            if (!activeWindow) {
-               // plasmoid.expanded = false
-            }
-        }
         onVisibleChanged: {
             if (!visible) {
                 plasmoid.expanded = false
+            } else {
+                // This call currently fails and complains at runtime:
+                // QWindow::setWindowState: QWindow::setWindowState does not accept Qt::WindowActive
+                popupWindow.activateWindow();
             }
         }
+
     }
 }
