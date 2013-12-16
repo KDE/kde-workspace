@@ -286,11 +286,8 @@ if(NOT WIN32)
    ecm_optional_add_subdirectory( kcheckpass )
    ecm_optional_add_subdirectory( kwin )
    ecm_optional_add_subdirectory( ksmserver )
-#
-   find_package(JPEG REQUIRED)
-   find_package(PNG REQUIRED)
-#    macro_optional_add_subdirectory( ksplash )
-#
+
+   ecm_optional_add_subdirectory( ksplash )
     ecm_optional_add_subdirectory( powerdevil )
    if (NOT CMAKE_SYSTEM_NAME MATCHES Darwin)
       ecm_optional_add_subdirectory( ksysguard )
