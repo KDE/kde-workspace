@@ -41,23 +41,19 @@ PlasmaComponents.ToolButton {
         }
         onPositionChanged: {
             switch (panel.location) {
-            //TopEdge
-            case 3:
+            case PlasmaCore.Types.TopEdge:
                 configDialog.y = mouse.screenY - mapToItem(dialogRoot, 0, startMouseY).y
                 panel.y = configDialog.y - panel.height
                 break
-            //LeftEdge
-            case 5:
+            case PlasmaCore.Types.LeftEdge:
                 configDialog.x = mouse.screenX - mapToItem(dialogRoot, startMouseX, 0).x
                 panel.x = configDialog.x - panel.width
                 break;
-            //RightEdge
-            case 6:
+            case PlasmaCore.Types.RightEdge:
                 configDialog.x = mouse.screenX - mapToItem(dialogRoot, startMouseX, 0).x
                 panel.x = configDialog.x + configDialog.width
                 break;
-            //BottomEdge
-            case 4:
+            case PlasmaCore.Types.BottomEdge:
             default:
                 configDialog.y = mouse.screenY - mapToItem(dialogRoot, 0, startMouseY).y
                 panel.y = configDialog.y + configDialog.height
@@ -65,9 +61,6 @@ PlasmaComponents.ToolButton {
 
             lastX = mouse.screenX
             lastY = mouse.screenY
-
-            var screenAspect = panel.screenGeometry.height / panel.screenGeometry.width
-            var newLocation = panel.location
 
             //If the mouse is in an internal rectangle, do nothing
             if ((mouse.screenX > panel.screenGeometry.x + panel.screenGeometry.width/3 &&
@@ -77,33 +70,26 @@ PlasmaComponents.ToolButton {
                 return;
             }
 
+            var screenAspect = panel.screenGeometry.height / panel.screenGeometry.width
+            var newLocation = panel.location
 
             if (mouse.screenY < panel.screenGeometry.y+(mouse.screenX-panel.screenGeometry.x)*screenAspect) {
                 if (mouse.screenY < panel.screenGeometry.y + panel.screenGeometry.height-(mouse.screenX-panel.screenGeometry.x)*screenAspect) {
-                    if (panel.location == 3) {
-                        return;
-                    } else {
-                        newLocation = PlasmaCore.Types.TopEdge;
-                    }
-                } else if (panel.location == 6) {
-                        return;
+                    newLocation = PlasmaCore.Types.TopEdge;
                 } else {
                     newLocation = PlasmaCore.Types.RightEdge;
                 }
 
             } else {
                 if (mouse.screenY < panel.screenGeometry.y + panel.screenGeometry.height-(mouse.screenX-panel.screenGeometry.x)*screenAspect) {
-                    if (panel.location == 5) {
-                        return;
-                    } else {
-                        newLocation = PlasmaCore.Types.LeftEdge;
-                    }
-                } else if(panel.location == 4) {
-                return;
+                    newLocation = PlasmaCore.Types.LeftEdge;
                 } else {
                     newLocation = PlasmaCore.Types.BottomEdge;
                 }
             }
+
+            panel.screen = mouse.screen;
+
             panel.location = newLocation
             print("New Location: " + newLocation);
         }
