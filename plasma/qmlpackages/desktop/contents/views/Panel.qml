@@ -98,17 +98,17 @@ PlasmaCore.FrameSvgItem {
 
         onMinimumHeightChanged: {
             if (containment.formFactor === PlasmaCore.Types.Vertical) {
-                panel.width = Math.max(panel.width, panel.minimumLength);
+                panel.height = Math.max(panel.height, panel.minimumLength);
             }
         }
         onMaximumHeightChanged: {
             if (containment.formFactor === PlasmaCore.Types.Vertical) {
-                panel.width = Math.min(panel.width, panel.maximumLength);
+                panel.height = Math.min(panel.height, panel.maximumLength);
             }
         }
         onImplicitHeightChanged: {
             if (containment.formFactor === PlasmaCore.Types.Vertical) {
-                panel.width = Math.min(panel.maximumLength, Math.max(containment.implicitHeight, panel.minimumLength));
+                panel.height = Math.min(panel.maximumLength, Math.max(containment.implicitHeight, panel.minimumLength));
             }
         }
     }
