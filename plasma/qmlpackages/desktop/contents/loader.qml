@@ -32,6 +32,8 @@ QtObject {
     // handler to know whether its shell is loaded
     property bool loaded   : false
 
+    default property var children
+
     Solid.Devices {
         id: keyboards
         query: "IS Keyboard"
