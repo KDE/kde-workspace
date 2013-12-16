@@ -40,6 +40,8 @@ PlasmaComponents.ToolButton {
             startMouseY = mouse.y
         }
         onPositionChanged: {
+            panel.screen = mouse.screen;
+
             switch (panel.location) {
             case PlasmaCore.Types.TopEdge:
                 configDialog.y = mouse.screenY - mapToItem(dialogRoot, 0, startMouseY).y
@@ -88,10 +90,10 @@ PlasmaComponents.ToolButton {
                 }
             }
 
-            panel.screen = mouse.screen;
-
+            if (panel.location != newLocation) {
+                print("New Location: " + newLocation);
+            }
             panel.location = newLocation
-            print("New Location: " + newLocation);
         }
         onReleased: {
             panelResetAnimation.running = true
