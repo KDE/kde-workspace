@@ -27,8 +27,6 @@
 #include "timesource.h"
 
 #include <QDateTime>
-#include <QTimeZone>
-#include <QDebug>
 
 #include <KSystemTimeZones>
 #include <KLocalizedString>
@@ -60,7 +58,7 @@ void TimeSource::setTimeZone(const QString &tz)
     m_tzName = tz;
     m_local = m_tzName == I18N_NOOP("Local");
     if (m_local) {
-        m_tzName = QString::fromUtf8(QTimeZone::systemTimeZoneId());
+        m_tzName = KSystemTimeZones::local().name();
     }
 
     const QString trTimezone = i18n(m_tzName.toUtf8());
@@ -89,36 +87,24 @@ TimeSource::~TimeSource()
 
 void TimeSource::updateTime()
 {
-    QTimeZone tz;
-    QByteArray tzName = m_tzName.toUtf8();
-    qDebug() << tzName << QTimeZone::availableTimeZoneIds().contains(tzName) << QTimeZone::isTimeZoneIdAvailable(tzName);//QTimeZone::availableTimeZoneIds();
+    KTimeZone tz;
     if (m_local) {
-        tz = QTimeZone(QTimeZone::systemTimeZoneId());
+        tz = KSystemTimeZones::local();
     } else {
-        if (QTimeZone::availableTimeZoneIds().contains(tzName)) { //QTimeZone::isTimeZoneIdAvailable(tzName)
-            qDebug() << tzName << "is available";
-            tz = QTimeZone(tzName);
-        } else {
-            qDebug() << "going for system zone";
-            tz = QTimeZone(QTimeZone::systemTimeZoneId());
+        tz = KSystemTimeZones::zone(m_tzName);
+        if (!tz.isValid()) {
+            tz = KSystemTimeZones::local();
         }
     }
 
-    QDateTime a = QDateTime::currentDateTime();
-    a.setTimeZone(tz);
-    int offset = a.offsetFromUtc();//tz.offsetFromUtc();
+    int offset = tz.currentOffset();
     if (m_offset != offset) {
         m_offset = offset;
         setData(I18N_NOOP("Offset"), m_offset);
     }
 
-    QDateTime dt;
-    if (m_userDateTime) {
-        dt = data()["DateTime"].toDateTime();
-    } else {
-        dt = QDateTime::currentDateTime();
-        dt.setTimeZone(tz);
-    }
+    QDateTime dt = m_userDateTime ? data()["DateTime"].toDateTime()
+                                  : KDateTime::currentDateTime(tz).dateTime();
 
     if (m_solarPosition || m_moonPosition) {
         const QDate prev = data()["Date"].toDate();
