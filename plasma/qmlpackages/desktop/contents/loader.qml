@@ -20,9 +20,8 @@
 
 import QtQuick 2
 import org.kde.solid 1.0 as Solid
-import QtQuick.Window 2.0
 
-Item {
+QtObject {
     id: main
 
     property string shell  : "org.kde.desktop"
