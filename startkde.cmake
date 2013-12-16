@@ -79,7 +79,7 @@ if test $returncode -ne 0; then
     xmessage -geometry 500x100 "kstartupconfig5 does not exist or fails. The error code is $returncode. Check your installation."
     exit 1
 fi
-[ -r $kdehome/share/config/startupconfig ] && . $kdehome/share/config/startupconfig
+[ -r $configDir/startupconfig ] && . $configDir/startupconfig
 
 # XCursor mouse theme needs to be applied here to work even for kded or ksmserver
 if test -n "$kcminputrc_mouse_cursortheme" -o -n "$kcminputrc_mouse_cursorsize" ; then
