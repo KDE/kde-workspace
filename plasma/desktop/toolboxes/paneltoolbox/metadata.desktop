@@ -27,6 +27,7 @@ Name[sv]=Panelverktygslåda
 Name[tr]=Panel Araç Kutusu
 Name[uk]=Набір інструментів панелі
 Name[x-test]=xxPanel Toolboxxx
+Name[zh_CN]=面板工具箱
 Name[zh_TW]=面板工具盒
 Comment=Manage Plasma panel
 Comment[ca]=Gestió del plafó del Plasma
@@ -56,6 +57,7 @@ Comment[sv]=Hantera Plasma-panel
 Comment[tr]=Plasma panelini yönet
 Comment[uk]=Керування панеллю Плазми
 Comment[x-test]=xxManage Plasma panelxx
+Comment[zh_CN]=管理 Plasma 面板 
 Comment[zh_TW]=管理 Plasma 面板
 Encoding=UTF-8
 

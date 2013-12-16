@@ -54,6 +54,7 @@ Name[sv]=Bakgrundsprov
 Name[tr]=Arkaplan Sınaması
 Name[uk]=Перевірка тла
 Name[x-test]=xxBackground Testxx
+Name[zh_CN]=背景测试
 Name[zh_TW]=背景測試
 Type=Service
 X-KDE-ParentApp=
