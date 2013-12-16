@@ -204,20 +204,6 @@ set_package_properties(PythonLibrary PROPERTIES DESCRIPTION "Python scripting la
                        PURPOSE "Needed to build plasma scriptengine for python."
                       )
 
-find_package(Soprano 2.7.56)
-set_package_properties(Soprano PROPERTIES DESCRIPTION "Semantic Desktop Storing"
-                       URL "http://soprano.sourceforge.net"
-                       TYPE OPTIONAL
-                       PURPOSE "Required to build Nepomuk features."
-                      )
-
-find_package(NepomukCore QUIET CONFIG)
-set_package_properties(NepomukCore PROPERTIES DESCRIPTION "Nepomuk Core Library"
-                       URL "https://projects.kde.org/nepomuk-core"
-                       TYPE OPTIONAL
-                       PURPOSE "Required to build Nepomuk features."
-                      )
-
 find_package(Boost 1.34.0 MODULE)
 set_package_properties(Boost PROPERTIES DESCRIPTION "Boost C++ Libraries"
                        URL "http://www.boost.org"
@@ -271,8 +257,6 @@ if(UNIX)
 endif()
 
 include_directories(${CMAKE_SOURCE_DIR} ${CMAKE_BINARY_DIR} ${KDE4_INCLUDES} ${KACTIVITIES_INCLUDE_DIRS} ${CMAKE_SOURCE_DIR}/libs)
-
-add_definitions(-DDISABLE_NEPOMUK_LEGACY)
 
 # libs
 # add_subdirectory(cmake)

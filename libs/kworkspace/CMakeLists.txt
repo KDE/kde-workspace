@@ -4,36 +4,6 @@ set(kworkspace_LIB_SRCS kdisplaymanager.cpp
                         kworkspace.cpp
    )
 
-if(SOPRANO_PLUGIN_RAPTORPARSER_FOUND AND SHAREDDESKTOPONTOLOGIES_ROOT_DIR)
-
-soprano_add_ontology(
-   kworkspace_LIB_SRCS
-   "${SHAREDDESKTOPONTOLOGIES_ROOT_DIR}/nie/nfo.trig"
-   "nfo"
-   "Ontologies"
-   "trig"
-   )
-
-soprano_add_ontology(
-   kworkspace_LIB_SRCS
-   "${SHAREDDESKTOPONTOLOGIES_ROOT_DIR}/nie/nco.trig"
-   "nco"
-   "Ontologies"
-   "trig"
-   )
-
-soprano_add_ontology(
-   kworkspace_LIB_SRCS
-   "${SHAREDDESKTOPONTOLOGIES_ROOT_DIR}/pimo/pimo.trig"
-   "pimo"
-   "Ontologies"
-   "trig"
-   )
-
-add_definitions(-DHAVE_SOPRANO_PLUGIN_RAPTORPARSER=1)
-
-endif()
-
 remove_definitions(-DQT_NO_CAST_FROM_ASCII)
 remove_definitions(-DQT_NO_CAST_FROM_BYTEARRAY)
 remove_definitions(-DQT_NO_CAST_TO_ASCII)

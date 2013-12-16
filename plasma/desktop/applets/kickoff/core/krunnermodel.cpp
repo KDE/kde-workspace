@@ -69,7 +69,6 @@ Plasma::RunnerManager * runnerManager() {
         // runner:  "desktopsessions"   "Desktop Sessions"
         // runner:  "places"   "Places"
         // runner:  "windows"   "Windows"
-        // runner:  "nepomuksearch"   "Nepomuk Desktop Search Runner"
         // runner:  "plasma-desktop"   "Plasma Desktop Shell"
         // runner:  "services"   "Applications"
         // runner:  "PowerDevil"   "PowerDevil"

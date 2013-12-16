@@ -10,10 +10,6 @@ add_subdirectory(solid)
 add_subdirectory(webshortcuts)
 add_subdirectory(windowedwidgets)
 
-if(NepomukCore_FOUND)
-  add_subdirectory(nepomuksearch)
-endif()
-
 if(NOT WIN32)
 add_subdirectory(powerdevil)
 add_subdirectory(sessions)
