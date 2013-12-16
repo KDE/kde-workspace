@@ -68,8 +68,8 @@ mkdir -p $configDir
 cat >$configDir/startupconfigkeys <<EOF
 kcminputrc Mouse cursorTheme 'Oxygen_White'
 kcminputrc Mouse cursorSize ''
-ksplashrc KSplash Theme Default
-ksplashrc KSplash Engine KSplashX
+ksplashrc KSplash Theme Classic
+ksplashrc KSplash Engine KSplashQML
 kcmfonts General forceFontDPI 0
 kdeglobals Locale Language '' # trigger requesting languages from KLocale
 EOF
