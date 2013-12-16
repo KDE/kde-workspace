@@ -86,19 +86,12 @@ PlasmaCore.FrameSvgItem {
             properties: (panel.location == 5 || panel.location == 6) ? "x" : "y"
             to:  {
                 switch (panel.location) {
-                //TopEdge
                 case PlasmaCore.Types.TopEdge:
-                    return 0
-                    break
-                //LeftEdge
+                    return panel.screenGeometry.y
                 case PlasmaCore.Types.LeftEdge:
-                    return 0
-                    break;
-                //RightEdge
+                    return panel.screenGeometry.x
                 case PlasmaCore.Types.RightEdge:
                     return panel.screenGeometry.x + panel.screenGeometry.width - panel.width
-                    break;
-                //BottomEdge
                 case PlasmaCore.Types.BottomEdge:
                 default:
                     return panel.screenGeometry.y + panel.screenGeometry.height - panel.height
@@ -112,19 +105,12 @@ PlasmaCore.FrameSvgItem {
             properties: (panel.location == 5 || panel.location == 6) ? "x" : "y"
             to: {
                 switch (panel.location) {
-                //TopEdge
                 case PlasmaCore.Types.TopEdge:
-                    return panel.height
-                    break
-                //LeftEdge
+                    return panel.screenGeometry.y + panel.height
                 case PlasmaCore.Types.LeftEdge:
-                    return panel.width
-                    break;
-                //RightEdge
+                    return panel.screenGeometry.x + panel.width
                 case PlasmaCore.Types.RightEdge:
                     return panel.screenGeometry.x + panel.screenGeometry.width - panel.width - configDialog.width
-                    break;
-                //BottomEdge
                 case PlasmaCore.Types.BottomEdge:
                 default:
                     return panel.screenGeometry.y + panel.screenGeometry.height - panel.height - configDialog.height
