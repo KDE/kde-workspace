@@ -56,7 +56,7 @@ function restore() {
         root.addApplet(appletsOrder[i], -1, -1)
     }
     //rewrite, so if in the orders there were now invalid ids or if some were missing creates a correct list instead
-    LayoutManager.save();
+    save();
 }
 
 function save() {
