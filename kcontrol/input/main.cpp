@@ -77,7 +77,7 @@ extern "C"
 
     // Tell klauncher to set the XCURSOR_THEME and XCURSOR_SIZE environment
     // variables when launching applications.
-    OrgKdeKLauncherInterface klauncher(QStringLiteral("org.kde.KLauncher"),
+    OrgKdeKLauncherInterface klauncher(QStringLiteral("org.kde.klauncher5"),
                                        QStringLiteral("/KLauncher"),
                                        QDBusConnection::sessionBus());
     if(!theme.isEmpty())
