@@ -47,6 +47,7 @@ private:
     int m_stage;
     QList<SplashWindow *> m_windows;
     bool m_testing;
+    QStringList m_stages;
     QBasicTimer m_timer;
     QDesktopWidget *m_desktop;
 

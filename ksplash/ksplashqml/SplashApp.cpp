@@ -74,20 +74,11 @@ void SplashApp::timerEvent(QTimerEvent * event)
 
 void SplashApp::setStage(const QString &stage)
 {
-    if (stage == QLatin1String("initial") && m_stage < 0)
-        setStage(0); // not actually used
-    else if (stage == QLatin1String("kded") && m_stage < 1)
-        setStage(1);
-    else if (stage == QLatin1String("confupdate") && m_stage < 2)
-        setStage(2);
-    else if (stage == QLatin1String("kcminit") && m_stage < 3)
-        setStage(3);
-    else if (stage == QLatin1String("ksmserver") && m_stage < 4)
-        setStage(4);
-    else if (stage == QLatin1String("wm") && m_stage < 5)
-        setStage(5);
-    else if (stage == QLatin1String("desktop") && m_stage < 6)
-        setStage(6);
+    if (m_stages.contains(stage)) {
+        return;
+    }
+    m_stages.append(stage);
+    setStage(m_stages.count());
 }
 
 void SplashApp::setStage(int stage)
