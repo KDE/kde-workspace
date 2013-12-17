@@ -69,9 +69,6 @@ Item {
 
                 anchors.fill: parent
 
-                Rectangle { anchors.fill: parent; color: "orange"; opacity: 0.6;  visible: debug;  }
-
-
                 hoverEnabled: true
                 acceptedButtons: Qt.LeftButton | Qt.RightButton
 
