@@ -25,10 +25,10 @@ main(int argc, char *argv[])
 
     QString sdtypeOption = args->getOption("type").toLower();
 
-    if (args->isSet("theme")) {
-        Plasma::Theme::defaultTheme()->setUseGlobalSettings(false); //don't change every plasma theme!
-        Plasma::Theme::defaultTheme()->setThemeName(args->getOption("theme"));
-    }
+//     if (args->isSet("theme")) {
+//         Plasma::Theme::defaultTheme()->setUseGlobalSettings(false); //don't change every plasma theme!
+//         Plasma::Theme::defaultTheme()->setThemeName(args->getOption("theme"));
+//     }
 
     KWorkSpace::ShutdownType sdtype = KWorkSpace::ShutdownTypeDefault;
     if (sdtypeOption == QStringLiteral("reboot")) {

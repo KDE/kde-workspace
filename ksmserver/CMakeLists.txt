@@ -6,7 +6,7 @@ include_directories(
    ${KDECLARATIVE_INCLUDE_DIR}
 )
 #
-# add_subdirectory( tests )
+add_subdirectory( tests )
 #
 if(NOT WIN32)
   add_subdirectory( screenlocker )

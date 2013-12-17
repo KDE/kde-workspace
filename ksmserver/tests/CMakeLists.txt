@@ -8,14 +8,21 @@ set(testsh_SRCS
 #    ${CMAKE_CURRENT_SOURCE_DIR}/../fadeeffect.cpp)
 )
 
-add_executable(testsh TEST ${testsh_SRCS})
+add_executable(testsh ${testsh_SRCS})
 
 target_link_libraries(testsh
-    KF5::Plasma
+     ${SCREEN_LOCKER}
     kworkspace
-    ${KDE4_KDEUI_LIBS}
-    ${KDE4_SOLID_LIBRARY}
-    ${X11_X11_LIB}
-    ${KDECLARATIVE_LIBRARIES}
-    Qt5::Declarative
+    KF5::KDE4Support
+    KF5::XmlGui
+    KF5::GlobalAccel
+    KF5::KIOCore
+    KF5::KIOWidgets
+    KF5::Notifications
+    ${X11_LIBRARIES}
+    ${X11_Xrender_LIB}
+    KF5::Solid
+    Qt5::Quick
+    KF5::Declarative
+    KF5::DBusAddons
 )
