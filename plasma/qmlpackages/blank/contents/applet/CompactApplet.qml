@@ -54,11 +54,6 @@ Item {
             onHeightChanged: applet.height = height
         }
 
-        onActiveWindowChanged: {
-            if (!activeWindow) {
-               // plasmoid.expanded = false
-            }
-        }
         onVisibleChanged: {
             if (!visible) {
                 plasmoid.expanded = false

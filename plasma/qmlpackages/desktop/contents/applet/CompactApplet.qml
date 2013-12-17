@@ -64,7 +64,6 @@ Item {
     PlasmaCore.Dialog {
         id: popupWindow
         objectName: "popupWindow"
-        //flags: Qt.Popup | Qt.WindowStaysOnTopHint
         flags: Qt.WindowStaysOnTopHint
         visible: plasmoid.expanded
         visualParent: compactRepresentation
@@ -73,22 +72,17 @@ Item {
 
         mainItem: Item {
             id: appletParent
-
             width: applet && applet.implicitWidth > 0 ? applet.implicitWidth : theme.mSize(theme.defaultFont).width * 35
             height: applet && applet.implicitHeight > 0 ? applet.implicitHeight : theme.mSize(theme.defaultFont).height * 25
-
         }
 
         onVisibleChanged: {
             if (!visible) {
-                print("Dismissing PopupApplet");
-                //popupWindow.flags = Qt.WindowStaysOnTopHint;
                 plasmoid.expanded = false
             } else {
-                print("Showing PopupApplet");
                 // This call currently fails and complains at runtime:
                 // QWindow::setWindowState: QWindow::setWindowState does not accept Qt::WindowActive
-                popupWindow.activateWindow();
+                popupWindow.requestActivate();
             }
         }
 
