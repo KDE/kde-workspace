@@ -140,7 +140,7 @@ KProcess* KSMServer::startApplication( const QStringList& cmd, const QString& cl
         return process;
     } else {
         int n = command.count();
-        org::kde::KLauncher klauncher(QStringLiteral("org.kde.klauncher"),
+        org::kde::KLauncher klauncher(QStringLiteral("org.kde.klauncher5"),
                                       QStringLiteral("/KLauncher"), QDBusConnection::sessionBus());
         QString app = command[0];
         QStringList argList;
@@ -624,7 +624,7 @@ KSMServer::KSMServer( const QString& windowManager, bool _only_local, bool locks
 
     new KSMServerInterfaceAdaptor( this );
     QDBusConnection::sessionBus().registerObject(QStringLiteral("/KSMServer"), this);
-    klauncherSignals = new OrgKdeKLauncherInterface(QLatin1String("org.kde.klauncher"),
+    klauncherSignals = new OrgKdeKLauncherInterface(QLatin1String("org.kde.klauncher5"),
             QLatin1String("/KLauncher"), QDBusConnection::sessionBus());
     kcminitSignals = NULL;
     the_server = this;
@@ -702,7 +702,7 @@ KSMServer::KSMServer( const QString& windowManager, bool _only_local, bool locks
         setenv( "SESSION_MANAGER", session_manager, true  );
 
         // Pass env. var to kdeinit.
-        org::kde::KLauncher klauncher( QStringLiteral( "org.kde.klauncher" ), QStringLiteral( "/KLauncher" ), QDBusConnection::sessionBus());
+        org::kde::KLauncher klauncher( QStringLiteral( "org.kde.klauncher5" ), QStringLiteral( "/KLauncher" ), QDBusConnection::sessionBus());
         klauncher.setLaunchEnv( QStringLiteral( "SESSION_MANAGER" ), QString::fromLocal8Bit( (const char*) session_manager ) );
 
         free(session_manager);
