@@ -70,7 +70,7 @@ Rectangle {
             }
         }
         type: PlasmaCore.Dialog.Dock
-        windowFlags: Qt.Window|Qt.WindowStaysOnTopHint|Qt.X11BypassWindowManagerHint
+        flags: Qt.Window|Qt.WindowStaysOnTopHint|Qt.X11BypassWindowManagerHint
 
         mainItem: PlasmaComponents.PageStack {
             id: sidePanelStack

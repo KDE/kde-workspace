@@ -150,7 +150,7 @@ Item {
 
     PlasmaCore.Dialog {
         id: calendar
-        windowFlags: Qt.Popup
+        flags: Qt.Popup
         //FIXME Temporarily disabled until Calendar becomes available
 //         mainItem: Calendar {
 //             firstDayOfMonth: 4

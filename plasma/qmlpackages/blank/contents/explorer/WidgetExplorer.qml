@@ -97,7 +97,7 @@ Item {
 
         Component.onCompleted: {
             tooltipDialog.setAttribute(Qt.WA_X11NetWmWindowTypeToolTip, true)
-            tooltipDialog.windowFlags = Qt.Window|Qt.WindowStaysOnTopHint|Qt.X11BypassWindowManagerHint
+            tooltipDialog.flags = Qt.Window|Qt.WindowStaysOnTopHint|Qt.X11BypassWindowManagerHint
         }
 
         onAppletDelegateChanged: {

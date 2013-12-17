@@ -41,7 +41,7 @@ Item {
 
     PlasmaCore.Dialog {
         id: popupWindow
-        //windowFlags: Qt.Popup
+        //flags: Qt.Popup
         color: Qt.rgba(0,0,0,0)
         visible: plasmoid.expanded
         visualParent: root

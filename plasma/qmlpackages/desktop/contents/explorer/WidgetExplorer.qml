@@ -100,7 +100,7 @@ Item {
         location: PlasmaCore.Types.LeftEdge
 
         type: PlasmaCore.Dialog.Tooltip
-        windowFlags:Qt.Window|Qt.WindowStaysOnTopHint|Qt.X11BypassWindowManagerHint
+        flags:Qt.Window|Qt.WindowStaysOnTopHint|Qt.X11BypassWindowManagerHint
 
         onAppletDelegateChanged: {
             if (!appletDelegate) {

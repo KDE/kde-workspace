@@ -63,7 +63,7 @@ Item {
         visible: false
         mainItem: content
         location: plasmoid.location
-        windowFlags: Qt.WindowStaysOnTopHint
+        flags: Qt.WindowStaysOnTopHint
 
         onActiveWindowChanged: dialog.visible = activeWindow  // hide window if it deactivates
 

@@ -78,7 +78,7 @@ PlasmaCore.Dialog {
     }
 
     location: customPosition ? Floating : plasmoid.location
-    windowFlags: Qt.WindowStaysOnTopHint
+    flags: Qt.WindowStaysOnTopHint
     Component.onCompleted: {
         setAttribute(Qt.WA_X11NetWmWindowTypeDock, true)
 

@@ -55,17 +55,17 @@ Item {
         applet.parent = appletParent;
         applet.anchors.fill = applet.parent;
     }
+
     onCompactRepresentationChanged: {
         compactRepresentation.parent = root
         compactRepresentation.anchors.fill = root
     }
 
-
     PlasmaCore.Dialog {
         id: popupWindow
         objectName: "popupWindow"
-        flags: Qt.Popup | Qt.WindowStaysOnTopHint
-        color: Qt.rgba(0,0,0,0)
+        //flags: Qt.Popup | Qt.WindowStaysOnTopHint
+        flags: Qt.WindowStaysOnTopHint
         visible: plasmoid.expanded
         visualParent: compactRepresentation
         location: plasmoid.location
@@ -81,8 +81,11 @@ Item {
 
         onVisibleChanged: {
             if (!visible) {
+                print("Dismissing PopupApplet");
+                //popupWindow.flags = Qt.WindowStaysOnTopHint;
                 plasmoid.expanded = false
             } else {
+                print("Showing PopupApplet");
                 // This call currently fails and complains at runtime:
                 // QWindow::setWindowState: QWindow::setWindowState does not accept Qt::WindowActive
                 popupWindow.activateWindow();

@@ -28,7 +28,7 @@ PlasmaCore.Dialog {
     property Item target
 
     visible: false
-    windowFlags: Qt.Popup
+    flags: Qt.Popup
 
     mainItem: Item {
         MouseHandler {
