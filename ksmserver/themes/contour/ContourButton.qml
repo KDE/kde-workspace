@@ -22,7 +22,7 @@ Inherits:
         PlasmaCore.FrameSvgItem
 
 Imports:
-        QtQuick 1.0
+        QtQuick 2.0
         org.kde.plasma.core
         org.kde.qtextracomponents
 
@@ -53,9 +53,9 @@ Signals:
         This handler is called when there is a click.
 **/
 
-import QtQuick 1.0
-import org.kde.plasma.core 0.1 as PlasmaCore
-import org.kde.qtextracomponents 0.1
+import QtQuick 2.0
+import org.kde.plasma.core 2.0 as PlasmaCore
+import org.kde.qtextracomponents 2.0
 
 PlasmaCore.FrameSvgItem {
     id: button

@@ -18,9 +18,9 @@
 *   51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
-import QtQuick 1.1
-import org.kde.plasma.core 0.1 as PlasmaCore
-import org.kde.plasma.components 0.1 as PlasmaComponents
+import QtQuick 2.0
+import org.kde.plasma.core 2.0 as PlasmaCore
+import org.kde.plasma.components 2.0 as PlasmaComponents
 
 Item {
     id: root
@@ -60,7 +60,7 @@ Item {
     PlasmaCore.Dialog {
         id: dialog
         visible: false
-        windowFlags: Qt.Popup
+//         windowFlags: Qt.Popup
         onVisibleChanged: {
             if (visible) {
                 status = PlasmaComponents.DialogStatus.Open
@@ -73,7 +73,7 @@ Item {
             id: contentItem
 
             width: listView.width
-            height: Math.min(listView.contentHeight, theme.defaultFont.mSize.height * 25)
+            height: Math.min(listView.contentHeight, theme.mSize(theme.defaultFont).height * 25)
 
             ListView {
                 id: listView

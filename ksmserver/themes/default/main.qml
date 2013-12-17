@@ -22,11 +22,11 @@
  . use kde-runtime/plasma/declarativeimports/plasmacomponents/qml/ContextMenu.qml
  instead of a custom ContextMenu component.
  */
-import QtQuick 1.1
-import org.kde.plasma.core 0.1 as PlasmaCore
-import org.kde.plasma.components 0.1 as PlasmaComponents
+import QtQuick 2.0
+import org.kde.plasma.core 2.0 as PlasmaCore
+import org.kde.plasma.components 2.0 as PlasmaComponents
 import "helper.js" as Helper
-
+import "."
 PlasmaCore.FrameSvgItem {
     id: shutdownUi
     property int realMarginTop: margins.top
@@ -51,9 +51,9 @@ PlasmaCore.FrameSvgItem {
     property variant lastButton: 0
     property int automaticallyDoSeconds: 30
 
-    PlasmaCore.Theme {
-        id: theme
-    }
+//     PlasmaCore.Theme {
+//         id: theme
+//     }
 
     /* This is not necessary for themes that follow the specification.
        Uncomment this and [1] below if the dialog appears without borders or background.
@@ -131,7 +131,7 @@ PlasmaCore.FrameSvgItem {
             }
         }
 
-        focusedButton.forceActiveFocus()
+//         focusedButton.forceActiveFocus()
         timer.running = true;
 
         // implement label accelerators in the buttons (the '&' in button's text).
@@ -186,7 +186,7 @@ PlasmaCore.FrameSvgItem {
 
     Text {
         id: automaticallyDoLabel
-        font.pointSize: theme.desktopFont.pointSize >= 10 ? theme.desktopFont.pointSize*0.9 : theme.desktopFont.pointSize
+//         font.pointSize: theme.desktopFont.pointSize >= 10 ? theme.desktopFont.pointSize*0.9 : theme.desktopFont.pointSize
         color: theme.textColor
         wrapMode: Text.WordWrap
         horizontalAlignment: Text.AlignRight
@@ -239,14 +239,14 @@ PlasmaCore.FrameSvgItem {
             Column {
                 spacing: 4
 
-                KSMButton {
+                PlasmaComponents.Button {
                     id: logoutButton
                     text: i18n("&Logout")
                     iconSource: "system-log-out"
                     anchors.right: parent.right
                     visible: (choose || sdtype == ShutdownType.ShutdownTypeNone)
-                    tabStopNext: shutdownButton
-                    tabStopBack: cancelButton
+//                     tabStopNext: shutdownButton
+//                     tabStopBack: cancelButton
 
                     onClicked: {
                         //console.log("main.qml: logoutRequested")
@@ -258,43 +258,43 @@ PlasmaCore.FrameSvgItem {
                     }
                 }
 
-                KSMButton {
+                PlasmaComponents.Button {
                     id: shutdownButton
                     text: i18n("&Turn Off Computer")
                     iconSource: "system-shutdown"
                     anchors.right: parent.right
                     visible: (choose || sdtype == ShutdownType.ShutdownTypeHalt)
-                    menu: spdMethods.StandbyState | spdMethods.SuspendState | spdMethods.HibernateState
-                    tabStopNext: rebootButton
-                    tabStopBack: logoutButton
+//                     menu: spdMethods.StandbyState | spdMethods.SuspendState | spdMethods.HibernateState
+//                     tabStopNext: rebootButton
+//                     tabStopBack: logoutButton
 
                     onClicked: {
                         //console.log("main.qml: haltRequested")
                         haltRequested()
                     }
 
-                    onPressAndHold: {
-                        if (!menu) {
-                            return
-                        }
-                        if (!contextMenu) {
-                            contextMenu = shutdownOptionsComponent.createObject(shutdownButton)
-                            if (spdMethods.StandbyState) {
-                                // 1 == Solid::PowerManagement::StandbyState
-                                contextMenu.append({itemIndex: 1, itemText: i18n("&Standby"), itemSubMenu: null, itemAllowAmpersand: false})
-                            }
-                            if (spdMethods.SuspendState) {
-                                // 2 == Solid::PowerManagement::SuspendState
-                                contextMenu.append({itemIndex: 2, itemText: i18n("Suspend to &RAM"), itemSubMenu: null, itemAllowAmpersand: false})
-                            }
-                            if (spdMethods.HibernateState) {
-                                // 4 == Solid::PowerManagement::HibernateState
-                                contextMenu.append({itemIndex: 4, itemText: i18n("Suspend to &Disk"), itemSubMenu: null, itemAllowAmpersand: false})
-                            }
-                            contextMenu.clicked.connect(shutdownUi.suspendRequested)
-                        }
-                        contextMenu.open()
-                    }
+//                     onPressAndHold: {
+//                         if (!menu) {
+//                             return
+//                         }
+//                         if (!contextMenu) {
+//                             contextMenu = shutdownOptionsComponent.createObject(shutdownButton)
+//                             if (spdMethods.StandbyState) {
+//                                 // 1 == Solid::PowerManagement::StandbyState
+//                                 contextMenu.append({itemIndex: 1, itemText: i18n("&Standby"), itemSubMenu: null, itemAllowAmpersand: false})
+//                             }
+//                             if (spdMethods.SuspendState) {
+//                                 // 2 == Solid::PowerManagement::SuspendState
+//                                 contextMenu.append({itemIndex: 2, itemText: i18n("Suspend to &RAM"), itemSubMenu: null, itemAllowAmpersand: false})
+//                             }
+//                             if (spdMethods.HibernateState) {
+//                                 // 4 == Solid::PowerManagement::HibernateState
+//                                 contextMenu.append({itemIndex: 4, itemText: i18n("Suspend to &Disk"), itemSubMenu: null, itemAllowAmpersand: false})
+//                             }
+//                             contextMenu.clicked.connect(shutdownUi.suspendRequested)
+//                         }
+//                         contextMenu.open()
+//                     }
 
                     onActiveFocusChanged: {
                         shutdownUi.focusedButton = shutdownButton
@@ -308,15 +308,15 @@ PlasmaCore.FrameSvgItem {
                     }
                 }
 
-                KSMButton {
+                PlasmaComponents.Button {
                     id: rebootButton
                     text: i18n("&Restart Computer")
                     iconSource: "system-reboot"
                     anchors.right: parent.right
                     visible: (choose || sdtype == ShutdownType.ShutdownTypeReboot)
-                    menu: rebootOptions["options"].length > 0
-                    tabStopNext: cancelButton
-                    tabStopBack: shutdownButton
+//                     menu: rebootOptions["options"].length > 0
+//                     tabStopNext: cancelButton
+//                     tabStopBack: shutdownButton
 
                     onClicked: {
                         //console.log("main.qml: rebootRequested")
@@ -377,46 +377,46 @@ PlasmaCore.FrameSvgItem {
                         menus[currentMenuId].append(itemData)
                     }
 
-                    onPressAndHold: {
-                        if (!menu) {
-                            return
-                        }
-                        if (!contextMenu) {
-                            var options = rebootOptions["options"]
-                            //console.log("bootManager == " + bootManager)
-
-                            if (bootManager === "Grub2" || bootManager === "Burg") {
-                                // javascript passes primitive types by value, I need this one passed by reference.
-                                function Index() { this.value = 0 }
-                                var index = new Index()
-                                var menus = {}
-                                var menuId = ""
-
-                                // starts backwards so that the top of the stack is the first menu entry.
-                                index.value = options.length - 1
-                                menus[menuId] = rebootOptionsComponent.createObject(rebootButton)
-                                menus[menuId].clicked.connect(shutdownUi.rebootRequested2)
-                                findAndCreateMenu(index, options, menus, menuId)
-                                contextMenu = menus[menuId]
-                            } else {
-                                contextMenu = rebootOptionsComponent.createObject(rebootButton)
-
-                                for (var index = 0; index < options.length; ++index) {
-                                    var itemData = new Object
-                                    itemData["itemIndex"] = index
-                                    itemData["itemText"] = options[index]
-                                    itemData["itemSubMenu"] = null
-                                    itemData["itemAllowAmpersand"] = true
-                                    if (index == rebootOptions["default"]) {
-                                        itemData["itemText"] += i18nc("default option in boot loader", " (default)")
-                                    }
-                                    contextMenu.append(itemData)
-                                }
-                                contextMenu.clicked.connect(shutdownUi.rebootRequested2)
-                            }
-                        }
-                        contextMenu.open()
-                    }
+//                     onPressAndHold: {
+//                         if (!menu) {
+//                             return
+//                         }
+//                         if (!contextMenu) {
+//                             var options = rebootOptions["options"]
+//                             //console.log("bootManager == " + bootManager)
+//
+//                             if (bootManager === "Grub2" || bootManager === "Burg") {
+//                                 // javascript passes primitive types by value, I need this one passed by reference.
+//                                 function Index() { this.value = 0 }
+//                                 var index = new Index()
+//                                 var menus = {}
+//                                 var menuId = ""
+//
+//                                 // starts backwards so that the top of the stack is the first menu entry.
+//                                 index.value = options.length - 1
+//                                 menus[menuId] = rebootOptionsComponent.createObject(rebootButton)
+//                                 menus[menuId].clicked.connect(shutdownUi.rebootRequested2)
+//                                 findAndCreateMenu(index, options, menus, menuId)
+//                                 contextMenu = menus[menuId]
+//                             } else {
+//                                 contextMenu = rebootOptionsComponent.createObject(rebootButton)
+//
+//                                 for (var index = 0; index < options.length; ++index) {
+//                                     var itemData = new Object
+//                                     itemData["itemIndex"] = index
+//                                     itemData["itemText"] = options[index]
+//                                     itemData["itemSubMenu"] = null
+//                                     itemData["itemAllowAmpersand"] = true
+//                                     if (index == rebootOptions["default"]) {
+//                                         itemData["itemText"] += i18nc("default option in boot loader", " (default)")
+//                                     }
+//                                     contextMenu.append(itemData)
+//                                 }
+//                                 contextMenu.clicked.connect(shutdownUi.rebootRequested2)
+//                             }
+//                         }
+//                         contextMenu.open()
+//                     }
 
                     onActiveFocusChanged: {
                         shutdownUi.focusedButton = rebootButton
@@ -431,14 +431,14 @@ PlasmaCore.FrameSvgItem {
                 }
             }
 
-            KSMButton {
+            PlasmaComponents.Button {
                 id: cancelButton
                 anchors.right: parent.right
                 text: i18n("&Cancel")
                 iconSource: "dialog-cancel"
-                smallButton: true
-                tabStopNext: logoutButton
-                tabStopBack: rebootButton
+//                 smallButton: true
+//                 tabStopNext: logoutButton
+//                 tabStopBack: rebootButton
 
                 onClicked: {
                     cancelRequested()

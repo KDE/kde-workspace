@@ -162,11 +162,12 @@ void KSMShutdownFeedback::logoutCanceled()
 ////////////
 
 Q_DECLARE_METATYPE(Solid::PowerManagement::SleepState)
+#include <QVBoxLayout>
 
 KSMShutdownDlg::KSMShutdownDlg( QWidget* parent,
                                 bool maysd, bool choose, KWorkSpace::ShutdownType sdtype,
                                 const QString& theme)
-  : QDialog( parent, Qt::Popup ) //krazy:exclude=qclasses
+  : QDialog( parent/*, Qt::Popup */) //krazy:exclude=qclasses
     // this is a WType_Popup on purpose. Do not change that! Not
     // having a popup here has severe side effects.
 {
@@ -181,8 +182,13 @@ KSMShutdownDlg::KSMShutdownDlg( QWidget* parent,
 
     KDialog::centerOnScreen(this, -3);
 
+     setMinimumSize(300, 200);
     //kDebug() << "Creating QML view";
-    m_view = new QQuickView(windowHandle());
+    QVBoxLayout *vbox = new QVBoxLayout(this);
+    m_view = new QQuickView( );
+    QWidget *windowContainer = QWidget::createWindowContainer(m_view, this);
+    vbox->addWidget(windowContainer);
+    windowContainer->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
     QQmlContext *context = m_view->rootContext();
     context->setContextProperty(QStringLiteral("maysd"), maysd);
     context->setContextProperty(QStringLiteral("choose"), choose);
@@ -223,22 +229,23 @@ KSMShutdownDlg::KSMShutdownDlg( QWidget* parent,
     setModal( true );
 
     // window stuff
-    m_view->setFlags(Qt::X11BypassWindowManagerHint);
-//    m_view->setFrameShape(QFrame::NoFrame);
-//    m_view->setAttribute(Qt::WA_TranslucentBackground);
+//     setFlags(Qt::X11BypassWindowManagerHint);
+//     windowContainer->setFrameShape(QFrame::NoFrame);
+    windowContainer->setAttribute(Qt::WA_TranslucentBackground);
+    setAttribute(Qt::WA_TranslucentBackground);
     setAttribute(Qt::WA_TranslucentBackground);
     setStyleSheet(QStringLiteral("background:transparent;"));
-//    QPalette pal = m_view->palette();
-//    pal.setColor(backgroundRole(), Qt::transparent);
-//    m_view->setPalette(pal);
-//    m_view->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-//    m_view->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    QPalette pal = windowContainer->palette();
+    pal.setColor(backgroundRole(), Qt::transparent);
+    windowContainer->setPalette(pal);
+//    setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+//    setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     // engine stuff
     KDeclarative kdeclarative;
     kdeclarative.setDeclarativeEngine(m_view->engine());
     kdeclarative.initialize();
     kdeclarative.setupBindings();
-    m_view->installEventFilter(this);
+    windowContainer->installEventFilter(this);
 
     QString fileName = QStandardPaths::locate(QStandardPaths::GenericDataLocation, QStringLiteral("ksmserver/themes/%1/main.qml").arg(theme));
     if (QFile::exists(fileName)) {
@@ -253,8 +260,7 @@ KSMShutdownDlg::KSMShutdownDlg( QWidget* parent,
     connect(rootObject, SIGNAL(rebootRequested2(int)), SLOT(slotReboot(int)) );
     connect(rootObject, SIGNAL(cancelRequested()), SLOT(reject()));
     connect(rootObject, SIGNAL(lockScreenRequested()), SLOT(slotLockScreen()));
-    m_view->show();
-//    m_view->setFocus();
+
     adjustSize();
 }
 

@@ -21,7 +21,7 @@ Inherits:
         PlasmaCore.FrameSvgItem
 
 Imports:
-        QtQuick 1.1
+        QtQuick 2.0
         org.kde.plasma.core
         org.kde.qtextracomponents
 
@@ -70,9 +70,9 @@ Signals:
         This handler is called when there is a press and hold.
 **/
 
-import QtQuick 1.1
-import org.kde.plasma.core 0.1 as PlasmaCore
-import org.kde.qtextracomponents 0.1
+import QtQuick 2.0
+import org.kde.plasma.core 2.0 as PlasmaCore
+import org.kde.qtextracomponents 2.0
 
 PlasmaCore.FrameSvgItem {
     id: button
@@ -90,9 +90,9 @@ PlasmaCore.FrameSvgItem {
     signal pressed()
     signal pressAndHold()
 
-    PlasmaCore.Theme {
-        id: theme
-    }
+//     PlasmaCore.Theme {
+//         id: theme
+//     }
 
     PlasmaCore.SvgItem {
         id: background
@@ -111,11 +111,11 @@ PlasmaCore.FrameSvgItem {
         anchors {
             verticalCenter: parent.verticalCenter
             left: parent.left
-            leftMargin: theme.defaultFont.mSize.width
+            leftMargin: theme.mSize(theme.defaultFont).width
         }
 
         onPaintedWidthChanged: {
-            button.width = Math.max(button.width, theme.defaultFont.mSize.width + labelElement.width + 2*theme.defaultFont.mSize.width + iconElement.width + theme.defaultFont.mSize.width)
+            button.width = Math.max(button.width, theme.mSize(theme.defaultFont).width + labelElement.width + 2*theme.mSize(theme.defaultFont).width + iconElement.width + theme.mSize(theme.defaultFont).width)
         }
     }
 
