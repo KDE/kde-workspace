@@ -20,9 +20,8 @@
 
 import QtQuick 2
 import org.kde.solid 1.0 as Solid
-import QtQuick.Window 2.0
 
-Item {
+QtObject {
     id: main
 
     property string shell  : "org.kde.desktop"
@@ -32,6 +31,8 @@ Item {
     // This is not needed, but allows the
     // handler to know whether its shell is loaded
     property bool loaded   : false
+
+    default property var children
 
     Solid.Devices {
         id: keyboards
