@@ -34,6 +34,7 @@ SplashApp::SplashApp(int &argc, char ** argv)
       m_testing(false)
 {
     m_testing = arguments().contains(QStringLiteral("--test"));
+    m_window = arguments().contains(QStringLiteral("--window"));
 
     m_desktop = QApplication::desktop();
     screenGeometryChanged(m_desktop->screenCount());
@@ -102,7 +103,7 @@ void SplashApp::screenGeometryChanged(int)
             m_windows[i]->setGeometry(m_desktop->availableGeometry(i));
         }
         else {
-            SplashWindow *w = new SplashWindow(m_testing);
+            SplashWindow *w = new SplashWindow(m_testing, m_window);
             w->setGeometry(m_desktop->availableGeometry(i));
             w->setStage(m_stage);
             w->show();

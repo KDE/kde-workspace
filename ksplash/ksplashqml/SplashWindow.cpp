@@ -27,20 +27,23 @@
 #include <QTimer>
 #include <QStandardPaths>
 
-SplashWindow::SplashWindow(bool testing)
+SplashWindow::SplashWindow(bool testing, bool window)
     : QQuickView(),
       m_stage(0),
-      m_testing(testing)
+      m_testing(testing),
+      m_window(window)
 {
-    setFlags(
-        Qt::FramelessWindowHint |
-        Qt::WindowStaysOnTopHint
-    );
 
-    if (m_testing) {
-        setWindowState(Qt::WindowFullScreen);
-    } else {
+    if (!m_window) {
+        setFlags(Qt::FramelessWindowHint | Qt::WindowStaysOnTopHint);
+    }
+
+    if (!m_testing && !m_window) {
         setFlags(Qt::BypassWindowManagerHint);
+    }
+
+    if (m_testing && !m_window) {
+        setWindowState(Qt::WindowFullScreen);
     }
 
     QString themePath = QStandardPaths::locate(QStandardPaths::GenericDataLocation,

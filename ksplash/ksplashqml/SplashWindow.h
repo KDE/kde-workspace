@@ -29,7 +29,7 @@ class QKeyEvent;
 class SplashWindow: public QQuickView
 {
 public:
-    SplashWindow(bool testing);
+    SplashWindow(bool testing, bool window);
 
     void setStage(int stage);
 
@@ -41,6 +41,7 @@ protected:
 private:
     int m_stage;
     bool m_testing;
+    bool m_window;
 };
 
 #endif // SPLASH_WINDOW_H_
