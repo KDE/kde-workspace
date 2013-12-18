@@ -25,6 +25,7 @@
 
 int main(int argc, char **argv)
 {
+    bool nofork = false;
     bool test = false;
     bool printPid = false;
 
@@ -33,11 +34,13 @@ int main(int argc, char **argv)
             test = true;
         else if (strcmp("--pid", argv[i]) == 0)
             printPid = true;
+        else if (strcmp("--nofork", argv[i]) == 0)
+            nofork = true;
     }
 
     // lets fork and all that...
 
-    if (!test) {
+    if (!test && !nofork) {
         pid_t pid = fork();
         if (pid < -1) {
             return -1;
