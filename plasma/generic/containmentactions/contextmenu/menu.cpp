@@ -169,6 +169,10 @@ QAction *ContextMenu::action(const QString &name)
         if (KAuthorized::authorizeKAction("logout")) {
             return m_logoutAction;
         }
+    } else if (name == "lock widgets") {
+        if (KAuthorized::authorizeKAction("logout")) {
+            return c->corona()->actions()->action("lock widgets");
+        }
     } else if (name == "manage activities") {
         if (c->corona()) {
             return c->corona()->actions()->action("manage activities");
