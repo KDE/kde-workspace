@@ -39,7 +39,7 @@ SplashApp::SplashApp(int &argc, char ** argv)
     m_desktop = QApplication::desktop();
     screenGeometryChanged(m_desktop->screenCount());
 
-    setStage(1);
+    setStage("initial");
 
     QPixmap cursor(32, 32);
     cursor.fill(QColor(0, 0, 0, 0));
