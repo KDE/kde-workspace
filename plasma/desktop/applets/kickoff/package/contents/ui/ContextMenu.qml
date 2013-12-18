@@ -44,7 +44,6 @@ PlasmaComponents.ContextMenu {
 
         text: contextMenu.title
         icon: contextMenu.model.decoration
-//         font.bold: true //FIXME?
         checkable: false
         enabled: false
     }
@@ -57,10 +56,11 @@ PlasmaComponents.ContextMenu {
         id: addToFavorites
 
         text: contextMenu.isFavorite ? i18n("Remove From Favorites") : i18n("Add To Favorites")
-        icon: contextMenu.isFavorite ? QIcon("list-remove") : QIcon("bookmark-new")
+        icon: contextMenu.isFavorite ? "list-remove" : "bookmark-new"
         visible: contextMenu.isApp
 
         onClicked: {
+            // FIXME: apparently contextMenu.model is empty
             if (contextMenu.isFavorite) {
                 favoritesModel.remove(contextMenu.model.url);
             } else {

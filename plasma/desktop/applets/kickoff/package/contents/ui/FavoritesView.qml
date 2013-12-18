@@ -53,7 +53,7 @@ Item {
             id: sortFavoritesAscending
 
             text: i18n("Sort Alphabetically (A to Z)")
-            icon: QIcon("view-sort-ascending")
+            icon: "view-sort-ascending"
 
             onClicked: {
                 favoritesModel.sortFavoritesAscending();
@@ -63,7 +63,7 @@ Item {
             id: sortFavoritesDescending
 
             text: i18n("Sort Alphabetically (Z to A)")
-            icon: QIcon("view-sort-descending")
+            icon: "view-sort-descending"
 
             onClicked: {
                 favoritesModel.sortFavoritesDescending();
