@@ -31,10 +31,19 @@ PlasmaCore.FrameSvgItem {
     property Item containment
 
     function adjustBorders() {
+        //print("PANEL ADJUST BORDERS");
+        var borders = PlasmaCore.FrameSvg.AllBorders;
         if (!containment) {
+            // Containment seems to never be set
+            // (or not reachable from here at least)
+            // FIXME: investigate why containment is null
+            print("FIXME Panel borders hardcoded in Panel.qml");
+            borders = borders & ~PlasmaCore.FrameSvg.BottomBorder;
+            borders = borders & ~PlasmaCore.FrameSvg.LeftBorder;
+            borders = borders & ~PlasmaCore.FrameSvg.RightBorder;
+            root.enabledBorders = borders;
             return;
         }
-        var borders = PlasmaCore.FrameSvg.AllBorders;
 
         switch (containment.location) {
         case PlasmaCore.Types.TopEdge:
@@ -48,6 +57,7 @@ PlasmaCore.FrameSvgItem {
             break;
         case PlasmaCore.Types.BottomEdge:
         default:
+            print("PANEL disable bottom border");
             borders = borders & ~PlasmaCore.FrameSvg.BottomBorder;
             break;
         }
