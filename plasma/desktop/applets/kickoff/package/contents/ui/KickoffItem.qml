@@ -41,12 +41,6 @@ Item {
         }
     }
 
-    PlasmaComponents.Highlight {
-        anchors.fill: parent
-        opacity: itemMouseArea.containsMouse ? 1 : 0
-        Behavior on opacity { NumberAnimation {} }
-    }
-
     Item {
         id: listItemDelegate
 
@@ -157,11 +151,13 @@ Item {
             font.pointSize: theme.smallestFont.pointSize
             elide: Text.ElideMiddle
         }
-    } // listItemDelegate
 
-    MouseArea {
-        id: itemMouseArea
-        hoverEnabled: true
-        anchors.fill: parent
-    }
+        PlasmaComponents.Highlight {
+            id: itemHighlight
+            anchors.fill: parent
+            anchors.margins: -4
+            opacity: mouseArea.containsMouse ? 1 : 0
+            Behavior on opacity { NumberAnimation {} }
+        }
+    } // listItemDelegate
 } // listItem
