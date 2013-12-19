@@ -135,7 +135,6 @@ Item {
 
             focus: true
             boundsBehavior: Flickable.StopAtBounds
-            highlight: PlasmaComponents.Highlight {}
 
             model: VisualDataModel {
                 id: vmodel

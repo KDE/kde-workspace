@@ -56,8 +56,6 @@ Item {
                 criteria: ViewSection.FullString
                 delegate: SectionDelegate {}
             }
-            highlight: PlasmaComponents.Highlight {
-            }
         }
     }
 }

@@ -41,6 +41,11 @@ Item {
         }
     }
 
+    PlasmaComponents.Highlight {
+        anchors.fill: parent
+        opacity: itemMouseArea.containsMouse ? 1 : 0
+        Behavior on opacity { NumberAnimation {} }
+    }
 
     Item {
         id: listItemDelegate
@@ -153,4 +158,10 @@ Item {
             elide: Text.ElideMiddle
         }
     } // listItemDelegate
+
+    MouseArea {
+        id: itemMouseArea
+        hoverEnabled: true
+        anchors.fill: parent
+    }
 } // listItem
