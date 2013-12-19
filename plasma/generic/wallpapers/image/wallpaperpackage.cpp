@@ -52,7 +52,8 @@ void WallpaperPackage::initPackage(Plasma::Package *package)
         m_targetSize = m_paper->targetSize();
         m_resizeMethod = m_paper->resizeMethod();
 
-        connect(m_paper, SIGNAL(renderHintsChanged()), this, SLOT(renderHintsChanged()));
+        connect(m_paper, SIGNAL(resizeMethodChanged()), this, SLOT(renderHintsChanged()));
+        connect(m_paper, SIGNAL(renderingModeChanged()), this, SLOT(renderHintsChanged()));
         connect(m_paper, SIGNAL(destroyed(QObject*)), this, SLOT(paperDestroyed()));
     }
 }
@@ -62,10 +63,10 @@ void WallpaperPackage::renderHintsChanged()
     if (m_paper) {
         m_targetSize = m_paper->targetSize();
         m_resizeMethod = m_paper->resizeMethod();
-    }
 
-    if (m_fullPackage) {
-        findBestPaper(m_paper->package());
+        if (m_fullPackage) {
+            findBestPaper(m_paper->package());
+        }
     }
 }
 

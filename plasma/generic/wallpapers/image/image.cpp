@@ -50,7 +50,6 @@ Image::Image(QObject *parent)
 {
     m_wallpaperPackage = Plasma::Package(new WallpaperPackage(this, this));
 
-    connect(this, SIGNAL(renderCompleted(QImage)), this, SLOT(updateBackground(QImage)));
     connect(&m_timer, SIGNAL(timeout()), this, SLOT(nextSlide()));
 
     connect(m_dirWatch, SIGNAL(created(QString)), SLOT(pathCreated(QString)));
@@ -251,6 +250,11 @@ void Image::removeDir()
         updateDirs();
         startSlideshow();
     }*/
+}
+
+void Image::pathDirty(const QString& path)
+{
+    updateDirWatch(QStringList(path));
 }
 
 void Image::updateDirWatch(const QStringList &newDirs)
@@ -605,7 +609,7 @@ void Image::removeWallpaper(QString name)
         m_usersWallpapers.removeAt(wallpaperIndex);
         m_model->reload(m_usersWallpapers);
         //TODO: save the configuration in the right way
-	Q_EMIT settingsChanged(true);
+        Q_EMIT settingsChanged(true);
     }
 }
 

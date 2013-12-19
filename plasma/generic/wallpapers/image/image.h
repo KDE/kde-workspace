@@ -130,10 +130,10 @@ class Image : public QObject
         void addDirFromSelectionDialog();
         void pathCreated(const QString &path);
         void pathDeleted(const QString &path);
+        void pathDirty(const QString &path);
         void backgroundsFound(const QStringList &paths, const QString &token);
 
     protected:
-        void suspendStartup(bool suspend); // for ksmserver
         void setSingleImage();
         void updateWallpaperActions();
         void useSingleImageDefaults();
