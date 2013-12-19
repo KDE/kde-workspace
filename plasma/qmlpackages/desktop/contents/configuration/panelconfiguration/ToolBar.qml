@@ -17,6 +17,7 @@
  */
 
 import QtQuick 2.0
+import QtQuick.Layouts 1.0
 import org.kde.plasma.components 2.0 as PlasmaComponents
 import org.kde.plasma.extras 2.0 as PlasmaExtras
 import org.kde.plasma.core 2.0 as PlasmaCore
@@ -25,38 +26,19 @@ import org.kde.plasma.configuration 2.0
 Item {
     id: root
     state: parent.state
-    implicitWidth: column.width + 20
+    implicitWidth: row.width + 20
     implicitHeight: row.height + 20
-    PlasmaComponents.ButtonRow {
+    GridLayout {
         id: row
-        spacing: 0
-        exclusive: false
-        visible: !dialogRoot.vertical
-        anchors {
-            centerIn: parent
-        }
-        EdgeHandle {
-            id: edgeHandle
-        }
-        SizeHandle {
-            id: sizeHandle
-        }
-    }
-    //FIXME: remove this duplication, use desktopcomponents linear layouts that can switch between horizontal and vertical
-    PlasmaComponents.ButtonColumn {
-        id: column
-        spacing: 0
-        exclusive: false
-        visible: dialogRoot.vertical
-        anchors {
-            centerIn: parent
-        }
-        EdgeHandle {
-            width: 80
-        }
-        SizeHandle {
-            width: 80
-        }
+        columns: dialogRoot.vertical ? 1 : 2
+        rows: dialogRoot.vertical ? 2 : 1
+        anchors.centerIn: parent
+
+        rowSpacing: 0
+        columnSpacing: 0
+
+        EdgeHandle {}
+        SizeHandle {}
     }
 
     PlasmaComponents.Button {
