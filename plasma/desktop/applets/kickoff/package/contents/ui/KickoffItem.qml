@@ -48,6 +48,7 @@ Item {
             left: parent.left
             right: parent.right
             top: parent.top
+            bottom: parent.bottom
             margins: 4 //FIXME theme.defaultFont.mSize.width/2
         }
         height: Math.max(elementIcon.height, titleElement.height + subTitleElement.height)
@@ -67,6 +68,7 @@ Item {
                 id: mouseArea
 
                 anchors.fill: parent
+                anchors.margins: -8
 
                 hoverEnabled: true
                 acceptedButtons: Qt.LeftButton | Qt.RightButton
