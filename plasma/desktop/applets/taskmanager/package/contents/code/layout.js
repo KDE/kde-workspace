@@ -154,8 +154,6 @@ function layout(container) {
 
     for (var i = 0; i < container.count; ++i) {
         item = container.itemAt(i);
-        item.visible = true;
-
         adjustedWidth = width;
 
         if (!tasks.vertical) {
@@ -168,5 +166,6 @@ function layout(container) {
 
         item.width = adjustedWidth;
         item.height = height;
+        item.visible = true;
     }
 }
