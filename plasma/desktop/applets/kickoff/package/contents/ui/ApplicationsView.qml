@@ -93,6 +93,8 @@ Item {
                 Repeater {
                     model: ListModel {
                         id: crumbModel
+                        // Array of the category indexes
+                        property var indexes: []
                     }
 
                     Breadcrumb {
@@ -162,8 +164,9 @@ Item {
                 model: Kickoff.ApplicationModel {}
             } // VisualDataModel
 
-            function addBreadcrumb(modelIndex, title) {
-                crumbModel.append({"text": title, "modelIndex": modelIndex, "depth": crumbModel.count+1})
+            function addBreadcrumb(categoryIndex, title) {
+                crumbModel.append({"text": title, "depth": crumbModel.count+1})
+                crumbModel.indexes.push(categoryIndex);
             }
 
             PlasmaCore.Svg {
