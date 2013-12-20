@@ -51,7 +51,7 @@ PlasmoidProtocol::~PlasmoidProtocol()
 void PlasmoidProtocol::init()
 {
     Plasma::Package package = Plasma::PluginLoader::self()->loadPackage("Plasma/Applet");
-    package.setPath("org.kde.systemtray");
+    package.setPath("org.kde.plasma.systemtray");
     m_systrayPackageRoot = package.path();
 
     qCDebug(SYSTEMTRAY) << "ST2 PackagePathQml: " << m_systrayPackageRoot;
@@ -65,8 +65,8 @@ void PlasmoidProtocol::init()
 
     QStringList blacklist;
     blacklist << "notifier";
-    //blacklist << "org.kde.devicenotifier";
-    //blacklist << "org.kde.notifications";
+    //blacklist << "org.kde.plasma.devicenotifier";
+    //blacklist << "org.kde.plasma.notifications";
     blacklist << "org.kde.systrayplasmoidtest";
 
     QMap<QString, KPluginInfo> sortedApplets;

@@ -171,7 +171,7 @@ NoDisplay=true
 
 X-KDE-PluginInfo-Author=The Plasma Team
 X-KDE-PluginInfo-Email=plasma-devel@kde.org
-X-KDE-PluginInfo-Name=org.kde.icon
+X-KDE-PluginInfo-Name=org.kde.plasma.icon
 X-KDE-PluginInfo-Version=1.0
 X-KDE-PluginInfo-Website=http://plasma.kde.org/
 X-KDE-PluginInfo-Category=File System

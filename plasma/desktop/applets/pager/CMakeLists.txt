@@ -1,4 +1,4 @@
-plasma_install_package(package org.kde.pager)
+plasma_install_package(package org.kde.plasma.pager)
 
 set(pager_SRCS
     plugin/model.cpp

@@ -52,7 +52,7 @@ bool taskLessThan(const Task *lhs, const Task *rhs)
      * - Name
      */
 
-    const QString _not = QStringLiteral("org.kde.notifications");
+    const QString _not = QStringLiteral("org.kde.plasma.notifications");
     if (lhs->taskId() == _not) {
         return true;
     }

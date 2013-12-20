@@ -1,1 +1,1 @@
-plasma_install_package(package org.kde.showActivityManager)
+plasma_install_package(package org.kde.plasma.showActivityManager)

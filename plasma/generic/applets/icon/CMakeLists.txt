@@ -1,4 +1,4 @@
-plasma_install_package(package org.kde.icon)
+plasma_install_package(package org.kde.plasma.icon)
 
 set(iconplugin_SRCS
   plugin/icon_p.cpp

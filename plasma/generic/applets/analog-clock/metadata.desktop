@@ -160,7 +160,7 @@ X-Plasma-MainScript=ui/analogclock.qml
 
 X-KDE-PluginInfo-Author=Marco Martin
 X-KDE-PluginInfo-Email=mart@kde.org
-X-KDE-PluginInfo-Name=org.kde.analogclock
+X-KDE-PluginInfo-Name=org.kde.plasma.analogclock
 X-KDE-PluginInfo-Version=1.0
 X-KDE-PluginInfo-Website=http://userbase.kde.org/Plasma/Clocks
 X-KDE-PluginInfo-Category=Date and Time

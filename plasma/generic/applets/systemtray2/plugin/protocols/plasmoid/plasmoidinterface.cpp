@@ -818,7 +818,7 @@ void PlasmoidInterface::compactRepresentationCheck()
 //         //Plasma::Package package(structure);
 //         Plasma::Package package = Plasma::PluginLoader::self()->loadPackage("Plasma/Applet");
 //         //package.setPath(path);
-//         package.setPath("org.kde.systemtray");
+//         package.setPath("org.kde.plasma.systemtray");
 //
 //         qCDebug(SYSTEMTRAY) << "ST2 PackagePathQml: " << package.path();
 //         qCDebug(SYSTEMTRAY) << "ST2 PackagePathQml mainScript: " << package.filePath("mainScript");

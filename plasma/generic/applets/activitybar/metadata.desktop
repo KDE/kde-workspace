@@ -149,7 +149,7 @@ X-Plasma-MainScript=ui/main.qml
 
 X-KDE-PluginInfo-Author=Bhushan Shah
 X-KDE-PluginInfo-Email=bhush94@gmail.com
-X-KDE-PluginInfo-Name=activitybar
+X-KDE-PluginInfo-Name=org.kde.plasma.activitybar
 X-KDE-PluginInfo-Version=1.0
 X-KDE-PluginInfo-Website=http://plasma.kde.org/
 X-KDE-PluginInfo-Category=Windows and Tasks

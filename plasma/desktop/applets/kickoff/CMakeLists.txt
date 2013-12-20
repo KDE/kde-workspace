@@ -1,7 +1,7 @@
 
 #######################################################################################
 # Package
-plasma_install_package(package org.kde.kickoff)
+plasma_install_package(package org.kde.plasma.kickoff)
 
 
 #######################################################################################
