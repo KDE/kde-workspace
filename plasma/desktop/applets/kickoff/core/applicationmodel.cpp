@@ -537,11 +537,12 @@ void ApplicationModel::delayedReloadMenu()
 
 void ApplicationModel::reloadMenu()
 {
+    beginResetModel();
     delete d->root;
+    endResetModel();
     d->root = new AppNode();
     createNewProgramList();
     d->fillNode(QString(), d->root);
-    reset();
 }
 
 void ApplicationModel::checkSycocaChange(const QStringList &changes)
