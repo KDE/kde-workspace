@@ -434,6 +434,7 @@ void ApplicationModel::fetchMore(const QModelIndex &parent)
     d->fillNode(node->relPath, node);
     node->fetched = true;
     emit layoutChanged();
+    changePersistentIndex(parent, parent);
 }
 
 bool ApplicationModel::hasChildren(const QModelIndex &parent) const
