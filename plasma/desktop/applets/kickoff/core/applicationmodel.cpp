@@ -430,11 +430,18 @@ void ApplicationModel::fetchMore(const QModelIndex &parent)
         return;
     }
 
-    emit layoutAboutToBeChanged();
+    // FIXME? QML's QQmlAdaptorModel (the "backend" used for VisualDataModel) always hard-resets
+    //        the model when the source model (this one) changes layout, which breaks kickoff's
+    //        navigation as opening a category for the first time calls this and then calls
+    //        layoutChanged() --> QML's VisualDataModel is reset, that in turn invalidates
+    //        VDM's rootIndex and when that happens, Kickoff is switched to the root level.
+    //        Disabling the layout signals makes Kickoff's navigation work properly.
+
+//     emit layoutAboutToBeChanged(QList<QPersistentModelIndex>() << parent);
     d->fillNode(node->relPath, node);
     node->fetched = true;
-    emit layoutChanged();
-    changePersistentIndex(parent, parent);
+//     changePersistentIndex(parent, parent);
+//     emit layoutChanged(QList<QPersistentModelIndex>() << parent);
 }
 
 bool ApplicationModel::hasChildren(const QModelIndex &parent) const
