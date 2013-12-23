@@ -27,20 +27,45 @@ Item {
 
     property string text: plasmoid.activityName
     property string cornerElement: "desktop-northeast"
-    property bool skipNextUpdate: false
     property bool isCorner: ((state == "topleft") || (state == "topright") ||
                              (state == "bottomright") || (state == "bottomleft"))
-    property bool isHorizontal: (state == "top") || (state == "bottom")
+    property bool isHorizontal: (state != "left" && state != "right")
 
-    width: (isCorner || !isHorizontal)
-            ? toolBoxIcon.width
-            : toolBoxIcon.width + activityName.implicitWidth + 4;
-    height: (isCorner || isHorizontal)
-            ? toolBoxIcon.height
-            : toolBoxIcon.height + activityName.implicitWidth + 4;
+    rotation: isHorizontal ? 0 : -90;
+
+    transform: Translate {
+        x: state == "left" ? -height : state == "right" ? height : 0
+        Behavior on x {
+            NumberAnimation {
+                duration: 150;
+                easing.type: Easing.InOutExpo;
+            }
+        }
+    }
+    transformOrigin: Item.Center
+    Behavior on rotation {
+        NumberAnimation {
+            duration: 150;
+            easing.type: Easing.InOutExpo;
+        }
+    }
+    Behavior on x {
+        NumberAnimation {
+            duration: 150;
+            easing.type: Easing.InOutExpo;
+        }
+    }
+    Behavior on y {
+        NumberAnimation {
+            duration: 150;
+            easing.type: Easing.InOutExpo;
+        }
+    }
+
+    width: isCorner ? toolBoxIcon.width : buttonLayout.width
+    height: buttonLayout.height
     y: 0
-    x: main.width - toolBoxButtonFrame.width
-    //z: toolBox.z + 1
+    x: main.width - width
 
     state: "topright" // FIXME: read default value from config
 
@@ -48,62 +73,42 @@ Item {
     onYChanged: updateState()
 
     function updateState() {
-        if (skipNextUpdate) {
-            skipNextUpdate = false;
-            return;
-        }
-        var _m = 2;
-        var _s = "";
         var container = main;
         //print("    w: " + container.width +"x"+container.height+" : "+x+"/"+y+" tbw: " + toolBoxButton.width);
-        if (x <= _m) {
-            if (y <= _m) {
-                _s = "topleft"
-            } else if (y >= (container.height - toolBoxButton.height - _m)) {
-                _s = "bottomleft"
-            } else {
-                _s = "left";
-            }
-        } else if (x >= (container.width - toolBoxButton.width - _m)) {
-            if (y <= _m) {
-                _s = "topright"
-            } else if (y >= (container.height- toolBoxButton.height - _m)) {
-                _s = "bottomright"
-            } else {
-                _s = "right";
-            }
-        } else {
-            if (y <= _m) {
-                _s = "top"
-            } else if (y >= (container.height - toolBoxButton.height - _m)) {
-                _s = "bottom"
-            } else {
-                //print("Error: Reached invalid state in ToolBoxButton.updateState()")
-            }
-        }
-        if (_s != "") {
-            if (_s == "topright" || _s == "bottomright" || _s == "right") {
-                skipNextUpdate = true;
-                toolBoxButton.x = main.width - toolBoxButton.width;
-            }
-            if (_s == "bottomleft" || _s == "bottomright" || _s == "bottom") {
-                skipNextUpdate = true;
-                toolBoxButton.y = main.height - toolBoxButton.height;
-            }
-            toolBoxButton.state = _s;
-            configSaveTimer.running = true;
-        }
-    }
 
-    Timer {
-        id: configSaveTimer
-        interval: 5000
-        running: false
-        onTriggered: {
-            plasmoid.writeConfig("ToolBoxButtonState", toolBoxButton.state);
-            plasmoid.writeConfig("ToolBoxButtonX", toolBoxButton.x);
-            plasmoid.writeConfig("ToolBoxButtonY", toolBoxButton.y);
-            print("Saved coordinates for ToolBox in config: " + toolBoxButton.x + "x" +toolBoxButton.x);
+        var x = toolBoxButton.x;
+        var y = toolBoxButton.y;
+
+        var cornerSnap = toolBoxIcon.width;
+
+        if (x < cornerSnap && y < cornerSnap) {
+            toolBoxButton.state = "topleft";
+        } else if (container.width - x - buttonLayout.width < cornerSnap && y < cornerSnap) {
+            toolBoxButton.state = "topright";
+        } else if (container.width - x - buttonLayout.width < cornerSnap && container.height - y - buttonLayout.height  < cornerSnap) {
+            toolBoxButton.state = "bottomright";
+        } else if (x < cornerSnap && container.height - y - buttonLayout.height < cornerSnap) {
+            toolBoxButton.state = "bottomleft";
+        //top diagonal half
+        } else if (x > y) {
+            //Top edge
+            if (container.width - x > y ) {
+                toolBoxButton.state = "top";
+            //right edge
+            } else {
+                //toolBoxButton.transformOrigin = Item.BottomRight
+                toolBoxButton.state = "right";
+            }
+        //bottom diagonal half
+        } else {
+            //Left edge
+            if (container.height - y > x ) {
+                //toolBoxButton.transformOrigin = Item.TopLeft
+                toolBoxButton.state = "left";
+            //Bottom edge
+            } else {
+                toolBoxButton.state = "bottom";
+            }
         }
     }
 
@@ -111,11 +116,11 @@ Item {
         id: cornerSvg
         svg: toolBoxSvg
         elementId: cornerElement
-        anchors {
-            fill: parent
-            margins: -16
-        }
-        opacity: isCorner ? 1 : 0
+        x: -width/2 + toolBoxIcon.width/2;
+        y: x;
+        width: toolBoxIcon.width * 5;
+        height: width
+        visible: isCorner
         Connections {
             target: toolBoxButton
             onStateChanged: {
@@ -137,62 +142,36 @@ Item {
     }
 
     PlasmaCore.FrameSvgItem {
-        id: toolBoxButtonFrame
         imagePath: "widgets/toolbox"
         anchors {
-            fill: parent
+            fill: buttonLayout
             leftMargin: -margins.left
             topMargin: -margins.top
             rightMargin: -margins.right
             bottomMargin: -margins.bottom
         }
 
-        opacity: !isCorner ? 1 : 0
-        enabledBorders: PlasmaCore.FrameSvg.TopBorder | PlasmaCore.FrameSvg.LeftBorder | PlasmaCore.FrameSvg.BottomBorder;
-
-        Connections {
-            target: toolBoxButton
-            onStateChanged: {
-                var s = toolBoxButton.state;
-                var h = iconSize + toolBoxButtonFrame.borderHeight;
-                if (s == "top") {
-                    toolBoxButtonFrame.enabledBorders = PlasmaCore.FrameSvg.RightBorder | PlasmaCore.FrameSvg.BottomBorder | PlasmaCore.FrameSvg.LeftBorder;
-                } else if (s == "right") {
-                    toolBoxButtonFrame.enabledBorders = PlasmaCore.FrameSvg.TopBorder | PlasmaCore.FrameSvg.BottomBorder | PlasmaCore.FrameSvg.LeftBorder;
-                } else if (s == "bottom") {
-                    toolBoxButtonFrame.enabledBorders = PlasmaCore.FrameSvg.RightBorder | PlasmaCore.FrameSvg.TopBorder | PlasmaCore.FrameSvg.LeftBorder;
-                } else if (s == "left") {
-                    toolBoxButtonFrame.enabledBorders = PlasmaCore.FrameSvg.TopBorder | PlasmaCore.FrameSvg.RightBorder | PlasmaCore.FrameSvg.BottomBorder;
-                }
-            }
-        }
-        Behavior on opacity { NumberAnimation { duration: 150; easing.type: Easing.InOutExpo; } }
-    }
-
-    PlasmaCore.IconItem {
-        id: toolBoxIcon
-        anchors {
-            top: parent.top;
-            left: parent.left;
-        }
-        width: iconSize
-        height: iconSize
-        enabled: buttonMouse.containsMouse || toolBoxItem.showing
-        source: "plasma"
-    }
-
-    PlasmaComponents.Label {
-        id: activityName
         visible: !isCorner
-        text: toolBoxButton.text
+    }
 
-        anchors {
-            fill: parent
-            leftMargin: isHorizontal ? toolBoxIcon.width + 4 : 0;
-            topMargin: isHorizontal ? 0 : toolBoxIcon.height * 2 + 4;
+    Row {
+        id: buttonLayout
+        PlasmaCore.IconItem {
+            id: toolBoxIcon
+            anchors.verticalCenter: parent.verticalCenter
+            width: iconSize
+            height: iconSize
+            enabled: buttonMouse.containsMouse || toolBoxItem.showing
+            source: "plasma"
+            rotation: isHorizontal ? 0 : 90;
+            transformOrigin: Item.Center
         }
-        rotation: isHorizontal ? 0 : -90;
-        transformOrigin: Item.Center
+
+        PlasmaComponents.Label {
+            id: activityName
+            opacity: isCorner ? 0 : 1
+            text: toolBoxButton.text
+        }
     }
 
     MouseArea {
@@ -202,7 +181,7 @@ Item {
 
         anchors {
             fill: parent
-            margins: -8
+            margins: -10
         }
 
         drag {
@@ -219,19 +198,14 @@ Item {
             print ("click state now: " + toolBoxItem.state);
             toolBoxItem.showing = !toolBoxItem.showing;
         }
-        Connections {
-            target: toolBoxButton
-            onStateChanged: {
-                var s = toolBoxButton.state;
-                if (isCorner) {
-                    buttonMouse.drag.axis = Drag.XAxis | Drag.YAxis;
-                } else if (s == "top" || s == "bottom" ) {
-                    buttonMouse.drag.axis = Drag.XAxis;
-                } else {
-                    buttonMouse.drag.axis = Drag.YAxis;
-                }
-            }
+        onReleased: {
+            plasmoid.writeConfig("ToolBoxButtonState", toolBoxButton.state);
+            plasmoid.writeConfig("ToolBoxButtonX", toolBoxButton.x);
+            plasmoid.writeConfig("ToolBoxButtonY", toolBoxButton.y);
+            print("Saved coordinates for ToolBox in config: " + toolBoxButton.x + ", " +toolBoxButton.x);
+            main.placeToolBox();
         }
+
         Connections {
             target: plasmoid
             onImmutableChanged: {
@@ -239,6 +213,7 @@ Item {
             }
         }
     }
+
     states: [
         State {
             name: "topleft"

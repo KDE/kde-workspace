@@ -41,6 +41,9 @@ Item {
     property int iconWidth: 22
     property int iconHeight: iconWidth
 
+    onWidthChanged: placeToolBoxTimer.restart();
+    onHeightChanged: placeToolBoxTimer.restart();
+
     MouseArea {
         id: toolBoxDismisser
         anchors.fill: parent
@@ -59,14 +62,15 @@ Item {
 
     ToolBoxButton {
         id: toolBoxButton
-        Timer {
-            id: placeToolBoxTimer
-            interval: 100
-            repeat: false
-            running: true
-            onTriggered: {
-                placeToolBox();
-            }
+    }
+
+    Timer {
+        id: placeToolBoxTimer
+        interval: 100
+        repeat: false
+        running: true
+        onTriggered: {
+            placeToolBox();
         }
     }
 
@@ -104,34 +108,41 @@ Item {
 
     function placeToolBox() {
         var ts = plasmoid.readConfig("ToolBoxButtonState")
-        ts = "topright"; // FIXME: hardcoded for now, test config saving!
-        if (ts) {
-            //print("Read state from config: " + ts);
-            if (ts == "topleft") {
-                toolBoxButton.x = 0;
-                toolBoxButton.y = 0;
-                return;
-            } else if (ts == "topright") {
-                toolBoxButton.x = main.width - toolBoxButton.width;
-                toolBoxButton.y = 0;
-                return;
-            } else if (ts == "bottomright") {
-                toolBoxButton.x = main.width - toolBoxButton.width;
-                toolBoxButton.y = main.height - toolBoxButton.height;
-                return;
-            } else if (ts == "bottomleft") {
-                toolBoxButton.x = 0;
-                toolBoxButton.y = main.height - toolBoxButton.height;
-                return;
-            }
-        }
-
         var tx = plasmoid.readConfig("ToolBoxButtonX")
-        if (tx) tx = main.width - toolBoxButton.width;
-
         var ty = plasmoid.readConfig("ToolBoxButtonY")
-        if (ty) ty = 0;
-        //print("XXX Setting toolbox to: " + tx + "x" + ty + " screen: " + main.width+ "x" + main.height+"");
+
+        switch (ts) {
+        case "top":
+            ty = 0;
+            break;
+        case "left":
+            tx = 0;
+            break;
+        case "right":
+            tx = main.width - toolBoxButton.width;
+            break;
+        case "bottom":
+            ty = main.height - toolBoxButton.height;
+            break;
+        case "topleft":
+            tx = 0;
+            ty = 0;
+            break;
+        case "topright":
+            tx = main.width - toolBoxButton.width;
+            ty = 0;
+            break;
+        case "bottomleft":
+            tx = 0;
+            ty = main.height - toolBoxButton.height;
+            break;
+        case "bottomright":
+        default:
+            tx = main.width - toolBoxButton.width;
+            ty = main.height - toolBoxButton.height;
+            break;
+        }
+        print("XXX Setting toolbox to: " + tx + "x" + ty + " screen: " + main.width+ "x" + main.height+"");
         toolBoxButton.x = tx;
         toolBoxButton.y = ty;
 
