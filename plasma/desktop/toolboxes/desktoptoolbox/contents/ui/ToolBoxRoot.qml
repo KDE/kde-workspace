@@ -73,10 +73,10 @@ Item {
     PlasmaExtras.ConditionalLoader {
         id: toolBoxItem
         property alias showing: toolBoxItem.when
-        state: mainItem ? item.state : "collapsed"
+        state: item ? item.state : "collapsed"
         property int margin: 22
-        width: childrenRect.width
-        height: childrenRect.height
+        width: item ? item.width : 0
+        height: item ? item.height : 0
         x: {
             var maxX = main.width - toolBoxItem.width - margin
             if (toolBoxButton.x > maxX) {
@@ -95,8 +95,10 @@ Item {
         }
         anchors.margins: 16
 
-        ToolBoxItem {
-            showing: parent.showing
+        source: Component {
+            ToolBoxItem {
+                showing: toolBoxItem.showing
+            }
         }
     }
 
