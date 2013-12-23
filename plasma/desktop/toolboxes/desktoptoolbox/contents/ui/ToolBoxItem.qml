@@ -26,7 +26,7 @@ import org.kde.qtextracomponents 2.0 as QtExtras
 Item {
     id: toolBoxItem
 
-    property bool showing: state != "collapsed"
+    property bool showing//: state != "collapsed"
     property int expandedWidth: 240
     property int expandedHeight: 240
 
@@ -62,13 +62,7 @@ Item {
 
     onShowingChanged: {
         print("TB showing changed to " + showing);
-        var qmlFile = (!showing) ? "ToolBoxDisappearAnimation.qml" : "ToolBoxAppearAnimation.qml";
-        var component = Qt.createComponent(qmlFile);
-        if (component.status == Component.Ready) {
-            var ani = component.createObject(toolBoxItem);
-            ani.targetItem = toolBoxItem;
-            ani.start();
-        }
+        state = showing ? "expanded" : "collapsed";
     }
 
     function performOperation(what) {
@@ -189,11 +183,30 @@ Item {
     states: [
         State {
             name: "expanded"
-            PropertyChanges { target: toolBoxFrame; opacity: 1.0; visible: true; }
+            PropertyChanges { target: toolBoxItem; opacity: 1.0; scale: 1;}
         },
         State {
             name: "collapsed"
-            PropertyChanges { target: toolBoxFrame; opacity: 0; visible: false; }
+            PropertyChanges { target: toolBoxItem; opacity: 0; scale: 0.8;}
+        }
+    ]
+
+    transitions: [
+        Transition {
+            ParallelAnimation {
+                NumberAnimation {
+                    target: toolBoxItem
+                    properties: "opacity"
+                    easing.type: Easing.InExpo
+                    duration: 250
+                }
+                NumberAnimation {
+                    target: toolBoxItem
+                    properties: "scale"
+                    easing.type: Easing.InExpo
+                    duration: 150
+                }
+            }
         }
     ]
 }

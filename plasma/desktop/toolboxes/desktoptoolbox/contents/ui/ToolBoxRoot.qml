@@ -22,6 +22,7 @@ import QtQuick 2.0
 import org.kde.plasma.core 2.0 as PlasmaCore
 import org.kde.plasma.components 2.0 as PlasmaComponents
 import org.kde.qtextracomponents 2.0 as QtExtras
+import org.kde.plasma.extras 2.0 as PlasmaExtras
 
 Item {
     id: main
@@ -69,9 +70,13 @@ Item {
         }
     }
 
-    ToolBoxItem {
+    PlasmaExtras.ConditionalLoader {
         id: toolBoxItem
+        property alias showing: toolBoxItem.when
+        state: mainItem ? item.state : "collapsed"
         property int margin: 22
+        width: childrenRect.width
+        height: childrenRect.height
         x: {
             var maxX = main.width - toolBoxItem.width - margin
             if (toolBoxButton.x > maxX) {
@@ -89,6 +94,10 @@ Item {
             }
         }
         anchors.margins: 16
+
+        ToolBoxItem {
+            showing: parent.showing
+        }
     }
 
     function placeToolBox() {
