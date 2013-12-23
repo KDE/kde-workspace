@@ -150,6 +150,7 @@ void Plotter::createWidgets()
     m_plotter->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     m_layout->addItem(m_plotter);
     themeChanged();
+    setPlotCount(m_plotCount);
 }
 
 void Plotter::themeChanged()
@@ -166,7 +167,6 @@ void Plotter::themeChanged()
     linesColor.setAlphaF(0.4);
     m_plotter->setHorizontalLinesColor(linesColor);
     m_plotter->setVerticalLinesColor(linesColor);
-    setPlotCount(m_plotCount);
     resizeEvent(0);
 }
 
