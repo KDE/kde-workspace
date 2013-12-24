@@ -93,9 +93,19 @@ Rectangle {
     Image {
         id: imageA
         anchors.fill: parent
+        asynchronous: true
+        sourceSize {
+            width: imageA.width
+            height: imageA.height
+        }
     }
     Image {
         id: imageB
         anchors.fill: parent
+        asynchronous: true
+        sourceSize {
+            width: imageB.width
+            height: imageB.height
+        }
     }
 }
