@@ -13,8 +13,8 @@
 <!-- TRANS:ROLES_OF_TRANSLATORS -->
 </authorgroup>
 
-<date>2009-11-21</date>
-<releaseinfo>&kde; 4.4</releaseinfo>
+<date>2013-12-05</date>
+<releaseinfo>&kde; 4.12</releaseinfo>
 
 <keywordset>
 <keyword>KDE</keyword>
@@ -27,7 +27,7 @@
 </articleinfo>
 
 <sect1 id="kcm_solid_actions">
-<title><guilabel>Actions for new devices</guilabel></title>
+<title>Actions for new devices</title>
 <sect2 id="icons-intro">
 <title>Introduction</title>
 

@@ -14,8 +14,8 @@
 <!-- TRANS:ROLES_OF_TRANSLATORS -->
 </authorgroup>
 
-<date>2010-10-05</date>
-<releaseinfo>&kde; 4.6</releaseinfo>
+<date>2013-12-05</date>
+<releaseinfo>&kde; 4.12</releaseinfo>
 
 <abstract>
 <para>This is the documentation for the &kde; &systemsettings; module that configures mice and other pointing devices.
@@ -45,7 +45,7 @@ or trackball, providing access to special features.
 </para>
 
 <sect2 id="mouse-general">
-<title><guilabel>General</guilabel></title>
+<title>General</title>
 
 <variablelist>
 <varlistentry>
@@ -124,7 +124,7 @@ action="simul">&Ctrl;<mousebutton>Right</mousebutton></keycombo> click. If you r
 </sect2>
 
 <sect2 id="mouse-advanced">
-<title><guilabel>Advanced</guilabel></title>
+<title>Advanced</title>
 
 <variablelist>
 <varlistentry>
@@ -219,7 +219,7 @@ scroll.</para>
 </sect2>
 
 <sect2 id="mouse-navigation">
-<title><guilabel>Mouse Navigation</guilabel></title>
+<title>Mouse Navigation</title>
 
 <para>
 This tab allows you to configure the keyboard number pad keys as a mouse-type device. This may be useful when you are working on a device without another pointing device, or where you have no other use for the number pad.
@@ -289,7 +289,7 @@ This is the slope of the acceleration curve for mouse key acceleration.
 </sect2>
 
 <sect2 id="logitech-mouse">
-<title><guilabel>Logitech Support</guilabel></title>
+<title>Logitech Support</title>
 
 <para>
 Some Logitech USB mice support special features, such as switching to a higher resolution, or
@@ -341,7 +341,7 @@ If the mouse supports cordless reporting, the <guilabel>Battery Level</guilabel>
 and <guilabel>RF Channel</guilabel> widgets will be enabled. You can only change
 the <guilabel>RF Channel</guilabel> if your mouse has two channel support.
 </para>
-
+<!--FIXME outdated
 <sect3 id="logitech-perms">
 <title>Fixing permission problems on Logitech mice</title>
 
@@ -464,7 +464,7 @@ plugged in, the ownership and permissions should be changed
 so that the user at the console can access the mouse.
 </para>
 </sect3>
-
+-->
 </sect2>
 
 </sect1>

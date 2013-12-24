@@ -14,8 +14,8 @@
 <!-- TRANS:ROLES_OF_TRANSLATORS -->
 </authorgroup>
 
-<date>2010-09-15</date>
-<releaseinfo>&kde; 4.5</releaseinfo>
+<date>2013-12-05</date>
+<releaseinfo>&kde; 4.12</releaseinfo>
 
 <keywordset>
 <keyword>KDE</keyword>
@@ -47,13 +47,6 @@ action with a key or a combination of keys.</para>
 
 </sect2>
 
-<!-- missing
-<sect2 id="custom-shortcuts">
-<title>Custom Shortcuts</title>
-
-</sect2>
--->
-
 <sect2 id="key-bindings-use-globapp">
 <title>Standard Shortcuts and Global Shortcuts</title>
 
@@ -79,7 +72,7 @@ for which you have to customize key bindings using the application's
 key bindings dialog.</para>
 
 <sect3 id="key-bindings-standard">
-<title><guilabel>Standard Keyboard Shortcuts</guilabel> tab</title>
+<title>Standard Keyboard Shortcuts page</title>
 <para>At the top of this dialog you see an input box, where you can
 search interactively for shortcut names (&eg; Copy) or combination of keys 
 (&eg; <quote><userinput>Ctrl+C</userinput></quote>) by typing them literally here.</para>
@@ -92,7 +85,7 @@ search interactively for shortcut names (&eg; Copy) or combination of keys
 </sect3>
 
 <sect3 id="key-bindings-global">
-<title><guilabel>Global Keyboard Shortcuts</guilabel> tab</title>
+<title>Global Keyboard Shortcuts page</title>
 <para>At the top of this page is a drop down box which allows you
 to select a <guilabel>KDE component</guilabel> like KWin, Plasma Desktop &etc;
 The defined shortcuts for the selected component are displayed in the 

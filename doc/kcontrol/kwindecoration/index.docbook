@@ -14,8 +14,8 @@
 <!-- TRANS:ROLES_OF_TRANSLATORS -->
 </authorgroup>
 
-<date>2010-06-23</date>
-<releaseinfo>&kde; 4.5</releaseinfo>
+<date>2013-12-05</date>
+<releaseinfo>&kde; 4.12</releaseinfo>
 
 <keywordset>
 <keyword>KDE</keyword>
@@ -53,7 +53,7 @@ windows.</para>
 <para>Choose a window decoration style from the preview list, using the 
 search field at the top of the screen.</para>
 
-<para>&kde; 4.5 default window decoration is called "Oxygen".</para>
+<para>The &kde; default window decoration is called "Oxygen".</para>
 
 <para>Each style has a different look, but also a different
 <quote>feel</quote>. Some have (sometimes invisible)
