@@ -67,7 +67,7 @@ Item {
     y: 0
     x: main.width - width
 
-    state: "topright" // FIXME: read default value from config
+    state: ""
 
     onXChanged: updateState()
     onYChanged: updateState()
