@@ -104,21 +104,9 @@ Item {
                 right: parent.right
                 leftMargin: spacing / 2
             }
-            //opacity: 0.6
             elide: Text.ElideRight
             text: Qt.locale().standaloneMonthName(agenda.day == null ? new Date().getMonth() : agenda.day.monthNumber - 1)
                              + agenda.dateString(" yyyy")
-//             text: {
-//                 var day = agenda.day;
-//                 var d;
-//                 if (day != undefined) {
-//                     d = new Date(day.yearNumber, day.monthNumber-1, day.dayNumber);
-//                 } else {
-//                     d = ne Date();
-//                 }
-//                 var o = Qt.formatDate(d, "MMM yyyy");
-//                 return o
-//             }
         }
 
         ListView {
@@ -130,7 +118,8 @@ Item {
                 top: parent.top
                 topMargin: monthView.cellHeight + dayHeading.height
             }
-            //model: monthView.rows
+
+            // Time slots shown
             model: [ 8, 10, 12, 14, 16, 18 ]
 
             delegate: Item {
@@ -158,7 +147,6 @@ Item {
                         right: minuteLabel.left
                         verticalCenter: parent.verticalCenter
                     }
-                    //text: eventList.model.get(index)
                     text: modelData
                 }
                 PlasmaComponents.Label {
@@ -168,16 +156,12 @@ Item {
                     height: paintedHeight
                     font.pixelSize: hourLabel.paintedHeight / 2
                     opacity: hourLabel.opacity
-                    //font: theme.smallestFont
                     anchors {
                         top: hourLabel.top
                     }
                     text: "00"
                 }
-                Rectangle { anchors.fill: parent; color: "orange"; opacity: 0.2;  visible: debug;  }
-
             }
-            Rectangle { anchors.fill: parent; color: "#4bd2ff"; opacity: 0.2;  visible: debug;  }
         }
 
     }
@@ -193,8 +177,6 @@ Item {
             bottomMargin: spacing
         }
 
-        Rectangle { anchors.fill: parent; color: "orange"; opacity: 0.2;  visible: debug;  }
-
         function isCurrentYear(date) {
             var d = new Date();
             if (d.getFullYear() == date.getFullYear()) {
@@ -209,13 +191,10 @@ Item {
             anchors {
                 top: parent.top
                 left: monthView.left
-//                 leftMargin: -borderWidth
                 right: monthView.right
             }
 
             level: 1
-            //opacity: 0.6
-            //text: monthCalendar.monthName + ", " + monthCalendar.year
             text: cal.isCurrentYear(monthView.startDate) ?  monthView.selectedMonth :  monthView.selectedMonth + ", " + monthView.selectedYear
             elide: Text.ElideRight
             Loader {
@@ -225,16 +204,12 @@ Item {
             MouseArea {
                 id: monthMouse
                 width: monthHeading.paintedWidth
-                //z: height
                 anchors {
                     left: parent.left
                     top: parent.top
                     bottom: parent.bottom
                 }
-                //anchors.fill: parent
-                Rectangle { anchors.fill: parent; color: "green"; opacity: 0.2;  visible: debug;  }
                 onClicked: {
-                    //print("menu ...");
                     if (menuLoader.source == "") {
                         menuLoader.source = "MonthMenu.qml"
                     }
