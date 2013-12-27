@@ -55,10 +55,8 @@ Item {
         font.bold: plasmoid.configuration.boldText
         font.italic: plasmoid.configuration.italicText
         font.pixelSize: Math.min(main.width/6, main.height)
-        style: Text.Raised; styleColor: "black"
         width: Math.max(paintedWidth, time.paintedWidth)
         opacity: 0.8
-        color: "white"
         // We need to adjust the timeformat a bit, see more at timeFormatCorrection(..) comments
         text: Qt.formatTime(dataSource.data["Local"]["Time"], timeFormatCorrection(Qt.locale().timeFormat(Locale.ShortFormat)));
         horizontalAlignment: main.AlignHCenter
