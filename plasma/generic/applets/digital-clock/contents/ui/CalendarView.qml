@@ -81,12 +81,11 @@ Item {
             width: paintedWidth
             font.pixelSize: height
             text: agenda.dateString("dd")
-            opacity: 0.3
+            opacity: 0.5
         }
 
         PlasmaExtras.Heading {
             id: dayHeading
-            //x: m
             anchors {
                 top: parent.top
                 left: dayLabel.right
@@ -94,33 +93,18 @@ Item {
                 leftMargin: spacing / 2
             }
             level: 1
-            opacity: 0.6
             elide: Text.ElideRight
             text: agenda.dateString("dddd")
-//             text: {
-//                 var day = agenda.day;
-//                 var d;
-//                 if (day != undefined) {
-//                     d = new Date(day.yearNumber, day.monthNumber-1, day.dayNumber);
-//                 } else {
-//                     d = new Date();
-//                 }
-//                 var o = Qt.formatDate(d, "dddd");
-//                 return o;
-//             }
         }
         PlasmaComponents.Label {
             id: dateHeading
-            //font.pixelSize: dayLabel.paintedheight - dateHeading.paintedheight
             anchors {
                 top: dayHeading.bottom
-                //bottom: dayLabel.bottom
                 left: dayLabel.right
-                //leftMargin: -borderWidth*2
                 right: parent.right
                 leftMargin: spacing / 2
             }
-            opacity: 0.6
+            //opacity: 0.6
             elide: Text.ElideRight
             text: Qt.locale().standaloneMonthName(agenda.day == null ? new Date().getMonth() : agenda.day.monthNumber - 1)
                              + agenda.dateString(" yyyy")
@@ -169,7 +153,7 @@ Item {
                     id: hourLabel
                     height: paintedHeight
                     font.pixelSize: monthView.cellHeight / 3
-                    opacity: .3
+                    opacity: 0.5
                     anchors {
                         right: minuteLabel.left
                         verticalCenter: parent.verticalCenter
@@ -230,7 +214,7 @@ Item {
             }
 
             level: 1
-            opacity: 0.6
+            //opacity: 0.6
             //text: monthCalendar.monthName + ", " + monthCalendar.year
             text: cal.isCurrentYear(monthView.startDate) ?  monthView.selectedMonth :  monthView.selectedMonth + ", " + monthView.selectedYear
             elide: Text.ElideRight
@@ -261,7 +245,7 @@ Item {
 
         PlasmaCalendar.MonthView {
             id: monthView
-            borderOpacity: 0.1
+            borderOpacity: 0.25
             anchors {
                 top: monthHeading.bottom
                 left: parent.left
