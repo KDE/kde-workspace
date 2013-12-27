@@ -142,8 +142,9 @@ void PlasmoidInterface::init()
     QQmlEngine *engine = m_qmlObject->engine();
 
     //Hook generic url resolution to the applet package as well
-    //TODO: same thing will have to be done for every qqmlengine: PackageUrlInterceptor is material for plasmaquick?
-    engine->setUrlInterceptor(new PackageUrlInterceptor(engine, pkg));
+    PackageUrlInterceptor *interceptor = new PackageUrlInterceptor(engine, pkg);
+    interceptor->addAllowedPath(m_systrayPackageRoot);
+    engine->setUrlInterceptor(interceptor);
 
     QVariantHash initialProperties;
     initialProperties["width"] = DEFAULTITEMSIZE;
