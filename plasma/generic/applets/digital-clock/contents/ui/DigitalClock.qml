@@ -1,5 +1,5 @@
 /*
- * Copyright 2013  Heena Mahour <heena393@gmail.com>
+ * Copyright 2013 Heena Mahour <heena393@gmail.com>
  * Copyright 2013 Sebastian Kügler <sebas@kde.org>
  * Copyright 2013 Martin Klapetek <mklapetek@kde.org>
  *
@@ -24,10 +24,10 @@ import org.kde.plasma.components 2.0 as Components
 Item {
     id: main
 
-    property int minimumWidth: time.paintedWidth
+    property int minimumWidth: time.paintedWidth + (theme.smallSpacing * 2)
     property int maximumWidth: minimumWidth
 
-    property int minimumHeight: time.paintedHeight
+    property int minimumHeight: time.paintedHeight + (theme.smallSpacing * 2)
     property int maximumHeight: minimumHeight
 
     property int formFactor: plasmoid.formFactor
@@ -58,8 +58,8 @@ Item {
         width: Math.max(paintedWidth, time.paintedWidth)
         // We need to adjust the timeformat a bit, see more at timeFormatCorrection(..) comments
         text: Qt.formatTime(dataSource.data["Local"]["Time"], timeFormatCorrection(Qt.locale().timeFormat(Locale.ShortFormat)));
-        horizontalAlignment: main.AlignHCenter
-        verticalAlignment: main.AlignVCenter
+        horizontalAlignment: Text.AlignHCenter
+        verticalAlignment: Text.AlignVCenter
         anchors {
             centerIn: parent
         }
