@@ -98,11 +98,6 @@ PlasmoidInterface::PlasmoidInterface(const QString &plugin, const QString &systr
 //
 //     m_qmlObject = new QmlObject(this);
 //     m_qmlObject->setInitializationDelayed(true);
-    //init();
-    m_collapseTimer = new QTimer(this);
-    m_collapseTimer->setSingleShot(true);
-    connect(m_collapseTimer, &QTimer::timeout, this, &PlasmoidInterface::compactRepresentationCheck);
-    m_collapseTimer->start(10);
 
     init();
 }
@@ -304,6 +299,7 @@ void PlasmoidInterface::init()
 //     emit busyChanged();
 //
 //     applet()->updateConstraints(Plasma::Types::UiReadyConstraint);
+    createCompactRepresentation();
 }
 
 Plasma::Types::FormFactor PlasmoidInterface::formFactor() const
@@ -785,15 +781,11 @@ void PlasmoidInterface::geometryChanged(const QRectF &newGeometry, const QRectF 
     Q_UNUSED(oldGeometry)
 
     QQuickItem::geometryChanged(newGeometry, oldGeometry);
-    m_collapseTimer->start(100);
 }
 
-void PlasmoidInterface::compactRepresentationCheck()
+void PlasmoidInterface::createCompactRepresentation()
 {
     //init();
-    if (width() <= 0 || height() <= 0 || !m_qmlObject->rootObject()) {
-        return;
-    }
 
     //Read the minimum width of the full representation, not our own, since we could be in collapsed mode
     QSizeF minHint(-1, -1);
@@ -805,14 +797,14 @@ void PlasmoidInterface::compactRepresentationCheck()
         minHint.setHeight(m_qmlObject->rootObject()->property("minimumHeight").toReal());
     }
 
-    //Make it an icon
-    if (width() < minHint.width() || height() < minHint.height()) {
-        m_expanded = false;
+    //Create the icon
 
-        //we are already an icon: nothing to do
-        if (m_compactUiObject) {
-            return;
-        }
+    m_expanded = false;
+
+    //we are already an icon: nothing to do
+    if (m_compactUiObject) {
+        return;
+    }
 
 //         //Plasma::PackageStructure* structure = new Plasma::PackageStructure;
 //         //Plasma::Package package(structure);
@@ -832,60 +824,60 @@ void PlasmoidInterface::compactRepresentationCheck()
 //         const QUrl compactQml = QUrl::fromLocalFile(_p+"contents/ui/CompactApplet.qml");
 //         const QUrl defaultCompactQml = QUrl::fromLocalFile(_p+"contents/ui/DefaultCompactRepresentation.qml");
 
-        const QUrl compactQml = QUrl::fromLocalFile(m_systrayPackageRoot+QStringLiteral("/contents/ui/CompactApplet.qml"));
-        const QUrl defaultQml = QUrl::fromLocalFile(m_systrayPackageRoot+QStringLiteral("/contents/ui/DefaultCompactRepresentation.qml"));
-        m_compactUiObject = m_qmlObject->createObjectFromSource(compactQml);
+    const QUrl compactQml = QUrl::fromLocalFile(m_systrayPackageRoot+QStringLiteral("/contents/ui/CompactApplet.qml"));
+    const QUrl defaultQml = QUrl::fromLocalFile(m_systrayPackageRoot+QStringLiteral("/contents/ui/DefaultCompactRepresentation.qml"));
+    m_compactUiObject = m_qmlObject->createObjectFromSource(compactQml);
 
 
-        // m_compactUiObject = m_qmlObject->createObjectFromSource(QUrl::fromLocalFile(applet()->containment()->corona()->package().filePath("compactapplet")));
+    // m_compactUiObject = m_qmlObject->createObjectFromSource(QUrl::fromLocalFile(applet()->containment()->corona()->package().filePath("compactapplet")));
 
-        qCDebug(SYSTEMTRAY) << "ST2 compactQml: " << compactQml;
-        qCDebug(SYSTEMTRAY) << "ST2 defaultcompactQml: " << defaultQml;
+    qCDebug(SYSTEMTRAY) << "ST2 compactQml: " << compactQml;
+    qCDebug(SYSTEMTRAY) << "ST2 defaultcompactQml: " << defaultQml;
 
-        QObject *compactRepresentation = 0;
+    QObject *compactRepresentation = 0;
 
-        //build the icon representation
-        if (m_compactUiObject) {
-            QQmlComponent *compactComponent = m_qmlObject->rootObject()->property("compactRepresentation").value<QQmlComponent *>();
+    //build the icon representation
+    if (m_compactUiObject) {
+        QQmlComponent *compactComponent = m_qmlObject->rootObject()->property("compactRepresentation").value<QQmlComponent *>();
 
-            if (compactComponent) {
-                compactRepresentation = compactComponent->create(compactComponent->creationContext());
-            } else {
-                //compactRepresentation = m_qmlObject->createObjectFromSource(QUrl::fromLocalFile(applet()->containment()->corona()->package().filePath("defaultcompactrepresentation")));
-                compactRepresentation = m_qmlObject->createObjectFromSource(defaultQml);
-            }
-
-            if (compactRepresentation && compactComponent) {
-                compactComponent->setParent(compactRepresentation);
-            } else {
-                delete compactComponent;
-            }
+        if (compactComponent) {
+            compactRepresentation = compactComponent->create(compactComponent->creationContext());
+        } else {
+            //compactRepresentation = m_qmlObject->createObjectFromSource(QUrl::fromLocalFile(applet()->containment()->corona()->package().filePath("defaultcompactrepresentation")));
+            compactRepresentation = m_qmlObject->createObjectFromSource(defaultQml);
         }
 
-        if (m_compactUiObject && compactRepresentation) {
-            //put compactRepresentation in the icon place
-            compactRepresentation->setProperty("parent", QVariant::fromValue(m_compactUiObject.data()));
-            m_compactUiObject.data()->setProperty("compactRepresentation", QVariant::fromValue(compactRepresentation));
+        if (compactRepresentation && compactComponent) {
+            compactComponent->setParent(compactRepresentation);
+        } else {
+            delete compactComponent;
+        }
+    }
 
-            //replace the full applet with the collapsed view
-            m_compactUiObject.data()->setProperty("visible", true);
-            m_compactUiObject.data()->setProperty("parent", QVariant::fromValue(this));
+    if (m_compactUiObject && compactRepresentation) {
+        //put compactRepresentation in the icon place
+        compactRepresentation->setProperty("parent", QVariant::fromValue(m_compactUiObject.data()));
+        m_compactUiObject.data()->setProperty("compactRepresentation", QVariant::fromValue(compactRepresentation));
 
-            {
-                //set anchors
-                QQmlExpression expr(m_qmlObject->engine()->rootContext(), m_compactUiObject.data(), "parent");
-                QQmlProperty prop(m_compactUiObject.data(), "anchors.fill");
-                prop.write(expr.evaluate());
-            }
+        //replace the full applet with the collapsed view
+        m_compactUiObject.data()->setProperty("visible", true);
+        m_compactUiObject.data()->setProperty("parent", QVariant::fromValue(this));
 
-            m_qmlObject->rootObject()->setProperty("parent", QVariant::fromValue(m_compactUiObject.data()));
+        {
+            //set anchors
+            QQmlExpression expr(m_qmlObject->engine()->rootContext(), m_compactUiObject.data(), "parent");
+            QQmlProperty prop(m_compactUiObject.data(), "anchors.fill");
+            prop.write(expr.evaluate());
+        }
+
+        m_qmlObject->rootObject()->setProperty("parent", QVariant::fromValue(m_compactUiObject.data()));
 
 
-            {
-                //reset all the anchors
-                QQmlExpression expr(m_qmlObject->engine()->rootContext(), m_qmlObject->rootObject(), "anchors.fill=undefined;anchors.left=undefined;anchors.right=undefined;anchors.top=undefined;anchors.bottom=undefined;");
-                expr.evaluate();
-            }
+        {
+            //reset all the anchors
+            QQmlExpression expr(m_qmlObject->engine()->rootContext(), m_qmlObject->rootObject(), "anchors.fill=undefined;anchors.left=undefined;anchors.right=undefined;anchors.top=undefined;anchors.bottom=undefined;");
+            expr.evaluate();
+        }
 
 //             KConfigGroup cg = applet()->config();
 //             cg = KConfigGroup(&cg, "PopupApplet");
@@ -894,117 +886,57 @@ void PlasmoidInterface::compactRepresentationCheck()
 //
 //             m_qmlObject->rootObject()->setProperty("width", width);
 //             m_qmlObject->rootObject()->setProperty("height", height);
-            m_qmlObject->rootObject()->setProperty("width", 400); // FIXME: dynamic sizing
-            m_qmlObject->rootObject()->setProperty("height", 300);
+        m_qmlObject->rootObject()->setProperty("width", 400); // FIXME: dynamic sizing
+        m_qmlObject->rootObject()->setProperty("height", 300);
 
-            m_compactUiObject.data()->setProperty("applet", QVariant::fromValue(m_qmlObject->rootObject()));
+        m_compactUiObject.data()->setProperty("applet", QVariant::fromValue(m_qmlObject->rootObject()));
 
-            m_defaultRepresentation = qobject_cast<QQuickItem*>(m_qmlObject->rootObject());
-            m_defaultRepresentation->setProperty("visible", m_expanded);
-            m_defaultRepresentation->setProperty("y", 48);
+        m_defaultRepresentation = qobject_cast<QQuickItem*>(m_qmlObject->rootObject());
+        m_defaultRepresentation->setProperty("visible", m_expanded);
+        m_defaultRepresentation->setProperty("y", 48);
 
-            qCDebug(SYSTEMTRAY) << "ST2P defaultRepresentation" << m_defaultRepresentation;
+        qCDebug(SYSTEMTRAY) << "ST2P defaultRepresentation" << m_defaultRepresentation;
 //             QQmlExpression expr(m_qmlObject->engine()->rootContext(), m_qmlObject->rootObject(), "y");
 //             QQmlProperty prop(m_qmlObject->rootObject(), "48");
 //             prop.write(expr.evaluate());
-            //emit defaultRepresentationChanged();
+        //emit defaultRepresentationChanged();
 
-            //hook m_compactUiObject size hints to this size hint
-            //Here we have to use the old connect syntax, because we don't have access to the class type
-            if (m_qmlObject->rootObject()) {
-                disconnect(m_qmlObject->rootObject(), 0, this, 0);
-            }
-
-            //resize of the root object means popup resize when iconified
-            connect(m_qmlObject->rootObject(), SIGNAL(widthChanged()),
-                    this, SLOT(updatePopupSize()));
-            connect(m_qmlObject->rootObject(), SIGNAL(heightChanged()),
-                    this, SLOT(updatePopupSize()));
-
-            if (m_compactUiObject.data()->property("minimumWidth").isValid()) {
-                connect(m_compactUiObject.data(), SIGNAL(minimumWidthChanged()),
-                        this, SIGNAL(minimumWidthChanged()));
-            }
-            if (m_compactUiObject.data()->property("minimumHeight").isValid()) {
-                connect(m_compactUiObject.data(), SIGNAL(minimumHeightChanged()),
-                        this, SIGNAL(minimumHeightChanged()));
-            }
-
-            if (m_compactUiObject.data()->property("maximumWidth").isValid()) {
-                connect(m_compactUiObject.data(), SIGNAL(maximumWidthChanged()),
-                        this, SIGNAL(maximumWidthChanged()));
-            }
-            if (m_compactUiObject.data()->property("maximumHeight").isValid()) {
-                connect(m_compactUiObject.data(), SIGNAL(maximumHeightChanged()),
-                        this, SIGNAL(maximumHeightChanged()));
-            }
-
-            if (m_compactUiObject.data()->property("implicitWidth").isValid()) {
-                connect(m_compactUiObject.data(), SIGNAL(implicitWidthChanged()),
-                        this, SIGNAL(implicitWidthChanged()));
-            }
-            if (m_compactUiObject.data()->property("implicitHeight").isValid()) {
-                connect(m_compactUiObject.data(), SIGNAL(implicitHeightChanged()),
-                        this, SIGNAL(implicitHeightChanged()));
-            }
-
-            emit fillWidthChanged();
-            emit fillHeightChanged();
-            emit minimumWidthChanged();
-            emit minimumHeightChanged();
-            emit implicitWidthChanged();
-            emit implicitHeightChanged();
-            emit maximumWidthChanged();
-            emit maximumHeightChanged();
-            emit defaultRepresentationChanged();
-        //failed to create UI, don't do anything, return in expanded status
-        } else {
-            m_expanded = true;
+        //hook m_compactUiObject size hints to this size hint
+        //Here we have to use the old connect syntax, because we don't have access to the class type
+        if (m_qmlObject->rootObject()) {
+            disconnect(m_qmlObject->rootObject(), 0, this, 0);
         }
 
-        emit expandedChanged();
-
-    //show the full UI
-    } else {
-        qCDebug(SYSTEMTRAY) << "ST2P expanded NOW";
-        m_expanded = true;
-        emit expandedChanged();
-
-        //we are already expanded: nothing to do
-        if (m_compactUiObject) {
-            disconnect(m_compactUiObject.data(), 0, this, 0);
-        }
-
-        disconnect(m_qmlObject->rootObject(), SIGNAL(widthChanged()),
-                    this, SLOT(updatePopupSize()));
-        disconnect(m_qmlObject->rootObject(), SIGNAL(heightChanged()),
+        //resize of the root object means popup resize when iconified
+        connect(m_qmlObject->rootObject(), SIGNAL(widthChanged()),
+                this, SLOT(updatePopupSize()));
+        connect(m_qmlObject->rootObject(), SIGNAL(heightChanged()),
                 this, SLOT(updatePopupSize()));
 
-        //Here we have to use the old connect syntax, because we don't have access to the class type
-        if (m_qmlObject->rootObject()->property("minimumWidth").isValid()) {
-            connect(m_qmlObject->rootObject(), SIGNAL(minimumWidthChanged()),
+        if (m_compactUiObject.data()->property("minimumWidth").isValid()) {
+            connect(m_compactUiObject.data(), SIGNAL(minimumWidthChanged()),
                     this, SIGNAL(minimumWidthChanged()));
         }
-        if (m_qmlObject->rootObject()->property("minimumHeight").isValid()) {
-            connect(m_qmlObject->rootObject(), SIGNAL(minimumHeightChanged()),
+        if (m_compactUiObject.data()->property("minimumHeight").isValid()) {
+            connect(m_compactUiObject.data(), SIGNAL(minimumHeightChanged()),
                     this, SIGNAL(minimumHeightChanged()));
         }
 
-        if (m_qmlObject->rootObject()->property("maximumWidth").isValid()) {
-            connect(m_qmlObject->rootObject(), SIGNAL(maximumWidthChanged()),
+        if (m_compactUiObject.data()->property("maximumWidth").isValid()) {
+            connect(m_compactUiObject.data(), SIGNAL(maximumWidthChanged()),
                     this, SIGNAL(maximumWidthChanged()));
         }
-        if (m_qmlObject->rootObject()->property("maximumHeight").isValid()) {
-            connect(m_qmlObject->rootObject(), SIGNAL(maximumHeightChanged()),
+        if (m_compactUiObject.data()->property("maximumHeight").isValid()) {
+            connect(m_compactUiObject.data(), SIGNAL(maximumHeightChanged()),
                     this, SIGNAL(maximumHeightChanged()));
         }
 
-        if (m_qmlObject->rootObject()->property("implicitWidth").isValid()) {
-            connect(m_qmlObject->rootObject(), SIGNAL(implicitWidthChanged()),
+        if (m_compactUiObject.data()->property("implicitWidth").isValid()) {
+            connect(m_compactUiObject.data(), SIGNAL(implicitWidthChanged()),
                     this, SIGNAL(implicitWidthChanged()));
         }
-        if (m_qmlObject->rootObject()->property("implicitHeight").isValid()) {
-            connect(m_qmlObject->rootObject(), SIGNAL(implicitHeightChanged()),
+        if (m_compactUiObject.data()->property("implicitHeight").isValid()) {
+            connect(m_compactUiObject.data(), SIGNAL(implicitHeightChanged()),
                     this, SIGNAL(implicitHeightChanged()));
         }
 
@@ -1016,20 +948,10 @@ void PlasmoidInterface::compactRepresentationCheck()
         emit implicitHeightChanged();
         emit maximumWidthChanged();
         emit maximumHeightChanged();
-
-        m_qmlObject->rootObject()->setProperty("parent", QVariant::fromValue(this));
-        if (m_compactUiObject) {
-            m_compactUiObject.data()->deleteLater();
-        }
-
-        //set anchors
-//         QQmlExpression expr(m_qmlObject->engine()->rootContext(), m_qmlObject->rootObject(), "parent");
-//         QQmlProperty prop(m_qmlObject->rootObject(), "anchors.fill");
-//         prop.write(expr.evaluate());
-        QQmlExpression expr(m_qmlObject->engine()->rootContext(), m_qmlObject->rootObject(), "y");
-        QQmlProperty prop(m_qmlObject->rootObject(), "48");
-        prop.write(expr.evaluate());
+        emit defaultRepresentationChanged();
     }
+
+    emit expandedChanged();
 }
 
 void PlasmoidInterface::updatePopupSize()

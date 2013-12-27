@@ -333,7 +333,7 @@ protected Q_SLOTS:
     virtual void init();
 
 private Q_SLOTS:
-    void compactRepresentationCheck();
+    void createCompactRepresentation();
     void updatePopupSize();
     void hideDefaultRepresenation();
 
@@ -353,8 +353,6 @@ private:
     QmlObject *m_qmlObject;
     QWeakPointer<QObject> m_compactUiObject;
     QQuickItem* m_defaultRepresentation;
-
-    QTimer *m_collapseTimer;
 
     Plasma::Types::BackgroundHints m_backgroundHints;
     Plasma::Types::ImmutabilityType m_immutability;
