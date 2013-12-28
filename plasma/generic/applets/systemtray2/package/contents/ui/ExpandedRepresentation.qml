@@ -32,7 +32,7 @@ Item {
         if (task.taskItemExpanded == null) return;
         var isthis = (task.taskId == root.currentTask);
         if (!isthis) {
-            task.expanded = false;
+            task.expandApplet(false);
         } else {
             root.currentName = task.name;
         }
@@ -53,8 +53,6 @@ Item {
         target: root
         onExpandedItemChanged: {
             if (root.expandedItem != null) {
-                print("not null");
-
                 root.expandedItem.parent = expandedItemContainer;
                 root.expandedItem.anchors.fill = expandedItemContainer;
                 expandedItemContainer.replace(root.expandedItem);
@@ -67,26 +65,7 @@ Item {
             clearExpanded();
         }
     }
-    /* This mechanism hides inactive items until the layout figures out that it has to
-     * collapse the Plasmoid.
-     *
-     * It also takes care of delaying the loading of hidden items (they're hidden, and
-     * can be loaded later as to not block other, visible components from loading). It
-     * does so by simply pushing them out of the viewport, which means the ListView won't
-     * render the TaskDelegates until then.
-     */
-    /*
-    Item {
-        id: loadingItem
-        anchors.fill: parent
-        anchors.margins: height
-        Timer {
-            running: true
-            interval: 4000
-            onTriggered: loadingItem.visible = false
-        }
-    }
-    */
+
     MouseArea {
         anchors {
             top: parent.top
@@ -134,27 +113,13 @@ Item {
         anchors {
             right: expandedItemContainer.left;
             rightMargin: theme.largeSpacing
-            //top: parent.right;
             bottom: parent.bottom;
-            //rightMargin: theme.largeSpacing
         }
         elementId: "vertical-line";
 
         svg: PlasmaCore.Svg {
             id: lineSvg;
             imagePath: "widgets/line";
-        }
-    }
-
-    Connections {
-        target: plasmoid
-        onExpandedChanged: {
-            if (!plasmoid.expanded) {
-                root.expandedItem = null;
-                expandedItemContainer.clear();
-                root.currentTask = "";
-            }
-            clearExpanded();
         }
     }
 
@@ -166,7 +131,6 @@ Item {
         Behavior on opacity { NumberAnimation {} }
 
         anchors {
-            //margins: theme.largeSpacing
             top: parent.top
             leftMargin: -theme.largeSpacing
             left: expandedItemContainer.left
@@ -183,9 +147,7 @@ Item {
         Behavior on opacity { NumberAnimation {} }
 
         anchors {
-            //margins: theme.largeSpacing
             top: parent.top
-            //leftMargin: root.currentTask != "" ? 0 : -theme.largeSpacing
             left: expandedItemContainer.left
             right: parent.right
         }
@@ -194,6 +156,7 @@ Item {
 
     PlasmaComponents.PageStack {
         id: expandedItemContainer
+        animate: false
         anchors {
             left: parent.left
             leftMargin: (root.baseSize + theme.largeSpacing * 3)
@@ -202,7 +165,26 @@ Item {
             bottom: parent.bottom
             right: parent.right
         }
+
+        Timer {
+            // this mechanism avoids animating the page switch
+            // when the popup is still closed.
+            interval: 500
+            running: plasmoid.expanded
+            onTriggered: expandedItemContainer.animate = true
+        }
     }
+
+    Connections {
+        target: plasmoid
+        onExpandedChanged: {
+            if (!plasmoid.expanded) {
+                expandedItemContainer.animate = false;
+            }
+        }
+
+    }
+
     MouseArea {
         id: pin
 
@@ -231,9 +213,5 @@ Item {
             text: "✓"
             opacity: pin.checked ? 1 : 0.3
         }
-    }
-
-    Component.onCompleted: {
-        clearExpanded();
     }
 }

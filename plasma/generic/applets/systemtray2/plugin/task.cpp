@@ -66,20 +66,6 @@ void Task::emitChanged()
     emit changed(this);
 }
 
-void Task::setExpanded(bool expanded)
-{
-    if (d->expanded != expanded) {
-        d->expanded = expanded;
-        emit expandedChanged();
-    }
-}
-
-bool Task::expanded() const
-{
-    return d->expanded;
-}
-
-
 void Task::setCategory(Category category)
 {
     if (d->category == category) {

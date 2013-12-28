@@ -87,18 +87,6 @@ void PlasmoidTask::updateStatus()
     }
 }
 
-void PlasmoidTask::setExpanded(bool expanded)
-{
-    qCDebug(SYSTEMTRAY) << "ST2P plasmoid.expand = " << expanded;
-    //if (m_taskItem->isExpanded() != expanded) {
-    if (m_taskItem && m_taskItem->isExpanded() != expanded) {
-        qCDebug(SYSTEMTRAY) << "ST2P plasmoid.expand = " << expanded;
-        m_taskItem->setExpanded(expanded);
-        //m_taskItem->setCollapsed();
-    }
-    SystemTray::Task::setExpanded(expanded);
-}
-
 void PlasmoidTask::expandApplet(bool expanded)
 {
     qCDebug(SYSTEMTRAY) << "ST2P expandApplet() " << expanded;
@@ -108,19 +96,7 @@ void PlasmoidTask::expandApplet(bool expanded)
         m_taskItem->setExpanded(expanded);
         //m_taskItem->setCollapsed();
     }
-    SystemTray::Task::setExpanded(expanded);
 }
-
-bool PlasmoidTask::expanded() const
-{
-    if (m_taskItem) {
-        qCDebug(SYSTEMTRAY) << "S2TP expanded " << m_taskItem->isExpanded();
-        //return SystemTray::Task::expanded();
-        return m_taskItem->isExpanded();
-    }
-    return false;
-}
-
 
 bool PlasmoidTask::isValid() const
 {

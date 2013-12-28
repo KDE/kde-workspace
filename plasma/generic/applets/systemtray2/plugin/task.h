@@ -51,8 +51,6 @@ class Task : public QObject
     Q_PROPERTY(QQuickItem* taskItem READ taskItem NOTIFY taskItemChanged)
     Q_PROPERTY(QQuickItem* taskItemExpanded READ taskItem NOTIFY taskItemExpandedChanged)
     Q_PROPERTY(Status status READ status NOTIFY changedStatus)
-    Q_PROPERTY(bool expanded READ expanded WRITE setExpanded NOTIFY expandedChanged)
-    Q_PROPERTY(bool shown READ shown NOTIFY shownChanged)
     Q_PROPERTY(QString name READ name NOTIFY changedName)
     Q_PROPERTY(Category category READ category NOTIFY changedCategory)
 
@@ -123,8 +121,6 @@ public:
 
     virtual QQuickItem* taskItem() const;
     virtual QQuickItem* taskItemExpanded() const;
-    virtual bool expanded() const;
-    virtual void setExpanded(bool expanded);
 
     /**
      * Returns an icon that can be associated with this task

@@ -45,8 +45,8 @@ QtExtraComponents.MouseEventListener {
         if (taskType == SystemTray.Task.TypePlasmoid) {
             togglePopup();
         }
-        //taskClicked();
     }
+
     Timer {
         id: hidePopupTimer
         interval: 10
@@ -68,7 +68,6 @@ QtExtraComponents.MouseEventListener {
     property int taskType: type
     property Item expandedItem: taskItemExpanded
     property Item expandedStatusItem: null
-//     property alias icon: itemIcon
     property bool snExpanded: expanded
 
     Rectangle {
@@ -111,64 +110,6 @@ QtExtraComponents.MouseEventListener {
         running: status == SystemTray.Task.NeedsAttention
     }
 
-    function taskClicked() {
-        print("ST2PX TaskDelegate clicked ... " + !taskItemContainer.expanded + taskItemContainer.expandedItem);
-        if (!plasmoid.expanded) {
-            plasmoid.expanded = true;
-        }
-        //return; // FIXME: remove
-        if (taskItemContainer.taskType == SystemTray.Task.TypeStatusItem && !taskItemContainer.snExpanded) {
-//                 root.currentTask = "";
-//                 root.expandedItem = null
-//                 taskItemContainer.snExpanded = true;
-//                 taskItemContainer.expanded = true;
-//                 clearTasks();
-        }
-        //
-
-        if (root.currentTask == taskId) {
-            print("S2TPX Resetting TASK");
-            root.currentTask = 0;
-            root.currentName = ""
-            root.expandedItem = null;
-            plasmoid.expanded = false;
-        }
-        if (taskItemContainer.taskType == SystemTray.Task.TypePlasmoid ) {
-            print("S2TPX Setting plasmoid");
-//             if (task) {
-//                 task.expanded = true; // crashes?!?!
-//             }
-            //&& !isCurrentTask
-            //expanded = true;
-            expandApplet(true);
-//             root.currentTask = taskId;
-//             root.currentName = name;
-//             applet.expanded = true;
-            //taskItemContainer.expandedItem = expandedItem;
-            //print("S2TPX expanded visible? " + expandedItem.visible);
-
-            // FIXME: expand applet
-
-        } else {
-            print("S2TPX resetting taskitem");
-            root.currentTask = "";
-            root.currentName = ""
-            root.expandedItem = null;
-        }
-    }
-
-    MouseArea {
-        anchors {
-            left: parent.left
-            top: parent.top
-            bottom: parent.bottom
-        }
-        width: snExpanded ? parent.width : parent.height
-        onClicked: {
-            taskClicked();
-        }
-    }
-
     onWidthChanged: updatePlasmoidGeometry()
     onHeightChanged: updatePlasmoidGeometry()
 
@@ -189,13 +130,10 @@ QtExtraComponents.MouseEventListener {
     }
 
     Component.onCompleted: {
-        //print("ST2PX new delegate: " + name);
         if (taskType == SystemTray.Task.TypeStatusItem) {
             sniLoader.source = "StatusNotifierItem.qml";
-
             var component = Qt.createComponent("ExpandedStatusNotifier.qml");
             if (component.status == Component.Ready) {
-                //print("ST2P Loading STatusItemExpanded: ");
                 expandedItem = component.createObject(taskItemContainer, {"x": 300, "y": 300});
             } else {
                 print("Error loading statusitem: " + component.errorString());

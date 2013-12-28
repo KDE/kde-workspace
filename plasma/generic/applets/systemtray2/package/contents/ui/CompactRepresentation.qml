@@ -39,10 +39,6 @@ QtExtraComponents.MouseEventListener {
 
     property QtObject systrayhost: undefined
 
-    onClicked: {
-        print("ST2P MouseEventListener.clicked!")
-        //togglePopup(); // FIXME reenable;
-    }
     onPressed: PlasmaExtras.PressedAnimation { targetItem: arrow }
     onReleased: PlasmaExtras.ReleasedAnimation { targetItem: arrow }
 
@@ -52,7 +48,7 @@ QtExtraComponents.MouseEventListener {
         running: false
         repeat: false
         onTriggered: {
-            print("hidetimer triggered, collapsing " + (root.currentTask == "") )
+            //print("hidetimer triggered, collapsing " + (root.currentTask == "") )
             if (root.currentTask == "") {
                 plasmoid.expanded = false
             }
@@ -64,22 +60,18 @@ QtExtraComponents.MouseEventListener {
         var rows = Math.floor(dim / root.itemSize);
         var cols = Math.ceil(systrayhost.shownTasks.length / rows);
         var res = cols * (root.itemSize + theme.smallSpacing*4) + theme.smallSpacing + arrow.width;
-        print(" computeDimension()  " + res);
         return res;
     }
 
     function computeDimensionHeight() {
         var dim = root.vertical ? compactRepresentation.width : compactRepresentation.height
         var rows = Math.floor(dim / root.itemSize);
-        //var cols = Math.ceil(systrayhost.shownTasks.length / rows);
         var rr = rows * (root.itemSize + theme.smallSpacing);
-        //var res = cols * (root.itemSize + theme.smallSpacing) + arrow.width;
-        print(" computeDimensionHeight()  " + rr);
         return rr;
     }
 
     function togglePopup() {
-        print("toggle popup => " + !plasmoid.expanded);
+        //print("toggle popup => " + !plasmoid.expanded);
         if (!plasmoid.expanded) {
             plasmoid.expanded = true
         } else {
@@ -90,12 +82,9 @@ QtExtraComponents.MouseEventListener {
     MouseArea {
         anchors.fill: parent
         onClicked: {
-            print("Empty clicked => " + !plasmoid.expanded)
             plasmoid.expanded = true;
             root.currentTask = "";
             root.expandedItem = null
-            print("!! compactRepresentation w/h : " + compactRepresentation.width + " / " + compactRepresentation.height);
-            print("!! compactRepresentation: x/y" + compactRepresentation.x + " / " + compactRepresentation.y);
         }
     }
 
@@ -128,12 +117,10 @@ QtExtraComponents.MouseEventListener {
         objectName: "gridView"
         flow: !root.vertical ? GridView.LeftToRight : GridView.TopToBottom
 
-//         y: (parent.height - root.itemSize) / 2
         anchors {
             top: parent.top
             bottom: parent.bottom
             topMargin: !root.vertical ? ((parent.height - root.itemSize) / 2) - theme.smallSpacing : theme.smallSpacing
-//             verticalCenter: parent.verticalCenter
             left: parent.left
             leftMargin: root.vertical ? 0 : theme.smallSpacing
             right: arrow.left
