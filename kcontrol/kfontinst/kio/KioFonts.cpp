@@ -64,9 +64,9 @@ KDE_EXPORT int kdemain(int argc, char **argv)
         exit(-1);
     }
 
+    QCoreApplication app(argc, argv);
     KComponentData   componentData("kio_" KFI_KIO_FONTS_PROTOCOL);
     KFI::CKioFonts   slave(argv[2], argv[3]);
-    QCoreApplication app(argc, argv);
 
     slave.dispatchLoop();
 
