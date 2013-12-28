@@ -159,9 +159,9 @@ MouseEventListener {
                 id: contentsColumn
                 width: popupFlickable.width
 
-                PlasmaExtras.Title {
+                PlasmaComponents.Label {
                     visible: notificationsApplet.totalCount == 0
-                    text: "Nothing is going on."
+                    text: i18n("No new notifications.")
                 }
                 //TODO: load those on demand based on configuration
                 Loader {
