@@ -43,7 +43,7 @@ Item {
     Item {
         anchors {
             fill: parent
-            margins: root.largeSpacing
+            margins: theme.largeSpacing
             leftMargin: 0
         }
 
@@ -55,8 +55,8 @@ Item {
             anchors {
                 right: parent.right
                 bottom: parent.bottom
-                rightMargin: root.largeSpacing
-                bottomMargin: root.largeSpacing
+                rightMargin: theme.largeSpacing
+                bottomMargin: theme.largeSpacing
             }
             source: iconName != "" ? iconName : (typeof(icon) != "undefined" ? icon : "")
         }
@@ -78,7 +78,7 @@ Item {
 
             anchors {
                 top: snTooltip.bottom
-                topMargin: root.largeSpacing
+                topMargin: theme.largeSpacing
                 left: parent.left
                 right: parent.right
             }

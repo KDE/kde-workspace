@@ -45,7 +45,7 @@ TaskDelegate {
 
         anchors {
             left: icon.right
-            leftMargin: root.largeSpacing
+            leftMargin: theme.largeSpacing
             right: parent.right
             verticalCenter: parent.verticalCenter
         }

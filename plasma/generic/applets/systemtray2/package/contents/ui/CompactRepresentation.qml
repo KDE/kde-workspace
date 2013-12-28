@@ -73,7 +73,7 @@ QtExtraComponents.MouseEventListener {
         var rows = Math.floor(dim / root.itemSize);
         //var cols = Math.ceil(systrayhost.shownTasks.length / rows);
         var rr = rows * (root.itemSize + theme.smallSpacing);
-        //var res = cols * (root.itemSize + root.smallSpacing) + arrow.width;
+        //var res = cols * (root.itemSize + theme.smallSpacing) + arrow.width;
         print(" computeDimensionHeight()  " + rr);
         return rr;
     }
@@ -135,7 +135,7 @@ QtExtraComponents.MouseEventListener {
             topMargin: !root.vertical ? ((parent.height - root.itemSize) / 2) - theme.smallSpacing : theme.smallSpacing
 //             verticalCenter: parent.verticalCenter
             left: parent.left
-            leftMargin: root.vertical ? 0 : root.smallSpacing
+            leftMargin: root.vertical ? 0 : theme.smallSpacing
             right: arrow.left
         }
         cellWidth: !root.vertical ? root.itemSize + theme.smallSpacing * 4 : root.itemSize
@@ -153,7 +153,7 @@ QtExtraComponents.MouseEventListener {
 
         y: root.itemSize / 4
         anchors {
-            leftMargin: root.smallSpacing
+            leftMargin: theme.smallSpacing
             right: parent.right
         }
         width: Math.floor(root.itemSize / 2)
@@ -176,8 +176,8 @@ QtExtraComponents.MouseEventListener {
 
         }
         MouseArea {
-            width: parent.width + root.smallSpacing
-            height: root.itemSize + root.largeSpacing
+            width: parent.width + theme.smallSpacing
+            height: root.itemSize + theme.largeSpacing
             anchors.centerIn: parent
             onClicked: plasmoid.expanded = !plasmoid.expanded
         }
@@ -193,7 +193,7 @@ QtExtraComponents.MouseEventListener {
         repeat: false
         onTriggered: {
             var dim = root.vertical ? compactRepresenation.width : compactRepresenation.height;
-            root.preferredItemSize = dim - root.smallSpacing;
+            root.preferredItemSize = dim - theme.smallSpacing;
         }
     }
 }

@@ -142,7 +142,7 @@ Item {
             rightMargin: theme.largeSpacing
             //top: parent.right;
             bottom: parent.bottom;
-            //rightMargin: root.largeSpacing
+            //rightMargin: theme.largeSpacing
         }
         elementId: "vertical-line";
 
@@ -168,11 +168,11 @@ Item {
         id: snHeading
 
         level: 1
-        opacity: root.currentTask != "" ? 0 : 0.6
+        opacity: root.currentTask != "" ? 0 : 0.8
         Behavior on opacity { NumberAnimation {} }
 
         anchors {
-            //margins: root.largeSpacing
+            //margins: theme.largeSpacing
             top: parent.top
             leftMargin: -theme.largeSpacing
             left: expandedItemContainer.left
@@ -189,7 +189,7 @@ Item {
         Behavior on opacity { NumberAnimation {} }
 
         anchors {
-            //margins: root.largeSpacing
+            //margins: theme.largeSpacing
             top: parent.top
             //leftMargin: root.currentTask != "" ? 0 : -theme.largeSpacing
             left: expandedItemContainer.left
@@ -202,7 +202,7 @@ Item {
         id: expandedItemContainer
         anchors {
             left: parent.left
-            leftMargin: (root.baseSize + root.largeSpacing * 3)
+            leftMargin: (root.baseSize + theme.largeSpacing * 3)
             top: snHeading.bottom
             topMargin: theme.largeSpacing / 2
             bottom: parent.bottom

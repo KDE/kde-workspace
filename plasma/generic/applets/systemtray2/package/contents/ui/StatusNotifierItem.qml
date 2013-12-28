@@ -172,7 +172,7 @@ Item {
             }
         }
         onWheelMoved: {
-            print("wheel moved by " + wheel.delta);
+            //print("wheel moved by " + wheel.delta);
             if (wheel.orientation === Qt.Horizontal)
                 activateHorzScroll(wheel.delta)
             else

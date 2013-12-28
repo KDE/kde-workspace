@@ -29,7 +29,7 @@ QtExtraComponents.MouseEventListener {
     id: taskItemContainer
     objectName: "taskItemContainer"
 
-    height: root.itemSize + (root.smallSpacing * 2)
+    height: root.itemSize + (theme.smallSpacing * 2)
     width: height
 
     hoverEnabled: true
