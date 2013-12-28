@@ -99,6 +99,18 @@ void PlasmoidTask::setExpanded(bool expanded)
     SystemTray::Task::setExpanded(expanded);
 }
 
+void PlasmoidTask::expandApplet(bool expanded)
+{
+    qCDebug(SYSTEMTRAY) << "ST2P expandApplet() " << expanded;
+    //if (m_taskItem->isExpanded() != expanded) {
+    if (m_taskItem && m_taskItem->isExpanded() != expanded) {
+        qCDebug(SYSTEMTRAY) << "ST2P set plasmoid.expand = " << expanded;
+        m_taskItem->setExpanded(expanded);
+        //m_taskItem->setCollapsed();
+    }
+    SystemTray::Task::setExpanded(expanded);
+}
+
 bool PlasmoidTask::expanded() const
 {
     if (m_taskItem) {

@@ -54,7 +54,7 @@ Item {
         if (!plasmoid.expanded) {
             plasmoid.expanded = true
         } else {
-            hidePopupTimer.start();
+            //hidePopupTimer.start();
         }
     }
 

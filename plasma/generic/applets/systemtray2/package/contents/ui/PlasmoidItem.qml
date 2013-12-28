@@ -26,7 +26,8 @@ Item {
         }
         onClicked: {
             print("PlasmoidItem.qml clicked: "  + plasmoid.expanded);
-            plasmoid.expanded = !plasmoid.expanded;
+            //plasmoid.expanded = !plasmoid.expanded;
+            expandApplet(true);
         }
     }
 }

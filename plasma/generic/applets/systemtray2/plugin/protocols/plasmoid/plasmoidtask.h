@@ -73,6 +73,8 @@ public:
     QString shortcut() const { return m_shortcut; }
     void    setShortcut(QString text);
 
+    Q_INVOKABLE void expandApplet(bool expanded);
+
 Q_SIGNALS:
     void changedShortcut();
     void taskItemChanged();

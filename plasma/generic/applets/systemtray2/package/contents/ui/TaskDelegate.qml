@@ -30,7 +30,7 @@ QtExtraComponents.MouseEventListener {
     objectName: "taskItemContainer"
 
     height: root.itemSize + (theme.smallSpacing * 2)
-    width: height
+    width: snExpanded ? parent.width : height
 
     hoverEnabled: true
 
@@ -45,6 +45,7 @@ QtExtraComponents.MouseEventListener {
         if (taskType == SystemTray.Task.TypePlasmoid) {
             togglePopup();
         }
+        //taskClicked();
     }
     Timer {
         id: hidePopupTimer
@@ -110,6 +111,52 @@ QtExtraComponents.MouseEventListener {
         running: status == SystemTray.Task.NeedsAttention
     }
 
+    function taskClicked() {
+        print("ST2PX TaskDelegate clicked ... " + !taskItemContainer.expanded + taskItemContainer.expandedItem);
+        if (!plasmoid.expanded) {
+            plasmoid.expanded = true;
+        }
+        //return; // FIXME: remove
+        if (taskItemContainer.taskType == SystemTray.Task.TypeStatusItem && !taskItemContainer.snExpanded) {
+//                 root.currentTask = "";
+//                 root.expandedItem = null
+//                 taskItemContainer.snExpanded = true;
+//                 taskItemContainer.expanded = true;
+//                 clearTasks();
+        }
+        //
+
+        if (root.currentTask == taskId) {
+            print("S2TPX Resetting TASK");
+            root.currentTask = 0;
+            root.currentName = ""
+            root.expandedItem = null;
+            plasmoid.expanded = false;
+        }
+        if (taskItemContainer.taskType == SystemTray.Task.TypePlasmoid ) {
+            print("S2TPX Setting plasmoid");
+//             if (task) {
+//                 task.expanded = true; // crashes?!?!
+//             }
+            //&& !isCurrentTask
+            //expanded = true;
+            expandApplet(true);
+//             root.currentTask = taskId;
+//             root.currentName = name;
+//             applet.expanded = true;
+            //taskItemContainer.expandedItem = expandedItem;
+            //print("S2TPX expanded visible? " + expandedItem.visible);
+
+            // FIXME: expand applet
+
+        } else {
+            print("S2TPX resetting taskitem");
+            root.currentTask = "";
+            root.currentName = ""
+            root.expandedItem = null;
+        }
+    }
+
     MouseArea {
         anchors {
             left: parent.left
@@ -118,37 +165,7 @@ QtExtraComponents.MouseEventListener {
         }
         width: snExpanded ? parent.width : parent.height
         onClicked: {
-            print("ST2PX TaskDelegate clicked ... " + !taskItemContainer.expanded + taskItemContainer.expandedItem);
-            //return; // FIXME: remove
-            if (taskItemContainer.taskType == SystemTray.Task.TypeStatusItem && !taskItemContainer.snExpanded) {
-//                 root.currentTask = "";
-//                 root.expandedItem = null
-//                 taskItemContainer.snExpanded = true;
-//                 taskItemContainer.expanded = true;
-//                 clearTasks();
-            }
-            //
-
-            if (root.currentTask == taskId) {
-                root.currentTask = 0;
-                root.currentName = ""
-                root.expandedItem = null;
-                plasmoid.expanded = false;
-            } else if (taskItemContainer.expanded || taskItemContainer.taskType == SystemTray.Task.TypeStatusItem || !isCurrentTask) {
-                //print("S2TPX Setting taskitem");
-                root.currentTask = taskId;
-                root.currentName = name
-                root.expandedItem = taskItemContainer.expandedItem;
-
-                // FIXME: expand applet
-                //task.expanded = true; // crashes?!?!
-
-            } else {
-                //print("S2TPX resetting taskitem");
-                root.currentTask = "";
-                root.currentName = ""
-                root.expandedItem = null;
-            }
+            taskClicked();
         }
     }
 

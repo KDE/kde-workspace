@@ -232,4 +232,8 @@ Item {
             opacity: pin.checked ? 1 : 0.3
         }
     }
+
+    Component.onCompleted: {
+        clearExpanded();
+    }
 }

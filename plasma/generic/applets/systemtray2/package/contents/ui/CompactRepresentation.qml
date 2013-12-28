@@ -27,7 +27,7 @@ import org.kde.private.systemtray 2.0 as SystemTray
 
 
 QtExtraComponents.MouseEventListener {
-    id: compactRepresenation
+    id: compactRepresentation
 
     property int minimumWidth: !root.vertical ? computeDimension() : computeDimensionHeight()
     property int minimumHeight: root.vertical ? computeDimension() : computeDimensionHeight()
@@ -60,7 +60,7 @@ QtExtraComponents.MouseEventListener {
     }
 
     function computeDimension() {
-        var dim = root.vertical ? compactRepresenation.width : compactRepresenation.height
+        var dim = root.vertical ? compactRepresentation.width : compactRepresentation.height
         var rows = Math.floor(dim / root.itemSize);
         var cols = Math.ceil(systrayhost.shownTasks.length / rows);
         var res = cols * (root.itemSize + theme.smallSpacing*4) + theme.smallSpacing + arrow.width;
@@ -69,7 +69,7 @@ QtExtraComponents.MouseEventListener {
     }
 
     function computeDimensionHeight() {
-        var dim = root.vertical ? compactRepresenation.width : compactRepresenation.height
+        var dim = root.vertical ? compactRepresentation.width : compactRepresentation.height
         var rows = Math.floor(dim / root.itemSize);
         //var cols = Math.ceil(systrayhost.shownTasks.length / rows);
         var rr = rows * (root.itemSize + theme.smallSpacing);
@@ -94,8 +94,8 @@ QtExtraComponents.MouseEventListener {
             plasmoid.expanded = true;
             root.currentTask = "";
             root.expandedItem = null
-            print("!! compactRepresenation w/h : " + compactRepresenation.width + " / " + compactRepresenation.height);
-            print("!! compactRepresenation: x/y" + compactRepresenation.x + " / " + compactRepresenation.y);
+            print("!! compactRepresentation w/h : " + compactRepresentation.width + " / " + compactRepresentation.height);
+            print("!! compactRepresentation: x/y" + compactRepresentation.x + " / " + compactRepresentation.y);
         }
     }
 
@@ -192,7 +192,7 @@ QtExtraComponents.MouseEventListener {
         running: false
         repeat: false
         onTriggered: {
-            var dim = root.vertical ? compactRepresenation.width : compactRepresenation.height;
+            var dim = root.vertical ? compactRepresentation.width : compactRepresentation.height;
             root.preferredItemSize = dim - theme.smallSpacing;
         }
     }
