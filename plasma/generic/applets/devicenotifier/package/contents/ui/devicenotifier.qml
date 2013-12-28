@@ -208,29 +208,11 @@ Item {
                     id: header
                     text: filterModel.count>0 ? i18n("Available Devices") : i18n("No Devices Available")
                     anchors { top: parent.top; topMargin: 3; left: parent.left; right: parent.right }
-                    horizontalAlignment: Text.AlignHCenter
                 }
 
-
-                PlasmaCore.Svg {
-                    id: lineSvg
-                    imagePath: "widgets/line"
-                }
-                PlasmaCore.SvgItem {
-                    id: headerSeparator
-                    svg: lineSvg
-                    elementId: "horizontal-line"
-                    anchors {
-                        top: header.bottom
-                        left: parent.left
-                        right: parent.right
-                        topMargin: 3
-                    }
-                    height: lineSvg.elementSize("horizontal-line").height
-                }
                 PlasmaExtras.ScrollArea {
                     anchors {
-                        top : headerSeparator.bottom
+                        top : header.bottom
                         topMargin: 10
                         bottom: statusBarSeparator.top
                         left: parent.left
