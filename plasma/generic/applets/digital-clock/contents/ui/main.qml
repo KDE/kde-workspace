@@ -47,7 +47,7 @@ Item {
         id: dataSource
         engine: "time"
         connectedSources: ["Local"]
-        interval: 30000
+        interval: plasmoid.configuration.showSeconds ? 500 : 30000
     }
 
 
