@@ -24,10 +24,10 @@ import org.kde.plasma.components 2.0 as Components
 Item {
     id: main
 
-    property int minimumWidth: time.paintedWidth + (theme.smallSpacing * 2)
+    property int minimumWidth: sizehelper.paintedWidth + (theme.smallSpacing * 2)
     property int maximumWidth: minimumWidth
 
-    property int minimumHeight: time.paintedHeight + (theme.smallSpacing * 2)
+    property int minimumHeight: sizehelper.paintedHeight + (theme.smallSpacing * 2)
     property int maximumHeight: minimumHeight
 
     property int formFactor: plasmoid.formFactor
@@ -46,7 +46,7 @@ Item {
 
     Timer {
         id: geotimer
-        interval: 10 // just to compress resize events of width and height
+        interval: 4 // just to compress resize events of width and height; below 60fps
         onTriggered: updateSize()
     }
 
@@ -58,10 +58,12 @@ Item {
         width: Math.max(paintedWidth, time.paintedWidth)
         // We need to adjust the timeformat a bit, see more at timeFormatCorrection(..) comments
         text: Qt.formatTime(dataSource.data["Local"]["Time"], timeFormatCorrection(Qt.locale().timeFormat(Locale.ShortFormat)));
-        horizontalAlignment: Text.AlignHCenter
+        //horizontalAlignment: Text.AlignHCenter
         verticalAlignment: Text.AlignVCenter
         anchors {
-            centerIn: parent
+            verticalCenter: parent.verticalCenter
+            left: parent.left
+            leftMargin: theme.smallSpacing
         }
 
         MouseArea {
@@ -93,7 +95,8 @@ Item {
 
     Components.Label {
         id: sizehelper
-        text: time.text
+        //text: time.text
+        text: Qt.locale().timeFormat(Locale.ShortFormat).length * "M"
         visible: false
     }
 
@@ -129,6 +132,8 @@ Item {
             }
         }
         time.font.pixelSize = maxSize;
+        sizehelper.font.timePixelSize = maxSize;
+
     }
 
     // Qt's QLocale does not offer any modular time creating like Klocale did
@@ -152,6 +157,16 @@ Item {
         //       put it
         if (plasmoid.configuration.showTimezone && timeFormatString.indexOf('t') == -1) {
             timeFormatString = timeFormatString + " t";
+        }
+
+        // We set the text of the sizehelper to a fixed-size string,
+        // only depending on the length of the time format, but not on
+        // the actually rendered time. This makes the width of the plasmoid
+        // not change when the time changes, which can lead to relayouts of
+        // the whole panel, and jumpiness.
+        var st = new Array( timeFormatString.length ).join( "A" );
+        if (sizehelper.text != st) {
+            sizehelper.text = st;
         }
 
         return timeFormatString;
