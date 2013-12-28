@@ -150,7 +150,7 @@ static const char * const constExtensions[]=
             {".ttf", KFI_FONTS_PACKAGE, ".otf", ".pfa", ".pfb", ".ttc",
              ".pcf", ".pcf.gz", ".bdf", ".bdf.gz", NULL };
 
-static QString removeKnownExtension(const KUrl &url)
+static QString removeKnownExtension(const QUrl &url)
 {
     QString fname(url.fileName());
     int     pos;
@@ -177,11 +177,11 @@ CKioFonts::~CKioFonts()
     delete itsTempDir;
 }
 
-void CKioFonts::listDir(const KUrl &url)
+void CKioFonts::listDir(const QUrl &url)
 {
-    KFI_DBUG << url.prettyUrl();
+    KFI_DBUG << url;
 
-    QStringList   pathList(url.path(KUrl::RemoveTrailingSlash).split('/', QString::SkipEmptyParts));
+    QStringList pathList(url.adjusted(QUrl::StripTrailingSlash).path().split('/', QString::SkipEmptyParts));
     EFolder       folder=Misc::root() ? FOLDER_SYS : getFolder(pathList);
     KIO::UDSEntry entry;
     int           size=0;
@@ -211,13 +211,13 @@ void CKioFonts::listDir(const KUrl &url)
         finished();
     }
     else
-        error(KIO::ERR_DOES_NOT_EXIST, url.prettyUrl());
+        error(KIO::ERR_DOES_NOT_EXIST, url.toDisplayString());
 }
 
-void CKioFonts::put(const KUrl &url, int /*permissions*/, KIO::JobFlags /*flags*/)
+void CKioFonts::put(const QUrl &url, int /*permissions*/, KIO::JobFlags /*flags*/)
 {
-    KFI_DBUG << url.prettyUrl();
-    QStringList pathList(url.path(KUrl::RemoveTrailingSlash).split('/', QString::SkipEmptyParts));
+    KFI_DBUG << url;
+    QStringList pathList(url.adjusted(QUrl::StripTrailingSlash).path().split('/', QString::SkipEmptyParts));
     EFolder     folder(getFolder(pathList));
 
     if(!Misc::root() && FOLDER_ROOT==folder)
@@ -227,7 +227,7 @@ void CKioFonts::put(const KUrl &url, int /*permissions*/, KIO::JobFlags /*flags*
     else if(Misc::isPackage(url.fileName()))
         error(KIO::ERR_SLAVE_DEFINED, i18n("You cannot install a fonts package directly.\n"
                                            "Please extract %1, and install the components individually.",
-                                           url.prettyUrl()));
+                                           url.toDisplayString()));
     else
     {
         if(!itsTempDir)
@@ -281,10 +281,10 @@ void CKioFonts::put(const KUrl &url, int /*permissions*/, KIO::JobFlags /*flags*
     }
 }
 
-void CKioFonts::get(const KUrl &url)
+void CKioFonts::get(const QUrl &url)
 {
-    KFI_DBUG << url.prettyUrl();
-    QStringList pathList(url.path(KUrl::RemoveTrailingSlash).split('/', QString::SkipEmptyParts));
+    KFI_DBUG << url;
+    QStringList pathList(url.adjusted(QUrl::StripTrailingSlash).path().split('/', QString::SkipEmptyParts));
     EFolder     folder(getFolder(pathList));
     Family      family(getFont(url, folder));
 
@@ -335,7 +335,7 @@ void CKioFonts::get(const KUrl &url)
                 if(!found)
                 {
                     KFI_DBUG << "hasMetaData(\"thumbnail\"), so return Url: " << url;
-                    stream << url.prettyUrl();
+                    stream << url.toDisplayString();
                 }
             }
             else
@@ -409,17 +409,17 @@ void CKioFonts::get(const KUrl &url)
         KFI_DBUG << "real: " << realPathC;
 
         if (-2==KDE_stat(realPathC.constData(), &buff))
-            error(EACCES==errno ? KIO::ERR_ACCESS_DENIED : KIO::ERR_DOES_NOT_EXIST, url.prettyUrl());
+            error(EACCES==errno ? KIO::ERR_ACCESS_DENIED : KIO::ERR_DOES_NOT_EXIST, url.toDisplayString());
         else if (S_ISDIR(buff.st_mode))
-            error(KIO::ERR_IS_DIRECTORY, url.prettyUrl());
+            error(KIO::ERR_IS_DIRECTORY, url.toDisplayString());
         else if (!S_ISREG(buff.st_mode))
-            error(KIO::ERR_CANNOT_OPEN_FOR_READING, url.prettyUrl());
+            error(KIO::ERR_CANNOT_OPEN_FOR_READING, url.toDisplayString());
         else
         {
             int fd = KDE_open(realPathC.constData(), O_RDONLY);
 
             if (fd < 0)
-                error(KIO::ERR_CANNOT_OPEN_FOR_READING, url.prettyUrl());
+                error(KIO::ERR_CANNOT_OPEN_FOR_READING, url.toDisplayString());
             else
             {
                 // Determine the mimetype of the file to be retrieved, and emit it.
@@ -441,7 +441,7 @@ void CKioFonts::get(const KUrl &url)
                         if (EINTR==errno)
                             continue;
 
-                        error(KIO::ERR_COULD_NOT_READ, url.prettyUrl());
+                        error(KIO::ERR_COULD_NOT_READ, url.toDisplayString());
                         ::close(fd);
                         if(multiple)
                             ::unlink(realPathC);
@@ -468,23 +468,23 @@ void CKioFonts::get(const KUrl &url)
             ::unlink(realPathC);
     }
     else
-        error(KIO::ERR_COULD_NOT_READ, url.prettyUrl());
+        error(KIO::ERR_COULD_NOT_READ, url.toDisplayString());
 }
 
-void CKioFonts::copy(const KUrl &, const KUrl &, int, KIO::JobFlags)
+void CKioFonts::copy(const QUrl &, const QUrl &, int, KIO::JobFlags)
 {
     error(KIO::ERR_SLAVE_DEFINED, i18n("Cannot copy fonts"));
 }
 
-void CKioFonts::rename(const KUrl &, const KUrl &, KIO::JobFlags)
+void CKioFonts::rename(const QUrl &, const QUrl &, KIO::JobFlags)
 {
     error(KIO::ERR_SLAVE_DEFINED, i18n("Cannot move fonts"));
 }
 
-void CKioFonts::del(const KUrl &url, bool isFile)
+void CKioFonts::del(const QUrl &url, bool isFile)
 {
-    KFI_DBUG << url.prettyUrl();
-    QStringList pathList(url.path(KUrl::RemoveTrailingSlash).split('/', QString::SkipEmptyParts));
+    KFI_DBUG << url;
+    QStringList pathList(url.adjusted(QUrl::StripTrailingSlash).path().split('/', QString::SkipEmptyParts));
     EFolder     folder(getFolder(pathList));
     QString     name(removeKnownExtension(url));
 
@@ -497,14 +497,14 @@ void CKioFonts::del(const KUrl &url, bool isFile)
     else if(!name.isEmpty())
         handleResp(itsInterface->uninstall(name, Misc::root() || FOLDER_SYS==folder), name);
     else
-        error(KIO::ERR_DOES_NOT_EXIST, url.prettyUrl());
+        error(KIO::ERR_DOES_NOT_EXIST, url.toDisplayString());
 }
 
-void CKioFonts::stat(const KUrl &url)
+void CKioFonts::stat(const QUrl &url)
 {
-    KFI_DBUG << url.prettyUrl();
+    KFI_DBUG << url;
 
-    QStringList   pathList(url.path(KUrl::RemoveTrailingSlash).split('/', QString::SkipEmptyParts));
+    QStringList pathList(url.adjusted(QUrl::StripTrailingSlash).path().split('/', QString::SkipEmptyParts));
     EFolder       folder=getFolder(pathList);
     KIO::UDSEntry entry;
     bool          ok=true;
@@ -538,7 +538,7 @@ void CKioFonts::stat(const KUrl &url)
     }
     else
     {
-        error(KIO::ERR_DOES_NOT_EXIST, url.prettyUrl());
+        error(KIO::ERR_DOES_NOT_EXIST, url.toDisplayString());
         return;
     }
 }
@@ -608,7 +608,7 @@ QString CKioFonts::getGroupName(gid_t gid)
     return itsGroupCache[gid];
 }
 
-bool CKioFonts::createStatEntry(KIO::UDSEntry &entry, const KUrl &url, EFolder folder)
+bool CKioFonts::createStatEntry(KIO::UDSEntry &entry, const QUrl &url, EFolder folder)
 {
     Family fam(getFont(url, folder));
 
@@ -755,9 +755,8 @@ bool CKioFonts::createUDSEntry(KIO::UDSEntry &entry, EFolder folder, const Famil
             else
                 path+=extension;
 
-            KUrl url(KUrl::fromPath(path));
-
-            url.setProtocol(KFI_KIO_FONTS_PROTOCOL);
+            QUrl url(QUrl::fromLocalFile(path));
+            url.setScheme(KFI_KIO_FONTS_PROTOCOL);
             entry.insert(KIO::UDSEntry::UDS_URL, url.url());
             return true;
         }
@@ -766,7 +765,7 @@ bool CKioFonts::createUDSEntry(KIO::UDSEntry &entry, EFolder folder, const Famil
     return false;
 }
 
-Family CKioFonts::getFont(const KUrl &url, EFolder folder)
+Family CKioFonts::getFont(const QUrl &url, EFolder folder)
 {
     QString name(removeKnownExtension(url));
 

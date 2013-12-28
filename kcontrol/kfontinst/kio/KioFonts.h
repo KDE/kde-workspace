@@ -29,7 +29,7 @@
 #include <sys/types.h>
 
 class KTempDir;
-class KUrl;
+class QUrl;
 
 namespace KFI
 {
@@ -53,13 +53,13 @@ class CKioFonts : public KIO::SlaveBase
     CKioFonts(const QByteArray &pool, const QByteArray &app);
     virtual ~CKioFonts();
 
-    void listDir(const KUrl &url);
-    void put(const KUrl &url, int permissions, KIO::JobFlags flags);
-    void get(const KUrl &url);
-    void del(const KUrl &url, bool isFile);
-    void copy(const KUrl &src, const KUrl &dest, int mode, KIO::JobFlags flags);
-    void rename(const KUrl &src, const KUrl &dest, KIO::JobFlags flags);
-    void stat(const KUrl &url);
+    void listDir(const QUrl &url);
+    void put(const QUrl &url, int permissions, KIO::JobFlags flags);
+    void get(const QUrl &url);
+    void del(const QUrl &url, bool isFile);
+    void copy(const QUrl &src, const QUrl &dest, int mode, KIO::JobFlags flags);
+    void rename(const QUrl &src, const QUrl &dest, KIO::JobFlags flags);
+    void stat(const QUrl &url);
     void special(const QByteArray &a);
 
     private:
@@ -67,10 +67,10 @@ class CKioFonts : public KIO::SlaveBase
     int     listFolder(KIO::UDSEntry &entry, EFolder folder);
     QString getUserName(uid_t uid);
     QString getGroupName(gid_t gid);
-    bool    createStatEntry(KIO::UDSEntry &entry, const KUrl &url, EFolder folder);
+    bool    createStatEntry(KIO::UDSEntry &entry, const QUrl &url, EFolder folder);
     void    createUDSEntry(KIO::UDSEntry &entry, EFolder folder);
     bool    createUDSEntry(KIO::UDSEntry &entry, EFolder folder, const Family &family, const Style &style);
-    Family  getFont(const KUrl &url, EFolder folder);
+    Family  getFont(const QUrl &url, EFolder folder);
     void    handleResp(int resp, const QString &file, const QString &tempFile=QString(), bool destIsSystem=false);
 
     private:
