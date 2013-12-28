@@ -101,6 +101,7 @@ Item {
         anchors {
             //horizontalCenter: parent.horizontalCenter
             left: parent.left
+            //leftMargin: theme.smallSpacing
             verticalCenter: parent.verticalCenter
         }
         source: iconName != "" ? iconName : (typeof(icon) != "undefined" ? icon : "")

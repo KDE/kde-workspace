@@ -67,7 +67,7 @@ QtExtraComponents.MouseEventListener {
     property int taskType: type
     property Item expandedItem: taskItemExpanded
     property Item expandedStatusItem: null
-    property alias icon: itemIcon
+//     property alias icon: itemIcon
     property bool snExpanded: expanded
 
     Rectangle {
@@ -103,18 +103,6 @@ QtExtraComponents.MouseEventListener {
             root.currentTask = ""
             root.expandedItem = null;
         }
-    }
-
-    PlasmaCore.IconItem {
-        id: itemIcon
-        width: parent.height
-        height: parent.height
-        visible: false
-        anchors {
-            left: parent.left
-            verticalCenter: parent.verticalCenter
-        }
-        source: iconName != "" ? iconName : (typeof(icon) != "undefined" ? icon : "")
     }
 
     PulseAnimation {
