@@ -143,7 +143,7 @@ Item {
         id: snHeadingExpanded
 
         level: 1
-        opacity: root.currentTask != "" ? 0.6 : 0
+        opacity: root.currentTask != "" ? 0.8 : 0
         Behavior on opacity { NumberAnimation {} }
 
         anchors {
