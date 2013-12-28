@@ -32,8 +32,8 @@ Item {
     property int maximumWidth: compactRepresentation && compactRepresentation.maximumWidth !== undefined ? compactRepresentation.maximumWidth : -1
     property int maximumHeight: compactRepresentation && compactRepresentation.maximumHeight !== undefined ? compactRepresentation.maximumHeight : -1
 
-    property int implicitWidth: compactRepresentation && compactRepresentation.implicitWidth !== undefined ? compactRepresentation.implicitWidth : -1
-    property int implicitHeight: compactRepresentation && compactRepresentation.implicitHeight !== undefined ? compactRepresentation.implicitHeight : -1
+    implicitWidth: compactRepresentation && compactRepresentation.implicitWidth !== undefined ? compactRepresentation.implicitWidth : -1
+    implicitHeight: compactRepresentation && compactRepresentation.implicitHeight !== undefined ? compactRepresentation.implicitHeight : -1
 
     property bool fillWidth: compactRepresentation && compactRepresentation.fillWidth !== undefined ? compactRepresentation.fillWidth : false
     property bool fillHeight: compactRepresentation && compactRepresentation.fillHeight !== undefined ? compactRepresentation.fillHeight : false
