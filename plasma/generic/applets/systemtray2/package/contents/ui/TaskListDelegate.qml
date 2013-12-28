@@ -35,7 +35,8 @@ TaskDelegate {
 
     PlasmaComponents.Highlight {
         anchors.fill: parent
-        anchors.rightMargin: height / 2
+        //anchors.rightMargin: height
+        anchors.margins: -theme.smallSpacing
         opacity: containsMouse && snExpanded ? 1 : 0
         Behavior on opacity { NumberAnimation {} }
     }
@@ -44,8 +45,8 @@ TaskDelegate {
         id: mainLabel
 
         anchors {
-            left: icon.right
-            leftMargin: theme.largeSpacing
+            left: parent.left
+            leftMargin: parent.height + theme.largeSpacing
             right: parent.right
             verticalCenter: parent.verticalCenter
         }

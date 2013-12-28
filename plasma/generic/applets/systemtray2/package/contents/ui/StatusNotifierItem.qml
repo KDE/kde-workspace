@@ -97,11 +97,10 @@ Item {
         id: itemIcon
         width: root.itemSize
         height: root.itemSize
-        //visible: false
         anchors {
             //horizontalCenter: parent.horizontalCenter
             left: parent.left
-            //leftMargin: theme.smallSpacing
+            leftMargin: (parent.height - height) / 2
             verticalCenter: parent.verticalCenter
         }
         source: iconName != "" ? iconName : (typeof(icon) != "undefined" ? icon : "")

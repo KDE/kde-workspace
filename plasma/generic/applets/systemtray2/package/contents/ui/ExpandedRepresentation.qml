@@ -110,14 +110,10 @@ Item {
         width: parent.width
 
         interactive: (contentHeight > height)
-//         highlightFollowsCurrentItem: true
-//         highlight: PlasmaComponents.Highlight {}
 
         anchors {
-            //top: (loadingItem.visible && !plasmoid.expanded) ? loadingItem.bottom : parent.top
             top: snHeading.bottom
             topMargin: theme.largeSpacing / 2
-            //bottom: (loadingItem.visible && !plasmoid.expanded) ? undefined : parent.bottom
             bottom: parent.bottom
             left: parent.left
         }
@@ -235,6 +231,5 @@ Item {
             text: "✓"
             opacity: pin.checked ? 1 : 0.3
         }
-
     }
 }
