@@ -715,16 +715,6 @@ qreal PlasmoidInterface::maximumHeight() const
     return readGraphicsObjectSizeHint("maximumHeight");
 }
 
-qreal PlasmoidInterface::implicitWidth() const
-{
-    return readGraphicsObjectSizeHint("implicitWidth");
-}
-
-qreal PlasmoidInterface::implicitHeight() const
-{
-    return readGraphicsObjectSizeHint("implicitHeight");
-}
-
 void PlasmoidInterface::setAssociatedApplication(const QString &string)
 {
     //applet()->setAssociatedApplication(string);
@@ -934,25 +924,33 @@ void PlasmoidInterface::createCompactRepresentation()
 
         if (m_compactUiObject.data()->property("implicitWidth").isValid()) {
             connect(m_compactUiObject.data(), SIGNAL(implicitWidthChanged()),
-                    this, SIGNAL(implicitWidthChanged()));
+                    this, SLOT(updateImplicitWidth()));
         }
         if (m_compactUiObject.data()->property("implicitHeight").isValid()) {
             connect(m_compactUiObject.data(), SIGNAL(implicitHeightChanged()),
-                    this, SIGNAL(implicitHeightChanged()));
+                    this, SLOT(updateImplicitHeight()));
         }
 
         emit fillWidthChanged();
         emit fillHeightChanged();
         emit minimumWidthChanged();
         emit minimumHeightChanged();
-        emit implicitWidthChanged();
-        emit implicitHeightChanged();
         emit maximumWidthChanged();
         emit maximumHeightChanged();
         emit defaultRepresentationChanged();
     }
 
     emit expandedChanged();
+}
+
+void PlasmoidInterface::updateImplicitWidth()
+{
+    setImplicitWidth(readGraphicsObjectSizeHint("implicitWidth"));
+}
+
+void PlasmoidInterface::updateImplicitHeight()
+{
+    setImplicitHeight(readGraphicsObjectSizeHint("implicitHeight"));
 }
 
 void PlasmoidInterface::updatePopupSize()

@@ -147,9 +147,6 @@ class PlasmoidInterface : public QQuickItem
     Q_PROPERTY(qreal minimumHeight READ minimumHeight NOTIFY minimumHeightChanged)
     Q_PROPERTY(qreal maximumWidth READ maximumWidth NOTIFY maximumWidthChanged)
     Q_PROPERTY(qreal maximumHeight READ maximumHeight NOTIFY maximumHeightChanged)
-    //FIXME?implicitWidth/height is already there
-//     Q_PROPERTY(qreal implicitWidth READ implicitWidth NOTIFY implicitWidthChanged)
-//     Q_PROPERTY(qreal implicitHeight READ implicitHeight NOTIFY implicitHeightChanged)
 
     Q_PROPERTY(QQuickItem* defaultRepresentation READ defaultRepresentation NOTIFY defaultRepresentationChanged)
 
@@ -285,8 +282,6 @@ public:
     qreal minimumHeight() const;
     qreal maximumWidth() const;
     qreal maximumHeight() const;
-    qreal implicitWidth() const;
-    qreal implicitHeight() const;
 
 Q_SIGNALS:
     /**
@@ -317,8 +312,6 @@ Q_SIGNALS:
     void minimumHeightChanged();
     void maximumWidthChanged();
     void maximumHeightChanged();
-//     void implicitWidthChanged();
-//     void implicitHeightChanged();
     void fillWidthChanged();
     void fillHeightChanged();
     void userConfiguringChanged();
@@ -336,6 +329,8 @@ private Q_SLOTS:
     void createCompactRepresentation();
     void updatePopupSize();
     void hideDefaultRepresenation();
+    void updateImplicitWidth();
+    void updateImplicitHeight();
 
 private:
     //Helper for minimumWidth etc.
