@@ -391,31 +391,21 @@ void PlasmoidInterface::setExpanded(bool expanded)
     if (!m_compactUiObject) {
         return;
     }
-    qDebug() << "CUI Is there";
     if (m_expanded != expanded) {
         m_expanded = expanded;
-        //m_defaultRepresentation = 0;
         QTimer::singleShot(500, this, SLOT(hideDefaultRepresenation()));
-        qCDebug(SYSTEMTRAY) << "ST2P PI expandedItem (visible):" << m_plugin << expanded;
+        //qCDebug(SYSTEMTRAY) << "ST2P PI expandedItem (visible):" << m_plugin << expanded;
         emit expandedChanged();
-        //emit defaultRepresentationChanged();
-        //m_defaultRepresentation->setProperty("visible", expanded);
-        //m_defaultRepresentation
         emit defaultRepresentationChanged();
     }
-    qDebug() << "still there. and changing";
-
-
 }
+
 void PlasmoidInterface::hideDefaultRepresenation()
 {
     if (m_defaultRepresentation) {
         m_defaultRepresentation->setProperty("visible", m_expanded);
     }
 }
-
-
-
 
 Plasma::Types::BackgroundHints PlasmoidInterface::backgroundHints() const
 {
