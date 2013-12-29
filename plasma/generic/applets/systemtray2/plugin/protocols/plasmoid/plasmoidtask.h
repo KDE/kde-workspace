@@ -71,6 +71,7 @@ public:
     void    setShortcut(QString text);
 
     Q_INVOKABLE void expandApplet(bool expanded);
+    Q_INVOKABLE void setLocation(Plasma::Types::Location loc);
 
 Q_SIGNALS:
     void changedShortcut();

@@ -244,6 +244,7 @@ public:
     Plasma::Types::FormFactor formFactor() const;
 
     Plasma::Types::Location location() const;
+    void setLocation(Plasma::Types::Location loc);
 
     QString currentActivity() const;
 
@@ -352,6 +353,7 @@ private:
     Plasma::Types::BackgroundHints m_backgroundHints;
     Plasma::Types::ImmutabilityType m_immutability;
     Plasma::Types::ItemStatus m_status;
+    Plasma::Types::Location m_location;
     bool m_busy : 1;
     bool m_expanded : 1;
     QString m_icon;

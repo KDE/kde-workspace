@@ -120,6 +120,12 @@ void PlasmoidTask::setShortcut(QString text) {
     }
 }
 
+void PlasmoidTask::setLocation(Plasma::Types::Location loc)
+{
+    if (m_taskItem) {
+        m_taskItem->setLocation(loc);
+    }
+}
 
 QString PlasmoidTask::taskId() const
 {

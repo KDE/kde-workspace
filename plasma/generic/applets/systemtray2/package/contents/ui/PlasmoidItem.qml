@@ -20,6 +20,17 @@
 import QtQuick 2.0
 
 Item {
+
+    // Notify the plasmoids inside containers of location changes
+    Connections {
+        target: plasmoid
+        onLocationChanged: {
+            if (taskType == SystemTray.Task.TypePlasmoid) {
+                setLocation(plasmoid.location);
+            }
+        }
+    }
+
     MouseArea {
         anchors {
             fill: parent

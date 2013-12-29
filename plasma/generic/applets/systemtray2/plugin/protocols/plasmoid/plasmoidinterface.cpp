@@ -62,6 +62,7 @@ PlasmoidInterface::PlasmoidInterface(const QString &plugin, const QString &systr
 //       m_actionSignals(0),
       m_backgroundHints(Plasma::Types::StandardBackground),
       m_status(Plasma::Types::ActiveStatus),
+      m_location(Plasma::Types::BottomEdge),
       m_qmlObject(0),
       m_defaultRepresentation(0),
       m_busy(false),
@@ -310,7 +311,15 @@ Plasma::Types::FormFactor PlasmoidInterface::formFactor() const
 
 Plasma::Types::Location PlasmoidInterface::location() const
 {
-    return Plasma::Types::BottomEdge;
+    return m_location;
+}
+
+void PlasmoidInterface::setLocation(Plasma::Types::Location loc)
+{
+    if (m_location != loc) {
+        m_location = loc;
+        emit locationChanged();
+    }
 }
 
 QString PlasmoidInterface::currentActivity() const
