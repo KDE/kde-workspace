@@ -118,7 +118,9 @@ if(Boost_FOUND)
     preview/keyboardpainter.cpp
     preview/keysymhelper.cpp
     preview/keysym2ucs.cpp
-    preview/model_to_geometry.cpp)
+    preview/model_to_geometry.cpp
+    LanguageDetection/training_text_map.cpp
+    LanguageDetection/languagedetector.cpp)
   
 else(Boost_FOUND)
 
@@ -164,3 +166,5 @@ add_subdirectory( pics )
 # Unit tests
 
 add_subdirectory( tests )
+
+add_subdirectory( LanguageDetection/langdata )

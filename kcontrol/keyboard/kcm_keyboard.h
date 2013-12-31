@@ -21,7 +21,8 @@
 #define KCM_KEYBOARD_H_
 
 #include <kcmodule.h>
-
+#include <QClipboard>
+#include "LanguageDetection/languagedetector.h"
 class KCMKeyboardWidget;
 class KeyboardConfig;
 class Rules;
@@ -42,6 +43,12 @@ private:
 	Rules* rules;
 	KeyboardConfig* keyboardConfig;
 	KCMKeyboardWidget *widget;
+    QClipboard *inputClipboard;
+    LanguageDetector ld;
+
+private Q_SLOTS:
+    void changeLabel();
+
 };
 
 #endif /* KCM_KEYBOARD_H_ */

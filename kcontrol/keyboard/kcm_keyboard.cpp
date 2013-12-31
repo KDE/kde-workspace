@@ -24,8 +24,11 @@
 #include <kpluginfactory.h>
 #include <kpluginloader.h>
 
+#include <QClipboard>
 #include <QtDBus/QDBusMessage>
 #include <QtDBus/QDBusConnection>
+#include <QMessageBox>
+#include <QMouseEvent>
 //#include <QtDBus/QDBusInterface>
 
 #include "kcm_keyboard_widget.h"
@@ -33,6 +36,8 @@
 #include "keyboard_config.h"
 #include "xkb_rules.h"
 #include "keyboard_dbus.h"
+#include "LanguageDetection/training_text_map.h"
+#include "LanguageDetection/languagedetector.h"
 
 #include "xkb_helper.h"
 
@@ -60,6 +65,10 @@ KCMKeyboard::KCMKeyboard(QWidget *parent, const QVariantList &args)
 
 
   rules = Rules::readRules(Rules::READ_EXTRAS);
+
+  inputClipboard = QApplication::clipboard();
+
+  connect(inputClipboard, SIGNAL(selectionChanged()),this, SLOT(changeLabel()));
 
   keyboardConfig = new KeyboardConfig();
 
@@ -105,4 +114,17 @@ void KCMKeyboard::save()
 
 	QDBusMessage message = QDBusMessage::createSignal(KEYBOARD_DBUS_OBJECT_PATH, KEYBOARD_DBUS_SERVICE_NAME, KEYBOARD_DBUS_CONFIG_RELOAD_MESSAGE);
     QDBusConnection::sessionBus().send(message);
+}
+
+void KCMKeyboard::changeLabel(){
+    QString originalText = inputClipboard->text(QClipboard::Selection);
+    QMouseEvent *e;
+    while(e->buttons() == Qt::LeftButton){
+        qDebug()<<"here\n\n\n\n\n\n\n\n\n";
+    }
+    QString language = ld.detectLanguage(originalText);
+    QMessageBox q;
+    q.setText("input: "+originalText+"\ndetectedLAnguage : "+ language);
+    q.exec();
+
 }
