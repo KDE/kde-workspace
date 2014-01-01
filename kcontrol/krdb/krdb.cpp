@@ -45,7 +45,6 @@
 #include <ksavefile.h>
 #include <ktemporaryfile.h>
 #include <KLocalizedString>
-#include <kstyle.h>
 
 #include "krdb.h"
 #ifdef HAVE_X11
