@@ -30,8 +30,6 @@
 #include <QTextDocument>
 #include <QDesktopWidget>
 
-#include <KCModuleInfo>
-#include <KCModuleProxy>
 #include <KColorScheme>
 #include <KGlobalSettings>
 #include <KIconLoader>

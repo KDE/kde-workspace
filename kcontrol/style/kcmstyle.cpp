@@ -38,7 +38,6 @@
 #include <kapplication.h>
 #include <kcombobox.h>
 #include <kmessagebox.h>
-#include <kstyle.h>
 #include <kstandarddirs.h>
 #include <kautostart.h>
 #include <KDebug>
