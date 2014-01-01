@@ -31,6 +31,7 @@ add_library(screenlocker_static STATIC ${ksld_SRCS})
 target_link_libraries(screenlocker_static kworkspace
    Qt5::X11Extras
    KF5::IdleTime
+   KF5::GlobalAccel
    ${X11_LIBRARIES}
    ${X11_Xcursor_LIB}
    ${XCB_XCB_LIBRARY}
