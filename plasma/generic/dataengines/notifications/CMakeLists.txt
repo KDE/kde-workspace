@@ -18,7 +18,7 @@ target_link_libraries(plasma_engine_notifications
     KF5::Notifications
     KF5::Plasma
     KF5::Service
-    #KF5::NotifyConfig
+    KF5::NotifyConfig
 )
 
 install(TARGETS plasma_engine_notifications DESTINATION ${PLUGIN_INSTALL_DIR}/plasma/dataengine)
