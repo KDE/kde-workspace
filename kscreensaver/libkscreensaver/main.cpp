@@ -147,6 +147,9 @@ int kScreenSaverMain( int argc, char** argv, KScreenSaverInterface& screenSaverI
     // Set a useful default icon.
     app.setWindowIcon(KIcon("preferences-desktop-screensaver"));
 
+    // Disable session management so screensaver windows don't get restored on login (bug#314859)
+    app.disableSessionManagement();
+
 
     if (!pipe(termPipe))
     {
