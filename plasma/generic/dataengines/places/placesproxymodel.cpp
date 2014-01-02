@@ -38,6 +38,7 @@ PlacesProxyModel::PlacesProxyModel(QObject* parent, KFilePlacesModel* model)
     roles.insert(KFilePlacesModel::SetupNeededRole, "setupNeeded");
     roles.insert(KFilePlacesModel::FixedDeviceRole, "fixedDevice");
     roles.insert(KFilePlacesModel::CapacityBarRecommendedRole, "capacityBarRecommended");
+    roles.insert(IndexRole, "index");
     roles.insert(IsDeviceRole, "isDevice");
     roles.insert(PathRole, "path");
     roles.insert(SizeRole, "size");
@@ -49,6 +50,8 @@ PlacesProxyModel::PlacesProxyModel(QObject* parent, KFilePlacesModel* model)
 QVariant PlacesProxyModel::data(const QModelIndex &index, int role) const
 {
     switch (role) {
+    case IndexRole:
+        return index.row();
     case IsDeviceRole:
         return m_placesModel->deviceForIndex(index).isValid();
     case PathRole:

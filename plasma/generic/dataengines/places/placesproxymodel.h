@@ -30,7 +30,8 @@ class PlacesProxyModel : public QIdentityProxyModel
 
 public:
     enum Roles {
-        IsDeviceRole = KFilePlacesModel::CapacityBarRecommendedRole + 100,
+        IndexRole = KFilePlacesModel::CapacityBarRecommendedRole + 100,
+        IsDeviceRole,
         PathRole,
         SizeRole,
         UsedRole,
