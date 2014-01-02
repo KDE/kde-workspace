@@ -1,5 +1,5 @@
 /*
- * Copyright 2008  Alex Merry <alex.merry@kdemail.net>
+ * Copyright 2014 Marco Martin <mart@kde.org>
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -17,28 +17,32 @@
  * Boston, MA  02110-1301  USA
  */
 
-#ifndef PLACESERVICE_H
-#define PLACESERVICE_H
+#ifndef PLACESPROXYMODEL_H
+#define PLACESPROXYMODEL_H
 
-#include <Plasma/Service>
+#include <QIdentityProxyModel>
 
 #include "placesengine.h"
 
-class PlaceService : public Plasma::Service
+class PlacesProxyModel : public QIdentityProxyModel
 {
     Q_OBJECT
 
 public:
-    PlaceService(QObject* parent,
-                 KFilePlacesModel* model);
+    enum Roles {
+        IsDeviceRole = KFilePlacesModel::CapacityBarRecommendedRole + 100,
+        PathRole,
+        SizeRole,
+        UsedRole,
+        AvailableRole
+    };
 
-protected:
-    Plasma::ServiceJob* createJob(const QString& operation,
-                                  QMap<QString,QVariant>& parameters);
+    PlacesProxyModel(QObject* parent, KFilePlacesModel* model);
+
+    QVariant data(const QModelIndex &index, int role) const;
 
 private:
-    KFilePlacesModel* m_model;
-    QModelIndex m_index;
+    KFilePlacesModel* m_placesModel;
 };
 
-#endif // PLACESERVICE_H
+#endif // PLACESPROXYMODEL_H

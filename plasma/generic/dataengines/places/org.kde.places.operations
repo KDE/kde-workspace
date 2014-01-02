@@ -3,6 +3,9 @@
     "http://www.kde.org/standards/kcfg/1.0/kcfg.xsd">
 <kcfg>
   <group name="Update">
+    <entry name="index" type="Integer">
+      <label>the index in the places model we're working on</label>
+    </entry>
     <entry name="Name" type="String">
       <label>The text to display on the place.</label>
     </entry>
@@ -14,6 +17,9 @@
     </entry>
   </group>
   <group name="Add">
+    <entry name="index" type="Integer">
+      <label>the index in the places model we're working on</label>
+    </entry>
     <entry name="Name" type="String">
       <label>The text to display on the place.</label>
     </entry>
@@ -25,9 +31,29 @@
     </entry>
   </group>
   <!-- FIXME: no move, cos we don't have drag-n-drop.  Can we fake it? -->
-  <group name="Remove" />
-  <group name="Hide" />
-  <group name="Show" />
-  <group name="Setup Device" />
-  <group name="Teardown Device" />
+  <group name="Remove">
+    <entry name="index" type="Integer">
+      <label>the index in the places model we're working on</label>
+    </entry>
+  </group>
+  <group name="Hide">
+    <entry name="index" type="Integer">
+      <label>the index in the places model we're working on</label>
+    </entry>
+  </group>
+  <group name="Show">
+    <entry name="index" type="Integer">
+      <label>the index in the places model we're working on</label>
+    </entry>
+  </group>
+  <group name="Setup Device">
+    <entry name="index" type="Integer">
+      <label>the index in the places model we're working on</label>
+    </entry>
+  </group>
+  <group name="Teardown Device">
+    <entry name="index" type="Integer">
+      <label>the index in the places model we're working on</label>
+    </entry>
+  </group>
 </kcfg>

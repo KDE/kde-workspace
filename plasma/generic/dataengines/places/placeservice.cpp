@@ -23,41 +23,40 @@
 #include <QDebug>
 
 
-PlaceService::PlaceService(QObject* parent,
-                           KFilePlacesModel* model,
-                           QModelIndex index)
+PlaceService::PlaceService(QObject* parent, KFilePlacesModel* model)
     : Plasma::Service(parent),
-      m_model(model),
-      m_index(index)
+      m_model(model)
 {
     setName("org.kde.places");
-    if (m_index.isValid()) {
-        Q_ASSERT(m_index.model() == model);
-        setDestination(QString::number(m_index.row()));
-        qDebug() << "Created a place service for" << destination();
-    } else {
-        qDebug() << "Created a dead place service";
-    }
+
+    setDestination("places");
+    qDebug() << "Created a place service for" << destination();
 }
 
 Plasma::ServiceJob* PlaceService::createJob(const QString& operation,
                                             QMap<QString,QVariant>& parameters)
 {
+    QModelIndex index = m_model->index(parameters.value("index").toInt(), 0);
+
+    if (!index.isValid()) {
+        return 0;
+    }
+
     qDebug() << "Job" << operation << "with arguments" << parameters << "requested";
     if (operation == "Add") {
-        return new AddEditPlaceJob(m_model, m_index, parameters, this);
+        return new AddEditPlaceJob(m_model, index, parameters, this);
     } else if (operation == "Edit") {
         return new AddEditPlaceJob(m_model, QModelIndex(), parameters, this);
     } else if (operation == "Remove") {
-        return new RemovePlaceJob(m_model, m_index, this);
+        return new RemovePlaceJob(m_model, index, this);
     } else if (operation == "Hide") {
-        return new ShowPlaceJob(m_model, m_index, false, this);
+        return new ShowPlaceJob(m_model, index, false, this);
     } else if (operation == "Show") {
-        return new ShowPlaceJob(m_model, m_index, true, this);
+        return new ShowPlaceJob(m_model, index, true, this);
     } else if (operation == "Setup Device") {
-        return new SetupDeviceJob(m_model, m_index, this);
+        return new SetupDeviceJob(m_model, index, this);
     } else if (operation == "Teardown Device") {
-        return new TeardownDeviceJob(m_model, m_index, this);
+        return new TeardownDeviceJob(m_model, index, this);
     } else {
         // FIXME: BAD!  No!
         return 0;

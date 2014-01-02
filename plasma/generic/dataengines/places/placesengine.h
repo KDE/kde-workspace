@@ -23,6 +23,8 @@
 
 #include <kfileplacesmodel.h>
 
+class PlacesProxyModel;
+
 class PlacesEngine : public Plasma::DataEngine
 {
     Q_OBJECT
@@ -33,18 +35,10 @@ public:
 
     Plasma::Service *serviceForSource(const QString &source);
 
-private Q_SLOTS:
-    // KFilePlacesModel
-    void modelReset();
-    void placesAdded(const QModelIndex& parent, int start, int end);
-    void placesRemoved(const QModelIndex& parent, int start, int end);
-    void dataChanged(const QModelIndex& topLeft, const QModelIndex& bottomRight);
-
 private:
-    void sendData(int start, int end);
-    void sendAllData();
 
-    KFilePlacesModel m_placesModel;
+    KFilePlacesModel *m_placesModel;
+    PlacesProxyModel *m_proxyModel;
 };
 
 

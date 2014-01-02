@@ -1,6 +1,7 @@
 set(places_engine_SRCS
     placesengine.cpp
     placeservice.cpp
+    placesproxymodel.cpp
     setupdevicejob.cpp
     modeljob.h
 )
