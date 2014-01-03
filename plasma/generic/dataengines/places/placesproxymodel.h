@@ -40,6 +40,7 @@ public:
 
     PlacesProxyModel(QObject* parent, KFilePlacesModel* model);
 
+    QHash<int, QByteArray>  roleNames() const;
     QVariant data(const QModelIndex &index, int role) const;
 
 private:

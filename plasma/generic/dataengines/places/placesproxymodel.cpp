@@ -29,7 +29,10 @@ PlacesProxyModel::PlacesProxyModel(QObject* parent, KFilePlacesModel* model)
       m_placesModel(model)
 {
     setSourceModel(model);
+}
 
+QHash<int, QByteArray>  PlacesProxyModel::roleNames() const
+{
     QHash<int, QByteArray> roles;
     roles.insert(Qt::DisplayRole, "display");
     roles.insert(Qt::DecorationRole, "decoration");
@@ -44,7 +47,7 @@ PlacesProxyModel::PlacesProxyModel(QObject* parent, KFilePlacesModel* model)
     roles.insert(SizeRole, "size");
     roles.insert(UsedRole, "used");
     roles.insert(AvailableRole, "available");
-    setRoleNames(roles);
+    return roles;
 }
 
 QVariant PlacesProxyModel::data(const QModelIndex &index, int role) const
