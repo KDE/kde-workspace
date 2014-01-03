@@ -52,7 +52,7 @@ PlasmaCore.FrameSvgItem {
         }
     }
 
-    property bool vertical: (panel.location == 5 || panel.location == 6)
+    property bool vertical: (panel.location == PlasmaCore.Types.LeftEdge || panel.location == PlasmaCore.Types.RightEdge)
 //END properties
 
 //BEGIN Connections
