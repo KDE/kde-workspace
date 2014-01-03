@@ -21,8 +21,7 @@
 #define PLACESPROXYMODEL_H
 
 #include <QIdentityProxyModel>
-
-#include "placesengine.h"
+#include <KFilePlacesModel>
 
 class PlacesProxyModel : public QIdentityProxyModel
 {
