@@ -27,5 +27,3 @@ void KickoffPlugin::registerTypes (const char *uri)
     Q_ASSERT(uri == QLatin1String("org.kde.plasma.private.pager"));
     qmlRegisterType<Pager>(uri, 2, 0, "Pager");
 }
-
-#include "pagerplugin.moc"
