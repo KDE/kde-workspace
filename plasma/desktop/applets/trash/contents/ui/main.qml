@@ -29,12 +29,12 @@ MouseArea {
     property bool constrained: formFactor==PlasmaCore.Types.Vertical||formFactor==PlasmaCore.Types.Horizontal
     hoverEnabled: true
     onClicked: Qt.openUrlExternally("trash:/");
-    
+
     DirModel {
         id: dirModel
         url: "trash:/"
     }
-    
+
     function action_open() {
         Qt.openUrlExternally("trash:/");
     }
@@ -42,15 +42,14 @@ MouseArea {
     function action_empty() {
         queryDialog.open();
     }
-    
-    Component.onCompleted: { 
+
+    Component.onCompleted: {
         plasmoid.backgroundHints = 0;
         plasmoid.setAction("open", "Open","document-open");
         plasmoid.setAction("empty","Empty","trash-empty");
         plasmoid.popupIcon = "user-trash";
         plasmoid.aspectRatioMode = IgnoreAspectRatio;
     }
-
 
     PlasmaCore.IconItem {
         id:icon
@@ -68,7 +67,7 @@ MouseArea {
         text: (dirModel.count==0) ? i18n("Trash\nEmpty"): i18np("Trash\nOne item", "Trash\n %1 items", dirModel.count);
         anchors {
             left: parent.left
-            bottom: parent.bottom  
+            bottom: parent.bottom
             right: parent.right
         }
         horizontalAlignment: Text.AlignHCenter
