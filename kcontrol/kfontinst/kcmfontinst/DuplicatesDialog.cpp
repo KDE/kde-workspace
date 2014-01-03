@@ -32,7 +32,6 @@
 #include <KDE/KIconLoader>
 #include <KDE/KLocale>
 #include <KDE/KMessageBox>
-#include <KDE/SuProcess>
 #include <KDE/KFileItem>
 #include <KDE/KMimeType>
 #include <KDE/KPropertiesDialog>
@@ -55,8 +54,6 @@
 #if defined USE_POLICYKIT && USE_POLICYKIT==1
 #include <QtDBus/QDBusInterface>
 #endif
-
-using namespace KDESu;
 
 namespace KFI
 {
