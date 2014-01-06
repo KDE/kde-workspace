@@ -27,8 +27,8 @@
 #include "timesource.h"
 
 #include <QDateTime>
+#include <QTimeZone>
 
-#include <KSystemTimeZones>
 #include <KLocalizedString>
 
 #include "solarsystem.h"
@@ -58,7 +58,7 @@ void TimeSource::setTimeZone(const QString &tz)
     m_tzName = tz;
     m_local = m_tzName == I18N_NOOP("Local");
     if (m_local) {
-        m_tzName = KSystemTimeZones::local().name();
+        m_tzName = QString::fromUtf8(QTimeZone::systemTimeZoneId());
     }
 
     const QString trTimezone = i18n(m_tzName.toUtf8());
@@ -87,24 +87,28 @@ TimeSource::~TimeSource()
 
 void TimeSource::updateTime()
 {
-    KTimeZone tz;
+    QTimeZone tz;
     if (m_local) {
-        tz = KSystemTimeZones::local();
+        tz = QTimeZone(QTimeZone::systemTimeZoneId());
     } else {
-        tz = KSystemTimeZones::zone(m_tzName);
+        tz = QTimeZone(m_tzName.toUtf8());
         if (!tz.isValid()) {
-            tz = KSystemTimeZones::local();
+            tz = QTimeZone(QTimeZone::systemTimeZoneId());
         }
     }
 
-    int offset = tz.currentOffset();
+    int offset = tz.offsetFromUtc(QDateTime::currentDateTime());
     if (m_offset != offset) {
         m_offset = offset;
         setData(I18N_NOOP("Offset"), m_offset);
     }
 
-    QDateTime dt = m_userDateTime ? data()["DateTime"].toDateTime()
-                                  : KDateTime::currentDateTime(tz).dateTime();
+    QDateTime dt;
+    if (m_userDateTime) {
+        dt = data()["DateTime"].toDateTime();
+    } else {
+        dt = QDateTime::currentDateTime().toTimeZone(tz);
+    }
 
     if (m_solarPosition || m_moonPosition) {
         const QDate prev = data()["Date"].toDate();
@@ -151,14 +155,6 @@ QString TimeSource::parseName(const QString &name)
 
     // now parse out what we got handed in
     const QStringList list = name.split('|', QString::SkipEmptyParts);
-
-    // set initial values for latitude and longitude, if available
-    const KTimeZone timezone = ((list.at(0) == I18N_NOOP("Local")) ? KSystemTimeZones::local() : KSystemTimeZones::zone(list.at(0)));
-
-    if (timezone.isValid() && timezone.latitude() != KTimeZone::UNKNOWN) {
-        m_latitude = timezone.latitude();
-        m_longitude = timezone.longitude();
-    }
 
     const int listSize = list.size();
     for (int i = 1; i < listSize; ++i) {
