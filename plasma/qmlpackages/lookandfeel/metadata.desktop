@@ -1,5 +1,6 @@
 [Desktop Entry]
 Comment=Desktop Design Language
+Comment[ca]=Llenguatge de disseny d'escriptori
 Comment[cs]=Jazyk pro návrh pracovní plochy
 Comment[de]=Sprache für die Entwicklung der Arbeitsfläche
 Comment[es]=Lenguaje de diseño del escritorio
@@ -26,6 +27,7 @@ Comment[zh_CN]=桌面设计语言
 Comment[zh_TW]=桌面設計語言
 Encoding=UTF-8
 Keywords=Desktop, Workspace, Appearance, Look and Feel, Logout, Lock, Suspend, Shutdown, Hibernate,
+Keywords[ca]=Escriptori, Espai de treball, Aparença, Aparença i comportament, Sortida, Bloqueig, Suspensió, Aturada, Hibernació,
 Keywords[de]=Desktop,Arbeitsfläche,Erscheinungsbild,Erscheinungsbild und Verhalten,Abmelden,Sperren,Ruhezustand,Tiefschlaf,Herunterfahren
 Keywords[el]=Επιφάνεια εργασίας, Χώρος εργασίας, Εμφάνιση, Όψη και Αίσθηση, Αποσύνδεση, Κλείδωμα, Αναστολή, Τερματισμός, Νάρκη,
 Keywords[es]=Escritorio, Espacio de trabajo, Apariencia, Aspecto visual, Cerrar sesión, Bloquear, Suspender, Apagar, Hibernar,
@@ -50,6 +52,7 @@ Keywords[uk]=стільниця;робочий;простір;вигляд;по�
 Keywords[x-test]=xxDesktop, Workspace, Appearance, Look and Feel, Logout, Lock, Suspend, Shutdown, Hibernate,xx
 Keywords[zh_TW]=Desktop, Workspace, Appearance, Look and Feel, Logout, Lock, Suspend, Shutdown, Hibernate,
 Name=Look and Feel
+Name[ca]=Aspecte i comportament
 Name[cs]=Vzhled a dojem
 Name[de]=Erscheinungsbild und Verhalten
 Name[el]=Όψη και αίσθηση

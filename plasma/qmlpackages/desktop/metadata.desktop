@@ -1,5 +1,6 @@
 [Desktop Entry]
 Comment=Desktop view furniture
+Comment[ca]=Accessori de vista d'escriptori
 Comment[de]=Einrichtung der Ansicht einer Arbeitsfläche
 Comment[es]=Accesorio de vista del escritorio
 Comment[fi]=Työpöydän sisustus
@@ -34,6 +35,7 @@ Name[bg]=Работен плот
 Name[bn]=ডেস্কটপ
 Name[bn_IN]=ডেস্কটপ
 Name[br]=Gorretaol
+Name[ca]=Escriptori
 Name[cs]=Pracovní plocha
 Name[csb]=Pùlt
 Name[cy]=Penbwrdd

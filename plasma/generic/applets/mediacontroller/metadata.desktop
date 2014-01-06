@@ -1,5 +1,6 @@
 [Desktop Entry]
 Name=Media Player
+Name[ca]=Reproductor multimèdia
 Name[de]=Medienwiedergabe
 Name[es]=Reproductor multimedia
 Name[fi]=Mediasoitin
@@ -23,6 +24,7 @@ Name[x-test]=xxMedia Playerxx
 Name[zh_CN]=媒体播放器
 Name[zh_TW]=媒體播放器
 Comment=Media Player Controls
+Comment[ca]=Controls del reproductor multimèdia
 Comment[de]=Steuerung der Medienwiedergabe
 Comment[es]=Controles del reproductor multimedia
 Comment[fi]=Mediasoittimen säätimet

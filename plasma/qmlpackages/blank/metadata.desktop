@@ -1,5 +1,6 @@
 [Desktop Entry]
 Comment=Blank desktop view furniture
+Comment[ca]=Accessori de vista d'escriptori buit
 Comment[de]=Einrichtung der Ansicht einer leeren Arbeitsfläche
 Comment[es]=Accesorio de vista del escritorio vacío
 Comment[fi]=Tyhjän työpöydän sisustus
@@ -25,6 +26,7 @@ Comment[zh_TW]=空白桌面檢視設備
 Encoding=UTF-8
 Keywords=
 Name=Blank Desktop
+Name[ca]=Escriptori buit
 Name[cs]=Prázdná pracovní plocha
 Name[de]=Leere Arbeitsfläche
 Name[el]=Κενή επιφάνεια εργασίας
