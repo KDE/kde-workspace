@@ -22,8 +22,11 @@
 // plasma
 #include <Plasma/ServiceJob>
 
-// own
-#include "tasksource.h"
+//taskmanger
+#include <taskmanager/groupmanager.h>
+#include <taskmanager/taskactions.h>
+#include <taskmanager/taskgroup.h>
+#include <taskmanager/tasksmodel.h>
 
 /**
  * Task Job
@@ -34,14 +37,15 @@ class TaskJob : public Plasma::ServiceJob
     Q_OBJECT
 
     public:
-        TaskJob(TaskSource *source, const QString &operation, QMap<QString, QVariant> &parameters, QObject *parent = NULL);
+        TaskJob(const TaskManager::TasksModel *model, const TaskManager::GroupManager *groupManager, const QString &operation, QMap<QString, QVariant> &parameters, QObject *parent = NULL);
         ~TaskJob();
 
     protected:
         void start();
 
     private:
-        TaskSource *m_source;
+	const TaskManager::TasksModel *m_model;
+	const TaskManager::GroupManager *m_groupManager;
 
 };
 

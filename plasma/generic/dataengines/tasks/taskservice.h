@@ -23,9 +23,8 @@
 #include <Plasma/Service>
 #include <Plasma/ServiceJob>
 
-// own
-#include "tasksource.h"
-
+#include <taskmanager/tasksmodel.h>
+#include <taskmanager/groupmanager.h>
 /**
  * Task Service
  */
@@ -35,14 +34,16 @@ class TaskService : public Plasma::Service
     Q_OBJECT
 
     public:
-        TaskService(TaskSource *source);
+        TaskService(TaskManager::TasksModel *model, TaskManager::GroupManager *groupManager);
         ~TaskService();
 
     protected:
         Plasma::ServiceJob *createJob(const QString &operation, QMap<QString, QVariant> &parameters);
 
     private:
-        TaskSource *m_source;
+	TaskManager::TasksModel *m_model;
+	TaskManager::GroupManager *m_groupManager;
+
 };
 
 #endif // TASKSERVICE_H

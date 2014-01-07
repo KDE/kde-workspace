@@ -25,6 +25,8 @@
 
 // libtaskmanager
 #include <taskmanager/taskmanager.h>
+#include <taskmanager/tasksmodel.h>
+#include <taskmanager/groupmanager.h>
 
 namespace TaskManager
 {
@@ -57,20 +59,14 @@ class TasksEngine : public Plasma::DataEngine
         Plasma::Service *serviceForSource(const QString &name);
 
     protected:
-        static const QString getStartupName(::TaskManager::Startup *startup);
-        static const QString getTaskName(::TaskManager::Task *task);
         virtual void init();
         bool sourceRequestEvent(const QString &source);
 
-    private Q_SLOTS:
-        void startupAdded(::TaskManager::Startup *startup);
-        void startupRemoved(::TaskManager::Startup *startup);
-        void taskAdded(::TaskManager::Task *task);
-        void taskRemoved(::TaskManager::Task *task);
-
     private:
         friend class TaskSource;
-         friend class TaskWindowService;
+        friend class TaskWindowService;
+	TaskManager::GroupManager *m_groupManager;
+        TaskManager::TasksModel *m_tasksModel;
 };
 
 #endif // TASKSENGINE_H

@@ -28,7 +28,7 @@ Item {
     signal entered()
     signal executeJob(string jobName)
     signal setOnDesktop(int desktop)
-    property alias name: label.text
+    property alias nameLabel: label.text
     property int desktop
     property alias icon: iconItem.source
     property alias label: label.text

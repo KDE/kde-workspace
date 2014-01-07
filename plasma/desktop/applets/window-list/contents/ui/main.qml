@@ -81,15 +81,17 @@ PlasmaExtras.ConditionalLoader {
                 service.startOperationCall(operation);
             }
 
-            function executeJob(operationName, source) {
-                var service = tasksSource.serviceForSource(source);
+            function executeJob(operationName, id) {
+                var service = tasksSource.serviceForSource("tasks");
                 var operation = service.operationDescription(operationName);
+		operation.Id = id;
                 service.startOperationCall(operation);
             }
 
-            function setOnDesktop(source, desktop) {
-                var service = tasksSource.serviceForSource(source);
+            function setOnDesktop(id, desktop) {
+                var service = tasksSource.serviceForSource("tasks");
                 var operation = service.operationDescription("toDesktop");
+		operation.Id = id;
                 operation.desktop = desktop;
                 service.startOperationCall(operation);
             }
@@ -110,21 +112,19 @@ PlasmaExtras.ConditionalLoader {
                 onSourceAdded: {
                     connectSource(source);
                 }
+                connectedSources: "tasks"
                 Component.onCompleted: {
-                    connectedSources = sources;
+		    print("connected");
                     connectSource("virtualDesktops");
                     main.desktopList = tasksSource.data["virtualDesktops"]["names"];
+		    print(models.tasks)
                 }
             }
 
             PlasmaCore.SortFilterModel {
                 id: tasksModelSortedByDesktop
                 sortRole: "desktop"
-                sourceModel: PlasmaCore.DataModel {
-                    id: tasksModel
-                    dataSource: tasksSource
-                    sourceFilter: "\\d+"
-                }
+                sourceModel: tasksSource.models.tasks
             }
 
             Column {
@@ -142,12 +142,12 @@ PlasmaExtras.ConditionalLoader {
                 }
 
                 TaskDelegate {
-                    name: i18n("Unclutter Windows")
+                    nameLabel: i18n("Unclutter Windows")
                     onClicked: performOperation("unclutter")
                 }
 
                 TaskDelegate {
-                    name: i18n("Cascade Windows")
+                    nameLabel : i18n("Cascade Windows")
                     onClicked: performOperation("cascade")
                 }
             }
@@ -166,9 +166,9 @@ PlasmaExtras.ConditionalLoader {
                 section.criteria: ViewSection.FullString
                 iconSize: main.iconSize
                 showDesktop: main.showDesktop
-                onItemSelected: main.executeJob("activate", source);
-                onExecuteJob: main.executeJob(jobName, source);
-                onSetOnDesktop: main.setOnDesktop(source, desktop);
+                onItemSelected: main.executeJob("activate", id);
+                onExecuteJob: main.executeJob(jobName, id);
+                onSetOnDesktop: main.setOnDesktop(id, desktop);
             }
         }
     }

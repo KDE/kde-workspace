@@ -26,9 +26,9 @@ PlasmaExtras.ScrollArea {
     property alias section: menuListView.section
     property int iconSize: theme.smallIconSize 
     property bool showDesktop: true
-    signal itemSelected(string source)
-    signal executeJob(string jobName, string source)
-    signal setOnDesktop(string source, int desktop)
+    signal itemSelected(int id)
+    signal executeJob(string jobName, int id)
+    signal setOnDesktop(int id, int desktop)
 
     ListView {
         id: menuListView
@@ -60,16 +60,15 @@ PlasmaExtras.ScrollArea {
         delegate: TaskDelegate {
             id: menuItemDelegate
             width: menuListView.width
-            property string source: DataEngineSource
-            name: model.name
-            desktop: model.desktop
-            icon: model.icon
-            active: model.active
+            nameLabel: DisplayRole
+            desktop: Desktop
+            icon: DecorationRole
+            active: Active
             iconSize: menu.iconSize
             showDesktop: menu.showDesktop
-            onClicked: menu.itemSelected(source);
-            onExecuteJob: menu.executeJob(jobName, source);
-            onSetOnDesktop: menu.setOnDesktop(source, desktop);
+            onClicked: menu.itemSelected(Id);
+            onExecuteJob: menu.executeJob(jobName, Id);
+            onSetOnDesktop: menu.setOnDesktop(Id, desktop);
             onActiveChanged: {
                 if (active) {
                     menuListView.currentIndex = index

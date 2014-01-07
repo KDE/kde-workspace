@@ -16,14 +16,18 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
+#include <taskmanager/tasksmodel.h>
+#include <taskmanager/groupmanager.h>
+
 #include "taskservice.h"
 
 // own
 #include "taskjob.h"
 
-TaskService::TaskService(TaskSource *source) :
-    Plasma::Service(source),
-    m_source(source)
+TaskService::TaskService(TaskManager::TasksModel *model, TaskManager::GroupManager *groupManager) :
+    Plasma::Service(),
+    m_model(model),
+    m_groupManager(groupManager)
 {
     setName("tasks");
 }
@@ -34,7 +38,7 @@ TaskService::~TaskService()
 
 Plasma::ServiceJob *TaskService::createJob(const QString &operation, QMap<QString, QVariant> &parameters)
 {
-    return new TaskJob(m_source, operation, parameters, this);
+    return new TaskJob(m_model, m_groupManager, operation, parameters, this);
 }
 
 #include "taskservice.moc"

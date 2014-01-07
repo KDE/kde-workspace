@@ -1,6 +1,5 @@
 set(tasks_engine_SRCS
     tasksengine.cpp
-    tasksource.cpp
     taskservice.cpp
     taskjob.cpp
     virtualdesktopssource.cpp
