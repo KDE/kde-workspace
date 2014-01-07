@@ -97,7 +97,7 @@ static void applyGtkStyles(bool active, int version)
 
    // Pass env. var to kdeinit.
    QString name = gtkEnvVar(version);
-   QString value = QFile::encodeName(list.join(":"));
+   QString value = list.join(":");
    org::kde::KLauncher klauncher(QStringLiteral("org.kde.klauncher5"), QStringLiteral("/KLauncher"), QDBusConnection::sessionBus());
    klauncher.setLaunchEnv(name, value);
 }

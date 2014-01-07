@@ -155,6 +155,9 @@ PagerModel::PagerModel(QObject *parent)
 
 WindowModel *PagerModel::windowsAt(int index) const
 {
+    if (index < 0 || index >= m_windows.count())
+        return 0;
+
     return qobject_cast<WindowModel *>(m_windows[index]);
 }
 
@@ -213,7 +216,11 @@ void PagerModel::clearWindowRects()
 void PagerModel::appendWindowRect(int desktopId, WId windowId, const QRectF &rect,
                                   bool active, const QPixmap &icon, const QString &name)
 {
-    windowsAt(desktopId)->append(windowId, rect, active, icon, name);
+    WindowModel *windows = windowsAt(desktopId);
+    if (!windows)
+        return;
+
+    windows->append(windowId, rect, active, icon, name);
 
     QModelIndex i = index(desktopId);
     emit dataChanged(i, i);

@@ -33,8 +33,7 @@
 #include <Plasma/QueryMatch>
 
 CalculatorRunner::CalculatorRunner( QObject* parent, const QVariantList &args )
-    : Plasma::AbstractRunner(parent, args),
-      m_regExp("[a-zA-Z]")
+    : Plasma::AbstractRunner(parent, args)
 {
     Q_UNUSED(args)
 
@@ -228,9 +227,21 @@ void CalculatorRunner::match(Plasma::RunnerContext &context)
         cmd.remove(0, cmd.indexOf('=') + 1);
     } else if (cmd.endsWith('=')) {
         cmd.chop(1);
-    } else if (cmd.contains(m_regExp)) {
-        // not just numbers and symbols, so we return
-        return;
+    } else {
+        bool foundDigit = false;
+        for (int i = 0; i < cmd.length(); ++i) {
+            QChar c = cmd.at(i);
+            if (c.isLetter()) {
+                // not just numbers and symbols, so we return
+                return;
+            }
+            if (c.isDigit()) {
+                foundDigit = true;
+            }
+        }
+        if (!foundDigit) {
+            return;
+        }
     }
 
     if (cmd.isEmpty()) {

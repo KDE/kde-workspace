@@ -131,9 +131,11 @@ void SM::Net::dataUpdated(const QString& source,
                 const double upstream = m_data[interface][1];
 
 
-                QString translatedString = i18n("<tr><td>Interface:%1</td><td>Upstream:%2</td><td>Downstream:%3</td></tr>", plotter->title(), upstream, downstream);
+                QString tooltip = QString::fromUtf8("<b>%1</b> <br /> ⇧ &nbsp; %2 <br />⇩ &nbsp; %3<br />");
 
-                setToolTip(interface, translatedString);
+                setToolTip(interface, tooltip.arg(plotter->title())
+                .arg(KGlobal::locale()->formatByteSize(upstream*1024))
+                .arg(KGlobal::locale()->formatByteSize(downstream*1024)));
             }
         }
         m_data[interface] = QList<double>() << -1 << -1;
