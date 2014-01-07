@@ -24,8 +24,6 @@ set(libkickoff_SRCS
     core/urlitemlauncher.cpp
 )
 
-qt4_automoc(${libkickoff_SRCS})
-
 qt5_add_dbus_adaptor(libkickoff_SRCS core/org.kde.kickoff.xml core/applicationmodel.h Kickoff::ApplicationModel)
 qt5_add_dbus_adaptor(libkickoff_SRCS core/org.kde.kickoff.recent.xml core/recentlyusedmodel.h Kickoff::RecentlyUsedModel)
 

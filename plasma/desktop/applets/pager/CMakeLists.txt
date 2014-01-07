@@ -5,8 +5,6 @@ set(pager_SRCS
     plugin/pager.cpp
     plugin/pagerplugin.cpp)
 
-qt4_automoc(${pager_SRCS})
-    
 add_library(pagerplugin SHARED ${pager_SRCS})
 
 target_link_libraries(pagerplugin

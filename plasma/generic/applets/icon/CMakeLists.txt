@@ -5,8 +5,6 @@ set(iconplugin_SRCS
   plugin/iconplugin.cpp
 )
 
-qt4_automoc(${iconplugin_SRCS})
-
 install(FILES plugin/qmldir DESTINATION ${QML_INSTALL_DIR}/org/kde/plasma/icon)
 
 add_library(iconplugin SHARED ${iconplugin_SRCS})
