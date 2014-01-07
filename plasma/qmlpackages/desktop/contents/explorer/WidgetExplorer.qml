@@ -108,8 +108,6 @@ Item {
                 toolTipShowTimer.running = false
             } else if (tooltipDialog.visible) {
                 tooltipDialog.visualParent = appletDelegate
-                tooltipDialog.x = point.x
-                tooltipDialog.y = point.y
             } else {
                 tooltipDialog.visualParent = appletDelegate
                 toolTipShowTimer.restart()
@@ -267,7 +265,6 @@ Item {
     }
 
     MouseEventListener {
-        id: listParent
         anchors {
             top: topBar.bottom
             left: parent.left
@@ -286,7 +283,7 @@ Item {
         }
         PlasmaExtras.ScrollArea {
             anchors.fill: parent
-            ListView {
+            flickableItem: ListView {
                 id: list
 
                 property int delegateWidth: (widgetExplorer.orientation == Qt.Horizontal) ? (list.width / Math.floor(list.width / cellWidth)) : list.width
