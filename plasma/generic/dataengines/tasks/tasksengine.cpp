@@ -34,7 +34,6 @@ TasksEngine::TasksEngine(QObject *parent, const QVariantList &args) :
     //TasksModel does not initialize itself, So we need to set grouping strategy.
     m_groupManager->setGroupingStrategy(static_cast<TaskManager::GroupManager::TaskGroupingStrategy>(0));
     setModel("tasks", m_tasksModel);
-    init();
 }
 
 TasksEngine::~TasksEngine()

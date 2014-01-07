@@ -22,9 +22,6 @@
 // plasma
 #include <Plasma/ServiceJob>
 
-// own
-#include "tasksource.h"
-
 /**
  * Task Window Job
  */

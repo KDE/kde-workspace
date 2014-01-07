@@ -23,9 +23,6 @@
 #include <Plasma/Service>
 #include <Plasma/ServiceJob>
 
-// own
-#include "tasksource.h"
-
 class TaskWindowService : public Plasma::Service
 {
 

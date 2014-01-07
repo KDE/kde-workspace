@@ -59,7 +59,6 @@ class TasksEngine : public Plasma::DataEngine
         Plasma::Service *serviceForSource(const QString &name);
 
     protected:
-        virtual void init();
         bool sourceRequestEvent(const QString &source);
 
     private:
