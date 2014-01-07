@@ -129,6 +129,12 @@ set_package_properties(KActivities PROPERTIES DESCRIPTION "The KActivities libra
                        URL "https://projects.kde.org/kactivities"
                        TYPE OPTIONAL
                       )
+find_package(Wayland)
+set_package_properties(Wayland PROPERTIES DESCRIPTION "The Wayland Client and Server libraries"
+                       URL "http://wayland.freedesktop.org"
+                       TYPE OPTIONAL
+                       PURPOSE "Required for building KWin with Wayland support"
+                      )
 
 find_package(X11)
 if (X11_FOUND)
