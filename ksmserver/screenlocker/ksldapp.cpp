@@ -239,7 +239,7 @@ bool KSldApp::grabMouse()
                    EnterWindowMask | LeaveWindowMask
     int rv = XGrabPointer( QX11Info::display(), QApplication::desktop()->winId(),
             True, GRABEVENTS, GrabModeAsync, GrabModeAsync, None,
-            QCursor(Qt::ArrowCursor).handle(), CurrentTime );
+            None, CurrentTime );
 #undef GRABEVENTS
 
     return (rv == GrabSuccess);
