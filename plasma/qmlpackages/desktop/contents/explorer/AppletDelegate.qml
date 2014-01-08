@@ -38,6 +38,9 @@ PlasmaCore.FrameSvgItem {
     property string pluginName: model.pluginName
     property bool local: model.local
 
+    imagePath: "widgets/viewitem"
+    prefix: mouseArea.containsMouse ? "hover" : "normal"
+
     ListView.onRemove: SequentialAnimation {
         PropertyAction {
             target: background
@@ -95,10 +98,6 @@ PlasmaCore.FrameSvgItem {
             easing.type: Easing.InOutQuad
         }
     }
-
-
-    imagePath: "widgets/viewitem"
-    prefix: "normal"
 
     DragArea {
         anchors.fill: parent
@@ -187,6 +186,7 @@ PlasmaCore.FrameSvgItem {
             }
         }
         MouseArea {
+            id: mouseArea
             anchors.fill: parent
             hoverEnabled: true
             onDoubleClicked: widgetExplorer.addApplet(pluginName)
