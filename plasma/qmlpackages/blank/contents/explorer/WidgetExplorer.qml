@@ -34,8 +34,6 @@ Item {
         imagePath: "dialogs/background"
         anchors.fill: parent
         anchors.margins: margins
-        //color: "orange"
-        //opacity: 0.3
     }
 
     property int minimumWidth: cellWidth + (
