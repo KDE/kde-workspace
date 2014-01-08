@@ -22,7 +22,7 @@ import QtQuick 2.0
 import org.kde.plasma.core 2.0 as PlasmaCore
 import org.kde.plasma.components 2.0 as Components
 import org.kde.qtextracomponents 2.0
-import org.kde.plasma.icon 1.0
+import org.kde.plasma.private.icon 1.0
 
 MouseArea {
 

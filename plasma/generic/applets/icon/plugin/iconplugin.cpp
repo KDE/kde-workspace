@@ -24,7 +24,7 @@
 
 void IconPlugin::registerTypes(const char *uri)
 {
-    Q_ASSERT(uri == QLatin1String("org.kde.plasma.icon"));
+    Q_ASSERT(uri == QLatin1String("org.kde.plasma.private.icon"));
     qmlRegisterType<IconPrivate>(uri, 1, 0,"Logic");
 }
 
