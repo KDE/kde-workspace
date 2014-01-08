@@ -41,64 +41,6 @@ PlasmaCore.FrameSvgItem {
     imagePath: "widgets/viewitem"
     prefix: mouseArea.containsMouse ? "hover" : "normal"
 
-    ListView.onRemove: SequentialAnimation {
-        PropertyAction {
-            target: background
-            property: "ListView.delayRemove"
-            value: true
-        }
-        NumberAnimation {
-            target: background
-            property: widgetExplorer.orientation == Qt.Horizontal ? "y" : "x"
-            to: widgetExplorer.orientation == Qt.Horizontal ? list.delegateHeight : list.delegateWidth
-            duration: 150
-            easing.type: Easing.InOutQuad
-        }
-        NumberAnimation {
-            target: background
-            property: widgetExplorer.orientation == Qt.Horizontal ? "y" : "x"
-            to: widgetExplorer.orientation == Qt.Horizontal ? list.delegateHeight : list.delegateWidth
-            duration: 150
-            easing.type: Easing.InOutQuad
-        }
-        NumberAnimation {
-            target: background
-            property: widgetExplorer.orientation == Qt.Horizontal ? "width" : "height"
-            from: widgetExplorer.orientation == Qt.Horizontal ? list.delegateWidth : list.delegateHeight
-            to: 0
-            duration: 150
-            easing.type: Easing.InOutQuad
-        }
-        PropertyAction {
-            target: background
-            property: "ListView.delayRemove"
-            value: false
-        }
-    }
-
-    ListView.onAdd: SequentialAnimation {
-        PropertyAction {
-            target: background
-            property: "y"
-            value: widgetExplorer.orientation == Qt.Horizontal ? -list.delegateHeight : -list.delegateWidth
-        }
-        NumberAnimation {
-            target: background
-            property: widgetExplorer.orientation == Qt.Horizontal ? "width" : "height"
-            from: 0
-            to: widgetExplorer.orientation == Qt.Horizontal ? list.delegateWidth : list.delegateHeight
-            duration: 150
-            easing.type: Easing.InOutQuad
-        }
-        NumberAnimation {
-            target: background
-            property: widgetExplorer.orientation == Qt.Horizontal ? "y" : "x"
-            to: 0
-            duration: 150
-            easing.type: Easing.InOutQuad
-        }
-    }
-
     DragArea {
         anchors.fill: parent
         supportedActions: Qt.MoveAction | Qt.LinkAction

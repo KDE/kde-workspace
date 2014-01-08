@@ -296,6 +296,39 @@ Item {
                 clip: widgetExplorer.orientation == Qt.Vertical
 
                 delegate: AppletDelegate {}
+
+                //slide in to view from the left / bottom
+                add: Transition {
+                    NumberAnimation {
+                        properties: widgetExplorer.orientation == Qt.Horizontal ? "y" : "x"
+                        from: widgetExplorer.orientation == Qt.Horizontal ? -list.height: -list.width
+                        to: 0
+                        duration: 150
+
+                    }
+                }
+
+                //slide out of view to the right / top
+                remove: Transition {
+                    NumberAnimation {
+                        properties: widgetExplorer.orientation == Qt.Horizontal ? "y" : "x"
+                        to: widgetExplorer.orientation == Qt.Horizontal ? list.height: list.width
+                        duration: 150
+                    }
+                }
+
+                //if we are adding other items into the view use the same animation as normal adding
+                //this makes everything slide in together
+                //if we make it move everything ends up weird
+                addDisplaced: list.add
+
+                //moved due to filtering
+                displaced: Transition {
+                    NumberAnimation {
+                        properties: widgetExplorer.orientation == Qt.Horizontal ? "x" : "y"
+                        duration: 150
+                    }
+                }
             }
         }
 
