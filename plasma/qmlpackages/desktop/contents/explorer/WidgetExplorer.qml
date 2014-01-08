@@ -97,7 +97,7 @@ Item {
     PlasmaCore.Dialog {
         id: tooltipDialog
         property Item appletDelegate
-        location: PlasmaCore.Types.LeftEdge
+        location: PlasmaCore.Types.RightEdge //actually we want this to be the opposite location of the explorer itself
 
         type: PlasmaCore.Dialog.Tooltip
         flags:Qt.Window|Qt.WindowStaysOnTopHint|Qt.X11BypassWindowManagerHint
