@@ -289,8 +289,6 @@ Item {
                 property int delegateWidth: (widgetExplorer.orientation == Qt.Horizontal) ? (list.width / Math.floor(list.width / cellWidth)) : list.width
                 property int delegateHeight: theme.defaultFont.pixelSize * 7 - 4
 
-                anchors.fill: parent
-
                 orientation: widgetExplorer.orientation == Qt.Horizontal ? ListView.Horizontal : ListView.Vertical
                 snapMode: ListView.SnapToItem
                 model: widgetExplorer.widgetsModel
