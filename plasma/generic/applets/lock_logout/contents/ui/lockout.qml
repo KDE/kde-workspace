@@ -50,7 +50,6 @@ Flow {
     }
 
     Component.onCompleted: {
-        plasmoid.aspectRatioMode = IgnoreAspectRatio;
         plasmoid.addEventListener('ConfigChanged', configChanged);
     }
 

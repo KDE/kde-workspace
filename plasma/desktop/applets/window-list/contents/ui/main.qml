@@ -103,7 +103,6 @@ PlasmaExtras.ConditionalLoader {
                 toolTipData["subText"] = i18n("Show list of opened windows");
                 plasmoid.popupIconToolTip = toolTipData;
                 plasmoid.popupIcon = QIcon("preferences-system-windows"); 
-                plasmoid.aspectRatioMode = ConstrainedSquare;
             }
 
             PlasmaCore.DataSource {

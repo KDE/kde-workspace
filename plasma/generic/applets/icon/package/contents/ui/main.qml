@@ -41,7 +41,6 @@ MouseArea {
     Component.onCompleted: {
         plasmoid.backgroundHints = 2;
         plasmoid.popupIcon = plasmoid.configuration.iconName;
-        plasmoid.aspectRatioMode = IgnoreAspectRatio;
     }
 
     PlasmaCore.IconItem {

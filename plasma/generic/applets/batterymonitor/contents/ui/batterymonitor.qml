@@ -35,7 +35,6 @@ Item {
     LayoutMirroring.childrenInherit: true
 
     Component.onCompleted: {
-        //plasmoid.aspectRatioMode = PlasmaCore.Types.IgnoreAspectRatio
         updateLogic(true);
         plasmoid.addEventListener('ConfigChanged', configChanged);
         plasmoid.popupEvent.connect(popupEventSlot);

@@ -90,7 +90,6 @@ MouseEventListener {
 
     Component.onCompleted: {
         //plasmoid.popupIcon = QIcon("preferences-desktop-notification")
-        //plasmoid.aspectRatioMode = "ConstrainedSquare"
         plasmoid.status = PlasmaCore.Types.PassiveStatus
         //var allApplications = new Object
         //plasmoid.addEventListener('ConfigChanged', configChanged); // FIXME

@@ -69,7 +69,6 @@ Item {
     }
 
     function setup() {
-        plasmoid.aspectRatioMode = PlasmaCore.Types.IgnoreAspectRatio;
         for (var i = 0; i < activitySource.sources.length; i++) {
             if (activitySource.sources[i] != "Status") {
                 activitySource.connectSource(activitySource.sources[i]);
