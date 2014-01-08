@@ -103,7 +103,7 @@ PlasmaCore.FrameSvgItem {
         anchors.fill: parent
         supportedActions: Qt.MoveAction | Qt.LinkAction
         onDragStarted: tooltipDialog.visible = false
-        delegateImage: background.icon
+        delegateImage: decoration
         mimeData {
             source: parent
         }
@@ -130,7 +130,7 @@ PlasmaCore.FrameSvgItem {
             PlasmaExtras.Heading {
                 id: titleText
                 level: 4
-                text: title
+                text: name
 //                 font {
 //                     weight: Font.Bold
 //                     pointSize: theme.smallestFont.pointSize
