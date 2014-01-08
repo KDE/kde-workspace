@@ -241,21 +241,9 @@ bool KSldApp::grabMouse()
 {
 #define GRABEVENTS ButtonPressMask | ButtonReleaseMask | PointerMotionMask | \
                    EnterWindowMask | LeaveWindowMask
-    auto cursor = [] {
-        Display *d = QX11Info::display();
-        const char *theme = XcursorGetTheme(d);
-        const int size = XcursorGetDefaultSize(d);
-        XcursorImage *ximg = XcursorLibraryLoadImage("left_ptr", theme, size);
-        if (!ximg) {
-            return None;
-        }
-        Cursor cursor = XcursorImageLoadCursor(d, ximg);
-        XcursorImageDestroy(ximg);
-        return cursor;
-    };
     int rv = XGrabPointer( QX11Info::display(), QApplication::desktop()->winId(),
             True, GRABEVENTS, GrabModeAsync, GrabModeAsync, None,
-            cursor(), CurrentTime );
+            None, CurrentTime );
 #undef GRABEVENTS
 
     return (rv == GrabSuccess);
