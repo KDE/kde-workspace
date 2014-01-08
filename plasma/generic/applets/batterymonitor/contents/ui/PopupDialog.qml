@@ -126,7 +126,7 @@ FocusScope {
             id: brightnessSlider
             icon: "video-display"
             label: i18n("Display Brightness")
-            visible: true//isBrightnessAvailable
+            visible: isBrightnessAvailable
             onChanged: brightnessChanged(value)
             KeyNavigation.tab: keyboardBrightnessSlider
             KeyNavigation.backtab: batteryList
@@ -137,7 +137,7 @@ FocusScope {
             id: keyboardBrightnessSlider
             icon: "input-keyboard"
             label: i18n("Keyboard Brightness")
-            visible: true//isKeyboardBrightnessAvailable
+            visible: isKeyboardBrightnessAvailable
             onChanged: keyboardBrightnessChanged(value)
             KeyNavigation.tab: pmSwitch
             KeyNavigation.backtab: brightnessSlider
