@@ -69,8 +69,8 @@ MouseArea {
         wrapMode: Text.Wrap
     }
 
-    PlasmaCore.ToolTip {
-        target : root
+    PlasmaCore.ToolTipArea {
+        anchors.fill: parent
         mainText : plasmoid.configuration.applicationName
         subText : plasmoid.configuration.genericName
         image : plasmoid.configuration.iconName
