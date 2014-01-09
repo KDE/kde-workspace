@@ -77,20 +77,6 @@ MouseEventListener {
     }
 
     onContainsMouseChanged:  {
-        if (containsMouse) {
-            if (!inPopup && plasmoid.configuration.showToolTips) {
-                toolTip.target = frame;
-                toolTip.mainText = model.DisplayRole;
-                //FIXME TODO: toolTip.image = model.DecorationRole;
-                toolTip.subText = model.IsLauncher ? model.GenericName
-                    : toolTip.generateSubText(model);
-                //FIXME TODO: toolTip.windowsToPreview = model.WindowList;
-            } else {
-                // A bit sneaky, but this works well to hide the tooltip.
-                toolTip.target = taskFrame;
-            }
-        }
-
         tasks.itemHovered(model.Id, containsMouse);
     }
 
@@ -146,6 +132,55 @@ MouseEventListener {
 
         imagePath: "widgets/tasks"
         prefix: "normal"
+
+        PlasmaCore.ToolTipArea {
+            id: toolTip
+
+            anchors.fill: parent
+
+            //FIXME TODO: highlightWindows: plasmoid.configuration.highlightWindows
+            onContainsMouseChanged:  {
+                if (containsMouse) {
+                    if (!inPopup && plasmoid.configuration.showToolTips || true) {
+                        //toolTip.target = frame;
+                        toolTip.mainText = model.DisplayRole;
+                        //FIXME TODO:
+                        //toolTip.image = model.DecorationRole;
+                        toolTip.subText = model.IsLauncher ? model.GenericName
+                            : toolTip.generateSubText(model);
+                        //FIXME TODO: toolTip.windowsToPreview = model.WindowList;
+                    } else {
+                        // A bit sneaky, but this works well to hide the tooltip.
+                        //toolTip.target = taskFrame;
+                    }
+                }
+            }
+
+            function generateSubText(task) {
+                var subTextEntries = new Array();
+
+                if (!plasmoid.configuration.showOnlyCurrentDesktop) {
+                    subTextEntries.push(i18n("On %1", task.DesktopName));
+                }
+
+                if (task.OnAllActivities) {
+                    subTextEntries.push(i18nc("Which virtual desktop a window is currently on",
+                        "Available on all activities"));
+                } else if (plasmoid.configuration.showOnlyCurrentActivity) {
+                    if (task.OtherActivityNames.length > 0) {
+                        subTextEntries.push(i18nc("Activities a window is currently on (apart from the current one)",
+                                                "Also available on %1",
+                                                task.OtherActivityNames.join(", ")));
+                    }
+                } else if (task.ActivityNames.length > 0) {
+                    subTextEntries.push(i18nc("Which activities a window is currently on",
+                                            "Available on %1",
+                                            task.ActivityNames.join(", ")));
+                }
+
+                return subTextEntries.join("<br />");
+            }
+        }
     }
 
     Item {
