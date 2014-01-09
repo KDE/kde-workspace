@@ -181,8 +181,8 @@ Item {
         }
 
 
-        PlasmaCore.ToolTip {
-            target: freeSpaceBar
+        PlasmaCore.ToolTipArea {
+            anchors.fill: freeSpaceBar
             subText: i18nc("@info:status Free disk space", "%1 free", sdSource.data[udi]["Free Space Text"])
         }
 
@@ -218,8 +218,8 @@ Item {
             }
         }
 
-        PlasmaCore.ToolTip {
-            target: leftAction
+        PlasmaCore.ToolTipArea {
+            anchors.fill: leftAction
             subText: {
                 if (!model["Accessible"]) {
                     return i18n("Click to mount this device.")
@@ -233,8 +233,8 @@ Item {
             }
         }
 
-        PlasmaCore.ToolTip {
-            target: deviceIcon
+        PlasmaCore.ToolTipArea {
+            anchors.fill: deviceIcon
             subText: {
                 if (model["Accessible"] || deviceItem.state != 0) {
                     if (model["Removable"]) {
