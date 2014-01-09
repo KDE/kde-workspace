@@ -97,13 +97,6 @@ QtExtraComponents.MouseEventListener {
         opacity: 0.2;
     }
 
-    // Tooltip for arrow --------------------------------
-    PlasmaCore.ToolTip {
-        id: arrow_tooltip
-        target: arrow
-        subText: plasmoid.expanded ? i18n("Hide icons") : i18n("Show hidden icons")
-    }
-
     Component {
         id: taskDelegateComponent
         TaskDelegate {
@@ -134,39 +127,48 @@ QtExtraComponents.MouseEventListener {
         delegate: taskDelegateComponent
     }
 
-    PlasmaCore.SvgItem {
+    // Tooltip for arrow --------------------------------
+    PlasmaCore.ToolTipArea {
 
-        id: arrow
-
-        y: root.itemSize / 4
+        width: childrenRect.width
+        height: childrenRect.height
         anchors {
             leftMargin: theme.smallSpacing
             right: parent.right
         }
-        width: Math.floor(root.itemSize / 2)
-        height: width
 
-        svg: PlasmaCore.Svg { imagePath: "widgets/arrows" }
-        elementId: {
+        subText: plasmoid.expanded ? i18n("Hide icons") : i18n("Show hidden icons")
 
-            var exp = plasmoid.expanded; // flip for bottom edge and right edge
+        PlasmaCore.SvgItem {
 
-            if (plasmoid.location == PlasmaCore.Types.BottomEdge) {
-                return (exp) ? "down-arrow" : "up-arrow"
-            } else if (plasmoid.location == PlasmaCore.Types.TopEdge) {
-                return (exp) ? "up-arrow" : "down-arrow"
-            } else if (plasmoid.location == PlasmaCore.Types.LeftEdge) {
-                return (exp) ? "left-arrow" : "right-arrow"
-            } else {
-                return (exp) ? "right-arrow" : "left-arrow"
+            id: arrow
+
+            y: root.itemSize / 4
+            width: Math.floor(root.itemSize / 2)
+            height: width
+
+            svg: PlasmaCore.Svg { imagePath: "widgets/arrows" }
+            elementId: {
+
+                var exp = plasmoid.expanded; // flip for bottom edge and right edge
+
+                if (plasmoid.location == PlasmaCore.Types.BottomEdge) {
+                    return (exp) ? "down-arrow" : "up-arrow"
+                } else if (plasmoid.location == PlasmaCore.Types.TopEdge) {
+                    return (exp) ? "up-arrow" : "down-arrow"
+                } else if (plasmoid.location == PlasmaCore.Types.LeftEdge) {
+                    return (exp) ? "left-arrow" : "right-arrow"
+                } else {
+                    return (exp) ? "right-arrow" : "left-arrow"
+                }
+
             }
-
-        }
-        MouseArea {
-            width: parent.width + theme.smallSpacing
-            height: root.itemSize + theme.largeSpacing
-            anchors.centerIn: parent
-            onClicked: plasmoid.expanded = !plasmoid.expanded
+            MouseArea {
+                width: parent.width + theme.smallSpacing
+                height: root.itemSize + theme.largeSpacing
+                anchors.centerIn: parent
+                onClicked: plasmoid.expanded = !plasmoid.expanded
+            }
         }
     }
 

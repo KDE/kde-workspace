@@ -27,7 +27,7 @@ import org.kde.qtextracomponents 2.0 as QtExtraComponents
 import org.kde.private.systemtray 2.0 as SystemTray
 
 
-Item {
+PlasmaCore.ToolTipArea {
     id: root_item
 
     property int blink_interval: 1000 // interval of blinking (if status of task is NeedsAttention)
@@ -42,6 +42,11 @@ Item {
     property string   __overlay_icon_name: __has_task ? overlayIconName : ""
     property string   __movie_path:        __has_task ? moviePath : ""
     property int      __status:            __has_task ? status : SystemTray.Task.UnknownStatus
+
+
+    mainText: __has_task ? tooltipTitle : ""
+    //subText:  __has_task ? tooltipText : ""
+    //image:    __has_task ? tooltipIcon : ""
 
     // Public functions ================================================================================================
     function click(buttons) {
@@ -177,14 +182,6 @@ Item {
                 activateHorzScroll(wheel.delta)
             else
                 activateVertScroll(wheel.delta)
-        }
-        // Tooltip ================================================================================
-        PlasmaCore.ToolTip {
-            id: tooltip
-            target: wheel_area
-            mainText: __has_task ? tooltipTitle : ""
-            //subText:  __has_task ? tooltipText : ""
-            //image:    __has_task ? tooltipIcon : ""
         }
     }
 
