@@ -48,50 +48,26 @@ Item {
         //view: desktop
         onShouldClose: main.closed();
     }
-    
-    PlasmaComponents.ContextMenu {
+
+    PlasmaComponents.ModelContextMenu {
         id: categoriesDialog
         visualParent: main.categoryButton
-    }
-    Repeater {
-        parent: categoriesDialog
         model: widgetExplorer.filterModel
-        delegate: Item {
-            PlasmaComponents.MenuItem {
-                text: display
-                separator: model["separator"] != undefined ? model["separator"] : false
-                onClicked: {
-                    list.contentX = 0
-                    list.contentY = 0
-                    main.categoryButton.text = display
-                    widgetExplorer.widgetsModel.filterQuery = model["filterData"]
-                    widgetExplorer.widgetsModel.filterType = model["filterType"]
-                }
-                Component.onCompleted: {
-                    parent = categoriesDialog
-                }
-            }
+
+        onClicked: {
+            list.contentX = 0
+            list.contentY = 0
+            main.categoryButton.text = model.display
+            widgetExplorer.widgetsModel.filterQuery = model.filterData
+            widgetExplorer.widgetsModel.filterType = model.filterType
         }
     }
 
-    PlasmaComponents.ContextMenu {
+    PlasmaComponents.ModelContextMenu {
         id: getWidgetsDialog
         visualParent: main.getWidgetsButton
-    }
-    Repeater {
-        parent: getWidgetsDialog
         model: widgetExplorer.widgetsMenuActions
-        delegate: Item {
-            PlasmaComponents.MenuItem {
-                icon: modelData.icon
-                text: modelData.text
-                separator: modelData.separator
-                onClicked: modelData.trigger()
-                Component.onCompleted: {
-                    parent = getWidgetsDialog
-                }
-            }
-        }
+        onClicked: model.trigger()
     }
 
     PlasmaCore.Dialog {
