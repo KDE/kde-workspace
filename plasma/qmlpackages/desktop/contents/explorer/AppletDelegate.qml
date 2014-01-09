@@ -18,6 +18,8 @@
  */
 
 import QtQuick 2.0
+import QtQuick.Layouts 1.0
+
 import org.kde.plasma.components 2.0 as PlasmaComponents
 import org.kde.plasma.extras 2.0 as PlasmaExtras
 import org.kde.plasma.core 2.0 as PlasmaCore
@@ -59,12 +61,15 @@ PlasmaCore.FrameSvgItem {
                 height: width
                 icon: background.icon
             }
-        Column {
+        ColumnLayout {
             anchors {
+                top: parent.top
+                bottom: parent.bottom
                 left: iconWidget.right
                 right: parent.right
-                verticalCenter: parent.verticalCenter
 
+                topMargin: background.margins.top
+                bottomMargin: background.margins.bottom
                 leftMargin: background.margins.left
                 rightMargin: background.margins.right
             }
@@ -73,46 +78,18 @@ PlasmaCore.FrameSvgItem {
                 id: titleText
                 level: 4
                 text: name
-//                 font {
-//                     weight: Font.Bold
-//                     pointSize: theme.smallestFont.pointSize
-//                 }
-                anchors {
-                    left: parent.left
-                    right: parent.right
-                }
-                height: paintedHeight
+                elide: Text.ElideRight
                 wrapMode: Text.WordWrap
-                //go with nowrap only if there is a single word too long
-                onPaintedWidthChanged: {
-                    wrapTimer.restart()
-                }
-                Timer {
-                    id: wrapTimer
-                    interval: 200
-                    onTriggered: {
-                        //give it some pixels of tolerance
-                        if (titleText.paintedWidth > titleText.width + 3) {
-                            titleText.wrapMode = Text.NoWrap
-                            titleText.elide = Text.ElideRight
-                        } else {
-                            titleText.wrapMode = Text.WordWrap
-                            titleText.elide = Text.ElideNone
-                        }
-                    }
-                }
+                Layout.fillWidth: true
             }
             PlasmaComponents.Label {
                 text: description
                 font.pointSize: theme.smallestFont.pointSize
-                anchors {
-                    left: parent.left
-                    right: parent.right
-                }
-                //elide: Text.ElideRight
                 wrapMode: Text.WordWrap
-                verticalAlignment: Text.AlignTop
+                elide: Text.ElideRight
                 maximumLineCount: 3
+                Layout.fillWidth: true
+                Layout.fillHeight: true
             }
         }
         QIconItem {
