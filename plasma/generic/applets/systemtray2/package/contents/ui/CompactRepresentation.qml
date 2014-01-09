@@ -116,7 +116,7 @@ QtExtraComponents.MouseEventListener {
             topMargin: !root.vertical ? ((parent.height - root.itemSize) / 2) - theme.smallSpacing : theme.smallSpacing
             left: parent.left
             leftMargin: root.vertical ? 0 : theme.smallSpacing
-            right: arrow.left
+            right: tooltip.left
         }
         cellWidth: !root.vertical ? root.itemSize + theme.smallSpacing * 4 : root.itemSize
         cellHeight: root.vertical ? root.itemSize + theme.smallSpacing * 4 : root.itemSize
@@ -129,6 +129,7 @@ QtExtraComponents.MouseEventListener {
 
     // Tooltip for arrow --------------------------------
     PlasmaCore.ToolTipArea {
+        id: tooltip
 
         width: childrenRect.width
         height: childrenRect.height
