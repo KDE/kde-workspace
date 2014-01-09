@@ -131,8 +131,8 @@ QtExtraComponents.MouseEventListener {
     PlasmaCore.ToolTipArea {
         id: tooltip
 
-        width: childrenRect.width
-        height: childrenRect.height
+        width: root.vertical ? root.itemSize + theme.smallSpacing*4 : childrenRect.width
+        height: !root.vertical ? root.itemSize + theme.smallSpacing*4 : childrenRect.height
         anchors {
             leftMargin: theme.smallSpacing
             right: parent.right
