@@ -72,8 +72,8 @@ MouseArea {
         horizontalAlignment: Text.AlignHCenter
         opacity: constrained ? 0: 1
     }
-    PlasmaCore.ToolTip {
-        target: root
+    PlasmaCore.ToolTipArea {
+        anchors.fill: parent
         mainText: i18n("Trash")
         subText: (dirModel.count==0) ? i18n("Trash \n Empty"): i18np("Trash\nOne item", "Trash\n %1 items", dirModel.count );
         image: (dirModel.count > 0) ? "user-trash-full": "user-trash"

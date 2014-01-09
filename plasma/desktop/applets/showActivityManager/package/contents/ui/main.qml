@@ -29,9 +29,8 @@ MouseArea {
     property int minimumHeight: 16
     implicitWidth: theme.iconSizes["panel"]
     implicitHeight: implicitWidth
-    onClicked:
-    {
-	var service = dataSource.serviceForSource(activeSource)
+    onClicked: {
+        var service = dataSource.serviceForSource(activeSource)
         var operation = service.operationDescription("toggleActivityManager")
         service.startOperationCall(operation)
     }
@@ -50,8 +49,7 @@ MouseArea {
         image: "preferences-activities"
     }
 
-    PlasmaCore.IconItem
-    {
+    PlasmaCore.IconItem {
         id: icon
         source: "preferences-activities"
         width: parent.width
