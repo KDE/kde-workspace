@@ -115,12 +115,8 @@ Item {
             }
         }
         mainItem: Tooltip { id: tooltipWidget }
-        Behavior on x {
-            enabled: widgetExplorer.orientation == Qt.Horizontal
-            NumberAnimation { duration: 250 }
-        }
+
         Behavior on y {
-            enabled: widgetExplorer.orientation == Qt.Vertical
             NumberAnimation { duration: 250 }
         }
     }
@@ -143,81 +139,14 @@ Item {
         id: topBar
         property Item categoryButton
 
-        sourceComponent: (widgetExplorer.orientation == Qt.Horizontal) ? horizontalTopBarComponent : verticalTopBarComponent
+        sourceComponent: verticalTopBarComponent
         height: item.height + 2
         anchors {
             top: parent.top
             left: parent.left
             right: parent.right
-
-            topMargin: widgetExplorer.orientation == Qt.Horizontal ? 4 : 0
+            topMargin: 0
             leftMargin: 4
-        }
-    }
-
-    Component {
-        id: horizontalTopBarComponent
-
-        Item {
-            anchors {
-                top: parent.top
-                left: parent.left
-                right: parent.right
-            }
-            height: filterField.height
-            Row {
-                spacing: 5
-                anchors {
-                    left: parent.left
-                    leftMargin: 2
-                }
-                PlasmaComponents.TextField {
-                    id: filterField
-                    width: list.width / Math.floor(list.width / cellWidth) - 4
-                    clearButtonShown: true
-                    placeholderText: i18n("Enter search term...")
-                    onTextChanged: {
-                        list.contentX = 0
-                        list.contentY = 0
-                        widgetExplorer.widgetsModel.searchTerm = text
-                    }
-                    Component.onCompleted: forceActiveFocus()
-                }
-                PlasmaComponents.Button {
-                    id: categoryButton
-                    text: i18n("Categories")
-                    onClicked: categoriesDialog.open(0, categoryButton.height)
-                }
-            }
-            Row {
-                anchors.right: parent.right
-                spacing: 5
-                PlasmaComponents.Button {
-                    id: getWidgetsButton
-                    iconSource: "get-hot-new-stuff"
-                    text: i18n("Get new widgets")
-                    onClicked: getWidgetsDialog.open()
-                }
-
-                Repeater {
-                    model: widgetExplorer.extraActions.length
-                    PlasmaComponents.Button {
-                        iconSource: widgetExplorer.extraActions[modelData].icon
-                        text: widgetExplorer.extraActions[modelData].text
-                        onClicked: {
-                            widgetExplorer.extraActions[modelData].trigger()
-                        }
-                    }
-                }
-                PlasmaComponents.ToolButton {
-                    iconSource: "window-close"
-                    onClicked: main.closed()
-                }
-            }
-            Component.onCompleted: {
-                main.getWidgetsButton = getWidgetsButton
-                main.categoryButton = categoryButton
-            }
         }
     }
 
@@ -264,80 +193,67 @@ Item {
         }
     }
 
-    MouseEventListener {
+    PlasmaExtras.ScrollArea {
         anchors {
             top: topBar.bottom
             left: parent.left
             right: parent.right
-            bottom: widgetExplorer.orientation == Qt.Horizontal ? parent.bottom : bottomBar.top
+            bottom: bottomBar.top
             leftMargin: 4
             bottomMargin: 4
         }
-        onWheelMoved: {
-            //use this only if the wheel orientation is vertical and the list orientation is horizontal, otherwise will be the list itself managing the wheel
-            if (wheel.orientation == Qt.Vertical && list.orientation == ListView.Horizontal) {
-                var delta = wheel.delta > 0 ? 20 : -20
-                list.contentX = Math.min(Math.max(0, list.contentWidth - list.width),
-                                        Math.max(0, list.contentX - delta))
+        flickableItem: ListView {
+            id: list
+
+            property int delegateWidth: list.width
+            property int delegateHeight: theme.defaultFont.pixelSize * 7 - 4
+
+            snapMode: ListView.SnapToItem
+            model: widgetExplorer.widgetsModel
+
+            clip: true //TODO work out why this is this needed
+
+            delegate: AppletDelegate {}
+
+            //slide in to view from the left
+            add: Transition {
+                NumberAnimation {
+                    properties: "x"
+                    from: -list.width
+                    to: 0
+                    duration: 150
+
+                }
             }
-        }
-        PlasmaExtras.ScrollArea {
-            anchors.fill: parent
-            flickableItem: ListView {
-                id: list
 
-                property int delegateWidth: (widgetExplorer.orientation == Qt.Horizontal) ? (list.width / Math.floor(list.width / cellWidth)) : list.width
-                property int delegateHeight: theme.defaultFont.pixelSize * 7 - 4
-
-                orientation: widgetExplorer.orientation == Qt.Horizontal ? ListView.Horizontal : ListView.Vertical
-                snapMode: ListView.SnapToItem
-                model: widgetExplorer.widgetsModel
-
-                clip: widgetExplorer.orientation == Qt.Vertical
-
-                delegate: AppletDelegate {}
-
-                //slide in to view from the left / bottom
-                add: Transition {
-                    NumberAnimation {
-                        properties: widgetExplorer.orientation == Qt.Horizontal ? "y" : "x"
-                        from: widgetExplorer.orientation == Qt.Horizontal ? -list.height: -list.width
-                        to: 0
-                        duration: 150
-
-                    }
+            //slide out of view to the right
+            remove: Transition {
+                NumberAnimation {
+                    properties: "x"
+                    to: list.width
+                    duration: 150
                 }
+            }
 
-                //slide out of view to the right / top
-                remove: Transition {
-                    NumberAnimation {
-                        properties: widgetExplorer.orientation == Qt.Horizontal ? "y" : "x"
-                        to: widgetExplorer.orientation == Qt.Horizontal ? list.height: list.width
-                        duration: 150
-                    }
-                }
+            //if we are adding other items into the view use the same animation as normal adding
+            //this makes everything slide in together
+            //if we make it move everything ends up weird
+            addDisplaced: list.add
 
-                //if we are adding other items into the view use the same animation as normal adding
-                //this makes everything slide in together
-                //if we make it move everything ends up weird
-                addDisplaced: list.add
-
-                //moved due to filtering
-                displaced: Transition {
-                    NumberAnimation {
-                        properties: widgetExplorer.orientation == Qt.Horizontal ? "x" : "y"
-                        duration: 150
-                    }
+            //moved due to filtering
+            displaced: Transition {
+                NumberAnimation {
+                    properties: "y"
+                    duration: 150
                 }
             }
         }
-
     }
 
     Loader {
         id: bottomBar
 
-        sourceComponent: (widgetExplorer.orientation == Qt.Horizontal) ? undefined : verticalBottomBarComponent
+        sourceComponent: verticalBottomBarComponent
         //height: item.height
         height: 48 // FIXME
         anchors {
