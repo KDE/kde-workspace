@@ -97,9 +97,9 @@ ListView {
         hoverEnabled: true
         onClicked: plasmoid.expanded = !plasmoid.expanded
 
-        PlasmaCore.ToolTip {
+        PlasmaCore.ToolTipArea {
             id: tooltip
-            target: mouseArea
+            anchors.fill: mouseArea
             image: batteries.tooltipImage
             subText: batteries.tooltipText
         }
