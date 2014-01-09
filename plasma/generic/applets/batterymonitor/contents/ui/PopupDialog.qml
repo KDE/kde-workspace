@@ -126,7 +126,7 @@ FocusScope {
             id: brightnessSlider
             icon: "video-display"
             label: i18n("Display Brightness")
-            visible: true//isBrightnessAvailable
+            visible: isBrightnessAvailable
             onChanged: brightnessChanged(value)
             KeyNavigation.tab: keyboardBrightnessSlider
             KeyNavigation.backtab: batteryList
@@ -137,7 +137,7 @@ FocusScope {
             id: keyboardBrightnessSlider
             icon: "input-keyboard"
             label: i18n("Keyboard Brightness")
-            visible: true//isKeyboardBrightnessAvailable
+            visible: isKeyboardBrightnessAvailable
             onChanged: keyboardBrightnessChanged(value)
             KeyNavigation.tab: pmSwitch
             KeyNavigation.backtab: brightnessSlider
@@ -148,6 +148,20 @@ FocusScope {
             onEnabledChanged: powermanagementChanged(enabled)
             KeyNavigation.tab: batteryList
             KeyNavigation.backtab: keyboardBrightnessSlider
+        }
+    }
+
+    Components.Label {
+        id: noControlsLabel
+        visible: !isKeyboardBrightnessAvailable && !isBrightnessAvailable
+        text: i18n("No screen or keyboard brightness controls available")
+        anchors {
+            top: plasmoid.location == PlasmaCore.Types.BottomEdge ? undefined : settingsColumn.bottom
+            bottom: plasmoid.location == PlasmaCore.Types.BottomEdge ? settingsColumn.top : undefined
+            leftMargin: padding.margins.left
+            rightMargin: padding.margins.right
+            topMargin: 5
+            bottomMargin: 5
         }
     }
 
@@ -162,8 +176,8 @@ FocusScope {
         width: parent.width
         visible: model.count
         anchors {
-            top: plasmoid.location == PlasmaCore.Types.BottomEdge ? undefined : settingsColumn.bottom
-            bottom: plasmoid.location == PlasmaCore.Types.BottomEdge ? settingsColumn.top : undefined
+            top: plasmoid.location == PlasmaCore.Types.BottomEdge ? undefined : noControlsLabel.bottom
+            bottom: plasmoid.location == PlasmaCore.Types.BottomEdge ? noControlsLabel.top : undefined
             leftMargin: padding.margins.left
             rightMargin: padding.margins.right
             topMargin: 5

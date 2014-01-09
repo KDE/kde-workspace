@@ -33,6 +33,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "scene.h"
 #include "scene_xrender.h"
 #include "scene_opengl.h"
+#include "scene_qpainter.h"
 #include "shadow.h"
 #include "useractions.h"
 #include "compositingprefs.h"
@@ -211,11 +212,20 @@ void Compositor::slotCompositingOptionsInitialized()
         m_scene = SceneXrender::createScene();
         break;
 #endif
+    case QPainterCompositing:
+        qDebug() << "Initializing QPainter compositing";
+        m_scene = SceneQPainter::createScene();
+        break;
     default:
         qDebug() << "No compositing enabled";
         m_starting = false;
         cm_selection->owning = false;
         cm_selection->release();
+        if (kwinApp()->requiresCompositing()) {
+            qCritical() << "The used windowing system requires compositing";
+            qCritical() << "We are going to quit KWin now as it is broken";
+            qApp->quit();
+        }
         return;
     }
     if (m_scene == NULL || m_scene->initFailed()) {
@@ -226,6 +236,11 @@ void Compositor::slotCompositingOptionsInitialized()
         m_starting = false;
         cm_selection->owning = false;
         cm_selection->release();
+        if (kwinApp()->requiresCompositing()) {
+            qCritical() << "The used windowing system requires compositing";
+            qCritical() << "We are going to quit KWin now as it is broken";
+            qApp->quit();
+        }
         return;
     }
     m_xrrRefreshRate = KWin::currentRefreshRate();
@@ -407,6 +422,10 @@ void Compositor::slotReinitialize()
 // for the shortcut
 void Compositor::slotToggleCompositing()
 {
+    if (kwinApp()->requiresCompositing()) {
+        // we are not allowed to turn on/off compositing
+        return;
+    }
     if (m_suspended) { // direct user call; clear all bits
         resume(AllReasonSuspend);
     } else { // but only set the user one (sufficient to suspend)
@@ -437,6 +456,9 @@ void Compositor::updateCompositeBlocking()
 
 void Compositor::updateCompositeBlocking(Client *c)
 {
+    if (kwinApp()->requiresCompositing()) {
+        return;
+    }
     if (c) { // if c == 0 we just check if we can resume
         if (c->isBlockingCompositing()) {
             if (!(m_suspended & BlockRuleSuspend)) // do NOT attempt to call suspend(true); from within the eventchain!
@@ -459,6 +481,9 @@ void Compositor::updateCompositeBlocking(Client *c)
 
 void Compositor::suspend(Compositor::SuspendReason reason)
 {
+    if (kwinApp()->requiresCompositing()) {
+        return;
+    }
     Q_ASSERT(reason != NoReasonSuspend);
     m_suspended |= reason;
     finish();
@@ -473,6 +498,9 @@ void Compositor::resume(Compositor::SuspendReason reason)
 
 void Compositor::setCompositing(bool active)
 {
+    if (kwinApp()->requiresCompositing()) {
+        return;
+    }
     if (active) {
         resume(ScriptSuspend);
     } else {
@@ -816,6 +844,8 @@ QString Compositor::compositingType() const
 #else
         return QStringLiteral("gl2");
 #endif
+    case QPainterCompositing:
+        return "qpainter";
     case NoCompositing:
     default:
         return QStringLiteral("none");
