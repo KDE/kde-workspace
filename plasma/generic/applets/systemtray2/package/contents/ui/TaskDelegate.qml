@@ -68,7 +68,7 @@ QtExtraComponents.MouseEventListener {
     property int taskType: type
     property Item expandedItem: taskItemExpanded
     property Item expandedStatusItem: null
-    property bool snExpanded: expanded
+    property bool snExpanded: false
 
     Rectangle {
         anchors.fill: parent;
