@@ -167,8 +167,8 @@ Flow {
                     hoverEnabled: true
                     onReleased: clickHandler(modelData.operation)
 
-                    PlasmaCore.ToolTip {
-                        target: mouseArea
+                    PlasmaCore.ToolTipArea {
+                        anchors.fill: parent
                         mainText: modelData.tooltip_mainText
                         subText: modelData.tooltip_subText
                         image: modelData.icon

@@ -171,8 +171,8 @@ Item {
                 elide: Text.ElideMiddle
                 visible: label0 != ''
 
-                PlasmaCore.ToolTip {
-                    target: label0Text
+                PlasmaCore.ToolTipArea {
+                    anchors.fill: parent
                     subText: label0Text.truncated ? label0 : ""
                 }
 
@@ -211,8 +211,8 @@ Item {
                 elide: Text.ElideMiddle
                 visible: label1 != ''
 
-                PlasmaCore.ToolTip {
-                    target: label1Text
+                PlasmaCore.ToolTipArea {
+                    anchors.fill: parent
                     subText: label1Text.truncated ? label1 : ""
                 }
             }
