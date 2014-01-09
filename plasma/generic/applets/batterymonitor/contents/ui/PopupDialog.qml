@@ -151,6 +151,20 @@ FocusScope {
         }
     }
 
+    Components.Label {
+        id: noControlsLabel
+        visible: !isKeyboardBrightnessAvailable && !isBrightnessAvailable
+        text: i18n("No screen or keyboard brightness controls available")
+        anchors {
+            top: plasmoid.location == PlasmaCore.Types.BottomEdge ? undefined : settingsColumn.bottom
+            bottom: plasmoid.location == PlasmaCore.Types.BottomEdge ? settingsColumn.top : undefined
+            leftMargin: padding.margins.left
+            rightMargin: padding.margins.right
+            topMargin: 5
+            bottomMargin: 5
+        }
+    }
+
     PlasmaCore.SvgItem {
         id: separator
         svg: PlasmaCore.Svg {
@@ -162,8 +176,8 @@ FocusScope {
         width: parent.width
         visible: model.count
         anchors {
-            top: plasmoid.location == PlasmaCore.Types.BottomEdge ? undefined : settingsColumn.bottom
-            bottom: plasmoid.location == PlasmaCore.Types.BottomEdge ? settingsColumn.top : undefined
+            top: plasmoid.location == PlasmaCore.Types.BottomEdge ? undefined : noControlsLabel.bottom
+            bottom: plasmoid.location == PlasmaCore.Types.BottomEdge ? noControlsLabel.top : undefined
             leftMargin: padding.margins.left
             rightMargin: padding.margins.right
             topMargin: 5
