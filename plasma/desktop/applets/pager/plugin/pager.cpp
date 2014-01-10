@@ -263,20 +263,20 @@ void Pager::recalculateGridSizes(int rows)
 
 void Pager::updateSizes()
 {
-    int padding = 2; // Space between miniatures of desktops
-    int textMargin = 3; // Space between name of desktop and border
+    const int padding = 2; // Space between miniatures of desktops
+    const int textMargin = 3; // Space between name of desktop and border
 
-    qreal leftMargin = 0;
-    qreal topMargin = 0;
-    qreal rightMargin = 0;
-    qreal bottomMargin = 0;
+    const qreal leftMargin = 0;
+    const qreal topMargin = 0;
+    const qreal rightMargin = 0;
+    const qreal bottomMargin = 0;
 
     QRect totalRect;
     for (int x = 0; x < m_desktopWidget->screenCount(); x++) {
         totalRect |= m_desktopWidget->screenGeometry(x);
     }
 
-    qreal ratio = (qreal) totalRect.width() /
+    const qreal ratio = (qreal) totalRect.width() /
                   (qreal) totalRect.height();
 
 
