@@ -166,10 +166,7 @@ void Pager::setSize(const QSizeF &size)
     
     m_validSizes = false;
 
-    // no need to update everything twice (if we are going to flip rows and columns later)
-    if (m_columns == m_rows) {
-        startTimer();
-    }
+    startTimer();
 }
 
 Pager::CurrentDesktopSelected Pager::currentDesktopSelected() const
