@@ -311,13 +311,7 @@ if(NOT WIN32)
 #       macro_optional_add_subdirectory(ksystraycmd)
    ecm_optional_add_subdirectory(appmenu)
 endif()
-#
-if(X11_Xau_FOUND AND X11_Xdmcp_FOUND)
-#       macro_optional_add_subdirectory( kdm )
-else()
-#       message(STATUS "Xau lib or Xdmcp lib was missing. kdm will not compile")
-endif()
-#
+
 if(NOT WIN32)
     # data
     ecm_optional_add_subdirectory(cursors)
