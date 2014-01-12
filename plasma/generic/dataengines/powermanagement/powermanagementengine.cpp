@@ -54,6 +54,7 @@ PowermanagementEngine::PowermanagementEngine(QObject* parent, const QVariantList
 {
     Q_UNUSED(args)
     qDBusRegisterMetaType< StringStringMap >();
+    init();
 }
 
 PowermanagementEngine::~PowermanagementEngine()
