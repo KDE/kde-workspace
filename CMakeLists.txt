@@ -224,7 +224,7 @@ set_package_properties(Akonadi PROPERTIES DESCRIPTION "An extensible cross-deskt
                        PURPOSE "Required to build certain Plasma DataEngines (Akonadi, Calendar)"
                       )
 
-find_package(KdepimLibs 4.5.60 QUIET CONFIG)
+find_package(KdepimLibs 4.70.10 QUIET CONFIG)
 set_package_properties(KdepimLibs PROPERTIES DESCRIPTION "The KDEPIM libraries"
                        URL "http://pim.kde.org"
                        TYPE OPTIONAL
