@@ -1,4 +1,3 @@
-add_subdirectory(kdm)
 add_subdirectory(klipper)
 add_subdirectory(kfontview)
 add_subdirectory(kmenuedit)
