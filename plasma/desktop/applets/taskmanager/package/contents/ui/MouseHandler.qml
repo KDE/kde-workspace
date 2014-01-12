@@ -51,7 +51,7 @@ Item {
                 }
             } else if (!tasks.dragSource && above && hoveredItem != above) {
                 hoveredItem = above;
-                activationTimer.start();
+                activationTimer.restart();
             } else if (!above) {
                 hoveredItem = null;
                 activationTimer.stop();
