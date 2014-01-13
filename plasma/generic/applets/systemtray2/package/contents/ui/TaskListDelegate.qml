@@ -33,6 +33,8 @@ TaskDelegate {
     width: snExpanded ? parent.width : height * 1.5 // be a bit more lenient to input
     height: (root.baseSize * 2)
 
+    isHiddenItem: true
+
     PlasmaComponents.Highlight {
         anchors.fill: parent
         //anchors.rightMargin: height

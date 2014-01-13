@@ -37,6 +37,8 @@ QtExtraComponents.MouseEventListener {
     property variant task: null
     property bool isCurrentTask: (root.currentTask == taskId)
 
+    property bool isHiddenItem: false
+
     onTaskChanged: {
         //print("******************* Task changed:" + task.taskId + " " + task.name)
     }
