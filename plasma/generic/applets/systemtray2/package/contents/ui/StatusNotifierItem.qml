@@ -30,6 +30,7 @@ import org.kde.private.systemtray 2.0 as SystemTray
 PlasmaCore.ToolTipArea {
     id: root_item
 
+    location: isHiddenItem ? PlasmaCore.Types.LeftEdge : PlasmaCore.Types.Floating
     property int blink_interval: 1000 // interval of blinking (if status of task is NeedsAttention)
     property variant task: null // task that provides information for item
 
