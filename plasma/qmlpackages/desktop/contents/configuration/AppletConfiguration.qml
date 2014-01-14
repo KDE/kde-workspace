@@ -170,7 +170,7 @@ Rectangle {
                     bottom: parent.bottom
                 }
                 Layout.fillWidth: true
-                height: Math.max(pageScroll.height, currentItem != null ? currentItem.implicitHeight : 0)
+                height: Math.max(categoriesScroll.height, currentItem != null ? currentItem.implicitHeight : 0)
                 property string sourceFile
                 Timer {
                     id: pageSizeSync
