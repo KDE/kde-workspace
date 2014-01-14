@@ -241,7 +241,7 @@ KSMShutdownDlg::KSMShutdownDlg( QWidget* parent,
 //    setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 //    setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     // engine stuff
-    KDeclarative kdeclarative;
+    KDeclarative::KDeclarative kdeclarative;
     kdeclarative.setDeclarativeEngine(m_view->engine());
     kdeclarative.initialize();
     kdeclarative.setupBindings();

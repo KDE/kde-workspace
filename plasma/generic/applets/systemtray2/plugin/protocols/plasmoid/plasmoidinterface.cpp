@@ -131,7 +131,7 @@ void PlasmoidInterface::init()
     }
     qCDebug(SYSTEMTRAY) << "INIT" << m_plugin;
     // Set up the runtime: security, url-based schemes, etc
-    m_qmlObject = new QmlObject(parent());
+    m_qmlObject = new KDeclarative::QmlObject(parent());
     //qCDebug(SYSTEMTRAY) << " rootitem: " << rootItem->objectName();
     m_qmlObject->setInitializationDelayed(true);
 
@@ -974,7 +974,7 @@ void PlasmoidInterface::itemChange(ItemChange change, const ItemChangeData &valu
     QQuickItem::itemChange(change, value);
 }
 
-QmlObject *PlasmoidInterface::qmlObject()
+KDeclarative::QmlObject *PlasmoidInterface::qmlObject()
 {
     return m_qmlObject;
 }

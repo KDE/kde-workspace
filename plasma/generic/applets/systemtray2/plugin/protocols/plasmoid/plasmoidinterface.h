@@ -35,10 +35,12 @@ class QmlAppletScript;
 class QSignalMapper;
 class QSizeF;
 
-class ConfigPropertyMap;
 class ConfigView;
 
-class QmlObject;
+namespace KDeclarative {
+    class QmlObject;
+    class ConfigPropertyMap;
+}
 
 namespace Plasma
 {
@@ -167,7 +169,7 @@ public:
     KPluginInfo pluginInfo() const;
 
 // //API not intended for the QML part
-    QmlObject *qmlObject();
+    KDeclarative::QmlObject *qmlObject();
 //
 //     QList<QAction*> contextualActions() const;
 //
@@ -343,10 +345,10 @@ private:
     QMap<QString, Plasma::ConfigLoader*> m_configs;
 
 
-    ConfigPropertyMap *m_configuration;
+    KDeclarative::ConfigPropertyMap *m_configuration;
 
 //UI-specific members ------------------
-    QmlObject *m_qmlObject;
+    KDeclarative::QmlObject *m_qmlObject;
     QWeakPointer<QObject> m_compactUiObject;
     QQuickItem* m_defaultRepresentation;
 

@@ -165,7 +165,7 @@ void UnlockApp::desktopResized()
         }
 
         // engine stuff
-        KDeclarative kdeclarative;
+        KDeclarative::KDeclarative kdeclarative;
         kdeclarative.setDeclarativeEngine(view->engine());
         kdeclarative.initialize();
         kdeclarative.setupBindings();
