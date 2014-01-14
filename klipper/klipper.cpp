@@ -171,6 +171,7 @@ Klipper::Klipper(QObject* parent, const KSharedConfigPtr& config)
     m_clearHistoryAction = m_collection->addAction( "clear-history" );
     m_clearHistoryAction->setIcon( KIcon("edit-clear-history") );
     m_clearHistoryAction->setText( i18n("C&lear Clipboard History") );
+    m_clearHistoryAction->setGlobalShortcut(KShortcut());
     connect(m_clearHistoryAction, SIGNAL(triggered()), SLOT(slotAskClearHistory()));
 
     m_configureAction = m_collection->addAction( "configure" );
