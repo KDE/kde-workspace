@@ -34,7 +34,7 @@
 #include <kautostart.h>
 #include <KGlobal>
 #include <KStandardDirs>
-#include <knewstuff3/downloaddialog.h>
+#include <KNewStuff3/KNS3/DownloadDialog>
 
 #include <Plasma/Theme>
 

@@ -38,7 +38,7 @@
 #include <ktar.h>
 #include <kservicetypetrader.h>
 #include <kio/netaccess.h>
-#include <knewstuff3/downloaddialog.h>
+#include <KNewStuff3/KNS3/DownloadDialog>
 
 ThemeListBox::ThemeListBox(QWidget *parent)
   : KListWidget(parent)

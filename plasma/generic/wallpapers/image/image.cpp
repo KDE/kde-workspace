@@ -29,7 +29,7 @@
 #include <KStandardDirs>
 #include <KIO/Job>
 #include <krun.h>
-#include <knewstuff3/downloaddialog.h>
+#include <KNewStuff3/KNS3/DownloadDialog>
 #include <klocalizedstring.h>
 #include <KGlobal>
 
