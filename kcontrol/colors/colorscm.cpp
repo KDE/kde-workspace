@@ -44,8 +44,8 @@
 #include <KPluginFactory>
 #include <KStandardDirs>
 #include <kio/netaccess.h>
-#include <knewstuff3/downloaddialog.h>
-#include <knewstuff3/uploaddialog.h>
+#include <KNewStuff3/KNS3/DownloadDialog>
+#include <KNewStuff3/KNS3/UploadDialog>
 
 K_PLUGIN_FACTORY( KolorFactory, registerPlugin<KColorCm>(); )
 K_EXPORT_PLUGIN( KolorFactory("kcmcolors") )

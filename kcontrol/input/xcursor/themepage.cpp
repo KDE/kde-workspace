@@ -29,7 +29,7 @@
 #include <KIO/Job>
 #include <KIO/DeleteJob>
 #include <kio/netaccess.h>
-#include <knewstuff3/downloaddialog.h>
+#include <KNewStuff3/KNS3/DownloadDialog>
 
 
 #include <KTar>
