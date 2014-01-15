@@ -68,7 +68,7 @@
 #include <KDE/KPluginLoader>
 #include <KDE/KStandardAction>
 #include <KDE/KZip>
-#include <KDE/KNS3/DownloadDialog>
+#include <KNewStuff3/KNS3/DownloadDialog>
 #include <KAction>
 
 #define CFG_GROUP                  "Main Settings"
