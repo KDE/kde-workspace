@@ -41,8 +41,7 @@ Item {
 
     property alias expandedLoader: expandedLoader
 
-    property Component compactRepresentation: CompactRepresentation {
-    }
+    property Component compactRepresentation: CompactRepresentation {}
 
     state: "off"
 

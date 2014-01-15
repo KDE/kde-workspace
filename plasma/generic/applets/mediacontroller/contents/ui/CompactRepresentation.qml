@@ -19,27 +19,22 @@
 
 import QtQuick 2.0
 import org.kde.plasma.core 2.0 as PlasmaCore
-import org.kde.plasma.components 2.0 as PlasmaComponents
 import org.kde.plasma.extras 2.0 as PlasmaExtras
 
 Item {
-    id: expandedRepresentation
+    id: compactRepresentation
 
-    PlasmaComponents.Label {
+    PlasmaCore.IconItem {
         property int s: Math.min(parent.height, parent.width)
         anchors {
             horizontalCenter: parent.horizontalCenter
+            //fill: parent
         }
         y: -height / 8 /// Urghs, but works due to the character being rather static
         width: s
         height: s
-        verticalAlignment: Text.AlignTop
-        horizontalAlignment: Text.AlignHCenter
-        font.pixelSize: Math.min(parent.height, parent.width)
-        text: "▶"
-        color: "white"
-        style: Text.Raised; styleColor: "black"
-        opacity: 0.6
+
+        source: root.state == "playing" ? "media-playback-pause" : "media-playback-start"
     }
 
     MouseArea {
