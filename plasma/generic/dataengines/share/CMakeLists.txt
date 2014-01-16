@@ -12,7 +12,7 @@ add_library(plasma_engine_share MODULE ${share_engine_SRCS})
 target_link_libraries(plasma_engine_share
                       KF5::Plasma
                       KF5::KIOCore
-                      KF5::KrossCore
+                      KF5::JsEmbed
                       KF5::KDE4Support
 )
 

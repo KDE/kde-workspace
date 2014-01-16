@@ -23,31 +23,30 @@
 #include <QObject>
 #include <kio/global.h>
 #include <KDE/KIO/Job>
-#include <KUrl>
+#include <QUrl>
 #include <KLocalizedString>
 
 #include <Plasma/PackageStructure>
 
+namespace KJSEmbed { class Engine; }
 
 class ShareProvider : public QObject
 {
     Q_OBJECT
 
 public:
-    ShareProvider(QObject *parent =0);
+    ShareProvider(KJSEmbed::Engine* engine, QObject *parent = 0);
     static Plasma::PackageStructure* packageStructure();
 
     QString method() const;
     void setMethod(const QString &method);
 
-    KUrl url() const;
+    QUrl url() const;
     void setUrl(const QString &url);
 
     void addPostFile(const QString &contentKey, const QString &content);
 
 Q_SIGNALS:
-    void handleResultData(QString data);
-    void handleRedirection(const QString &url);
     void readyToPublish();
     void finished(const QString &url);
     void finishedError(const QString &msg);
@@ -66,7 +65,7 @@ public Q_SLOTS:
     // result methods
     void success(const QString &url);
     void error(const QString &msg);
-    void redirected(KIO::Job *job, const KUrl &from);
+    void redirected(KIO::Job *job, const QUrl &from);
 
 protected Q_SLOTS:
     // Q_SLOTS for kio
@@ -87,14 +86,15 @@ private:
     bool m_isBlob;
     bool m_isPost;
 
-    KUrl m_url;
-    KUrl m_service;
+    QUrl m_url;
+    QUrl m_service;
 
     QByteArray m_data;
     QByteArray m_buffer;
     QByteArray m_boundary;
 
     static Plasma::PackageStructure *m_packageStructure;
+    KJSEmbed::Engine* m_engine;
 };
 
 #endif // SHAREPROVIDER

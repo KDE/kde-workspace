@@ -57,7 +57,7 @@ add_definitions(-DQT_DISABLE_DEPRECATED_BEFORE=0)
 # Load the frameworks we need
 find_package(KF5 CONFIG REQUIRED
     IdleTime ItemModels WidgetsAddons WindowSystem Codecs Archive CoreAddons Solid ThreadWeaver
-    Config Auth JS Wallet DBusAddons Sonnet GlobalAccel
+    Config Auth JS JsEmbed Wallet DBusAddons Sonnet GlobalAccel
     I18n GuiAddons Service ConfigWidgets ItemViews Notifications IconThemes Style Completion JobWidgets TextWidgets XmlGui Crash
     Bookmarks UnitConversion KIO KCMUtils Parts Kross NotifyConfig PrintUtils Su DocTools NewStuff KHtml Declarative Init)
 

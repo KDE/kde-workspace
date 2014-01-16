@@ -24,6 +24,8 @@
 #include <QDebug>
 #include <KDE/KIO/MimetypeJob>
 #include <KDE/KIO/FileJob>
+#include <kjsembed/kjsembed.h>
+#include <KJsEmbed/variant_binding.h>
 
 #include "shareprovider.h"
 #include "share_package.h"
@@ -31,8 +33,9 @@
 Plasma::PackageStructure* ShareProvider::m_packageStructure(0);
 
 
-ShareProvider::ShareProvider(QObject *parent)
-    : QObject(parent), m_isBlob(false), m_isPost(true)
+ShareProvider::ShareProvider(KJSEmbed::Engine* engine, QObject *parent)
+    : QObject(parent), m_isBlob(false), m_isPost(true),
+      m_engine(engine)
 {
     // Just make the boundary random part long enough to be sure
     // it's not inside one of the arguments that we are sending
@@ -57,7 +60,7 @@ void ShareProvider::setMethod(const QString &method)
     }
 }
 
-KUrl ShareProvider::url() const
+QUrl ShareProvider::url() const
 {
     // the url that is set in this provider
     return m_url;
@@ -142,7 +145,7 @@ void ShareProvider::addPostFile(const QString &contentKey, const QString &conten
     // The applet using this engine must ensure that the provider selected
     // supports the file format that is added here as a parameter, otherwise
     // it will return as an error later in the process.
-    KUrl url(m_content);
+    QUrl url(m_content);
 
     KIO::MimetypeJob *mjob = KIO::mimetype(url, KIO::HideProgressInfo);
     connect(mjob, SIGNAL(finished(KJob*)), this, SLOT(mimetypeJobFinished(KJob*)));
@@ -178,7 +181,7 @@ void ShareProvider::mimetypeJobFinished(KJob *job)
         m_isBlob = true;
 
     // try to open the file
-    KIO::FileJob *fjob = KIO::open(KUrl(m_content), QIODevice::ReadOnly);
+    KIO::FileJob *fjob = KIO::open(QUrl(m_content), QIODevice::ReadOnly);
     connect(fjob, SIGNAL(open(KIO::Job*)), this, SLOT(openFile(KIO::Job*)));
 }
 
@@ -221,7 +224,7 @@ void ShareProvider::finishedContentData(KIO::Job *job, const QByteArray &data)
     str += m_contentKey.toAscii();
     str += "\"; ";
     str += "filename=\"";
-    str += QFile::encodeName(KUrl(m_content).fileName()).replace(".tmp", ".jpg");
+    str += QFile::encodeName(QUrl(m_content).fileName()).replace(".tmp", ".jpg");
     str += "\"\r\n";
     str += "Content-Length: ";
     str += fileSize.toAscii();
@@ -246,6 +249,7 @@ void ShareProvider::readPublishData(KIO::Job *job, const QByteArray &data)
 
 void ShareProvider::finishedPublish(KJob *job)
 {
+    qDebug() << "finished!!!" << job;
     Q_UNUSED(job);
     if (m_data.length() == 0) {
         error(i18n("Service was not available"));
@@ -254,7 +258,9 @@ void ShareProvider::finishedPublish(KJob *job)
 
     // process data. should be interpreted by the plugin.
     // plugin must call the right slots after processing the data.
-    emit handleResultData(QString(m_data));
+    KJS::List kjsargs;
+    kjsargs.append( KJSEmbed::convertToValue(m_engine->interpreter()->execState(), m_data) );
+    m_engine->callMethod("handleResultData", kjsargs);
 }
 
 void ShareProvider::finishHeader()
@@ -274,7 +280,7 @@ void ShareProvider::addQueryItem(const QString &key, const QString &value)
 
 void ShareProvider::publish()
 {
-    if (m_url == "") {
+    if (m_url.isEmpty()) {
         emit finishedError(i18n("You must specify a URL for this service"));
     }
 
@@ -305,11 +311,11 @@ void ShareProvider::publish()
     connect(tf, SIGNAL(data(KIO::Job*,QByteArray)),
             this, SLOT(readPublishData(KIO::Job*,QByteArray)));
     connect(tf, SIGNAL(result(KJob*)), this, SLOT(finishedPublish(KJob*)));
-    connect(tf, SIGNAL(redirection(KIO::Job*,KUrl)),
-            this, SLOT(redirected(KIO::Job*,KUrl)));
+    connect(tf, SIGNAL(redirection(KIO::Job*,QUrl)),
+            this, SLOT(redirected(KIO::Job*,QUrl)));
 }
 
-void ShareProvider::redirected(KIO::Job *job, const KUrl &to)
+void ShareProvider::redirected(KIO::Job *job, const QUrl &to)
 {
     Q_UNUSED(job)
     const QUrl toUrl(to);
@@ -322,7 +328,9 @@ void ShareProvider::redirected(KIO::Job *job, const KUrl &to)
         return;
     }
 
-    emit handleRedirection(toString);
+    KJS::List kjsargs;
+    kjsargs.append( KJSEmbed::convertToValue(m_engine->interpreter()->execState(), toString) );
+    m_engine->callMethod("handleRedirection", kjsargs);
 }
 
 void ShareProvider::success(const QString &url)

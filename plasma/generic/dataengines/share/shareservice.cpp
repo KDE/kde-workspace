@@ -19,12 +19,12 @@
 
 #include <QtCore/QFile>
 
-#include <kross/core/action.h>
-#include <kross/core/interpreter.h>
-#include <kross/core/manager.h>
 #include <kstandarddirs.h>
+#include <kjsembed/kjsembed.h>
+#include <kjs/JSVariableObject.h>
 
 #include <Plasma/Package>
+#include <QDebug>
 
 #include "shareservice.h"
 #include "shareprovider.h"
@@ -45,13 +45,12 @@ Plasma::ServiceJob *ShareService::createJob(const QString &operation,
 ShareJob::ShareJob(const QString &destination, const QString &operation,
                    QMap<QString, QVariant> &parameters, QObject *parent)
     : Plasma::ServiceJob(destination, operation, parameters, parent),
-      m_action(0), m_provider(0), m_package(0)
+      m_engine(new KJSEmbed::Engine()), m_provider(0), m_package(0)
 {
 }
 
 ShareJob::~ShareJob()
 {
-    delete m_action;
     delete m_provider;
     delete m_package;
 }
@@ -79,96 +78,77 @@ void ShareJob::start()
     m_package = new Plasma::Package(ShareProvider::packageStructure());
     m_package->setPath(path);
     if (m_package->isValid()) {
-        const QString mainscript = 
-            m_package->path() + m_package->contentsPrefixPaths().at(0) +
-            m_package->filePath("mainscript");
+        const QString mainscript = m_package->filePath("mainscript");
 
-        if (!QFile::exists(mainscript)) {
-            showError(i18n("Selected provider does not have a valid script file"));
+        m_provider = new ShareProvider(m_engine.data(), this);
+        connect(m_provider, SIGNAL(readyToPublish()), this, SLOT(publish()));
+        connect(m_provider, SIGNAL(finished(QString)),
+                this, SLOT(showResult(QString)));
+        connect(m_provider, SIGNAL(finishedError(QString)),
+                this, SLOT(showError(QString)));
+
+        m_engine->addObject(m_provider, "provider");
+
+        // set the main script file and load it
+        KJSEmbed::Engine::ExitStatus status = m_engine->runFile(mainscript);
+
+        // check for any errors
+        if(status == KJSEmbed::Engine::Failure) {
+            showError(i18n("Error trying to execute script"));
             return;
         }
 
-        const QString interpreter =
-            Kross::Manager::self().interpreternameForFile(mainscript);
+        KJS::ExecState* execState = m_engine->interpreter()->execState();
+        KJS::JSGlobalObject* scriptObject = m_engine->interpreter()->globalObject();
 
-        if (interpreter.isEmpty()) {
-            showError(i18n("Selected provider does not provide a supported script file"));
+        // do the work together with the loaded plugin
+        if (!scriptObject->hasProperty(execState, "url") || !scriptObject->hasProperty(execState, "contentKey") ||
+            !scriptObject->hasProperty(execState, "setup")) {
+            showError(i18n("Could not find all required functions"));
             return;
         }
 
-        m_action = new Kross::Action(parent(), pluginName);
-        if (m_action) {
-            m_provider = new ShareProvider(this);
-            connect(m_provider, SIGNAL(readyToPublish()), this, SLOT(publish()));
-            connect(m_provider, SIGNAL(finished(QString)),
-                    this, SLOT(showResult(QString)));
-            connect(m_provider, SIGNAL(finishedError(QString)),
-                    this, SLOT(showError(QString)));
+        // call the methods from the plugin
+        const QString url = m_engine->callMethod("url")->toString(execState).qstring();
+        m_provider->setUrl(url);
 
-            // automatically connects signals and slots with the script
-            m_action->addObject(m_provider, "provider",
-                                Kross::ChildrenInterface::AutoConnectSignals);
-
-            // set the main script file and load it
-            m_action->setFile(mainscript);
-            m_action->trigger();
-
-            // check for any errors
-            if(m_action->hadError()) {
-                showError(i18n("Error trying to execute script"));
-                return;
-            }
-
-            // do the work together with the loaded plugin
-            const QStringList functions = m_action->functionNames();
-            if (!functions.contains("url") || !functions.contains("contentKey") ||
-                !functions.contains("setup")) {
-                showError(i18n("Could not find all required functions"));
-                return;
-            }
-
-            // call the methods from the plugin
-            const QString url =
-                m_action->callFunction("url", QVariantList()).toString();
-            m_provider->setUrl(url);
-
-            // setup the method (get/post)
-            QVariant vmethod;
-            if (functions.contains("method")) {
-                vmethod =
-                    m_action->callFunction("method", QVariantList()).toString();
-            }
-
-            // default is POST (if the plugin does not specify one method)
-            const QString method = vmethod.isValid() ? vmethod.toString() : "POST";
-            m_provider->setMethod(method);
-
-            // setup the provider
-            QVariant setup = m_action->callFunction("setup", QVariantList());
-
-            // get the content from the parameters, set the url and add the file
-            // then we can wait the signal to publish the information
-            const QString contentKey =
-                m_action->callFunction("contentKey", QVariantList()).toString();
-
-            const QString content(parameters()["content"].toString());
-            m_provider->addPostFile(contentKey, content);
+        // setup the method (get/post)
+        QVariant vmethod;
+        if (scriptObject->hasProperty(execState, "method")) {
+            vmethod = m_engine->callMethod("method")->toString(execState).qstring();
         }
+
+        // default is POST (if the plugin does not specify one method)
+        const QString method = vmethod.isValid() ? vmethod.toString() : "POST";
+        m_provider->setMethod(method);
+
+        // setup the provider
+        m_engine->callMethod("setup");
+
+        // get the content from the parameters, set the url and add the file
+        // then we can wait the signal to publish the information
+        const QString contentKey = m_engine->callMethod("contentKey")->toString(execState).qstring();
+
+        const QString content(parameters()["content"].toString());
+        m_provider->addPostFile(contentKey, content);
     }
 }
 
 void ShareJob::publish()
 {
+    qDebug() << "ready!!!!!!";
     m_provider->publish();
 }
 
 void ShareJob::showResult(const QString &url)
 {
+    qDebug() << "piribip!!!";
     setResult(url);
 }
 
 void ShareJob::showError(const QString &message)
 {
+    qDebug() << "meeeeeeeeeec!!!";
     QString errorMsg = message;
     if (errorMsg.isEmpty()) {
         errorMsg = i18n("Unknown Error");

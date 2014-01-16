@@ -32,8 +32,8 @@ namespace Plasma {
     class Package;
 }
 
-namespace Kross {
-    class Action;
+namespace KJSEmbed {
+    class Engine;
 }
 
 class ShareService : public Plasma::Service
@@ -62,7 +62,7 @@ public Q_SLOTS:
     void showError(const QString &msg);
 
 private:
-    Kross::Action *m_action;
+    QScopedPointer<KJSEmbed::Engine> m_engine;
     ShareProvider *m_provider;
     Plasma::Package *m_package;
 };
