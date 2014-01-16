@@ -41,6 +41,8 @@ K_PLUGIN_FACTORY(LaunchFactory,
         )
 K_EXPORT_PLUGIN(LaunchFactory("kcmlaunch"))
 
+static const int s_startupDefaultTimeout = 5;
+
 
 LaunchConfig::LaunchConfig(QWidget * parent, const QVariantList &)
   : KCModule(parent)
@@ -160,7 +162,7 @@ LaunchConfig::load()
   cb_taskbarButton->setChecked(taskbarButton);
 
   c= conf.group( "BusyCursorSettings" );
-  sb_cursorTimeout->setValue( c.readEntry( "Timeout", 30 ));
+  sb_cursorTimeout->setValue( c.readEntry( "Timeout", s_startupDefaultTimeout ));
   bool busyBlinking =c.readEntry("Blinking", false);
   bool busyBouncing =c.readEntry("Bouncing", true);
   if ( !busyCursor )
@@ -173,7 +175,7 @@ LaunchConfig::load()
      cb_busyCursor->setCurrentIndex(1);
 
   c= conf.group( "TaskbarButtonSettings" );
-  sb_taskbarTimeout->setValue( c.readEntry( "Timeout", 30 ));
+  sb_taskbarTimeout->setValue( c.readEntry( "Timeout", s_startupDefaultTimeout ));
 
   slotBusyCursor( cb_busyCursor->currentIndex() );
   slotTaskbarButton( taskbarButton );
@@ -216,8 +218,8 @@ LaunchConfig::defaults()
   cb_busyCursor->setCurrentIndex(2);
   cb_taskbarButton->setChecked( (bool)(Default & TaskbarButton) );
 
-  sb_cursorTimeout->setValue( 30 );
-  sb_taskbarTimeout->setValue( 30 );
+  sb_cursorTimeout->setValue( s_startupDefaultTimeout );
+  sb_taskbarTimeout->setValue( s_startupDefaultTimeout );
 
   slotBusyCursor( 2 );
   slotTaskbarButton( (bool)(Default & TaskbarButton) );
@@ -238,12 +240,12 @@ LaunchConfig::checkChanged()
     c.readEntry("TaskbarButton", (bool)(Default & TaskbarButton));
 
   c = conf.group("BusyCursorSettings");
-  unsigned int savedCursorTimeout = c.readEntry( "Timeout", 30 );
+  unsigned int savedCursorTimeout = c.readEntry( "Timeout", s_startupDefaultTimeout );
   bool savedBusyBlinking =c.readEntry("Blinking", false);
   bool savedBusyBouncing =c.readEntry("Bouncing", true);
 
   c = conf.group("TaskbarButtonSettings");
-  unsigned int savedTaskbarTimeout = c.readEntry( "Timeout", 30 );
+  unsigned int savedTaskbarTimeout = c.readEntry( "Timeout", s_startupDefaultTimeout );
 
   bool newBusyCursor =cb_busyCursor->currentIndex()!=0;
 

@@ -59,6 +59,8 @@ public:
 
 Q_GLOBAL_STATIC(TaskManagerSingleton, privateTaskManagerSelf)
 
+static const int s_startupDefaultTimeout = 5;
+
 TaskManager* TaskManager::self()
 {
     return &privateTaskManagerSelf->self;
@@ -186,7 +188,7 @@ void TaskManager::configureStartup()
     }
 
     c = KConfigGroup(&_c, "TaskbarButtonSettings");
-    d->startupInfo->setTimeout(c.readEntry("Timeout", 30));
+    d->startupInfo->setTimeout(c.readEntry("Timeout", s_startupDefaultTimeout));
 }
 
 Task *TaskManager::findTask(WId w)
