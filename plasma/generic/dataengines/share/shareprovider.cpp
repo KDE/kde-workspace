@@ -249,7 +249,6 @@ void ShareProvider::readPublishData(KIO::Job *job, const QByteArray &data)
 
 void ShareProvider::finishedPublish(KJob *job)
 {
-    qDebug() << "finished!!!" << job;
     Q_UNUSED(job);
     if (m_data.length() == 0) {
         error(i18n("Service was not available"));

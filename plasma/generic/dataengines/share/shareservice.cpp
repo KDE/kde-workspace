@@ -136,19 +136,16 @@ void ShareJob::start()
 
 void ShareJob::publish()
 {
-    qDebug() << "ready!!!!!!";
     m_provider->publish();
 }
 
 void ShareJob::showResult(const QString &url)
 {
-    qDebug() << "piribip!!!";
     setResult(url);
 }
 
 void ShareJob::showError(const QString &message)
 {
-    qDebug() << "meeeeeeeeeec!!!";
     QString errorMsg = message;
     if (errorMsg.isEmpty()) {
         errorMsg = i18n("Unknown Error");
