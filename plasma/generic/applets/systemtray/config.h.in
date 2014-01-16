@@ -1,4 +1,0 @@
-#cmakedefine HAVE_LIBXSS
-
-// Path to directory containing qml stuff for systemtray
-#define SYSTEMTRAY_DATA_INSTALL_DIR "${data_install_dir}"
