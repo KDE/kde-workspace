@@ -25,7 +25,7 @@
 #include <KDE/KIO/MimetypeJob>
 #include <KDE/KIO/FileJob>
 #include <kjsembed/kjsembed.h>
-#include <KJsEmbed/variant_binding.h>
+#include <kjsembed/variant_binding.h>
 
 #include "shareprovider.h"
 #include "share_package.h"
