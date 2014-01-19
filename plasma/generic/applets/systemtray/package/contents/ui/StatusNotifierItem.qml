@@ -41,6 +41,8 @@ Item {
     property string   __overlay_icon_name: __has_task ? task.overlayIconName : ""
     property string   __movie_path:        __has_task ? task.moviePath : ""
     property int      __status:            __has_task ? task.status : UnknownStatus
+    //Hack for activating only items that has been clicked by ourselves
+    property variant  __clickTime:        0;
 
     // Public functions ================================================================================================
     function click(buttons) {
@@ -71,7 +73,13 @@ Item {
             icon_widget.action.triggered.connect(__onActivatedShortcut)
         }
 
-        onShowContextMenu: plasmoid.showMenu(menu, x, y, root_item)
+        onShowContextMenu: {
+            //refuse events for elapsed times < 1 second
+            var time = new Date().getTime();
+            if (time - __clickTime < 1000) {
+                plasmoid.showMenu(menu, x, y, root_item)
+            }
+        }
     }
 
     function __onActivatedShortcut() {
@@ -185,6 +193,7 @@ Item {
     }
 
     function __processClick(buttons, item) {
+        __clickTime = (new Date()).getTime();
         var pos = plasmoid.popupPosition(item)
         switch (buttons) {
         case Qt.LeftButton:    task.activate1(pos.x, pos.y); break
