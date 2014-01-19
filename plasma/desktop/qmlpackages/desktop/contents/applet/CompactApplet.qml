@@ -26,40 +26,24 @@ Item {
     id: root
     objectName: "org.kde.desktop-CompactApplet"
 
-    property int minimumWidth: compactRepresentation && compactRepresentation.minimumWidth !== undefined ? compactRepresentation.minimumWidth : -1
-    property int minimumHeight: compactRepresentation && compactRepresentation.minimumHeight !== undefined ? compactRepresentation.minimumHeight : -1
-
-    property int maximumWidth: compactRepresentation && compactRepresentation.maximumWidth !== undefined ? compactRepresentation.maximumWidth : -1
-    property int maximumHeight: compactRepresentation && compactRepresentation.maximumHeight !== undefined ? compactRepresentation.maximumHeight : -1
-
-    implicitWidth: compactRepresentation && compactRepresentation.implicitWidth !== undefined ? compactRepresentation.implicitWidth : -1
-    implicitHeight: compactRepresentation && compactRepresentation.implicitHeight !== undefined ? compactRepresentation.implicitHeight : -1
-
-    property bool fillWidth: compactRepresentation && compactRepresentation.fillWidth !== undefined ? compactRepresentation.fillWidth : false
-    property bool fillHeight: compactRepresentation && compactRepresentation.fillHeight !== undefined ? compactRepresentation.fillHeight : false
-
-
     property Item applet
+    property Item fullRepresentation
     property Item compactRepresentation
 
-    onAppletChanged: {
+    onFullRepresentationChanged: {
 
         //if the applet size was restored to a stored size, or if is dragged from the desktop, restore popup size
-        if (applet.width > 0) {
-            popupWindow.mainItem.width = applet.width;
+        if (fullRepresentation.width > 0) {
+            popupWindow.mainItem.width = fullRepresentation.width;
         }
-        if (applet.height > 0) {
-            popupWindow.mainItem.height = applet.height;
+        if (fullRepresentation.height > 0) {
+            popupWindow.mainItem.height = fullRepresentation.height;
         }
 
-        applet.parent = appletParent;
-        applet.anchors.fill = applet.parent;
+        fullRepresentation.parent = appletParent;
+        fullRepresentation.anchors.fill = fullRepresentation.parent;
     }
 
-    onCompactRepresentationChanged: {
-        compactRepresentation.parent = root
-        compactRepresentation.anchors.fill = root
-    }
 
     PlasmaCore.Dialog {
         id: popupWindow
