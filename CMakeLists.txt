@@ -87,13 +87,6 @@ set_package_properties(ZLIB PROPERTIES DESCRIPTION "Support for gzip compressed 
 #                        TYPE REQUIRED
 #                       )
 
-# TODO remove it in future
-find_package(LibAttica NO_MODULE)
-set_package_properties(LibAttica PROPERTIES DESCRIPTION "Support for Get Hot New Stuff related stuff"
-                       URL "https://projects.kde.org/attica"
-                       TYPE REQUIRED
-                      )
-
 find_package(DBusMenuQt5)
 set_package_properties(DBusMenuQt5 PROPERTIES DESCRIPTION "Support for notification area menus via the DBusMenu protocol"
                         URL "https://launchpad.net/libdbusmenu-qt"
