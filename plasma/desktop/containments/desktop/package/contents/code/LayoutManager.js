@@ -48,7 +48,7 @@ function restore()
 
     itemsConfig = new Object();
     var configString = String(plasmoid.readConfig("ItemsGeometries"))
-    print("Config read from configfile: " + configString);
+    //print("Config read from configfile: " + configString);
     //array, a cell for encoded item geometry
     var itemsStrings = configString.split(";")
     for (var i=0; i<itemsStrings.length; i++) {
@@ -61,7 +61,7 @@ function restore()
         }
 
         //array [x, y, width, height, rotation]
-        print("Restoring applet " + idConfig[0] + " at " + idConfig[1]);
+        //print("Restoring applet " + idConfig[0] + " at " + idConfig[1]);
         var rect = idConfig[1].split(",")
         if (rect.length < 5) {
             continue
@@ -75,7 +75,6 @@ function restore()
         //print("xxxxx Rotation: " + geomObject.rotation + " " + rect[4]);
         itemsConfig[idConfig[0]] = geomObject
     }
-    print("Restore done.");
 }
 
 function save()
@@ -89,8 +88,6 @@ function save()
             configString +=  idstring + ":" + rect.x + "," + rect.y + "," + rect.width + "," + rect.height + "," + rect.rotation + ";";
         }
     }
-    print("Applet number: " + plasmoid.applets.length);
-    print("saving "+configString);
     plasmoid.writeConfig("ItemsGeometries", configString);
 }
 
