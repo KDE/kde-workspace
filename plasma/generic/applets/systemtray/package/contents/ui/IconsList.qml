@@ -33,7 +33,7 @@ MouseArea {
     id: root_item
 
     property int icons_size:     24  ///< Size of icons, icons are square i.e. width == height
-    property int icons_margins:  4  ///< Margins for icons
+    property int icons_margins:  icons_size/3  ///< Margins for icons
     property alias icons_number: repeater.count  ///< [readonly] Number of icons
     property alias model:    repeater.model; ///< Model for grid
     property int cell_size: icons_size + 2*icons_margins ///< [readonly] size of grid cell

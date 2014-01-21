@@ -34,7 +34,7 @@ Item {
     property int minimumWidth:  JS.MINIMUM_SIZE
     property int minimumHeight: JS.MINIMUM_SIZE
 
-    property int iconSize: Math.min(root_item.width, Math.min(root_item.height, JS.ICONS_SIZE))
+    property int iconSize: Math.min(root_item.width, Math.min(root_item.height, theme.defaultFont.mSize.height < 20 ? 24 : theme.largeIconSize)) //Math.min(root_item.width, Math.min(root_item.height, JS.ICONS_SIZE))
 
     // Data Models
     property list<ListModel> models: [
@@ -112,7 +112,7 @@ Item {
 
             content: IconsList {
                 id: popup_area
-                icons_size: JS.ICONS_SIZE
+                icons_size: root_item.iconSize
                 model: model_popup
             }
         }
