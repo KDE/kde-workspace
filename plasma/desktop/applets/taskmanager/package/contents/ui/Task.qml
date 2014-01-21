@@ -145,7 +145,7 @@ MouseEventListener {
                         //toolTip.target = frame;
                         toolTip.mainText = model.DisplayRole;
                         //FIXME TODO:
-                        //toolTip.image = model.DecorationRole;
+                        toolTip.icon = model.DecorationRole;
                         toolTip.subText = model.IsLauncher ? model.GenericName
                             : toolTip.generateSubText(model);
                         //FIXME TODO: toolTip.windowsToPreview = model.WindowList;
