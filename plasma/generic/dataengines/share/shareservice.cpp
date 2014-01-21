@@ -129,8 +129,14 @@ void ShareJob::start()
         // then we can wait the signal to publish the information
         const QString contentKey = m_engine->callMethod("contentKey")->toString(execState).qstring();
 
-        const QString content(parameters()["content"].toString());
-        m_provider->addPostFile(contentKey, content);
+        QVariant contents = parameters()["content"];
+        if(contents.type() == QVariant::List) {
+            QVariantList list = contents.toList();
+            if (list.size() == 1) {
+                contents = list.first();
+            }
+        }
+        m_provider->addPostFile(contentKey, contents);
     }
 }
 

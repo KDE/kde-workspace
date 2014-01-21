@@ -129,11 +129,11 @@ void ShareProvider::addPostItem(const QString &key, const QString &value,
     m_buffer.append("\r\n");
 }
 
-void ShareProvider::addPostFile(const QString &contentKey, const QString &content)
+void ShareProvider::addPostFile(const QString &contentKey, const QVariant &content)
 {
     // add a file in a post form (gets it using KIO)
     m_contentKey = contentKey;
-    m_content = content;
+    m_content = content.toString();
 
     // we expect either text or an URL of a file. The file can be a text file
     // that is an exception that we handle in this case. So we have basically

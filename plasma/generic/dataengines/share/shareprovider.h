@@ -44,7 +44,7 @@ public:
     QUrl url() const;
     void setUrl(const QString &url);
 
-    void addPostFile(const QString &contentKey, const QString &content);
+    void addPostFile(const QString &contentKey, const QVariant &content);
 
 Q_SIGNALS:
     void readyToPublish();
