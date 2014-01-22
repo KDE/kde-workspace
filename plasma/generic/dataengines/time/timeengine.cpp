@@ -82,10 +82,8 @@ void TimeEngine::tzConfigChanged()
 QStringList TimeEngine::sources() const
 {
     QStringList sources;
-    QList<QByteArray> timezones = QTimeZone::availableTimeZoneIds();
-    for(int i=0; i<timezones.size(); ++i){
-	QString str(timezones[i].constData());
-	sources << str;
+    Q_FOREACH(const QByteArray &tz, QTimeZone::availableTimeZoneIds()) {
+	sources << QString(tz.constData());
     }
     sources << "Local";
     return sources;
