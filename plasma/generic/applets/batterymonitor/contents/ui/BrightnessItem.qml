@@ -38,7 +38,7 @@ FocusScope {
 
     QtExtras.QIconItem {
         id: brightnessIcon
-        width: theme.iconSizes.dialog
+        width: units.iconSizes.dialog
         height: width
         anchors {
             verticalCenter: parent.verticalCenter

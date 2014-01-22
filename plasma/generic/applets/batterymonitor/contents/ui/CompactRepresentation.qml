@@ -27,7 +27,7 @@ import "plasmapackage:/code/logic.js" as Logic
 ListView {
     id: view
 
-    property int minimumWidth: isConstrained() ? theme.iconSizes.dialog : 24 // NOTE: Keep in sync with systray
+    property int minimumWidth: isConstrained() ? units.iconSizes.dialog : 24 // NOTE: Keep in sync with systray
     property int minimumHeight: isConstrained() ? minimumHeight * view.count : 24
 
     property bool hasBattery: pmSource.data["Battery"]["Has Battery"]

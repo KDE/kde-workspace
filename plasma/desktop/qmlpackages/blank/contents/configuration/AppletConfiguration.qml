@@ -124,7 +124,7 @@ Rectangle {
                         Rectangle {
                             color: syspal.highlight
                             width: parent.width
-                            height:  theme.iconSizes.IconSizeHuge
+                            height:  units.iconSizes.IconSizeHuge
                             y: index * height
                             Behavior on y {
                                 NumberAnimation {

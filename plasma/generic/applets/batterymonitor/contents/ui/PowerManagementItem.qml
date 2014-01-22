@@ -36,7 +36,7 @@ FocusScope {
         anchors {
             verticalCenter: parent.verticalCenter
             left: parent.left
-            leftMargin: padding.margins.left + (theme.iconSizes.dialog - width)
+            leftMargin: padding.margins.left + (units.iconSizes.dialog - width)
             topMargin: padding.margins.top
             bottomMargin: padding.margins.bottom
         }

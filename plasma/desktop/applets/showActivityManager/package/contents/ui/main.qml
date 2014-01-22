@@ -27,7 +27,7 @@ MouseArea {
     width: 16
     property int minimumWidth: 16
     property int minimumHeight: 16
-    implicitWidth: theme.iconSizes["panel"]
+    implicitWidth: units.iconSizes["panel"]
     implicitHeight: implicitWidth
     onClicked: {
         var service = dataSource.serviceForSource(activeSource)
