@@ -92,9 +92,9 @@ function layoutHeight() {
 
 function preferredMinWidth() {
     if (tasks.vertical) {
-        return horizontalMargins() + theme.smallIconSize;
+        return horizontalMargins() + units.iconSizes.small;
     } else {
-        return horizontalMargins() + theme.smallIconSize + 3 + (theme.mSize(theme.defaultFont).width * 12);
+        return horizontalMargins() + units.iconSizes.small + 3 + (theme.mSize(theme.defaultFont).width * 12);
     }
 }
 
@@ -108,7 +108,7 @@ function preferredMinHeight() {
 }
 
 function preferredMaxHeight() {
-    return verticalMargins() + Math.min(theme.smallIconSize * 3, theme.mSize(theme.defaultFont).height * 3);
+    return verticalMargins() + Math.min(units.iconSizes.small * 3, theme.mSize(theme.defaultFont).height * 3);
 }
 
 function taskWidth() {
@@ -136,7 +136,7 @@ function taskHeight() {
 }
 
 function launcherWidth() {
-    return horizontalMargins() + theme.smallIconSize;
+    return horizontalMargins() + units.iconSizes.small;
 }
 
 function layout(container) {
