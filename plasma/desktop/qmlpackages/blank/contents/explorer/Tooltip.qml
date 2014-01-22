@@ -62,7 +62,7 @@ MouseArea {
         id: tooltipIconWidget
         anchors.left: parent.left
         anchors.top: parent.top
-        width: theme.hugeIconSize
+        width: units.iconSizes.huge
         height: width
         icon: main.icon
     }

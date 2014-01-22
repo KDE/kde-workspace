@@ -33,7 +33,7 @@ Item {
     property alias icon: iconItem.source
     property alias label: label.text
     property bool active: false
-    property int iconSize: theme.smallIconSize
+    property int iconSize: units.iconSizes.small
     property bool showDesktop: true
     property variant desktopItems: []
 

@@ -114,7 +114,7 @@ PlasmaCore.FrameSvgItem {
                 id: iconWidget
                 anchors.verticalCenter: parent.verticalCenter
                 x: y
-                width: theme.hugeIconSize
+                width: units.iconSizes.huge
                 height: width
                 icon: background.icon
             }
@@ -177,7 +177,7 @@ PlasmaCore.FrameSvgItem {
         QIconItem {
             icon: running ? "dialog-ok-apply" : undefined
             visible: running
-            width: theme.smallIconSize
+            width: units.iconSizes.small
             height: width
             anchors {
                 right: parent.right

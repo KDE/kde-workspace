@@ -75,7 +75,7 @@ PlasmaCore.FrameSvgItem {
                     id: iconWidget
                     anchors.verticalCenter: parent.verticalCenter
                     x: y
-                    width: theme.hugeIconSize
+                    width: units.iconSizes.huge
                     height: width
                     source: Icon
                 }
@@ -85,7 +85,7 @@ PlasmaCore.FrameSvgItem {
                     visible: Icon == ""
                 }
                 PlasmaCore.IconItem {
-                    width: theme.mediumIconSize
+                    width: units.iconSizes.medium
                     height: width
                     anchors.centerIn: iconWidget
                     source: "media-playback-start"
@@ -229,7 +229,7 @@ PlasmaCore.FrameSvgItem {
                 width: height
                 QPixmapItem {
                     anchors.centerIn: parent
-                    width: theme.largeIconSize
+                    width: units.iconSizes.large
                     height: width
                     smooth: true
                     visible: iconButton.iconSource == ""

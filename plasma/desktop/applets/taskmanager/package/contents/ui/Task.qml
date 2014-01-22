@@ -32,7 +32,7 @@ MouseEventListener {
     id: task
 
     width: groupDialog.mainItem.width
-    height: theme.smallIconSize + Layout.verticalMargins()
+    height: units.iconSizes.small + Layout.verticalMargins()
 
     visible: false
 
@@ -192,9 +192,9 @@ MouseEventListener {
             verticalCenter: parent.verticalCenter
         }
 
-        width: inPopup ? theme.smallIconSize : Math.min(height, parent.width - Layout.horizontalMargins())
-        height: Math.min(theme.hugeIconSize,
-                         parent.height - (parent.height - Layout.verticalMargins() < theme.smallIconSize ?
+        width: inPopup ? units.iconSizes.small : Math.min(height, parent.width - Layout.horizontalMargins())
+        height: Math.min(units.iconSizes.huge,
+                         parent.height - (parent.height - Layout.verticalMargins() < units.iconSizes.small ?
                                           Math.min(9, Layout.verticalMargins()) : Layout.verticalMargins()))
 
         PlasmaCore.IconItem {

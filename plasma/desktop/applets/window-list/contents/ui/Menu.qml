@@ -24,7 +24,7 @@ PlasmaExtras.ScrollArea {
 
     property alias model: menuListView.model
     property alias section: menuListView.section
-    property int iconSize: theme.smallIconSize 
+    property int iconSize: units.iconSizes.small 
     property bool showDesktop: true
     signal itemSelected(int id)
     signal executeJob(string jobName, int id)

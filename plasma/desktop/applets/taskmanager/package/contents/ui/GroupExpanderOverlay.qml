@@ -68,7 +68,7 @@ PlasmaCore.SvgItem {
         }
     }
 
-    implicitWidth: Math.min(theme.smallIconSize, iconBox.width)
+    implicitWidth: Math.min(units.iconSizes.small, iconBox.width)
     implicitHeight: implicitWidth
 
     svg: arrows

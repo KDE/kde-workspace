@@ -199,8 +199,8 @@ PlasmaCore.Dialog {
                 QIconItem {
                     id: appIconItem
                     icon: model.appIcon
-                    width: (model.appIcon.length > 0 || imageItem.visible) ? theme.largeIconSize : 0
-                    height: theme.largeIconSize
+                    width: (model.appIcon.length > 0 || imageItem.visible) ? units.iconSizes.large : 0
+                    height: units.iconSizes.large
                     visible: !imageItem.visible
                     anchors {
                         left: parent.left
@@ -288,7 +288,7 @@ PlasmaCore.Dialog {
             PlasmaComponents.ToolButton {
                 id: nextButton
                 iconSource: "go-next"
-                width: theme.smallMediumIconSize
+                width: units.iconSizes.smallMedium
                 height: mainItem.height/2 - 4
                 enabled: notificationsView.currentIndex < notificationsView.count-1
                 onPressedChanged: {
@@ -306,7 +306,7 @@ PlasmaCore.Dialog {
             PlasmaComponents.ToolButton {
                 id: backButton
                 iconSource: "go-previous"
-                width: theme.smallMediumIconSize
+                width: units.iconSizes.smallMedium
                 height: mainItem.height/2 - 4
                 enabled: notificationsView.currentIndex > 0
                 onPressedChanged: {
@@ -325,7 +325,7 @@ PlasmaCore.Dialog {
             id: closeButton
             opacity: 0
             iconSource: "window-close"
-            width: theme.smallMediumIconSize
+            width: units.iconSizes.smallMedium
             height: width
             anchors {
                 right: parent.right
@@ -349,7 +349,7 @@ PlasmaCore.Dialog {
             id: settingsButton
             opacity: 0
             iconSource: "configure"
-            width: theme.smallMediumIconSize
+            width: units.iconSizes.smallMedium
             height: width
             visible: notificationsModel.get((notificationsView.count-1)-notificationsView.currentIndex).configurable
             anchors {

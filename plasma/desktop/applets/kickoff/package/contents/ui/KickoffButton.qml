@@ -49,7 +49,7 @@ PlasmaComponents.TabButton {
             top: parent.top
             horizontalCenter: parent.horizontalCenter
         }
-        width: theme.largeIconSize
+        width: units.iconSizes.large
         height: width
 
         icon: iconSource

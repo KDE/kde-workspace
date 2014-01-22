@@ -106,11 +106,11 @@ PlasmaCore.Dialog {
                 task.textWidthChanged.connect(updateSize);
             }
 
-            maxWidth += Layout.horizontalMargins() + theme.smallIconSize + 6;
+            maxWidth += Layout.horizontalMargins() + units.iconSizes.small + 6;
 
             // TODO: Properly derive limits from work area size (screen size sans struts).
             mainItem.width = Math.min(maxWidth, (tasks.vertical ? 640 - tasks.width : Math.max(tasks.width, 640)) - 20);
-            mainItem.height = groupRepeater.count * (Layout.verticalMargins() + theme.smallIconSize);
+            mainItem.height = groupRepeater.count * (Layout.verticalMargins() + units.iconSizes.small);
         }
     }
 }

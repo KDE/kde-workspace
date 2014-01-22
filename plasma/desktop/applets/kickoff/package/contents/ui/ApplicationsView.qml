@@ -152,7 +152,7 @@ Item {
                             verticalCenter: parent.verticalCenter
                             rightMargin: y
                         }
-                        height: theme.smallIconSize
+                        height: units.iconSizes.small
                         width: height
 
                         svg: arrowSvg

@@ -26,7 +26,7 @@ PlasmaComponents.ListItem {
     id: notificationItem
     opacity: 1-Math.abs(x)/width
     width: popupFlickable.width
-    property int toolIconSize: theme.smallMediumIconSize
+    property int toolIconSize: units.iconSizes.smallMedium
     property int layoutSpacing: 4
 
     visible: appTabBar.currentTab == allAppsTab || appTabBar.currentTab.text == appName
@@ -141,8 +141,8 @@ PlasmaComponents.ListItem {
                 QIconItem {
                     id: appIconItem
                     icon: QIcon(appIcon)
-                    width: theme.largeIconSize
-                    height: theme.largeIconSize
+                    width: units.iconSizes.large
+                    height: units.iconSizes.large
                     visible: !imageItem.visible
                     anchors {
                         left: parent.left

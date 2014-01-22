@@ -66,7 +66,7 @@ MouseArea {
             top: parent.top
             margins: 8
         }
-        width: theme.hugeIconSize
+        width: units.iconSizes.huge
         height: width
         source: main.icon
     }

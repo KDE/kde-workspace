@@ -32,7 +32,7 @@ PlasmaExtras.ConditionalLoader {
             implicitHeight: windowListMenu.implicitHeight
             property alias data: tasksSource.data;
             property variant desktopList: []
-            property int iconSize: theme.smallMediumIconSize 
+            property int iconSize: units.iconSizes.smallMedium 
             property bool showDesktop: true
             property bool highlight: false
 

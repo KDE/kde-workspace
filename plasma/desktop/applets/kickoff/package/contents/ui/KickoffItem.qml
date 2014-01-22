@@ -105,7 +105,7 @@ Item {
                 left: parent.left
                 verticalCenter: parent.verticalCenter
             }
-            width: theme.mediumIconSize
+            width: units.iconSizes.medium
             height: width
 
             icon: decoration

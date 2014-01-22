@@ -29,7 +29,7 @@ Item {
     width: popupFlickable.width
     height: jobGrid.childrenRect.height + (newDetailsItem.state == "expanded" ? theme.largeSpacing : theme.largeSpacing / 2)
 
-    property int toolIconSize: theme.smallMediumIconSize
+    property int toolIconSize: units.iconSizes.smallMedium
     property int layoutSpacing: theme.largeSpacing / 4
     property int animationDuration: 100
     property bool flatButtons: true
@@ -670,7 +670,7 @@ Item {
     }
 
     Component.onCompleted: {
-        print("NNN ICON SIZE: " + toolIconSize + " " + theme.smallMediumIconSize);
+        print("NNN ICON SIZE: " + toolIconSize + " " + units.iconSizes.smallMedium);
         print("NNN JOBSTATE: " + notificationItem.jobstate);
     }
 }
