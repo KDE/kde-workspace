@@ -18,6 +18,6 @@
  */
 
 
-var toolIconSize = theme.mediumIconSize
+var toolIconSize =  units.iconSizes.smallMedium
 var layoutSpacing = 6
 var touchInput = true
