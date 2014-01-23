@@ -24,10 +24,10 @@ import org.kde.plasma.components 2.0 as Components
 Item {
     id: main
 
-    property int minimumWidth: sizehelper.paintedWidth + (theme.smallSpacing * 2)
+    property int minimumWidth: sizehelper.paintedWidth + (units.smallSpacing * 2)
     property int maximumWidth: minimumWidth
 
-    property int minimumHeight: sizehelper.paintedHeight + (theme.smallSpacing * 2)
+    property int minimumHeight: sizehelper.paintedHeight + (units.smallSpacing * 2)
     property int maximumHeight: minimumHeight
 
     property int formFactor: plasmoid.formFactor
@@ -63,7 +63,7 @@ Item {
         anchors {
             verticalCenter: parent.verticalCenter
             left: parent.left
-            leftMargin: theme.smallSpacing
+            leftMargin: units.smallSpacing
         }
 
         MouseArea {

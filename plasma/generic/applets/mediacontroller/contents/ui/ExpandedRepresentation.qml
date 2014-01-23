@@ -26,7 +26,7 @@ Item {
     id: expandedRepresentation
 
     anchors {
-        margins: theme.largeSpacing
+        margins: units.largeSpacing
         //fill: parent
     }
 
@@ -51,7 +51,7 @@ Item {
         opacity: 0.3
         anchors {
             top: song.bottom
-            topMargin: theme.smallSpacing
+            topMargin: units.smallSpacing
             left: parent.left
             right: parent.right
         }
@@ -86,8 +86,8 @@ Item {
 
             height: root.controlsSize
             //height: 20
-            width: (root.controlsSize * 3) + (theme.largeSpacing * 2)
-            spacing: theme.largeSpacing
+            width: (root.controlsSize * 3) + (units.largeSpacing * 2)
+            spacing: units.largeSpacing
 
             MediaControl {
                 source: "media-skip-backward"

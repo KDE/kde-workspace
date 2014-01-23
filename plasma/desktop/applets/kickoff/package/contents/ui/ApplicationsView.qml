@@ -112,8 +112,8 @@ Item {
         anchors {
             top: crumbContainer.bottom
             bottom: parent.bottom
-            rightMargin: -theme.largeSpacing
-            leftMargin: -theme.largeSpacing
+            rightMargin: -units.largeSpacing
+            leftMargin: -units.largeSpacing
         }
 
 

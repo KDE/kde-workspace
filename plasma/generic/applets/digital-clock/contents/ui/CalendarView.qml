@@ -22,11 +22,11 @@ import org.kde.plasma.extras 2.0 as PlasmaExtras
 Item {
     id: calendar
 
-    property int avWidth: (parent.width - (3 * theme.largeSpacing)) / 2
-    property int avHeight: parent.height - (2 * theme.largeSpacing)
+    property int avWidth: (parent.width - (3 * units.largeSpacing)) / 2
+    property int avHeight: parent.height - (2 * units.largeSpacing)
 
-    //anchors.margins: theme.largeSpacing
-    property int spacing: theme.largeSpacing
+    //anchors.margins: units.largeSpacing
+    property int spacing: units.largeSpacing
     property alias borderWidth: monthView.borderWidth
     property alias monthView: monthView
 
@@ -151,7 +151,7 @@ Item {
                 }
                 PlasmaComponents.Label {
                     id: minuteLabel
-                    x: theme.largeSpacing*2
+                    x: units.largeSpacing*2
 
                     height: paintedHeight
                     font.pixelSize: hourLabel.paintedHeight / 2
@@ -236,7 +236,7 @@ Item {
 
         /* Allows the user to keep the calendar open for reference */
 
-        width: theme.largeSpacing
+        width: units.largeSpacing
         height: width
         anchors {
             top: parent.top

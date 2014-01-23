@@ -159,8 +159,8 @@ PlasmaExtras.ConditionalLoader {
                     }
                     left: plasmoid.location == PlasmaCore.Types.LeftEdge ? parent.left : parent.left
                     right: plasmoid.location == PlasmaCore.Types.RightEdge ? tabBar.left : parent.right
-                    leftMargin: plasmoid.location == PlasmaCore.Types.LeftEdge ? tabBar.height : theme.largeSpacing
-                    rightMargin: plasmoid.location == PlasmaCore.Types.RightEdge ? tabBar.height : theme.largeSpacing
+                    leftMargin: plasmoid.location == PlasmaCore.Types.LeftEdge ? tabBar.height : units.largeSpacing
+                    rightMargin: plasmoid.location == PlasmaCore.Types.RightEdge ? tabBar.height : units.largeSpacing
                 }
 
                 //pages

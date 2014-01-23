@@ -27,10 +27,10 @@ Item {
     id: notificationItem
 
     width: popupFlickable.width
-    height: jobGrid.childrenRect.height + (newDetailsItem.state == "expanded" ? theme.largeSpacing : theme.largeSpacing / 2)
+    height: jobGrid.childrenRect.height + (newDetailsItem.state == "expanded" ? units.largeSpacing : units.largeSpacing / 2)
 
     property int toolIconSize: units.iconSizes.smallMedium
-    property int layoutSpacing: theme.largeSpacing / 4
+    property int layoutSpacing: units.largeSpacing / 4
     property int animationDuration: 100
     property bool flatButtons: true
 

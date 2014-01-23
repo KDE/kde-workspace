@@ -26,7 +26,7 @@ import org.kde.private.systemtray 2.0 as SystemTray
 
 Item {
 
-    anchors.margins: theme.largeSpacing
+    anchors.margins: units.largeSpacing
 
     function checkTask(task) {
         if (task.taskItemExpanded == null) return;
@@ -92,7 +92,7 @@ Item {
 
         anchors {
             top: snHeading.bottom
-            topMargin: theme.largeSpacing / 2
+            topMargin: units.largeSpacing / 2
             bottom: parent.bottom
             left: parent.left
         }
@@ -112,7 +112,7 @@ Item {
 
         anchors {
             right: expandedItemContainer.left;
-            rightMargin: theme.largeSpacing
+            rightMargin: units.largeSpacing
             bottom: parent.bottom;
         }
         elementId: "vertical-line";
@@ -132,7 +132,7 @@ Item {
 
         anchors {
             top: parent.top
-            leftMargin: -theme.largeSpacing
+            leftMargin: -units.largeSpacing
             left: expandedItemContainer.left
             right: parent.right
         }
@@ -159,9 +159,9 @@ Item {
         animate: false
         anchors {
             left: parent.left
-            leftMargin: (root.baseSize + theme.largeSpacing * 3)
+            leftMargin: (root.baseSize + units.largeSpacing * 3)
             top: snHeading.bottom
-            topMargin: theme.largeSpacing / 2
+            topMargin: units.largeSpacing / 2
             bottom: parent.bottom
             right: parent.right
         }
@@ -190,13 +190,13 @@ Item {
 
         /* Allows the user to keep the calendar open for reference */
 
-        width: theme.largeSpacing
+        width: units.largeSpacing
         height: width
         anchors {
             top: parent.top
             right: parent.right
-            rightMargin: -theme.largeSpacing
-            topMargin: -theme.largeSpacing
+            rightMargin: -units.largeSpacing
+            topMargin: -units.largeSpacing
         }
 
         property bool checked: false

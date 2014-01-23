@@ -59,14 +59,14 @@ QtExtraComponents.MouseEventListener {
         var dim = root.vertical ? compactRepresentation.width : compactRepresentation.height
         var rows = Math.floor(dim / root.itemSize);
         var cols = Math.ceil(systrayhost.shownTasks.length / rows);
-        var res = cols * (root.itemSize + theme.smallSpacing*4) + theme.smallSpacing + arrow.width;
+        var res = cols * (root.itemSize + units.smallSpacing*4) + units.smallSpacing + arrow.width;
         return res;
     }
 
     function computeDimensionHeight() {
         var dim = root.vertical ? compactRepresentation.width : compactRepresentation.height
         var rows = Math.floor(dim / root.itemSize);
-        var rr = rows * (root.itemSize + theme.smallSpacing);
+        var rr = rows * (root.itemSize + units.smallSpacing);
         return rr;
     }
 
@@ -113,13 +113,13 @@ QtExtraComponents.MouseEventListener {
         anchors {
             top: parent.top
             bottom: parent.bottom
-            topMargin: !root.vertical ? ((parent.height - root.itemSize) / 2) - theme.smallSpacing : theme.smallSpacing
+            topMargin: !root.vertical ? ((parent.height - root.itemSize) / 2) - units.smallSpacing : units.smallSpacing
             left: parent.left
-            leftMargin: root.vertical ? 0 : theme.smallSpacing
+            leftMargin: root.vertical ? 0 : units.smallSpacing
             right: tooltip.left
         }
-        cellWidth: !root.vertical ? root.itemSize + theme.smallSpacing * 4 : root.itemSize
-        cellHeight: root.vertical ? root.itemSize + theme.smallSpacing * 4 : root.itemSize
+        cellWidth: !root.vertical ? root.itemSize + units.smallSpacing * 4 : root.itemSize
+        cellHeight: root.vertical ? root.itemSize + units.smallSpacing * 4 : root.itemSize
         interactive: false
 
         model: systrayhost.shownTasks
@@ -131,10 +131,10 @@ QtExtraComponents.MouseEventListener {
     PlasmaCore.ToolTipArea {
         id: tooltip
 
-        width: root.vertical ? root.itemSize + theme.smallSpacing*4 : childrenRect.width
-        height: !root.vertical ? root.itemSize + theme.smallSpacing*4 : childrenRect.height
+        width: root.vertical ? root.itemSize + units.smallSpacing*4 : childrenRect.width
+        height: !root.vertical ? root.itemSize + units.smallSpacing*4 : childrenRect.height
         anchors {
-            leftMargin: theme.smallSpacing
+            leftMargin: units.smallSpacing
             right: parent.right
         }
 
@@ -165,8 +165,8 @@ QtExtraComponents.MouseEventListener {
 
             }
             MouseArea {
-                width: parent.width + theme.smallSpacing
-                height: root.itemSize + theme.largeSpacing
+                width: parent.width + units.smallSpacing
+                height: root.itemSize + units.largeSpacing
                 anchors.centerIn: parent
                 onClicked: plasmoid.expanded = !plasmoid.expanded
             }
@@ -183,7 +183,7 @@ QtExtraComponents.MouseEventListener {
         repeat: false
         onTriggered: {
             var dim = root.vertical ? compactRepresentation.width : compactRepresentation.height;
-            root.preferredItemSize = dim - theme.smallSpacing;
+            root.preferredItemSize = dim - units.smallSpacing;
         }
     }
 }
