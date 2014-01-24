@@ -18,6 +18,7 @@
 import QtQuick 2.0
 import org.kde.plasma.core 2.0 as PlasmaCore
 import org.kde.plasma.components 2.0 as PlasmaComponents
+import org.kde.plasma.extras 2.0 as PlasmaExtra
 
 PlasmaCore.Dialog {
     id: root
@@ -91,7 +92,7 @@ PlasmaCore.Dialog {
             value: visible ? root.osdValue : 0
 
         }
-        PlasmaComponents.Label {
+        PlasmaExtra.Heading {
             anchors {
                 bottom: parent.bottom
                 left: parent.left
