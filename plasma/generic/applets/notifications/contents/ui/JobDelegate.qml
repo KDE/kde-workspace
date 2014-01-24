@@ -64,6 +64,10 @@ Item {
         anchors.fill: parent
     }
 
+    PlasmaCore.Formats {
+	id: formats
+    }
+
     Item {
         id: jobGrid
         anchors {
@@ -228,59 +232,12 @@ Item {
                 }
                 spacing: notificationItem.layoutSpacing
 
-                function formatByteSize(size) {
-                    // Per IEC 60027-2
-
-                    // Binary prefixes
-                    //Tebi-byte             TiB             2^40    1,099,511,627,776 bytes
-                    //Gibi-byte             GiB             2^30    1,073,741,824 bytes
-                    //Mebi-byte             MiB             2^20    1,048,576 bytes
-                    //Kibi-byte             KiB             2^10    1,024 bytes
-
-                    var s;
-                    // Gibi-byte
-                    if ( size >= 1073741824.0 )
-                    {
-                        size = size /1073741824.0;
-                        if ( size > 1024 ) { // Tebi-byte
-                            // That's a huge amount, so display 3 digits
-                            s = i18n("%1 TiB", Math.round(size / 1024.0 *1000) / 1000);
-                        } else {
-                            // Still quite large, display 3 digits
-                            s = i18n("%1 GiB", Math.round(size *100) / 100);
-                        }
-                    }
-                    // Mebi-byte
-                    else if ( size >= 1048576.0 )
-                    {
-                        size = size /1048576.0;
-                        s = i18n("%1 MiB", Math.round(size *10) / 10);
-                    }
-                    // Kibi-byte
-                    else if ( size >= 1024.0 )
-                    {
-                        size = size /1024.0;
-                        s = i18n("%1 KiB", Math.round(size *10) / 10);
-                    }
-                    // Just byte
-                    else if ( size > 0 )
-                    {
-                        s = i18n("%1 B", Math.round(size *10) / 10);
-                    }
-                    // Nothing
-                    else
-                    {
-                        s = i18n("0 B");
-                    }
-                    return s;
-                }
-
                 function localizeProcessedAmount(id) {
                     //if bytes localise the unit
                     if (jobsSource.data[modelData]["processedUnit"+id] == "bytes") {
                         return i18nc("How much many bytes (or whether unit in the locale has been copied over total", "%1 of %2",
-                                formatByteSize(jobsSource.data[modelData]["processedAmount"+id]),
-                                formatByteSize(jobsSource.data[modelData]["totalAmount"+id]))
+                                formats.formatByteSize(jobsSource.data[modelData]["processedAmount"+id]),
+                                formats.formatByteSize(jobsSource.data[modelData]["totalAmount"+id]))
                     //else print something only if is interesting data (ie more than one file/directory etc to copy
                     } else if (jobsSource.data[modelData]["totalAmount"+id] > 1) {
                         return i18n( "%1 of %2 %3",
@@ -290,18 +247,6 @@ Item {
                     } else {
                         return ""
                     }
-                }
-
-                function prettyFormatDuration(msec) {
-                    var minutes = Math.floor(msec / 1000 / 60);
-                    var seconds = Math.round((msec % (1000 * 60)) / 1000);
-                    var o;
-                    if (minutes < 3) {
-                        o = i18n("%1 min %2 sec", minutes, seconds);
-                    } else {
-                        o = i18n("%1 min", minutes);
-                    }
-                    return o;
                 }
 
                 PlasmaComponents.Label {
@@ -330,7 +275,7 @@ Item {
                     anchors.left: parent.left
                     font: theme.smallestFont
                     height: paintedHeight
-                    text: notificationItem.eta > 0 ? i18nc("Speed and estimated time to completition", "%1 (%2 remaining)", speed, detailsColumn.prettyFormatDuration(notificationItem.eta)) : speed
+                    text: notificationItem.eta > 0 ? i18nc("Speed and estimated time to completition", "%1 (%2 remaining)", speed, formats.formatSpelloutDuration(notificationItem.eta)) : speed
                 }
 // FIXME: find a way to plot the signal
 //                     PlasmaWidgets.SignalPlotter {
@@ -533,7 +478,7 @@ Item {
             }
             PlasmaComponents.Label {
                 id: speedLabel
-                text: eta > 0 ? i18nc("Speed and estimated time to completition", "%1 (%2 remaining)", speed, locale.prettyFormatDuration(eta)) : speed
+                text: eta > 0 ? i18nc("Speed and estimated time to completition", "%1 (%2 remaining)", speed, formats.formatSpelloutDuration(eta)) : speed
             }
         }
 

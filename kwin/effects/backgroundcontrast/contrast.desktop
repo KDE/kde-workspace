@@ -1,0 +1,35 @@
+[Desktop Entry]
+Name=Background contrast
+Name[de]=Hintergrundkontrast
+Name[nl]=Contrast in achtergrond
+Name[pt]=Contraste do fundo
+Name[pt_BR]=Contraste do plano de fundo
+Name[sk]=Kontrast pozadia
+Name[sv]=Bakgrundskontrast
+Name[uk]=Контрастність тла
+Name[x-test]=xxBackground contrastxx
+Icon=preferences-system-windows-effect-contrast
+Comment=Improve contrast and readability behind semi-transparent windows
+Comment[de]=Erhöht den Kontrast und verbessert die Lesbarkeit hinter halbtransparenten Fenster.
+Comment[nl]=Contrast en leesbaarheid verbeteren achter half-transparante vensters
+Comment[pt]=Melhorar o contraste e a legibilidade atrás das janelas semi-transparentes
+Comment[pt_BR]=Melhora o contraste e legibilidade por trás das janelas semitransparentes
+Comment[sk]=Zlepšiť kontrast a čitateľnosť za polopriehľadnými oknami
+Comment[sv]=Förbättra kontrast och läsbarhet bakom halvgenomskinliga fönster
+Comment[uk]=Покращення контрастності та придатності до читання тексту під напівпрозорими вікнами
+Comment[x-test]=xxImprove contrast and readability behind semi-transparent windowsxx
+
+Type=Service
+X-KDE-ServiceTypes=KWin/Effect
+X-KDE-PluginInfo-Author=Marco Martin
+X-KDE-PluginInfo-Email=mart@kde.org
+X-KDE-PluginInfo-Name=kwin4_effect_contrast
+X-KDE-PluginInfo-Version=0.1.0
+X-KDE-PluginInfo-Category=Appearance
+X-KDE-PluginInfo-Depends=
+X-KDE-PluginInfo-License=GPL
+X-KDE-PluginInfo-EnabledByDefault=true
+X-KDE-Library=kwin4_effect_builtins
+X-KDE-Ordering=76
+X-KWin-Requires-OpenGL=true
+X-KWin-Requires-Shaders=true

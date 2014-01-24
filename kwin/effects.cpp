@@ -47,6 +47,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "virtualdesktops.h"
 #include "workspace.h"
 #include "kwinglutils.h"
+#include "effects/effect_builtins.h"
 
 #include <QDebug>
 #include <QFile>
@@ -653,6 +654,9 @@ void EffectsHandlerImpl::slotDesktopChanged(int old, Client *c)
 
 void EffectsHandlerImpl::slotDesktopPresenceChanged(Client *c, int old)
 {
+    if (!c->effectWindow()) {
+        return;
+    }
     emit desktopPresenceChanged(c->effectWindow(), old, c->desktop());
 }
 
@@ -1388,6 +1392,12 @@ bool EffectsHandlerImpl::loadEffect(const QString& name, bool checkDefault)
         return loadScriptedEffect(name, service.data());
     }
 
+    if (Effect *e = loadBuiltInEffect(internalname.remove(QStringLiteral("kwin4_effect_")).toUtf8(), checkDefault)) {
+        effect_order.insert(service->property(QStringLiteral("X-KDE-Ordering")).toInt(), EffectPair(name, e));
+        effectsChanged();
+        return true;
+    }
+
     KLibrary* library = findEffectLibrary(service.data());
     if (!library) {
         return false;
@@ -1469,6 +1479,23 @@ bool EffectsHandlerImpl::loadEffect(const QString& name, bool checkDefault)
     effect_libraries[ name ] = library;
 
     return true;
+}
+
+Effect *EffectsHandlerImpl::loadBuiltInEffect(const QByteArray &name, bool checkDefault)
+{
+    if (!BuiltInEffects::available(name)) {
+        return nullptr;
+    }
+    if (!BuiltInEffects::supported(name)) {
+        qWarning() << "Effect " << name << " is not supported" ;
+        return nullptr;
+    }
+    if (checkDefault) {
+        if (!BuiltInEffects::enabledByDefault(name)) {
+            return nullptr;
+        }
+    }
+    return BuiltInEffects::create(name);
 }
 
 bool EffectsHandlerImpl::loadScriptedEffect(const QString& name, KService *service)

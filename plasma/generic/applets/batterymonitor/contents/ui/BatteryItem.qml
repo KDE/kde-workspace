@@ -56,6 +56,10 @@ Item {
         }
     }
 
+    PlasmaCore.Formats {
+	id: formats
+    }
+
     PlasmaCore.FrameSvgItem {
         id: padding
         imagePath: "widgets/viewitem"
@@ -244,7 +248,7 @@ Item {
                 DetailsLabel {
                     id: remainingTimeLabel
                     // FIXME Uses overall remaining time, not bound to individual battery
-                    text: locale.prettyFormatDuration(dialogItem.remainingTime)
+                    text: formats.formatSpelloutDuration (dialogItem.remainingTime)
                     visible: model["Is Power Supply"] && model["State"] != "NoCharge" && text != ""
                     //visible: showRemainingTime && model["Is Power Supply"] && model["State"] != "NoCharge" && text != "" && dialogItem.remainingTime > 0
                 }

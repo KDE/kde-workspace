@@ -24,9 +24,8 @@
 #include <QDBusConnection>
 #include <QStringList>
 #include <QTime>
+#include <QTimeZone>
 
-#include <KLocale>
-#include <KSystemTimeZones>
 #include <KDateTime>
 #include <Solid/PowerManagement>
 
@@ -82,9 +81,12 @@ void TimeEngine::tzConfigChanged()
 
 QStringList TimeEngine::sources() const
 {
-    QStringList timezones(KSystemTimeZones::zones().keys());
-    timezones << "Local";
-    return timezones;
+    QStringList sources;
+    Q_FOREACH(const QByteArray &tz, QTimeZone::availableTimeZoneIds()) {
+	sources << QString(tz.constData());
+    }
+    sources << "Local";
+    return sources;
 }
 
 bool TimeEngine::sourceRequestEvent(const QString &name)
@@ -99,7 +101,6 @@ bool TimeEngine::updateSourceEvent(const QString &tz)
 
     if (s) {
         s->updateTime();
-        //scheduleSourcesUpdated();
         return true;
     }
 
