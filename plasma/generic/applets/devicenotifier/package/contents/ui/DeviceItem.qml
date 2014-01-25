@@ -84,7 +84,7 @@ Item {
         // or specifically, when some UI element changes.
         PlasmaCore.IconItem {
             id: deviceIcon
-            width: units.iconSizes.dialog
+            width: units.iconSizes.medium
             height: width
             z: 900
             source: deviceItem.icon
@@ -96,7 +96,7 @@ Item {
 
             PlasmaCore.IconItem {
                 id: emblem
-                width: units.iconSizes.dialog * 0.5
+                width: units.iconSizes.medium * 0.5
                 height: width
                 source: deviceItem.state == 0 ? emblemIcon : undefined;
                 anchors {
@@ -188,7 +188,7 @@ Item {
 
         MouseEventListener {
             id: leftActionArea
-            width: units.iconSizes.dialog*0.8
+            width: units.iconSizes.medium*0.8
             height: width
             hoverEnabled: true
             anchors {
@@ -266,7 +266,7 @@ Item {
             interactive: false
             model: hpSource.data[udi]["actions"]
             property int actionVerticalMargins: 5
-            property int actionIconHeight: units.iconSizes.dialog*0.8
+            property int actionIconHeight: units.iconSizes.medium*0.8
             height: expanded ? ((actionIconHeight+(2*actionVerticalMargins))*model.length)+anchors.topMargin : 0
             opacity: expanded ? 1 : 0
             delegate: actionItem

@@ -101,7 +101,7 @@ Item {
 
         QtExtras.QIconItem {
             id: batteryIcon
-            width: units.iconSizes.dialog
+            width: units.iconSizes.medium
             height: width
             anchors {
                 verticalCenter: parent.verticalCenter
