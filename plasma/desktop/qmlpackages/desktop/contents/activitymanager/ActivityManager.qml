@@ -40,6 +40,7 @@ Item {
         )
     property int minimumHeight: topBar.height + list.delegateHeight + (activityManager.orientation == Qt.Horizontal ? scrollBar.height : 0) + 4
 
+    width: minimumWidth
 
     PlasmaCore.DataSource {
         id: activitySource
