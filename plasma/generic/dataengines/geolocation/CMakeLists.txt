@@ -5,8 +5,6 @@ project(geolocation)
 set(plasma_geolocation_interface_SRCS geolocationprovider.cpp)
 add_library(plasma-geolocation-interface SHARED ${plasma_geolocation_interface_SRCS})
 target_link_libraries(plasma-geolocation-interface KF5::KIOCore KF5::Plasma)
-target_link_libraries(plasma-geolocation-interface
-                      LINK_INTERFACE_LIBRARIES KF5::KIOCore KF5::Plasma)
 set_target_properties(plasma-geolocation-interface PROPERTIES
    VERSION ${GENERIC_LIB_VERSION}
    SOVERSION ${GENERIC_LIB_SOVERSION}
