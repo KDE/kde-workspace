@@ -101,7 +101,7 @@ void ShareProvider::addPostItem(const QString &key, const QString &value,
 
     // add a pair <item,value> in a post form
     QByteArray str;
-    QString length = QString("%1").arg(value.length());
+    QString length = QString::number(value.length());
 
     str += "--";
     str += m_boundary;
@@ -216,7 +216,7 @@ void ShareProvider::finishedContentData(KIO::Job *job, const QByteArray &data)
 
     // Add the special http post stuff with the content of the file
     QByteArray str;
-    const QString fileSize = QString("%1").arg(data.size());
+    const QString fileSize = QString::number(data.size());
     str += "--";
     str += m_boundary;
     str += "\r\n";
