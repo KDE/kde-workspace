@@ -26,7 +26,7 @@ SequentialAnimation {
 
     property Item targetItem
     //property int duration: Animations.normalDuration
-    property int duration: 2000
+    property int duration: 1500
 
     onRunningChanged: {
         // Make sure we reset the scale (which is manipulated by the Animation
@@ -47,7 +47,7 @@ SequentialAnimation {
             property: "scale"
             from: 1
             to: 1.2
-            duration: pulseAnimation.duration * 0.1
+            duration: pulseAnimation.duration * 0.15
             easing.type: Easing.InQuad;
         }
 
@@ -56,12 +56,12 @@ SequentialAnimation {
             property: "scale"
             from: 1.2
             to: 1
-            duration: pulseAnimation.duration * 0.1
+            duration: pulseAnimation.duration * 0.15
             easing.type: Easing.OutQuad;
         }
 
         PauseAnimation {
-            duration: pulseAnimation.duration * 0.8
+            duration: pulseAnimation.duration * 0.7
         }
     }
 
