@@ -45,7 +45,7 @@ PlasmaCore.Dialog {
     }
 
     mainItem: Item {
-        height: units.gridUnit * 22
+        height: units.gridUnit * 15
         width: height
 
         //  /--------------------\
@@ -70,7 +70,7 @@ PlasmaCore.Dialog {
                 right: parent.right
             }
 
-            height: parent.height - progressBar.height - (units.smallSpacing * 3) //it's an svg
+            height: parent.height - progressBar.height - ((units.largeSpacing/2) * 3) //it's an svg
             width: height
 
             source: root.icon
@@ -83,7 +83,7 @@ PlasmaCore.Dialog {
                 bottom: parent.bottom
                 left: parent.left
                 right: parent.right
-                margins: units.smallSpacing
+                margins: units.largeSpacing / 2
             }
 
             visible: root.showingProgress
@@ -97,7 +97,7 @@ PlasmaCore.Dialog {
                 bottom: parent.bottom
                 left: parent.left
                 right: parent.right
-                margins: units.smallSpacing
+                margins: units.largeSpacing / 2
             }
 
             visible: !root.showingProgress
