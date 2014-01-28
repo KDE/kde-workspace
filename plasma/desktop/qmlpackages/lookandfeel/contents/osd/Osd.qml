@@ -70,7 +70,7 @@ PlasmaCore.Dialog {
                 right: parent.right
             }
 
-            height: parent.height - progressBar.height - (theme.smallSpacing * 3) //it's an svg
+            height: parent.height - progressBar.height - (units.smallSpacing * 3) //it's an svg
             width: height
 
             source: root.icon
@@ -83,7 +83,7 @@ PlasmaCore.Dialog {
                 bottom: parent.bottom
                 left: parent.left
                 right: parent.right
-                margins: theme.smallSpacing
+                margins: units.smallSpacing
             }
 
             visible: root.showingProgress
@@ -97,7 +97,7 @@ PlasmaCore.Dialog {
                 bottom: parent.bottom
                 left: parent.left
                 right: parent.right
-                margins: theme.smallSpacing
+                margins: units.smallSpacing
             }
 
             visible: !root.showingProgress
