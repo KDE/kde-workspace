@@ -26,7 +26,7 @@
 
 #include <QDebug>
 #include <KDiskFreeSpaceInfo>
-#include <KLocale>
+#include <KFormat>
 
 #include <Plasma/DataContainer>
 
@@ -175,7 +175,7 @@ bool SolidDeviceEngine::populateDeviceData(const QString &name)
             }
             if (!device.is<Solid::OpticalDisc>()) {
                 setData(name, I18N_NOOP("Free Space"), freeDiskVar );
-                setData(name, I18N_NOOP("Free Space Text"), KLocale::global()->formatByteSize(freeDisk));
+                setData(name, I18N_NOOP("Free Space Text"), KFormat().formatByteSize(freeDisk));
             }
         }
 
@@ -679,7 +679,7 @@ bool SolidDeviceEngine::updateFreeSpace(const QString &udi)
         freeSpaceVar.setValue( freeSpace );
     }
     setData(udi, I18N_NOOP("Free Space"), freeSpaceVar );
-    setData(udi, I18N_NOOP("Free Space Text"), KLocale::global()->formatByteSize(freeSpace));
+    setData(udi, I18N_NOOP("Free Space Text"), KFormat().formatByteSize(freeSpace));
     return true;
 }
 

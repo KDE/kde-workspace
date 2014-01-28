@@ -17,7 +17,7 @@ target_link_libraries(plasma_engine_soliddevice
   KF5::KIOCore
   KF5::Plasma
   KF5::Solid
-  KF5::KDE4Support
+  KF5::CoreAddons
 )
 
 install(TARGETS plasma_engine_soliddevice DESTINATION ${PLUGIN_INSTALL_DIR}/plasma/dataengine)
