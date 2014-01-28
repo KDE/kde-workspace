@@ -79,6 +79,9 @@ protected:
     void finishHeader();
 
 private:
+    void publishUrl(const QUrl& url);
+    void uploadData(const QByteArray &data);
+
     QString m_content;
     QString m_contentKey;
     QString m_mimetype;

@@ -22,10 +22,13 @@
 
 #include <krandom.h>
 #include <QDebug>
+#include <QTemporaryFile>
 #include <KDE/KIO/MimetypeJob>
 #include <KDE/KIO/FileJob>
 #include <kjsembed/kjsembed.h>
 #include <kjsembed/variant_binding.h>
+#include <QImage>
+#include <QPixmap>
 
 #include "shareprovider.h"
 #include "share_package.h"
@@ -133,19 +136,40 @@ void ShareProvider::addPostFile(const QString &contentKey, const QVariant &conte
 {
     // add a file in a post form (gets it using KIO)
     m_contentKey = contentKey;
-    m_content = content.toString();
 
-    // we expect either text or an URL of a file. The file can be a text file
-    // that is an exception that we handle in this case. So we have basically
-    // three use cases:
-    // 1 - just text
-    // 2 - a file that is a text
-    // 3 - other kind of files (images, pdf, etc..)
-    //
-    // The applet using this engine must ensure that the provider selected
-    // supports the file format that is added here as a parameter, otherwise
-    // it will return as an error later in the process.
-    QUrl url(m_content);
+    if(content.type() == QVariant::String) {
+        m_content = content.toString();
+        addPostItem(m_contentKey, m_content, "text/plain");
+        addQueryItem(m_contentKey, m_content);
+        emit readyToPublish();
+    } else if(content.type() == QVariant::Url) {
+        publishUrl(content.toUrl());
+    } else if(content.type() == QVariant::Image) {
+        QTemporaryFile* file = new QTemporaryFile("shareimage-XXXXXX.png", this);
+        bool b = file->open();
+        Q_ASSERT(b);
+        file->close();
+
+        QImage image = content.value<QImage>();
+        b = image.save(file->fileName());
+        Q_ASSERT(b);
+        publishUrl(QUrl::fromLocalFile(file->fileName()));
+    } else if(content.type() == QVariant::Pixmap) {
+        QTemporaryFile* file = new QTemporaryFile("sharepixmap-XXXXXX.png", this);
+        bool b = file->open();
+        Q_ASSERT(b);
+        file->close();
+
+        QPixmap image = content.value<QPixmap>();
+        b = image.save(file->fileName());
+        Q_ASSERT(b);
+        publishUrl(QUrl::fromLocalFile(file->fileName()));
+    }
+}
+
+void ShareProvider::publishUrl(const QUrl& url)
+{
+    m_content = url.toString();
 
     KIO::MimetypeJob *mjob = KIO::mimetype(url, KIO::HideProgressInfo);
     connect(mjob, SIGNAL(finished(KJob*)), this, SLOT(mimetypeJobFinished(KJob*)));
@@ -159,11 +183,7 @@ void ShareProvider::mimetypeJobFinished(KJob *job)
     }
 
     if (mjob->error()) {
-        // it's not a file - usually this happens when we are
-        // just sharing plain text, so add the content and publish it
-        addPostItem(m_contentKey, m_content, "text/plain");
-        addQueryItem(m_contentKey, m_content);
-        emit readyToPublish();
+        qWarning() << "error when figuring out the file type";
         return;
     }
 
@@ -177,7 +197,7 @@ void ShareProvider::mimetypeJobFinished(KJob *job)
     }
 
     // If it's not text then we should handle it later
-    if (m_mimetype.indexOf("text/") != 0)
+    if (!m_mimetype.startsWith("text/"))
         m_isBlob = true;
 
     // try to open the file
@@ -199,13 +219,17 @@ void ShareProvider::finishedContentData(KIO::Job *job, const QByteArray &data)
     // Close the job as we don't need it anymore.
     // NOTE: this is essential to ensure the job gets de-scheduled and deleted!
     job->disconnect(this);
-    static_cast<KIO::FileJob *>(job)->close();
+    qobject_cast<KIO::FileJob *>(job)->close();
 
     if (data.length() == 0) {
         error(i18n("It was not possible to read the selected file"));
         return;
     }
+    uploadData(data);
+}
 
+void ShareProvider::uploadData(const QByteArray& data)
+{
     if (!m_isBlob) {
         // it's just text and we can return here using data()
         addPostItem(m_contentKey, QString::fromLocal8Bit(data), "text/plain");
