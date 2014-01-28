@@ -1,5 +1,6 @@
 /*
  *  Copyright 2012 Marco Martin <mart@kde.org>
+ *  Copyright 2014 David Edmundson <davidedmundson@kde.org>
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -35,28 +36,20 @@ Rectangle {
     function toggleWidgetExplorer(containment) {
         console.log("Widget Explorer toggled");
 
-        sidePanelStack.pop(blankPage);
-
         if (sidePanelStack.state == "widgetExplorer") {
             sidePanelStack.state = "closed";
         } else {
-            var page = sidePanelStack.push(Qt.resolvedUrl("../explorer/WidgetExplorer.qml"));
-            page.closed.connect(function(){sidePanelStack.state = "closed";});
-            page.containment = containment;
+            sidePanelStack.setSource(Qt.resolvedUrl("../explorer/WidgetExplorer.qml"), {"containment": containment})
             sidePanelStack.state = "widgetExplorer";
         }
     }
 
     function toggleActivityManager() {
         console.log("Activity manger toggled");
-
-        sidePanelStack.pop(blankPage);
-
         if (sidePanelStack.state == "activityManager") {
             sidePanelStack.state = "closed";
         } else {
-            var page = sidePanelStack.push(Qt.resolvedUrl("../activitymanager/ActivityManager.qml"));
-            page.closed.connect(function(){sidePanelStack.state = "closed";});
+            sidePanelStack.setSource(Qt.resolvedUrl("../activitymanager/ActivityManager.qml"))
             sidePanelStack.state = "activityManager";
         }
     }
@@ -64,49 +57,26 @@ Rectangle {
     PlasmaCore.Dialog {
         id: sidePanel
         location: PlasmaCore.Types.LeftEdge
-        onVisibleChanged: {
-            if (!visible) {
-                sidePanelStack.pop(blankPage);
-            }
-        }
         type: PlasmaCore.Dialog.Dock
         flags: Qt.Window|Qt.WindowStaysOnTopHint|Qt.X11BypassWindowManagerHint
 
-        mainItem: PlasmaComponents.PageStack {
+        mainItem: Loader {
             id: sidePanelStack
-            state: "closed"
-            width: 250
-            height: 500
-            initialPage: Item {
-                id: blankPage
-            }
-
-            states: [
-                State {
-                    name: "closed"
-                    PropertyChanges {
-                        target: sidePanel
-                        visible: false
-                        height: containment ? containment.availableScreenRegion(containment.screen)[0].height : 1080;
-                    }
-                },
-                State {
-                    name: "widgetExplorer"
-                    PropertyChanges {
-                        target: sidePanel
-                        visible: true
-                        height: containment.availableScreenRegion(containment.screen)[0].height;
-                    }
-                },
-                State {
-                    name: "activityManager"
-                    PropertyChanges {
-                        target: sidePanel
-                        visible: true
-                        height: containment.availableScreenRegion(containment.screen)[0].height;
-                    }
+            asynchronous: true
+            height: containment ? containment.availableScreenRegion(containment.screen)[0].height : 1080
+            width: item ? item.width: 0
+            onLoaded: {
+                if (sidePanelStack.item) {
+                    item.closed.connect(function(){sidePanelStack.state = "closed";});
                 }
-            ]
+                sidePanel.visible = true;
+            }
+            onStateChanged: {
+                if (sidePanelStack.state == "closed") {
+                    sidePanelStack.source = ""; //unload all elements
+                    sidePanel.visible = false;
+                }
+            }
         }
     }
 
