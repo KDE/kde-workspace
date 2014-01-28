@@ -46,8 +46,8 @@ PlasmaCore.ToolTipArea {
 
 
     mainText: __has_task ? tooltipTitle : ""
-    //subText:  __has_task ? tooltipText : ""
-    //image:    __has_task ? tooltipIcon : ""
+    subText:  __has_task ? tooltipText : ""
+    icon:    __has_task ? tooltipIcon : ""
 
     // Public functions ================================================================================================
     function click(buttons) {
