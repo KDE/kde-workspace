@@ -48,9 +48,6 @@ function addApplet(applet, x, y) {
     var container = appletContainerComponent.createObject(root)
     print("Applet added in test panel: " + applet + applet.title + " at: " + x + ", " + y);
 
-    if (applet.fillWidth) {
-        lastSpacer.parent = root;
-    }
     applet.parent = container;
     container.applet = applet;
     applet.anchors.fill = container;
@@ -76,6 +73,40 @@ function addApplet(applet, x, y) {
         //else put it in last position
         } else {
             container.parent = currentLayout;
+        }
+    }
+
+    if (applet.Layout.fillWidth) {
+        lastSpacer.parent = root;
+    }
+}
+
+
+function checkLastSpacer() {
+    lastSpacer.parent = root
+
+    var expands = false;
+
+    if (plasmoid.formFactor == PlasmaCore.Types.Vertical) {
+        for (var container in column.children) {
+            var item = column.children[container];
+            if (item.Layout && item.Layout.fillHeight) {
+                expands = true;
+            }
+        }
+        if (expands) {
+            lastSpacer.parent = column
+        }
+
+    } else {
+        for (var container in row.children) {
+            var item = row.children[container];
+            if (item.Layout && item.Layout.fillWidth) {
+                expands = true;
+            }
+        }
+        if (!expands) {
+            lastSpacer.parent = row
         }
     }
 }
@@ -121,7 +152,7 @@ function addApplet(applet, x, y) {
         onAppletRemoved: {
             var flexibleFound = false;
             for (var i = 0; i < currentLayout.children.length; ++i) {
-                if (currentLayout.children[i].applet.fillWidth) {
+                if (currentLayout.children[i].applet.Layout.fillWidth) {
                     flexibleFound = true;
                     break
                 }
@@ -136,20 +167,31 @@ function addApplet(applet, x, y) {
         onFormFactorChanged: {
             lastSpacer.parent = root
 
+            var expands = false;
+
             if (plasmoid.formFactor == PlasmaCore.Types.Vertical) {
                 for (var container in row.children) {
                     var item = row.children[0];
+                    if (item.Layout && item.Layout.fillHeight) {
+                        expands = true;
+                    }
                     item.parent = column
                 }
-                lastSpacer.parent = column
+                if (expands) {
+                    lastSpacer.parent = column
+                }
 
             } else {
-                lastSpacer.parent = row
                 for (var container in column.children) {
                     var item = column.children[0];
+                    if (item.Layout && item.Layout.fillWidth) {
+                        expands = true;
+                    }
                     item.parent = row
                 }
-                lastSpacer.parent = row
+                if (!expands) {
+                    lastSpacer.parent = row
+                }
             }
         }
 
@@ -177,7 +219,17 @@ function addApplet(applet, x, y) {
             visible: false
 
             Layout.fillWidth: applet && applet.Layout.fillWidth
+            Layout.onFillWidthChanged: {
+                if (plasmoid.formFactor != PlasmaCore.Types.Vertical) {
+                    checkLastSpacer();
+                }
+            }
             Layout.fillHeight: applet && applet.Layout.fillHeight
+            Layout.onFillHeightChanged: {
+                if (plasmoid.formFactor == PlasmaCore.Types.Vertical) {
+                    checkLastSpacer();
+                }
+            }
 
             Layout.minimumWidth: (plasmoid.formFactor != PlasmaCore.Types.Vertical ? (applet && applet.Layout.minimumWidth > 0 ? applet.Layout.minimumWidth : root.height) : root.width)
             Layout.minimumHeight: (plasmoid.formFactor == PlasmaCore.Types.Vertical ? (applet && applet.Layout.minimumHeight > 0 ? applet.Layout.minimumHeight : root.width) : root.height)
