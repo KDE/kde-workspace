@@ -19,7 +19,6 @@
  */
 
 import QtQuick 2.0
-import QtQuick.Layouts 1.1
 import org.kde.plasma.core 2.0 as PlasmaCore
 import org.kde.plasma.components 2.0 as PlasmaComponents
 import org.kde.plasma.extras 2.0 as PlasmaExtras
@@ -45,12 +44,12 @@ Item {
     property bool handleMerged: (height < minimumHandleHeight)
     property bool animationsEnabled: false
 
-    Layout.minimumWidth: Math.max(LayoutManager.cellSize.width,
+    property int minimumWidth: Math.max(LayoutManager.cellSize.width,
                            appletContainer.minimumWidth +
                            appletItem.contents.anchors.leftMargin +
                            appletItem.contents.anchors.rightMargin)
 
-    Layout.minimumHeight: Math.max(LayoutManager.cellSize.height,
+    property int minimumHeight: Math.max(LayoutManager.cellSize.height,
                             appletContainer.minimumHeight +
                             appletItem.contents.anchors.topMargin +
                             appletItem.contents.anchors.bottomMargin)
@@ -251,6 +250,9 @@ Item {
             z: mouseListener.z+1
 
             property QtObject applet
+
+            property int minimumWidth: applet && applet.Layout ? applet.Layout.minimumWidth : 0
+            property int minimumHeight: applet && applet.Layout ? applet.Layout.minimumHeight : 0
 
             function appletDestroyed() {
                 print("Applet DESTROYED.");

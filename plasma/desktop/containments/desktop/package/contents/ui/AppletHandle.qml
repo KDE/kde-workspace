@@ -33,7 +33,7 @@ Item {
     //z: dragMouseArea.z + 1
 
     property int buttonMargin: 6
-    Layout.minimumHeight:  6 * (root.iconSize + buttonMargin)
+    property int minimumHeight:  6 * (root.iconSize + buttonMargin)
     property Item buttonsParent: appletHandle
 
     signal removeApplet

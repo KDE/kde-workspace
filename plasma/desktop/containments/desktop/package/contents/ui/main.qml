@@ -20,7 +20,6 @@
  */
 
 import QtQuick 2.0
-import org.kde.plasma.shell 2.0
 import org.kde.plasma.core 2.0 as PlasmaCore
 import org.kde.plasma.components 2.0 as PlasmaComponents
 import org.kde.draganddrop 2.0 as DragDrop
@@ -219,7 +218,8 @@ DragDrop.DropArea {
             height: 100
 
             property bool animationsEnabled
-
+            property int minimumWidth
+            property int minimumHeight
             property Item syncItem
 
             function syncWithItem(item) {
