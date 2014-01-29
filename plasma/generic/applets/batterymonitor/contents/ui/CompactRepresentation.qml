@@ -100,7 +100,7 @@ ListView {
         PlasmaCore.ToolTipArea {
             id: tooltip
             anchors.fill: mouseArea
-            image: batteries.tooltipImage
+            icon: batteries.tooltipImage
             subText: batteries.tooltipText
         }
     }
