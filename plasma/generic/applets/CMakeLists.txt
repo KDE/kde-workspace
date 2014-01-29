@@ -21,5 +21,5 @@ if(NOT WIN32)
 #    #notifications
 #    #should compile also on windows? (even if doesn't really make sense)
     plasma_install_package(notifications org.kde.plasma.notifications)
-    add_subdirectory(systemtray)
+    #add_subdirectory(systemtray)
 endif()
