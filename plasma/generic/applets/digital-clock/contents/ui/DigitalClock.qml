@@ -26,10 +26,10 @@ Item {
     id: main
 
     Layout.minimumWidth: sizehelper.paintedWidth + (units.smallSpacing * 2)
-    Layout.maximumWidth: minimumWidth
+    Layout.maximumWidth: Layout.minimumWidth
 
     Layout.minimumHeight: sizehelper.paintedHeight + (units.smallSpacing * 2)
-    Layout.maximumHeight: minimumHeight
+    Layout.maximumHeight: Layout.minimumHeight
 
     property int formFactor: plasmoid.formFactor
     property int timePixelSize: theme.defaultFont.pixelSize

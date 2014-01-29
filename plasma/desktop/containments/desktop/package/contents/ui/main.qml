@@ -219,8 +219,7 @@ DragDrop.DropArea {
             height: 100
 
             property bool animationsEnabled
-            Layout.minimumWidth
-            Layout.minimumHeight
+
             property Item syncItem
 
             function syncWithItem(item) {
