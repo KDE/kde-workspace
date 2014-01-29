@@ -86,8 +86,9 @@ Item {
             PlasmaCore.ToolTipArea {
                 id: tooltip
                 anchors.fill: parent
-                mainText: "Current Time"
-                subText: Qt.formatDate(dataSource.data["Local"]["Date"],"dddd, MMM d yyyy") + "\n" + Qt.formatTime(dataSource.data["Local"]["Time"], Qt.DefaultLocaleShortDate)
+                //subText: time.text
+                mainText: Qt.formatDate(dataSource.data["Local"]["Date"],"dddd")
+                subText: Qt.formatDate(dataSource.data["Local"]["Date"],"MMM d yyyy")
                 icon: "preferences-system-time"
             }
         }
