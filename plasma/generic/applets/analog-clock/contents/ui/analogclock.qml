@@ -20,14 +20,15 @@
  */
 
 import QtQuick 2.0
+import QtQuick.Layouts 1.1
 
 import org.kde.plasma.core 2.0 as PlasmaCore
 import "plasmapackage:/code/logic.js" as Logic
 
 Item {
     id: analogclock
-    property int minimumWidth: 20
-    property int minimumHeight: 20
+    Layout.minimumWidth: 20
+    Layout.minimumHeight: 20
 
     property int hours
     property int minutes

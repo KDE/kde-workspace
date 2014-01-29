@@ -16,6 +16,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import QtQuick 2.0
+import QtQuick.Layouts 1.1
+import org.kde.plasma.shell 2.0
 import org.kde.plasma.core 2.0 as PlasmaCore
 import org.kde.plasma.components 2.0 as PlasmaComponents
 import org.kde.plasma.extras 2.0 as PlasmaExtras
@@ -28,8 +30,8 @@ Item {
     // Some people want to show a really big digital clock.
     // Moreover, semantically, the calendar is not a more complete
     // representation, but really a popup dialog.
-    property int minimumWidth: 4000
-    property int minimumHeight: 2000
+    Layout.minimumWidth: 4000
+    Layout.minimumHeight: 2000
 
     // The "sensible" values
     property int _minimumWidth: _minimumHeight * 2.2
@@ -41,7 +43,7 @@ Item {
 
     property alias calendarLoader: calendarLoader
 
-    property Component compactRepresentation: DigitalClock { }
+    Plasmoid.compactRepresentation: DigitalClock { }
 
     PlasmaCore.DataSource {
         id: dataSource

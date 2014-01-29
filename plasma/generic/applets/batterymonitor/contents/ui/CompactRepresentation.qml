@@ -20,6 +20,7 @@
 */
 
 import QtQuick 2.0
+import QtQuick.Layouts 1.1
 import org.kde.plasma.core 2.0 as PlasmaCore
 import org.kde.plasma.components 2.0 as Components
 import "plasmapackage:/code/logic.js" as Logic
@@ -27,8 +28,8 @@ import "plasmapackage:/code/logic.js" as Logic
 ListView {
     id: view
 
-    property int minimumWidth: isConstrained() ? units.iconSizes.medium : 24 // NOTE: Keep in sync with systray
-    property int minimumHeight: isConstrained() ? minimumHeight * view.count : 24
+    Layout.minimumWidth: isConstrained() ? units.iconSizes.medium : 24 // NOTE: Keep in sync with systray
+    Layout.minimumHeight: isConstrained() ? minimumHeight * view.count : 24
 
     property bool hasBattery: pmSource.data["Battery"]["Has Battery"]
 

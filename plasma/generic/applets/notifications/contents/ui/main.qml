@@ -19,6 +19,8 @@
  ***************************************************************************/
 
 import QtQuick 2.0
+import QtQuick.Layouts 1.1
+import org.kde.plasma.shell 2.0
 import org.kde.plasma.core 2.0 as PlasmaCore
 import org.kde.plasma.components 2.0 as PlasmaComponents
 import org.kde.qtextracomponents 2.0
@@ -34,12 +36,12 @@ MouseEventListener {
     width: 32
     height: 32
 
-    //property int minimumWidth: mainScrollArea.implicitWidth
-    //property int minimumHeight: mainScrollArea.implicitHeight
-    property int minimumWidth: 256 // FIXME: use above
-    property int minimumHeight: 256
-    property int maximumWidth: -1
-    property int maximumHeight: mainScrollArea.implicitHeight
+    //Layout.minimumWidth: mainScrollArea.implicitWidth
+    //Layout.minimumHeight: mainScrollArea.implicitHeight
+    Layout.minimumWidth: 256 // FIXME: use above
+    Layout.minimumHeight: 256
+    Layout.maximumWidth: -1
+    Layout.maximumHeight: mainScrollArea.implicitHeight
 
     property int toolIconSize: UiProperties.toolIconSize
     property int layoutSpacing: UiProperties.layoutSpacing
@@ -109,7 +111,7 @@ MouseEventListener {
         imagePath: "widgets/configuration-icons"
     }
 
-    property Component compactRepresentation: Component {
+    Plasmoid.compactRepresentation: Component {
         NotificationIcon {
             id: notificationIcon
             Component.onCompleted: notificationsApplet.notificationIcon = notificationIcon

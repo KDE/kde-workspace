@@ -16,6 +16,8 @@
  */
 
 import QtQuick 2.0
+import QtQuick.Layouts 1.1
+import org.kde.plasma.shell 2.0
 import org.kde.plasma.core 2.0 as PlasmaCore
 import org.kde.plasma.components 2.0 as PlasmaComponents
 import org.kde.qtextracomponents 2.0 as QtExtraComponents
@@ -28,14 +30,14 @@ Item {
 
     property bool vertical: (plasmoid.formFactor == PlasmaCore.Types.Vertical)
 
-    property int minimumWidth
-    property int minimumHeight
+    Layout.minimumWidth
+    Layout.minimumHeight
 
-    property int maximumWidth: !root.vertical ? pager.preferredSize.width : undefined
-    property int maximumHeight: root.vertical ? pager.preferredSize.height : undefined
+    Layout.maximumWidth: !root.vertical ? pager.preferredSize.width : undefined
+    Layout.maximumHeight: root.vertical ? pager.preferredSize.height : undefined
 
-    property bool fillHeight: root.vertical && root.visible
-    property bool fillWidth: !root.vertical && root.visible
+    Layout.fillHeight: root.vertical && root.visible
+    Layout.fillWidth: !root.vertical && root.visible
 
     property bool dragging: false
     property int dragId

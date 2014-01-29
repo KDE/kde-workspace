@@ -18,6 +18,8 @@
  ***************************************************************************/
 
 import QtQuick 2.0
+import QtQuick.Layouts 1.1
+import org.kde.plasma.shell 2.0
 import org.kde.plasma.core 2.0 as PlasmaCore
 import org.kde.plasma.components 2.0 as PlasmaComponents
 import org.kde.plasma.extras 2.0 as PlasmaExtras
@@ -30,8 +32,8 @@ Item {
     property string playerIcon: ""
 
 
-    property int minimumWidth: minimumHeight * 1.333
-    property int minimumHeight: theme.mSize(theme.defaultFont).height * 8
+    Layout.minimumWidth: minimumHeight * 1.333
+    Layout.minimumHeight: theme.mSize(theme.defaultFont).height * 8
     property int implicitWidth: minimumWidth * 1.5
     property int implicitHeight: minimumHeight * 1.5
 
@@ -41,7 +43,7 @@ Item {
 
     property alias expandedLoader: expandedLoader
 
-    property Component compactRepresentation: CompactRepresentation {}
+    Plasmoid.compactRepresentation: CompactRepresentation {}
 
     state: "off"
 

@@ -16,17 +16,18 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import QtQuick 2.0
+import org.kde.plasma.shell 2.0
 import org.kde.plasma.core 2.0 as PlasmaCore
 import org.kde.plasma.components 2.0 as PlasmaComponents
 import org.kde.plasma.calendar 2.0
 
 Item {
     id: main
-    //     property int minimumWidth: units.gridUnit * 90
-    //     property int minimumHeight: units.gridUnit * 30
+    //     Layout.minimumWidth: units.gridUnit * 90
+    //     Layout.minimumHeight: units.gridUnit * 30
 
-//     property int minimumWidth: 500
-//     property int minimumHeight: 500
+//     Layout.minimumWidth: 500
+//     Layout.minimumHeight: 500
     property int formFactor: plasmoid.formFactor
 
 //     PlasmaCore.DataSource {
@@ -48,7 +49,7 @@ Item {
         id: calendar
     }
 
-//     property Component compactRepresentation: Item {
+//     Plasmoid.compactRepresentation: Item {
 //         width: main.minimumWidth
 //         height: main.minimumHeight
 //         Image {

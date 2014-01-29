@@ -18,6 +18,8 @@
  ***************************************************************************/
 
 import QtQuick 2.0
+import QtQuick.Layouts 1.1
+import org.kde.plasma.shell 2.0
 import org.kde.plasma.core 2.0 as PlasmaCore
 // import org.kde.plasma.components 2.0 as PlasmaComponents
 // import org.kde.plasma.extras 2.0 as PlasmaExtras
@@ -31,8 +33,8 @@ Item {
 
     property bool vertical: (plasmoid.formFactor == PlasmaCore.Types.Vertical)
 
-    property int minimumWidth: minimumHeight * 1.333
-    property int minimumHeight: theme.mSize(theme.defaultFont).height * 14
+    Layout.minimumWidth: minimumHeight * 1.333
+    Layout.minimumHeight: theme.mSize(theme.defaultFont).height * 14
 
     property int implicitWidth: minimumWidth * 1.5
     property int implicitHeight: minimumHeight * 1.5
@@ -58,7 +60,7 @@ Item {
         }
     }
 
-    property Component compactRepresentation: CompactRepresentation {
+    Plasmoid.compactRepresentation: CompactRepresentation {
         systrayhost: host
     }
 

@@ -20,14 +20,15 @@
  */
 
 import QtQuick 2.0
+import QtQuick.Layouts 1.1
 import org.kde.plasma.core 2.0 as PlasmaCore
 import "plasmapackage:/code/logic.js" as Logic
 
 Item {
     id: batterymonitor
-    property int minimumWidth: units.iconSizes.medium * 9
-    property int minimumHeight: dialogItem.implicitHeight
-    property int maximumHeight: dialogItem.implicitHeight
+    Layout.minimumWidth: units.iconSizes.medium * 9
+    Layout.minimumHeight: dialogItem.implicitHeight
+    Layout.maximumHeight: dialogItem.implicitHeight
 
     property bool show_remaining_time: false
 
@@ -66,7 +67,7 @@ Item {
         }
     }
 
-    property Component compactRepresentation: CompactRepresentation { }
+    Plasmoid.compactRepresentation: CompactRepresentation { }
 
     property QtObject pmSource: PlasmaCore.DataSource {
         id: pmSource

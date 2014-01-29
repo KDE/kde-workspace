@@ -17,6 +17,7 @@
  */
 
 import QtQuick 2.0
+import QtQuick.Layouts 1.1
 import QtQuick.Window 2.0
 
 import org.kde.plasma.core 2.0 as PlasmaCore
@@ -26,17 +27,17 @@ Item {
     id: root
     objectName: "CompactApplet.qml"
 
-    property int minimumWidth: compactRepresentation && compactRepresentation.minimumWidth !== undefined ? compactRepresentation.minimumWidth : -1
-    property int minimumHeight: compactRepresentation && compactRepresentation.minimumHeight !== undefined ? compactRepresentation.minimumHeight : -1
+    Layout.minimumWidth: compactRepresentation && compactRepresentation.minimumWidth !== undefined ? compactRepresentation.minimumWidth : -1
+    Layout.minimumHeight: compactRepresentation && compactRepresentation.minimumHeight !== undefined ? compactRepresentation.minimumHeight : -1
 
-    property int maximumWidth: compactRepresentation && compactRepresentation.maximumWidth !== undefined ? compactRepresentation.maximumWidth : -1
-    property int maximumHeight: compactRepresentation && compactRepresentation.maximumHeight !== undefined ? compactRepresentation.maximumHeight : -1
+    Layout.maximumWidth: compactRepresentation && compactRepresentation.maximumWidth !== undefined ? compactRepresentation.maximumWidth : -1
+    Layout.maximumHeight: compactRepresentation && compactRepresentation.maximumHeight !== undefined ? compactRepresentation.maximumHeight : -1
 
     implicitWidth: compactRepresentation && compactRepresentation.implicitWidth !== undefined ? compactRepresentation.implicitWidth : -1
     implicitHeight: compactRepresentation && compactRepresentation.implicitHeight !== undefined ? compactRepresentation.implicitHeight : -1
 
-    property bool fillWidth: compactRepresentation && compactRepresentation.fillWidth !== undefined ? compactRepresentation.fillWidth : false
-    property bool fillHeight: compactRepresentation && compactRepresentation.fillHeight !== undefined ? compactRepresentation.fillHeight : false
+    Layout.fillWidth: compactRepresentation && compactRepresentation.fillWidth !== undefined ? compactRepresentation.fillWidth : false
+    Layout.fillHeight: compactRepresentation && compactRepresentation.fillHeight !== undefined ? compactRepresentation.fillHeight : false
 
     property Item applet
     property Item compactRepresentation

@@ -19,6 +19,7 @@
  ***************************************************************************/
 
 import QtQuick 2.0
+import QtQuick.Layouts 1.1
 import org.kde.plasma.core 2.0 as PlasmaCore
 import org.kde.plasma.components 2.0 as PlasmaComponents
 import org.kde.qtextracomponents 2.0
@@ -98,10 +99,10 @@ PlasmaCore.Dialog {
         id: mainItem
         width: maximumWidth
         height: maximumHeight
-        property int maximumWidth: theme.mSize(theme.defaultFont).width * 35
-        property int maximumHeight: theme.mSize(theme.defaultFont).width * 10
-        property int minimumWidth: maximumWidth
-        property int minimumHeight: maximumHeight
+        Layout.maximumWidth: theme.mSize(theme.defaultFont).width * 35
+        Layout.maximumHeight: theme.mSize(theme.defaultFont).width * 10
+        Layout.minimumWidth: maximumWidth
+        Layout.minimumHeight: maximumHeight
 
         property int startX: 0
         property int startY: 0

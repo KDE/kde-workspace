@@ -18,6 +18,8 @@
  ***************************************************************************/
 
 import QtQuick 2.0
+import QtQuick.Layouts 1.1
+import org.kde.plasma.shell 2.0
 
 import org.kde.plasma.core 2.0 as PlasmaCore
 
@@ -33,10 +35,10 @@ Item {
 
     property bool vertical: (plasmoid.formFactor == PlasmaCore.Types.Vertical)
 
-    property bool fillWidth: true
-    property bool fillHeight:true
-    property int minimumWidth: tasks.vertical ? 0 : Layout.preferredMinWidth()
-    property int minimumHeight: !tasks.vertical ? 0 : Layout.preferredMinHeight()
+    Layout.fillWidth: true
+    Layout.fillHeight:true
+    Layout.minimumWidth: tasks.vertical ? 0 : Layout.preferredMinWidth()
+    Layout.minimumHeight: !tasks.vertical ? 0 : Layout.preferredMinHeight()
     property int preferredWidth: taskList.width
     property int preferredHeight: taskList.height
 
