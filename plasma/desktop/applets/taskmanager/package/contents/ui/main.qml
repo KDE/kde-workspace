@@ -36,8 +36,7 @@ Item {
     property bool vertical: (plasmoid.formFactor == PlasmaCore.Types.Vertical)
 
     Plasmoid.preferredRepresentation: Plasmoid.fullRepresentation
-    Plasmoid.switchWidth: 1
-    Plasmoid.switchHeight: 1
+
     Layout.fillWidth: true
     Layout.fillHeight:true
     Layout.minimumWidth: tasks.vertical ? 0 : LayoutManager.preferredMinWidth()
