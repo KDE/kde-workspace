@@ -21,9 +21,6 @@ import QtQuick 2.0
 import org.kde.plasma.core 2.0 as PlasmaCore
 import org.kde.plasma.components 2.0 as PlasmaComponents
 
-//import "NotificationDelegate"
-import "plasmapackage:/ui/NotificationDelegate"
-
 Column {
     id: notificationsRoot
     property alias count: notificationsRepeater.count
