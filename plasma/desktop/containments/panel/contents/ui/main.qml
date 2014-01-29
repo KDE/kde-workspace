@@ -32,9 +32,9 @@ DragDrop.DropArea {
     height: 48
 
 //BEGIN properties
-    property int minimumWidth: currentLayout.Layout.minimumWidth
-    property int maximumWidth: currentLayout.Layout.maximumWidth
-    implicitWidth: currentLayout.implicitWidth
+    Layout.minimumWidth: currentLayout.Layout.minimumWidth
+    Layout.maximumWidth: currentLayout.Layout.maximumWidth
+    Layout.preferredWidth: currentLayout.Layout.preferredWidth
 
     property Item toolBox
 
@@ -176,17 +176,17 @@ function addApplet(applet, x, y) {
             id: container
             visible: false
 
-            Layout.fillWidth: applet && applet.fillWidth
-            Layout.fillHeight: applet && applet.fillHeight
+            Layout.fillWidth: applet && applet.Layout.fillWidth
+            Layout.fillHeight: applet && applet.Layout.fillHeight
 
-            Layout.minimumWidth: (plasmoid.formFactor != PlasmaCore.Types.Vertical ? (applet && applet.minimumWidth > 0 ? applet.minimumWidth : root.height) : root.width)
-            Layout.minimumHeight: (plasmoid.formFactor == PlasmaCore.Types.Vertical ? (applet && applet.minimumHeight > 0 ? applet.minimumHeight : root.width) : root.height)
+            Layout.minimumWidth: (plasmoid.formFactor != PlasmaCore.Types.Vertical ? (applet && applet.Layout.minimumWidth > 0 ? applet.Layout.minimumWidth : root.height) : root.width)
+            Layout.minimumHeight: (plasmoid.formFactor == PlasmaCore.Types.Vertical ? (applet && applet.Layout.minimumHeight > 0 ? applet.Layout.minimumHeight : root.width) : root.height)
 
-            Layout.preferredWidth: (plasmoid.formFactor != PlasmaCore.Types.Vertical ? (applet && applet.implicitWidth > 0 ? applet.implicitWidth : root.height) : root.width)
-            Layout.preferredHeight: (plasmoid.formFactor == PlasmaCore.Types.Vertical ? (applet && applet.implicitHeight > 0 ? applet.implicitHeight : root.width) : root.height)
+            Layout.preferredWidth: (plasmoid.formFactor != PlasmaCore.Types.Vertical ? (applet && applet.Layout.preferredWidth > 0 ? applet.Layout.preferredWidth : root.height) : root.width)
+            Layout.preferredHeight: (plasmoid.formFactor == PlasmaCore.Types.Vertical ? (applet && applet.Layout.preferredHeight > 0 ? applet.Layout.preferredHeight : root.width) : root.height)
 
-            Layout.maximumWidth: (plasmoid.formFactor != PlasmaCore.Types.Vertical ? (applet && applet.maximumWidth > 0 ? applet.maximumWidth : (Layout.fillWidth ? -1 : root.height)) : (Layout.fillHeight ? -1 : root.width))
-            Layout.maximumHeight: (plasmoid.formFactor == PlasmaCore.Types.Vertical ? (applet && applet.maximumHeight > 0 ? applet.maximumHeight : (Layout.fillHeight ? -1 : root.width)) : (Layout.fillWidth ? -1 : root.height))
+            Layout.maximumWidth: (plasmoid.formFactor != PlasmaCore.Types.Vertical ? (applet && applet.Layout.maximumWidth > 0 ? applet.Layout.maximumWidth : (Layout.fillWidth ? -1 : root.height)) : (Layout.fillHeight ? -1 : root.width))
+            Layout.maximumHeight: (plasmoid.formFactor == PlasmaCore.Types.Vertical ? (applet && applet.Layout.maximumHeight > 0 ? applet.Layout.maximumHeight : (Layout.fillHeight ? -1 : root.width)) : (Layout.fillWidth ? -1 : root.height))
 
             property int oldX: x
             property int oldY: y

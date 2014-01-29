@@ -44,12 +44,12 @@ Item {
     property bool handleMerged: (height < minimumHandleHeight)
     property bool animationsEnabled: false
 
-    property int minimumWidth: Math.max(LayoutManager.cellSize.width,
+    Layout.minimumWidth: Math.max(LayoutManager.cellSize.width,
                            appletContainer.minimumWidth +
                            appletItem.contents.anchors.leftMargin +
                            appletItem.contents.anchors.rightMargin)
 
-    property int minimumHeight: Math.max(LayoutManager.cellSize.height,
+    Layout.minimumHeight: Math.max(LayoutManager.cellSize.height,
                             appletContainer.minimumHeight +
                             appletItem.contents.anchors.topMargin +
                             appletItem.contents.anchors.bottomMargin)
