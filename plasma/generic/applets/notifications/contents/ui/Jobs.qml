@@ -24,27 +24,31 @@ import org.kde.plasma.extras 2.0 as PlasmaExtras
 
 Column {
     id: jobsRoot
-    property alias count: jobsRepeater.count
-    //height: 192 // FIXME: should be dynamic, once childrenRect works again
     anchors {
         left: parent.left
         right: parent.right
     }
 
+    property alias count: jobsRepeater.count
+    //height: 192 // FIXME: should be dynamic, once childrenRect works again
+
     PlasmaCore.DataSource {
         id: jobsSource
+
+        property variant runningJobs
+
         engine: "applicationjobs"
         interval: 0
 
         onSourceAdded: {
             connectSource(source);
         }
-        property variant runningJobs
 
         onSourceRemoved: {
             if (!notifications) {
                 return
             }
+
             var message = runningJobs[source]["label1"] ? runningJobs[source]["label1"] : runningJobs[source]["label0"]
             notifications.addNotification(
                 source,
@@ -56,17 +60,16 @@ Column {
                 0,
                 0,
                 [{"id": message, "text": i18n("Open")}])
+
             delete runningJobs[source]
         }
-        Component.onCompleted: {
-            jobsSource.runningJobs = new Object
-            connectedSources = sources
-        }
+
         onNewData: {
             var jobs = runningJobs
             jobs[sourceName] = data
             runningJobs = jobs
         }
+
         onDataChanged: {
             var total = 0
             for (var i = 0; i < sources.length; ++i) {
@@ -78,27 +81,37 @@ Column {
             total /= sources.length
             notificationsApplet.globalProgress = total/100
         }
+
+        Component.onCompleted: {
+            jobsSource.runningJobs = new Object
+            connectedSources = sources
+        }
     }
 
     Title {
         visible: jobsRepeater.count > 0 && notifications && notifications.count > 0
         text: i18n("Transfers")
     }
+
     Item {
         visible: jobsRepeater.count > 3
+
         PlasmaComponents.ProgressBar {
             anchors {
                 verticalCenter: parent.verticalCenter
                 left: parent.left
                 right: parent.right
             }
+
             minimumValue: 0
             maximumValue: 100
             value: notificationsApplet.globalProgress * 100
         }
     }
+
     Repeater {
         id: jobsRepeater
+
         model: jobsSource.sources
         delegate: JobDelegate {
             toolIconSize: notificationsApplet.toolIconSize

@@ -23,11 +23,13 @@ import org.kde.plasma.components 2.0 as PlasmaComponents
 
 Column {
     id: notificationsRoot
-    property alias count: notificationsRepeater.count
     anchors {
         left: parent.left
         right: parent.right
     }
+
+    property QtObject lastNotificationPopup
+    property alias count: notificationsRepeater.count
 
     function addNotification(source, appIcon, image, appName, summary, body, expireTimeout, urgency, appRealName, configurable, actions) {
         // Do not show duplicated notifications
@@ -60,9 +62,11 @@ Column {
                 "configurable": configurable,
                 "appRealName": appRealName,
                 "actions" : actions}
+
         notificationsModel.inserting = true;
         notificationsModel.insert(0, notification);
         notificationsModel.inserting = false;
+
         if (plasmoid.popupShowing) {
             return
         }
@@ -87,19 +91,18 @@ Column {
     }
 
     function configureNotification(appRealName) {
-      var service = notificationsSource.serviceForSource("notification")
-      var op = service.operationDescription("configureNotification")
-      op["appRealName"] = appRealName;
-      service.startOperationCall(op)
+        var service = notificationsSource.serviceForSource("notification")
+        var op = service.operationDescription("configureNotification")
+        op["appRealName"] = appRealName;
+        service.startOperationCall(op)
     }
 
     function closeNotification(source) {
-      var service = notificationsSource.serviceForSource(source)
-      var op = service.operationDescription("userClosed")
-      service.startOperationCall(op)
+        var service = notificationsSource.serviceForSource(source)
+        var op = service.operationDescription("userClosed")
+        service.startOperationCall(op)
     }
 
-    property QtObject lastNotificationPopup
     Component {
         id: lastNotificationPopupComponent
         LastNotificationPopup {
@@ -110,10 +113,11 @@ Column {
         id: notificationsModel
         property bool inserting: false;
     }
+
     ListModel {
         id: allApplicationsModel
-        function addApplication(icon, name)
-        {
+
+        function addApplication(icon, name) {
             for (var i = 0; i < count; ++i) {
                 var item = get(i)
                 if (item.name == name) {
@@ -123,8 +127,8 @@ Column {
             }
             append({"icon": icon, "name": name, "count": 1})
         }
-        function removeApplication(name)
-        {
+
+        function removeApplication(name) {
             for (var i = 0; i < count; ++i) {
                 var item = get(i)
                 if (item.name == name) {
@@ -142,15 +146,18 @@ Column {
 
     PlasmaCore.DataSource {
         id: idleTimeSource
+
+        property bool idle: data["UserActivity"]["IdleTime"] > 300000
+
         engine: "powermanagement"
         interval: 30000
         connectedSources: ["UserActivity"]
         //Idle whith more than 5 minutes of user inactivity
-        property bool idle: data["UserActivity"]["IdleTime"] > 300000
     }
 
     PlasmaCore.DataSource {
         id: notificationsSource
+
         engine: "notifications"
         interval: 0
 
@@ -189,30 +196,38 @@ Column {
     Title {
         visible: notificationsRepeater.count > 1 || (jobs && jobs.count > 0 && notificationsRepeater.count > 0)
         text: i18n("Notifications")
+
         PlasmaComponents.ToolButton {
-            iconSource: "window-close"
-            width: notificationsApplet.toolIconSize
-            height: width
             anchors {
                 right: parent.right
                 verticalCenter: parent.verticalCenter
             }
+            width: notificationsApplet.toolIconSize
+            height: width
+
+            iconSource: "window-close"
+
             onClicked: notificationsModel.clear()
         }
     }
+
     PlasmaComponents.ListItem {
         visible: allApplicationsModel.count > 1
+
         PlasmaComponents.TabBar {
             id: appTabBar
             anchors.horizontalCenter: parent.horizontalCenter
             width: Math.min(implicitWidth, parent.width-8)
+
             PlasmaComponents.TabButton {
                 id: allAppsTab
                 text: i18n("All")
                 iconSource: "dialog-information"
             }
+
             Repeater {
                 model: allApplicationsModel
+
                 PlasmaComponents.TabButton {
                     text: name
                     iconSource: icon
@@ -220,6 +235,7 @@ Column {
             }
         }
     }
+
     Repeater {
         id: notificationsRepeater
         model: notificationsModel

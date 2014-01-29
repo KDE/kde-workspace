@@ -24,21 +24,22 @@ import org.kde.plasma.extras 2.0 as PlasmaExtras
 
 Item {
     id: root
-    property alias text: titleLabel.text
-    height: childrenRect.height
-
-    //sectionDelegate: true
 
     width: parent.width
+    height: childrenRect.height
+
+    property alias text: titleLabel.text
 
     PlasmaExtras.Heading {
         id: titleLabel
-        //horizontalAlignment: Text.AlignHCenter
-        elide: Text.ElideRight
+
         anchors {
             verticalCenter: parent.verticalCenter
             left: parent.left
             right: parent.right
         }
+
+        //horizontalAlignment: Text.AlignHCenter
+        elide: Text.ElideRight
     }
 }

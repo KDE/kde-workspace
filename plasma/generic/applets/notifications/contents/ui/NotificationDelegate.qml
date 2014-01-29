@@ -24,21 +24,14 @@ import org.kde.qtextracomponents 2.0
 
 PlasmaComponents.ListItem {
     id: notificationItem
-    opacity: 1-Math.abs(x)/width
     width: popupFlickable.width
-    property int toolIconSize: units.iconSizes.smallMedium
-    property int layoutSpacing: 4
 
+    property int layoutSpacing: 4
+    property int toolIconSize: units.iconSizes.smallMedium
+
+    opacity: 1-Math.abs(x)/width
     visible: appTabBar.currentTab == allAppsTab || appTabBar.currentTab.text == appName
 
-    Component.onCompleted: {
-        allApplicationsModel.addApplication(appIcon, appName)
-        mainScrollArea.height = mainScrollArea.implicitHeight
-    }
-    Component.onDestruction: {
-        allApplicationsModel.removeApplication(model.appName)
-        mainScrollArea.height = mainScrollArea.implicitHeight
-    }
     Timer {
         interval: 10*60*1000
         repeat: false
@@ -52,6 +45,7 @@ PlasmaComponents.ListItem {
     MouseArea {
         width: parent.width
         height: childrenRect.height
+
         drag {
             target: notificationItem
             axis: Drag.XAxis
@@ -70,6 +64,7 @@ PlasmaComponents.ListItem {
                 resetAnimation.running = true
             }
         }
+
         SequentialAnimation {
             id: removeAnimation
             property bool exitFromRight: true
@@ -91,6 +86,7 @@ PlasmaComponents.ListItem {
                 script: notificationsModel.remove(index)
             }
         }
+
         SequentialAnimation {
             id: resetAnimation
             NumberAnimation {
@@ -102,22 +98,24 @@ PlasmaComponents.ListItem {
             }
         }
         Column {
-            spacing: notificationItem.layoutSpacing
             width: parent.width
+            spacing: notificationItem.layoutSpacing
+
             Item {
                 width: parent.width
                 height: summaryLabel.height
 
                 PlasmaComponents.Label {
                     id: summaryLabel
-                    text: summary
-                    height: paintedHeight
                     anchors {
                         left: parent.left
                         right: parent.right
                         leftMargin: closeButton.width
                         rightMargin: settingsButton.visible ? settingsButton.width + closeButton.width : closeButton.width
                     }
+                    height: paintedHeight
+
+                    text: summary
                     horizontalAlignment: Text.AlignHCenter
                     elide: Text.ElideRight
                     onLinkActivated: plasmoid.openUrl(link)
@@ -125,9 +123,15 @@ PlasmaComponents.ListItem {
 
                 PlasmaComponents.ToolButton {
                     id: closeButton
-                    iconSource: "window-close"
+                    anchors {
+                        top: parent.top
+                        right: parent.right
+                    }
                     width: notificationItem.toolIconSize
                     height: width
+
+                    iconSource: "window-close"
+
                     onClicked: {
                         if (notificationsModel.count > 1) {
                             removeAnimation.running = true
@@ -136,26 +140,24 @@ PlasmaComponents.ListItem {
                             notificationsModel.remove(index)
                         }
                     }
-                    anchors {
-                        top: parent.top
-                        right: parent.right
-                    }
                 }
 
                 PlasmaComponents.ToolButton {
                     id: settingsButton
-                    iconSource: "configure"
-                    width: notificationItem.toolIconSize
-                    height: width
-                    visible: model.configurable
-                    onClicked: {
-                        plasmoid.hidePopup()
-                        configureNotification(model.appRealName)
-                    }
                     anchors {
                         top: parent.top
                         right: closeButton.left
                         rightMargin: 5
+                    }
+                    width: notificationItem.toolIconSize
+                    height: width
+
+                    iconSource: "configure"
+                    visible: model.configurable
+
+                    onClicked: {
+                        plasmoid.hidePopup()
+                        configureNotification(model.appRealName)
                     }
                 }
             }
@@ -163,36 +165,44 @@ PlasmaComponents.ListItem {
             Item {
                 height: childrenRect.height
                 width: parent.width
+
                 QIconItem {
                     id: appIconItem
-                    icon: appIcon
-                    width: units.iconSizes.large
-                    height: units.iconSizes.large
-                    visible: !imageItem.visible
                     anchors {
                         left: parent.left
                         verticalCenter: parent.verticalCenter
                     }
+                    width: units.iconSizes.large
+                    height: units.iconSizes.large
+
+                    icon: appIcon
+                    visible: !imageItem.visible
                 }
+
                 QImageItem {
                     id: imageItem
                     anchors.fill: appIconItem
+
                     image: image
                     smooth: true
                     visible: nativeWidth > 0
                 }
+
                 PlasmaComponents.ContextMenu {
                     id: contextMenu
                     visualParent: contextMouseArea
+
                     PlasmaComponents.MenuItem {
                         text: i18n("Copy")
                         onClicked: bodyText.copy()
                     }
+
                     PlasmaComponents.MenuItem {
                         text: i18n("Select All")
                         onClicked: bodyText.selectAll()
                     }
                 }
+
                 MouseArea {
                     id: contextMouseArea
                     anchors {
@@ -202,13 +212,17 @@ PlasmaComponents.ListItem {
                         leftMargin: 6
                         rightMargin: 6
                     }
-                    acceptedButtons: Qt.RightButton
                     height: bodyText.paintedHeight
+
+                    acceptedButtons: Qt.RightButton
                     preventStealing: true
+
                     onPressed: contextMenu.open(mouse.x, mouse.y)
+
                     TextEdit {
                         id: bodyText
                         anchors.fill: parent
+
                         text: body
                         color: theme.textColor
                         font.capitalization: theme.defaultFont.capitalization
@@ -225,31 +239,46 @@ PlasmaComponents.ListItem {
                         readOnly: true
                         wrapMode: Text.Wrap
                         textFormat: TextEdit.RichText
+
                         onLinkActivated: plasmoid.openUrl(link)
                     }
                 }
+
                 Column {
                     id: actionsColumn
-                    spacing: notificationItem.layoutSpacing
                     anchors {
                         right: parent.right
                         rightMargin: 6
                         verticalCenter: parent.verticalCenter
                     }
+
+                    spacing: notificationItem.layoutSpacing
+
                     Repeater {
                         model: actions
+
                         PlasmaComponents.Button {
-                            text: model.text
                             width: theme.mSize(theme.defaultFont).width * 8
                             height: theme.mSize(theme.defaultFont).width * 2
+
+                            text: model.text
                             onClicked: {
                                 executeAction(source, model.id)
                                 actionsColumn.visible = false
                             }
-                        }
-                    }
-                }
-            }
-        }
+                        } // Button
+                    } // Repeater
+                } // Column
+            } // Item
+        } // Column
+    } //MouseArea
+
+    Component.onCompleted: {
+        allApplicationsModel.addApplication(appIcon, appName)
+        mainScrollArea.height = mainScrollArea.implicitHeight
+    }
+    Component.onDestruction: {
+        allApplicationsModel.removeApplication(model.appName)
+        mainScrollArea.height = mainScrollArea.implicitHeight
     }
 }

@@ -22,17 +22,16 @@ import QtQuick 2.0
 import org.kde.plasma.core 2.0 as PlasmaCore
 import org.kde.plasma.components 2.0 as PlasmaComponents
 import org.kde.qtextracomponents 2.0
-import org.kde.plasma.extras 2.0 as PlasmaExtras
-
 
 Item {
     PlasmaCore.SvgItem {
         id: notificationSvgItem
-        svg: notificationSvg
-        elementId: "notification-disabled"
         anchors.centerIn: parent
         width: Math.min(parent.width, parent.height)
         height: width
+
+        svg: notificationSvg
+        elementId: "notification-disabled"
 
         state: notificationsApplet.state
 
@@ -43,36 +42,47 @@ Item {
 
         Item {
             id: jobProgressItem
-            width: notificationSvgItem.width * globalProgress
-            clip: true
-            visible: jobs.count > 0
             anchors {
                 left: parent.left
                 top: parent.top
                 bottom: parent.bottom
             }
+            width: notificationSvgItem.width * globalProgress
+
+            clip: true
+            visible: jobs.count > 0
+
             PlasmaCore.SvgItem {
-                svg: notificationSvg
-                elementId: "notification-progress-active"
                 anchors {
                     left: parent.left
                     top: parent.top
                     bottom: parent.bottom
                 }
                 width: notificationSvgItem.width
+
+                svg: notificationSvg
+                elementId: "notification-progress-active"
             }
         }
+
         PlasmaComponents.BusyIndicator {
             anchors.fill: parent
+
             visible: jobs ? jobs.count > 0 : false
             running: visible
         }
 
         Column {
             id: countColumn
-            visible: false
             anchors.centerIn: parent
+
+            visible: false
+
             PlasmaCore.SvgItem {
+                anchors.horizontalCenter: parent.horizontalCenter
+                width: naturalSize.width
+                height: naturalSize.height
+
                 svg: notificationSvg
                 elementId: {
                     switch (plasmoid.location) {
@@ -86,17 +96,17 @@ Item {
                         return "expander-bottom"
                     }
                 }
-                width: naturalSize.width
-                height: naturalSize.height
-                anchors.horizontalCenter: parent.horizontalCenter
             }
-            PlasmaComponents.Label {
-                property int totalCount: notificationsApplet.totalCount
-                text: totalCount
 
-                property int oldTotalCount: 0
-                font.pointSize: theme.smallestFont.pointSize
+            PlasmaComponents.Label {
                 height: paintedHeight - 3
+
+                property int totalCount: notificationsApplet.totalCount
+                property int oldTotalCount: 0
+
+                text: totalCount
+                font.pointSize: theme.smallestFont.pointSize
+
                 onTotalCountChanged: {
                     if (totalCount > oldTotalCount) {
                         notificationAnimation.running = true
@@ -109,6 +119,7 @@ Item {
         PlasmaCore.SvgItem {
             id: notificationAnimatedItem
             anchors.fill: parent
+
             svg: notificationSvg
             elementId: "notification-active"
             opacity: 0
@@ -116,6 +127,7 @@ Item {
 
             SequentialAnimation {
                 id: notificationAnimation
+
                 NumberAnimation {
                     target: notificationAnimatedItem
                     duration: 250
@@ -123,7 +135,9 @@ Item {
                     to: 1
                     easing.type: Easing.InOutQuad
                 }
+
                 PauseAnimation { duration: 500 }
+
                 ParallelAnimation {
                     NumberAnimation {
                         target: notificationAnimatedItem
@@ -132,6 +146,7 @@ Item {
                         to: 0
                         easing.type: Easing.InOutQuad
                     }
+
                     NumberAnimation {
                         target: notificationAnimatedItem
                         duration: 250
@@ -142,17 +157,14 @@ Item {
                 }
             }
         }
+
         MouseArea {
             anchors.fill: parent
             onClicked: {
                 plasmoid.expanded = !plasmoid.expanded;
-//                 if (notificationsApplet.totalCount > 0) {
-//                     plasmoid.expanded = !plasmoid.expanded;
-//                 } else {
-//                     plasmoid.expanded = false;
-//                 }
             }
         }
+
         states: [
             State {
                 name: "default"
@@ -169,6 +181,7 @@ Item {
                     status: PlasmaCore.Types.PassiveStatus
                 }
             },
+
             State {
                 name: "new-notifications"
                 PropertyChanges {
@@ -186,9 +199,4 @@ Item {
             }
         ]
     }
-
-    Component.onCompleted: {
-        print(" NOTificationsIcon.qml loaded");
-    }
 }
-

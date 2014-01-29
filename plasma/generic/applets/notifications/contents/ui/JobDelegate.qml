@@ -34,10 +34,6 @@ Item {
     property int animationDuration: 100
     property bool flatButtons: true
 
-    function getData(data, name, defaultValue) {
-        return data[modelData] ? (data[modelData][name] ? data[modelData][name] : defaultValue) : defaultValue;
-    }
-
     property string labelName0: getData(jobsSource.data, "labelName0", '')
     property string label0: getData(jobsSource.data, "label0", '')
     property string labelName1: getData(jobsSource.data, "labelName1", '')
@@ -47,6 +43,10 @@ Item {
     property string speed: getData(jobsSource.data, "speed", '')
 
     property bool debug: false
+
+    function getData(data, name, defaultValue) {
+        return data[modelData] ? (data[modelData][name] ? data[modelData][name] : defaultValue) : defaultValue;
+    }
 
     function friendlyLabel() {
         // Take the filename, might be improved
@@ -65,7 +65,7 @@ Item {
     }
 
     PlasmaCore.Formats {
-	id: formats
+        id: formats
     }
 
     Item {
@@ -80,12 +80,13 @@ Item {
 
         PlasmaExtras.Heading {
             id: infoLabel
-            opacity: 0.6
             anchors {
                 top: parent.top
                 left: parent.left
                 right: parent.right
             }
+
+            opacity: 0.6
             level: 3
             text: getData(jobsSource.data, "infoMessage", '')
         }
@@ -98,52 +99,49 @@ Item {
                 right: expandButton.left
                 rightMargin: notificationItem.layoutSpacing
             }
+
             elide: Text.ElideMiddle
             text: notificationItem.friendlyLabel()
         }
 
         PlasmaComponents.ToolButton {
             id: expandButton
-            width: notificationItem.toolIconSize
-            height: width
-            flat: notificationItem.flatButtons
-            iconSource: checked ? "list-remove" : "list-add"
-            checkable: true
             anchors {
                 right: parent.right
                 top: summary.top
             }
+            width: notificationItem.toolIconSize
+            height: width
+
+            flat: notificationItem.flatButtons
+            iconSource: checked ? "list-remove" : "list-add"
+            checkable: true
         }
 
         Item {
             id: newDetailsItem
 
-            property bool expanded: state == "expanded"
-            state: expandButton.checked ? "expanded" : "collapsed"
-            onStateChanged: {
-                print("NNN expand state is now: " + state);
-            }
-
-            // 1st row
-//             Rectangle {
-//                 color: "yellow"
-//                 visible: notificationItem.debug
-//                 opacity: 0.3
-//                 anchors {
-//                     fill: parent
-//                 }
-//             }
-            opacity: newDetailsItem.state == "expanded" ? 0.6 : 0
-            //height: newDetailsItem.expanded ? childrenRect.height : 0
-            //Behavior on height { NumberAnimation { duration: notificationItem.animationDuration } }
-            Behavior on opacity { NumberAnimation { duration: notificationItem.animationDuration } }
-            //clip: true
             anchors {
                 top: summary.bottom
                 topMargin: notificationItem.layoutSpacing
                 left: parent.left
                 right: parent.right
             }
+            //height: newDetailsItem.expanded ? childrenRect.height : 0
+
+            property bool expanded: state == "expanded"
+
+            opacity: newDetailsItem.state == "expanded" ? 0.6 : 0
+            state: expandButton.checked ? "expanded" : "collapsed"
+
+            onStateChanged: {
+                print("NNN expand state is now: " + state);
+            }
+
+            // 1st row
+            //Behavior on height { NumberAnimation { duration: notificationItem.animationDuration } }
+            Behavior on opacity { NumberAnimation { duration: notificationItem.animationDuration } }
+            //clip: true
 
             PlasmaComponents.Label {
                 id: labelName0Text
@@ -169,6 +167,7 @@ Item {
                     leftMargin: notificationItem.layoutSpacing
                 }
                 height: paintedHeight
+
                 font: theme.smallestFont
                 text: label0 ? label0 : ''
                 //width: parent.width - labelName0Text.width
@@ -179,7 +178,6 @@ Item {
                     anchors.fill: parent
                     subText: label0Text.truncated ? label0 : ""
                 }
-
             }
 
             // 2nd row
@@ -207,9 +205,9 @@ Item {
                     right: parent.right
                     leftMargin: notificationItem.layoutSpacing
                 }
+                height: paintedHeight
 
                 font: theme.smallestFont
-                height: paintedHeight
                 text: label1 ? label1 : ''
                 //width: parent.width - labelName0Text.width
                 elide: Text.ElideMiddle
@@ -250,31 +248,38 @@ Item {
                 }
 
                 PlasmaComponents.Label {
+                    anchors.left: parent.left
+                    height: paintedHeight
+
                     text: jobsSource.data[modelData] ? detailsColumn.localizeProcessedAmount(0) : ""
-                    anchors.left: parent.left
                     font: theme.smallestFont
-                    height: paintedHeight
                     visible: text != ""
                 }
+
                 PlasmaComponents.Label {
+                    anchors.left: parent.left
+                    height: paintedHeight
+
                     text: jobsSource.data[modelData] ? detailsColumn.localizeProcessedAmount(1) : ""
-                    anchors.left: parent.left
                     font: theme.smallestFont
-                    height: paintedHeight
                     visible: text != ""
                 }
+
                 PlasmaComponents.Label {
-                    text: jobsSource.data[modelData] ? detailsColumn.localizeProcessedAmount(2) : ""
                     anchors.left: parent.left
-                    font: theme.smallestFont
                     height: paintedHeight
+
+                    text: jobsSource.data[modelData] ? detailsColumn.localizeProcessedAmount(2) : ""
+                    font: theme.smallestFont
                     visible: text != ""
                 }
+
                 PlasmaComponents.Label {
                     id: speedLabel
                     anchors.left: parent.left
-                    font: theme.smallestFont
                     height: paintedHeight
+
+                    font: theme.smallestFont
                     text: notificationItem.eta > 0 ? i18nc("Speed and estimated time to completition", "%1 (%2 remaining)", speed, formats.formatSpelloutDuration(notificationItem.eta)) : speed
                 }
 // FIXME: find a way to plot the signal
@@ -351,16 +356,17 @@ Item {
                 }
             ]
         }
+
         Item {
             id: buttonsRow
 
-            height: notificationItem.toolIconSize
             anchors {
                 top: !newDetailsItem.opacity  ? summary.bottom : newDetailsItem.bottom
                 left: parent.left
                 right: parent.right
 
             }
+            height: notificationItem.toolIconSize
 
             Rectangle {
                 visible: notificationItem.debug
@@ -381,6 +387,7 @@ Item {
                 //width: parent.width - pauseButton.width*2 - notificationItem.layoutSpacing*3
                 width: 200
                 height: 16
+
                 orientation: Qt.Horizontal
                 minimumValue: 0
                 maximumValue: 100
@@ -394,7 +401,7 @@ Item {
 //                         rightMargin: notificationItem.layoutSpacing
 //                     }
             }
-//                     anchors.right: parent.right
+
             PlasmaComponents.ToolButton {
                 id: pauseButton
                 width: notificationItem.toolIconSize
@@ -404,8 +411,10 @@ Item {
                     right: stopButton.left
                     rightMargin: notificationItem.layoutSpacing
                 }
+
                 iconSource: notificationItem.jobstate == "suspended" ? "media-playback-start" : "media-playback-pause"
                 flat: notificationItem.flatButtons
+
                 onClicked: {
                     print("NNN Current: " + jobstate);
                     var operationName = "suspend"
@@ -418,6 +427,7 @@ Item {
                     print("NNN now: " + notificationItem.jobstate);
                 }
             }
+
             PlasmaComponents.ToolButton {
                 id: stopButton
                 anchors {
@@ -426,8 +436,10 @@ Item {
                 }
                 width: notificationItem.toolIconSize
                 height: width
+
                 iconSource: "media-playback-stop"
                 flat: notificationItem.flatButtons
+
                 onClicked: {
                     var service = jobsSource.serviceForSource(modelData)
                     var operation = service.operationDescription("stop")

@@ -30,7 +30,6 @@ import "plasmapackage:/ui/uiproperties.js" as UiProperties
 
 MouseEventListener {
     id: notificationsApplet
-    state: "default"
     width: 32
     height: 32
 
@@ -54,6 +53,19 @@ MouseEventListener {
 
     //notifications + jobs
     property int totalCount: (notifications ? notifications.count : 0) + (jobs ? jobs.count : 0)
+
+    property Item notificationIcon
+
+    property Component compactRepresentation: Component {
+        NotificationIcon {
+            id: notificationIcon
+            Component.onCompleted: notificationsApplet.notificationIcon = notificationIcon
+        }
+    }
+
+    state: "default"
+    hoverEnabled: !UiProperties.touchInput
+
     onTotalCountChanged: {
         print(" totalCountChanged " + totalCount)
         if (totalCount > 0) {
@@ -67,6 +79,7 @@ MouseEventListener {
         var data = new Object
         data["image"] = "preferences-desktop-notification"
         data["mainText"] = i18n("Notifications and Jobs")
+
         if (totalCount == 0) {
             data["subText"] = i18n("No notifications or jobs")
         } else if (!notifications.count) {
@@ -86,18 +99,9 @@ MouseEventListener {
         }
     }
 
-    property Item notificationIcon
-
-    Component.onCompleted: {
-        //plasmoid.popupIcon = QIcon("preferences-desktop-notification")
-        plasmoid.status = PlasmaCore.Types.PassiveStatus
-        //var allApplications = new Object
-        //plasmoid.addEventListener('ConfigChanged', configChanged); // FIXME
-        configChanged()
-    }
-
     function configChanged()
     {
+        //FIXME: reenable config?
         //showNotifications = plasmoid.readConfig("ShowNotifications")
         showNotifications = true;
         //showJobs = plasmoid.readConfig("ShowJobs")
@@ -109,24 +113,58 @@ MouseEventListener {
         imagePath: "widgets/configuration-icons"
     }
 
-    property Component compactRepresentation: Component {
-        NotificationIcon {
-            id: notificationIcon
-            Component.onCompleted: notificationsApplet.notificationIcon = notificationIcon
-        }
-    }
-
-    hoverEnabled: !UiProperties.touchInput
-
     PlasmaExtras.ScrollArea {
         id: mainScrollArea
         anchors.fill: parent
+
         implicitWidth: theme.mSize(theme.defaultFont).width * 40
         implicitHeight: Math.min(theme.mSize(theme.defaultFont).height * 40, Math.max(theme.mSize(theme.defaultFont).height * 6, contentsColumn.height))
         state: ""
 
-//         onImplicitWidthChanged: print(" implicitWidth: " + implicitWidth);
-//         onImplicitHeightChanged: print(" implicitHeight: " + implicitHeight);
+        Flickable {
+            id: popupFlickable
+            anchors.fill:parent
+
+            contentWidth: width
+            contentHeight: contentsColumn.height
+            clip: true
+
+            Column {
+                id: contentsColumn
+                width: popupFlickable.width
+
+                PlasmaComponents.Label {
+                    visible: notificationsApplet.totalCount == 0
+                    text: i18n("No new notifications.")
+                }
+
+                //TODO: load those on demand based on configuration
+                Loader {
+                    id: jobsLoader
+                    source: showJobs ? "Jobs.qml" : ""
+                    anchors {
+                        left: parent.left
+                        right: parent.right
+                    }
+                }
+
+                Connections {
+                    target: jobsLoader.item
+                    onMessage: console.log(msg)
+                }
+
+                Loader {
+                    id: notificationsLoader
+                    anchors {
+                        left: parent.left
+                        right: parent.right
+                    }
+
+                    source: showNotifications ? "Notifications.qml" : ""
+                }
+            }
+        }
+
         states: [
             State {
                 name: "underMouse"
@@ -146,44 +184,13 @@ MouseEventListener {
             }
         ]
 
-        Flickable {
-            id: popupFlickable
-            anchors.fill:parent
+    }
 
-            contentWidth: width
-            contentHeight: contentsColumn.height
-            clip: true
-
-            Column {
-                id: contentsColumn
-                width: popupFlickable.width
-
-                PlasmaComponents.Label {
-                    visible: notificationsApplet.totalCount == 0
-                    text: i18n("No new notifications.")
-                }
-                //TODO: load those on demand based on configuration
-                Loader {
-                    id: jobsLoader
-                    source: showJobs ? "Jobs.qml" : ""
-                    anchors {
-                        left: parent.left
-                        right: parent.right
-                    }
-                }
-                Connections {
-                    target: jobsLoader.item
-                    onMessage: console.log(msg)
-                }
-                Loader {
-                    id: notificationsLoader
-                    source: showNotifications ? "Notifications.qml" : ""
-                    anchors {
-                        left: parent.left
-                        right: parent.right
-                    }
-                }
-            }
-        }
+    Component.onCompleted: {
+        //plasmoid.popupIcon = QIcon("preferences-desktop-notification")
+        plasmoid.status = PlasmaCore.Types.PassiveStatus
+        //var allApplications = new Object
+        //plasmoid.addEventListener('ConfigChanged', configChanged); // FIXME
+        configChanged()
     }
 }
