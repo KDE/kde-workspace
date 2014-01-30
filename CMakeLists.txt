@@ -149,6 +149,8 @@ if(HAVE_X11)
                          URL "http://xcb.freedesktop.org"
                          TYPE REQUIRED
                         )
+  find_package(XCB COMPONENTS ICCCM)
+  add_feature_info("XCB-ICCCM" XCB_ICCCM_FOUND "Required for building test applications for KWin")
 
 
   add_feature_info("Automated testing of X clients" X11_XTest_FOUND
