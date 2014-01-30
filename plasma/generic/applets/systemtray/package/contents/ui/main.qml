@@ -36,8 +36,8 @@ Item {
     Layout.minimumWidth: minimumHeight * 1.333
     Layout.minimumHeight: theme.mSize(theme.defaultFont).height * 14
 
-    property int implicitWidth: minimumWidth * 1.5
-    property int implicitHeight: minimumHeight * 1.5
+    Layout.preferredWidth: Layout.minimumWidth * 1.5
+    Layout.preferredHeight: Layout.minimumHeight * 1.5
 
     property int preferredItemSize: 128 // will be set by the grid, just needs a high-enough default
 
