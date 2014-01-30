@@ -45,7 +45,7 @@ Item {
             }
             plasmoid.expanded = !plasmoid.expanded
         }
-        onPressed: PlasmaExtras.PressedAnimation { targetItem: parent }
-        onReleased: PlasmaExtras.ReleasedAnimation { targetItem: parent }
+       // onPressed: PlasmaExtras.PressedAnimation { targetItem: parent }
+       // onReleased: PlasmaExtras.ReleasedAnimation { targetItem: parent }
     }
 }

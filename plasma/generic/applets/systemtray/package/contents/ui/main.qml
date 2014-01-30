@@ -38,6 +38,7 @@ Item {
 
     Layout.preferredWidth: Layout.minimumWidth * 1.5
     Layout.preferredHeight: Layout.minimumHeight * 1.5
+    Plasmoid.preferredRepresentation: Plasmoid.compactRepresentation
 
     property int preferredItemSize: 128 // will be set by the grid, just needs a high-enough default
 

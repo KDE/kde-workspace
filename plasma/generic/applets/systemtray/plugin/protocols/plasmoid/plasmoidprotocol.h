@@ -26,6 +26,10 @@
 class QQuickItem;
 class QmlObject;
 
+namespace Plasma {
+    class Containment;
+}
+
 namespace SystemTray
 {
 
@@ -48,6 +52,7 @@ protected Q_SLOTS:
 private:
     QHash<QString, PlasmoidTask*> m_tasks;
     QString m_systrayPackageRoot;
+    Plasma::Containment *m_containment;
 };
 
 }

@@ -30,10 +30,13 @@
 
 #include <QLoggingCategory>
 
+#include <Plasma/Applet>
+#include <Plasma/PluginLoader>
+
 namespace SystemTray
 {
 
-PlasmoidTask::PlasmoidTask(QQuickItem* rootItem, const QString &packageName, const QString &systrayPackageRoot, QObject *parent)
+PlasmoidTask::PlasmoidTask(QQuickItem* rootItem, const QString &packageName, const QString &systrayPackageRoot, Plasma::Containment *cont, QObject *parent)
     : Task(parent),
       m_taskId(packageName),
       m_taskItem(0),
@@ -41,14 +44,31 @@ PlasmoidTask::PlasmoidTask(QQuickItem* rootItem, const QString &packageName, con
       m_valid(true)
 {
     qCDebug(SYSTEMTRAY) << "Loading applet: " << packageName;
-    m_taskItem = new PlasmoidInterface(packageName, systrayPackageRoot, m_rootItem);
+    //m_taskItem = new PlasmoidInterface(packageName, systrayPackageRoot, m_rootItem);
+
+    m_taskItem = cont->createApplet(packageName);//Plasma::PluginLoader::self()->loadApplet(packageName);
+    m_taskItem->init();
+    m_taskGraphicsObject = m_taskItem->property("graphicObject").value<QQuickItem *>();
+
+    if (m_taskGraphicsObject) {
+        QMetaObject::invokeMethod(m_taskGraphicsObject, "init", Qt::DirectConnection);
+        qWarning()<<m_taskGraphicsObject->property("compactRepresentationItem");
+        qWarning()<<m_taskGraphicsObject->property("fullRepresentationItem");
+        
+        //old syntax, because we are connecting blindly
+        connect(m_taskGraphicsObject, SIGNAL(expandedChanged(bool)),
+                this, SLOT(syncExpanded(bool)));
+    }
+
+
+
     if (!m_taskItem) {
         qCDebug(SYSTEMTRAY) << "Invalid applet taskitem";
         m_valid = false;
         return;
     }
-    connect(m_taskItem, &PlasmoidInterface::statusChanged, this, &PlasmoidTask::updateStatus);
-    connect(m_taskItem, &PlasmoidInterface::defaultRepresentationChanged, this, &PlasmoidTask::taskItemExpandedChanged);
+    connect(m_taskItem, &Plasma::Applet::statusChanged, this, &PlasmoidTask::updateStatus);
+   // connect(m_taskItem, &PlasmoidInterface::defaultRepresentationChanged, this, &PlasmoidTask::taskItemExpandedChanged);
 
     if (pluginInfo().isValid()) {
         setName(pluginInfo().name());
@@ -90,12 +110,15 @@ void PlasmoidTask::updateStatus()
 void PlasmoidTask::expandApplet(bool expanded)
 {
     qCDebug(SYSTEMTRAY) << "ST2P expandApplet() " << expanded;
+    if (m_taskGraphicsObject) {
+        m_taskGraphicsObject->setProperty("expanded", expanded);
+    }
     //if (m_taskItem->isExpanded() != expanded) {
-    if (m_taskItem && m_taskItem->isExpanded() != expanded) {
+/*    if (m_taskItem && m_taskItem->isExpanded() != expanded) {
         qCDebug(SYSTEMTRAY) << "ST2P set plasmoid.expand = " << expanded;
         m_taskItem->setExpanded(expanded);
         //m_taskItem->setCollapsed();
-    }
+    }*/
 }
 
 bool PlasmoidTask::isValid() const
@@ -123,7 +146,7 @@ void PlasmoidTask::setShortcut(QString text) {
 void PlasmoidTask::setLocation(Plasma::Types::Location loc)
 {
     if (m_taskItem) {
-        m_taskItem->setLocation(loc);
+//        m_taskItem->setLocation(loc);
     }
 }
 
@@ -134,7 +157,10 @@ QString PlasmoidTask::taskId() const
 
 QQuickItem* PlasmoidTask::taskItem()
 {
-    return m_taskItem;
+    if (m_taskGraphicsObject && m_taskGraphicsObject->property("compactRepresentationItem").value<QQuickItem *>()) {
+        return m_taskGraphicsObject->property("compactRepresentationItem").value<QQuickItem *>();
+    }
+    return new QQuickItem();//m_taskItem;
 }
 
 QQuickItem* PlasmoidTask::taskItemExpanded()
@@ -142,7 +168,11 @@ QQuickItem* PlasmoidTask::taskItemExpanded()
     if (!m_taskItem) {
         return 0;
     }
-    return m_taskItem->defaultRepresentation();
+
+    if (m_taskGraphicsObject && m_taskGraphicsObject->property("fullRepresentationItem").value<QQuickItem *>()) {
+        return m_taskGraphicsObject->property("fullRepresentationItem").value<QQuickItem *>();
+    }
+    return new QQuickItem();//m_taskItem->defaultRepresentation();
 }
 
 QIcon PlasmoidTask::icon() const
@@ -160,6 +190,11 @@ void PlasmoidTask::syncStatus(QString newStatus)
     }
 
     setStatus(status);
+}
+
+void PlasmoidTask::syncExpanded(bool expanded)
+{
+    emit expandedChanged(expanded);
 }
 
 }

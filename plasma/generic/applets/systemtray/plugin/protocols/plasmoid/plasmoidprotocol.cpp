@@ -26,6 +26,8 @@
 #include "../../manager.h"
 
 #include <Plasma/PluginLoader>
+#include <Plasma/Containment>
+#include <Plasma/Corona>
 #include <kdeclarative/qmlobject.h>
 #include <KLocalizedString>
 #include <kplugintrader.h>
@@ -50,9 +52,15 @@ PlasmoidProtocol::~PlasmoidProtocol()
 
 void PlasmoidProtocol::init()
 {
-    Plasma::Package package = Plasma::PluginLoader::self()->loadPackage("Plasma/Applet");
+    Plasma::Corona *c = new Plasma::Corona();
+
+    m_containment = c->createContainment("invalid");
+    m_containment->init();
+    Plasma::Package package = Plasma::PluginLoader::self()->loadPackage("Plasma/Shell");
+    package.setDefaultPackageRoot("plasma/plasmoids/");
     package.setPath("org.kde.plasma.systemtray");
     m_systrayPackageRoot = package.path();
+    c->setPackage(package);
 
     qCDebug(SYSTEMTRAY) << "ST2 PackagePathQml: " << m_systrayPackageRoot;
 
@@ -72,7 +80,8 @@ void PlasmoidProtocol::init()
     QMap<QString, KPluginInfo> sortedApplets;
     foreach (const KPluginInfo &info, applets) {
         KService::Ptr service = info.service();
-        if (!blacklist.contains(info.pluginName()) && service->property("X-Plasma-NotificationArea", QVariant::Bool).toBool()) {
+        //HACK
+        if (info.pluginName() == "org.kde.plasma.mediacontroller" && !blacklist.contains(info.pluginName()) && service->property("X-Plasma-NotificationArea", QVariant::Bool).toBool()) {
             // if we already have a plugin with this exact name in it, then check if it is the
             // same plugin and skip it if it is indeed already listed
             if (sortedApplets.contains(info.name())) {
@@ -118,7 +127,7 @@ void PlasmoidProtocol::newTask(const QString &service)
     Manager* m = qobject_cast<Manager*>(parent());
     QQuickItem* rootItem = m->rootItem();
 
-    PlasmoidTask *task = new PlasmoidTask(rootItem, service, m_systrayPackageRoot, this);
+    PlasmoidTask *task = new PlasmoidTask(rootItem, service, m_systrayPackageRoot, m_containment, this);
 
     if (task->pluginInfo().isValid()) {
         m_tasks[service] = task;

@@ -43,6 +43,14 @@ QtExtraComponents.MouseEventListener {
         //print("******************* Task changed:" + task.taskId + " " + task.name)
     }
 
+    Connections {
+        target: task
+        onExpandedChanged: {
+            print("FFFFFFFF"+expanded+"  "+task.name)
+        }
+        
+    }
+
     onClicked: {
         if (taskType == SystemTray.Task.TypePlasmoid) {
             togglePopup();

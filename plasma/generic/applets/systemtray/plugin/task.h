@@ -178,7 +178,7 @@ Q_SIGNALS:
 
     void taskItemChanged();
     void taskItemExpandedChanged();
-    void expandedChanged();
+    void expandedChanged(bool expanded);
     /**
      * Special signal for changed status
      */
