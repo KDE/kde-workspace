@@ -55,6 +55,7 @@ void PlasmoidProtocol::init()
     Plasma::Corona *c = new Plasma::Corona();
 
     m_containment = c->createContainment("invalid");
+    m_containment->setFormFactor(Plasma::Types::Horizontal);
     m_containment->init();
     Plasma::Package package = Plasma::PluginLoader::self()->loadPackage("Plasma/Shell");
     package.setDefaultPackageRoot("plasma/plasmoids/");

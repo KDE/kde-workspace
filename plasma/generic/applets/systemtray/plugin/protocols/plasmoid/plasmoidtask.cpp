@@ -51,7 +51,7 @@ PlasmoidTask::PlasmoidTask(QQuickItem* rootItem, const QString &packageName, con
     m_taskGraphicsObject = m_taskItem->property("graphicObject").value<QQuickItem *>();
 
     if (m_taskGraphicsObject) {
-        QMetaObject::invokeMethod(m_taskGraphicsObject, "init", Qt::DirectConnection);
+        //QMetaObject::invokeMethod(m_taskGraphicsObject, "init", Qt::DirectConnection);
         qWarning()<<m_taskGraphicsObject->property("compactRepresentationItem");
         qWarning()<<m_taskGraphicsObject->property("fullRepresentationItem");
         
@@ -157,8 +157,8 @@ QString PlasmoidTask::taskId() const
 
 QQuickItem* PlasmoidTask::taskItem()
 {
-    if (m_taskGraphicsObject && m_taskGraphicsObject->property("compactRepresentationItem").value<QQuickItem *>()) {
-        return m_taskGraphicsObject->property("compactRepresentationItem").value<QQuickItem *>();
+    if (m_taskGraphicsObject) {
+        return m_taskGraphicsObject;
     }
     return new QQuickItem();//m_taskItem;
 }
