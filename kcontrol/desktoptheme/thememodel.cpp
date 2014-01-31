@@ -37,6 +37,9 @@
 
 #include <Plasma/FrameSvg>
 #include <Plasma/Theme>
+#include <qstandardpaths.h>
+
+#include <QDebug>
 
 ThemeModel::ThemeModel( QObject *parent )
 : QAbstractListModel( parent )
@@ -190,7 +193,7 @@ void ThemeDelegate::paint(QPainter *painter,
     painter->save();
     QFont font = painter->font();
     font.setWeight(QFont::Bold);
-    const QString colorFile = KStandardDirs::locate("data", "desktoptheme/" + package + "/colors");
+    const QString colorFile = QStandardPaths::locate(QStandardPaths::GenericDataLocation, "desktoptheme/" + package + "/colors");
     if (!colorFile.isEmpty()) {
         KSharedConfigPtr colors = KSharedConfig::openConfig(colorFile);
         KColorScheme colorScheme(QPalette::Active, KColorScheme::Window, colors);
