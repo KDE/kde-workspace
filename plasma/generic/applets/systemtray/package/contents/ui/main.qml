@@ -48,9 +48,7 @@ Item {
 
     property bool debug: plasmoid.configuration.debug
 
-    property Item expandedItem: null
-    property string currentTask: ""
-    property string currentName: ""
+    property QtObject expandedTask: null;
 
 
     function togglePopup() {

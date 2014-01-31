@@ -28,7 +28,7 @@ TaskDelegate {
     id: taskListDelegate
     objectName: "taskListDelegate"
 
-    snExpanded: (root.currentTask == "")
+    snExpanded: (root.expandedTask == null)
 
     width: snExpanded ? parent.width : height * 1.5 // be a bit more lenient to input
     height: (root.baseSize * 2)

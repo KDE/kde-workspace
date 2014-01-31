@@ -28,42 +28,16 @@ Item {
 
     anchors.margins: units.largeSpacing
 
-    function checkTask(task) {
-        if (task.taskItemExpanded == null) return;
-        var isthis = (task.taskId == root.currentTask);
-        if (!isthis) {
-            task.expandApplet(false);
-        } else {
-            root.currentName = task.name;
-        }
-    }
-
-    function clearExpanded() {
-        var _hidden = host.hiddenTasks;
-        for (var i = 0; i < _hidden.length; i++) {
-            checkTask(_hidden[i]);
-        }
-        var _shown = host.shownTasks;
-        for (i = 0; i < _shown.length; i++) {
-            checkTask(_shown[i]);
-        }
-    }
-
     Connections {
         target: root
-        onExpandedItemChanged: {
-            print(root.expandedItem)
-            if (root.expandedItem != null) {
-                root.expandedItem.parent = expandedItemContainer;
-                root.expandedItem.anchors.fill = expandedItemContainer;
-                expandedItemContainer.replace(root.expandedItem);
+        onExpandedTaskChanged: {
+            if (root.expandedTask) {
+                root.expandedTask.taskItemExpanded.parent = expandedItemContainer;
+                root.expandedTask.taskItemExpanded.anchors.fill = expandedItemContainer;
+                expandedItemContainer.replace(root.expandedTask.taskItemExpanded);
             } else {
-                if (expandedItemContainer.currentPage != null) {
-                    expandedItemContainer.clear();
-                }
-                root.currentTask = "";
+                expandedItemContainer.clear();
             }
-            clearExpanded();
         }
     }
 
@@ -75,11 +49,8 @@ Item {
             right: expandedItemContainer.left
         }
         onClicked: {
-            clearExpanded();
             expandedItemContainer.clear();
-            root.currentTask = ""
-            root.currentName = ""
-            root.expandedItem = null;
+            root.expandedTask = null;
         }
     }
 
@@ -108,7 +79,7 @@ Item {
         id: separator
 
         width: lineSvg.elementSize("vertical-line").width;
-        visible: root.expandedItem != null
+        visible: root.expandedTask != null
 
         anchors {
             right: expandedItemContainer.left;
@@ -128,7 +99,7 @@ Item {
         id: snHeading
 
         level: 1
-        opacity: root.currentTask != "" ? 0 : 0.8
+        opacity: root.expandedTask != null ? 0 : 0.8
         Behavior on opacity { NumberAnimation {} }
 
         anchors {
@@ -144,7 +115,7 @@ Item {
         id: snHeadingExpanded
 
         level: 1
-        opacity: root.currentTask != "" ? 0.8 : 0
+        opacity: root.expandedTask != null ? 0.8 : 0
         Behavior on opacity { NumberAnimation {} }
 
         anchors {
@@ -152,7 +123,7 @@ Item {
             left: expandedItemContainer.left
             right: parent.right
         }
-        text: root.currentName
+        text: root.expandedTask ? root.expandedTask.name : ""
     }
 
     PlasmaComponents.PageStack {

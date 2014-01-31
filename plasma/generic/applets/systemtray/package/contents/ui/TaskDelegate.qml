@@ -35,7 +35,7 @@ QtExtraComponents.MouseEventListener {
     hoverEnabled: true
 
     property variant task: null
-    property bool isCurrentTask: (root.currentTask == taskId)
+    property bool isCurrentTask: (root.expandedTask == modelData)
 
     property bool isHiddenItem: false
 
@@ -56,15 +56,15 @@ QtExtraComponents.MouseEventListener {
         running: false
         repeat: false
         onTriggered: {
-            print("hidetimer triggered, collapsing " + (root.currentTask == "") )
-            if (root.currentTask == "") {
+            print("hidetimer triggered, collapsing " + (root.expandedTask == null) )
+            if (root.expandedTask == null) {
                 plasmoid.expanded = false
             }
         }
     }
 
     // opacity is raised when: plasmoid is collapsed, we are the current task, or it's hovered
-    opacity: (containsMouse || !plasmoid.expanded || root.currentTask == taskId) || (plasmoid.expanded && root.currentTask == "") ? 1.0 : 0.6
+    opacity: (containsMouse || !plasmoid.expanded || isCurrentTask) || (plasmoid.expanded && root.expandedTask == null) ? 1.0 : 0.6
     Behavior on opacity { NumberAnimation { duration: 150 } }
 
     property int taskStatus: status
@@ -99,35 +99,22 @@ QtExtraComponents.MouseEventListener {
 
 
     property bool isExpanded: expanded
-    onIsExpandedChanged: {
-        if (!expandedItem) {
-            return;
-        }
-        print("AAA"+expanded+root.expandedItem+expandedItem)
-        expandedItem.visible = false;
-        if (expanded) {
-            root.currentTask = taskId;
-            root.expandedItem = expandedItem;
-        } else {
-            // release
-            root.currentTask = ""
-            root.expandedItem = null;
-        }
-    }
-    onExpandedItemChanged: {
-        if (!expandedItem) {
-            return;
-        }
 
-        /*if (expanded && root.expandedItem == expandedItem) {
-            root.expandedItem.visible = false;
-            root.currentTask = taskId;
-            root.expandedItem = expandedItem;
-            expandedItem.visible = true;
-        } else {
-            expandedItem.visible = false;
-        }*/
+    onIsExpandedChanged: {
+        if (expanded) {
+            var task;
+            if (root.expandedTask) {
+                task = root.expandedTask;
+            }
+            root.expandedTask = modelData;
+            if (task) {
+                task.expanded = false;
+            }
+        } else if (root.expandedTask == modelData) {
+            root.expandedTask = null;
+        }
     }
+
 
     PulseAnimation {
         targetItem: taskItemContainer

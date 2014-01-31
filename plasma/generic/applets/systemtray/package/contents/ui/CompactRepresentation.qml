@@ -32,8 +32,8 @@ QtExtraComponents.MouseEventListener {
 
     Layout.minimumWidth: !root.vertical ? computeDimension() : computeDimensionHeight()
     Layout.minimumHeight: root.vertical ? computeDimension() : computeDimensionHeight()
-    Layout.maximumWidth: minimumWidth
-    Layout.maximumHeight: minimumHeight
+    Layout.maximumWidth: Layout.minimumWidth
+    Layout.maximumHeight: Layout.minimumHeight
 
     Layout.fillWidth: false
     Layout.fillHeight: false
@@ -49,8 +49,8 @@ QtExtraComponents.MouseEventListener {
         running: false
         repeat: false
         onTriggered: {
-            //print("hidetimer triggered, collapsing " + (root.currentTask == "") )
-            if (root.currentTask == "") {
+            //print("hidetimer triggered, collapsing " + (root.expandedTask == null) )
+            if (root.expandedTask == null) {
                 plasmoid.expanded = false
             }
         }
@@ -84,8 +84,6 @@ QtExtraComponents.MouseEventListener {
         anchors.fill: parent
         onClicked: {
             plasmoid.expanded = true;
-            root.currentTask = "";
-            root.expandedItem = null
         }
     }
 
