@@ -230,9 +230,7 @@ function checkLastSpacer() {
                     checkLastSpacer();
                 }
             }
-Text{
-   text: (applet && applet.Layout ? applet.Layout.minimumWidth : "pollo")
-}
+
             Layout.minimumWidth: (plasmoid.formFactor != PlasmaCore.Types.Vertical ? (applet && applet.Layout.minimumWidth > 0 ? applet.Layout.minimumWidth : root.height) : root.width)
             Layout.minimumHeight: (plasmoid.formFactor == PlasmaCore.Types.Vertical ? (applet && applet.Layout.minimumHeight > 0 ? applet.Layout.minimumHeight : root.width) : root.height)
 

@@ -82,22 +82,6 @@ QtExtraComponents.MouseEventListener {
         opacity: 0.8;
     }
 
-    Component {
-        id: exandedStatusItemComponent
-        Item {
-            Rectangle {
-                anchors.fill: parent;
-                border.width: 1;
-                border.color: "black";
-                color: "green";
-                visible: root.debug;
-                opacity: 0.7;
-            }
-
-        }
-    }
-
-
     property bool isExpanded: expanded
 
     onIsExpandedChanged: {
