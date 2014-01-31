@@ -32,7 +32,6 @@ Item {
     property string playerIcon: ""
 
 
-    property int baseSize: theme.mSize(theme.defaultFont).height
     property bool noPlayer: true
 
     Plasmoid.switchWidth: units.gridUnit * 10
@@ -46,7 +45,7 @@ Item {
         id: mpris2Source
         engine: "mpris2"
         connectedSources: sources
-        interval: 0
+        interval: 800
         property string last
         onSourceAdded: {
             //print("XXX source added: " + source);
