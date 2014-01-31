@@ -50,7 +50,10 @@ Item {
         }
         onClicked: {
             expandedItemContainer.clear();
-            root.expandedTask = null;
+            if (root.expandedTask) {
+                root.expandedTask.expanded = false;
+                root.expandedTask = null;
+            }
         }
     }
 

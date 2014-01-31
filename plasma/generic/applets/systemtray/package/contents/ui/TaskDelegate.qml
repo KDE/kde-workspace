@@ -143,12 +143,7 @@ QtExtraComponents.MouseEventListener {
     Component.onCompleted: {
         if (taskType == SystemTray.Task.TypeStatusItem) {
             sniLoader.source = "StatusNotifierItem.qml";
-            var component = Qt.createComponent("ExpandedStatusNotifier.qml");
-            if (component.status == Component.Ready) {
-                expandedItem = component.createObject(taskItemContainer, {"x": 300, "y": 300});
-            } else {
-                print("Error loading statusitem: " + component.errorString());
-            }
+
         } else if (taskItem != undefined) {
             sniLoader.source = "PlasmoidItem.qml";
             taskItem.parent = taskItemContainer;
