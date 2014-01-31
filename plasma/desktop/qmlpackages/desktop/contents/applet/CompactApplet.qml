@@ -16,6 +16,7 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  2.010-1301, USA.
  */
 import QtQuick 2.0
+import QtQuick.Layouts 1.1
 import QtQuick.Window 2.0
 
 import org.kde.plasma.core 2.0 as PlasmaCore
@@ -29,12 +30,26 @@ Item {
     property Item compactRepresentation
 
     onFullRepresentationChanged: {
+
         //if the fullRepresentation size was restored to a stored size, or if is dragged from the desktop, restore popup size
         if (fullRepresentation.width > 0) {
             popupWindow.mainItem.width = fullRepresentation.width;
+        } else if (fullRepresentation.Layout && fullRepresentation.Layout.preferredWidth > 0) {
+            popupWindow.mainItem.width = fullRepresentation.Layout.preferredWidth
+        } else if (fullRepresentation.implicitWidth > 0) {
+            popupWindow.mainItem.width = fullRepresentation.implicitWidth
+        } else {
+            popupWindow.mainItem.width = theme.mSize(theme.defaultFont).width * 35
         }
+
         if (fullRepresentation.height > 0) {
             popupWindow.mainItem.height = fullRepresentation.height;
+        } else if (fullRepresentation.Layout && fullRepresentation.Layout.preferredHeight > 0) {
+            popupWindow.mainItem.height = fullRepresentation.Layout.preferredHeight
+        } else if (fullRepresentation.implicitHeight > 0) {
+            popupWindow.mainItem.height = fullRepresentation.implicitHeight
+        } else {
+            popupWindow.mainItem.width = theme.mSize(theme.defaultFont).height * 25
         }
 
         fullRepresentation.parent = appletParent;
@@ -53,8 +68,8 @@ Item {
 
         mainItem: Item {
             id: appletParent
-            width: fullRepresentation && fullRepresentation.implicitWidth > 0 ? fullRepresentation.implicitWidth : theme.mSize(theme.defaultFont).width * 35
-            height: fullRepresentation && fullRepresentation.implicitHeight > 0 ? fullRepresentation.implicitHeight : theme.mSize(theme.defaultFont).height * 25
+            Layout.minimumWidth: (fullRepresentation && fullRepresentation.Layout) ? fullRepresentation.Layout.minimumWidth : 0
+            Layout.minimumHeight: (fullRepresentation && fullRepresentation.Layout) ? fullRepresentation.Layout.minimumHeight: 0
         }
 
         onVisibleChanged: {

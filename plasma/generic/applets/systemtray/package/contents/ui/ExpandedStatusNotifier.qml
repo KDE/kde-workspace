@@ -24,7 +24,7 @@ import org.kde.plasma.extras 2.0 as PlasmaExtras
 import org.kde.qtextracomponents 2.0 as QtExtraComponents
 
 import org.kde.private.systemtray 2.0 as SystemTray
-//import "plasmapackage:/code/Layout.js" as Layout
+//import "plasmapackage:/code/Layout.js" as LayoutManager
 
 
 Item {

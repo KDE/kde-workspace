@@ -26,23 +26,20 @@ import org.kde.plasma.extras 2.0 as PlasmaExtras
 Item {
     id: main
 
-    // Override the minimumwidth to force the collapsed version
-    // Some people want to show a really big digital clock.
-    // Moreover, semantically, the calendar is not a more complete
-    // representation, but really a popup dialog.
-    Layout.minimumWidth: 4000
-    Layout.minimumHeight: 2000
+    Layout.minimumWidth: _minimumWidth
+    Layout.minimumHeight: _minimumHeight
 
     // The "sensible" values
     property int _minimumWidth: _minimumHeight * 2.2
     property int _minimumHeight: theme.mSize(theme.defaultFont).height * 14
-    property int implicitWidth: _minimumWidth * 1.5
-    property int implicitHeight: _minimumHeight * 1.5
+    Layout.preferredWidth: _minimumWidth * 1.5
+    Layout.preferredHeight: _minimumHeight * 1.5
 
     property int formFactor: plasmoid.formFactor
 
     property alias calendarLoader: calendarLoader
 
+    Plasmoid.preferredRepresentation: Plasmoid.compactRepresentation
     Plasmoid.compactRepresentation: DigitalClock { }
 
     PlasmaCore.DataSource {

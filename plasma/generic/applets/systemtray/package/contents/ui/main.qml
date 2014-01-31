@@ -25,7 +25,7 @@ import org.kde.plasma.core 2.0 as PlasmaCore
 // import org.kde.plasma.extras 2.0 as PlasmaExtras
 
 import org.kde.private.systemtray 2.0 as SystemTray
-import "plasmapackage:/code/Layout.js" as Layout
+import "plasmapackage:/code/Layout.js" as LayoutManager
 
 Item {
     id: root
@@ -49,7 +49,7 @@ Item {
 
     // Sizes depend on the font, and thus on DPI
     property int baseSize: theme.mSize(theme.defaultFont).height
-    property int itemSize: Layout.alignedSize(Math.min(baseSize * 2, preferredItemSize))
+    property int itemSize: LayoutManager.alignedSize(Math.min(baseSize * 2, preferredItemSize))
 
     property bool debug: plasmoid.configuration.debug
 
