@@ -30,7 +30,7 @@ Item {
 
     signal triggered
 
-    width: root.controlSize
+    width: expandedRepresentation.controlSize
     height: width
 
     PlasmaCore.IconItem {

@@ -18,12 +18,20 @@
  ***************************************************************************/
 
 import QtQuick 2.0
+import QtQuick.Layouts 1.1
 import org.kde.plasma.core 2.0 as PlasmaCore
 import org.kde.plasma.components 2.0 as PlasmaComponents
 import org.kde.plasma.extras 2.0 as PlasmaExtras
 
 Item {
     id: expandedRepresentation
+
+    Layout.minimumWidth: Layout.minimumHeight * 1.333
+    Layout.minimumHeight: theme.mSize(theme.defaultFont).height * 8
+    Layout.preferredWidth: Layout.minimumWidth * 1.5
+    Layout.preferredHeight: Layout.minimumHeight * 1.5
+
+    property int controlSize: Math.min(height, width) / 4
 
     anchors {
         margins: units.largeSpacing
