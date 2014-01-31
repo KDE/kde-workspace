@@ -18,6 +18,7 @@ target_link_libraries(kcm_desktoptheme ${X11_LIBRARIES}
 )
 
 install(TARGETS kcm_desktoptheme DESTINATION ${PLUGIN_INSTALL_DIR} )
+install( FILES plasma-themes.knsrc  DESTINATION  ${CONFIG_INSTALL_DIR} )
 
 ########### install files ###############
 install( FILES desktoptheme.desktop  DESTINATION  ${SERVICES_INSTALL_DIR} )
