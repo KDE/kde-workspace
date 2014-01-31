@@ -33,11 +33,6 @@ Item {
 
     property bool vertical: (plasmoid.formFactor == PlasmaCore.Types.Vertical)
 
-    Layout.minimumWidth: Layout.minimumHeight * 1.333
-    Layout.minimumHeight: theme.mSize(theme.defaultFont).height * 14
-
-    Layout.preferredWidth: Layout.minimumWidth * 1.5
-    Layout.preferredHeight: Layout.minimumHeight * 1.5
     Plasmoid.preferredRepresentation: Plasmoid.compactRepresentation
     Plasmoid.onExpandedChanged: {
         if (!plasmoid.expanded) {
@@ -67,6 +62,12 @@ Item {
 
     Plasmoid.compactRepresentation: CompactRepresentation {
         systrayhost: host
+    }
+    Plasmoid.fullRepresentation: ExpandedRepresentation {
+        Layout.minimumWidth: Layout.minimumHeight * 1.333
+        Layout.minimumHeight: theme.mSize(theme.defaultFont).height * 14
+        Layout.preferredWidth: Layout.minimumWidth * 1.5
+        Layout.preferredHeight: Layout.minimumHeight * 1.5
     }
 
     Rectangle {
@@ -99,7 +100,4 @@ Item {
 //         id: expandedLoader
 //     }
 
-    ExpandedRepresentation {
-        anchors.fill: parent
-    }
 }
