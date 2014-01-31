@@ -57,7 +57,7 @@ PlasmoidTask::PlasmoidTask(QQuickItem* rootItem, const QString &packageName, con
         
         //old syntax, because we are connecting blindly
         connect(m_taskGraphicsObject, SIGNAL(expandedChanged(bool)),
-                this, SLOT(syncExpanded(bool)));
+                this, SIGNAL(expandedChanged(bool)));
     }
 
 
@@ -107,20 +107,6 @@ void PlasmoidTask::updateStatus()
     }
 }
 
-void PlasmoidTask::expandApplet(bool expanded)
-{
-    qCDebug(SYSTEMTRAY) << "ST2P expandApplet() " << expanded;
-    if (m_taskGraphicsObject) {
-        m_taskGraphicsObject->setProperty("expanded", expanded);
-    }
-    //if (m_taskItem->isExpanded() != expanded) {
-/*    if (m_taskItem && m_taskItem->isExpanded() != expanded) {
-        qCDebug(SYSTEMTRAY) << "ST2P set plasmoid.expand = " << expanded;
-        m_taskItem->setExpanded(expanded);
-        //m_taskItem->setCollapsed();
-    }*/
-}
-
 bool PlasmoidTask::isValid() const
 {
     return m_valid && pluginInfo().isValid();
@@ -158,9 +144,9 @@ QString PlasmoidTask::taskId() const
 QQuickItem* PlasmoidTask::taskItem()
 {
     if (m_taskGraphicsObject) {
-        qWarning()<<"BBBBB"<<m_taskGraphicsObject<<m_taskGraphicsObject->property("title");
         return m_taskGraphicsObject;
     }
+    //FIXME
     return new QQuickItem();//m_taskItem;
 }
 
@@ -173,6 +159,7 @@ QQuickItem* PlasmoidTask::taskItemExpanded()
     if (m_taskGraphicsObject && m_taskGraphicsObject->property("fullRepresentationItem").value<QQuickItem *>()) {
         return m_taskGraphicsObject->property("fullRepresentationItem").value<QQuickItem *>();
     }
+    //FIXME
     return new QQuickItem();//m_taskItem->defaultRepresentation();
 }
 
@@ -202,10 +189,13 @@ bool PlasmoidTask::expanded() const
     }
 }
 
-void PlasmoidTask::syncExpanded(bool expanded)
+void PlasmoidTask::setExpanded(bool expanded)
 {
-    emit expandedChanged(expanded);
+    if (m_taskGraphicsObject) {
+        m_taskGraphicsObject->setProperty("expanded", expanded);
+    }
 }
+
 
 }
 

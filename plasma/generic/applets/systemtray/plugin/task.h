@@ -53,7 +53,7 @@ class Task : public QObject
     Q_PROPERTY(Status status READ status NOTIFY changedStatus)
     Q_PROPERTY(QString name READ name NOTIFY changedName)
     Q_PROPERTY(Category category READ category NOTIFY changedCategory)
-    Q_PROPERTY(bool expanded READ expanded NOTIFY expandedChanged)
+    Q_PROPERTY(bool expanded READ expanded WRITE setExpanded NOTIFY expandedChanged)
 
 public:
     enum Status {
@@ -160,6 +160,7 @@ public:
     Status status() const;
 
     virtual bool expanded() const;
+    virtual void setExpanded(bool expanded);
 
     /**
      * This function must always return type of task (an integer value). This value must always be

@@ -68,13 +68,13 @@ public:
     virtual bool isWidget() const;
     virtual TaskType type() const { return TypePlasmoid; };
     virtual bool expanded() const;
+    virtual void setExpanded(bool expanded);
 
     QString iconName() const { return m_iconName; }
     KPluginInfo pluginInfo() const;
     QString shortcut() const { return m_shortcut; }
     void    setShortcut(QString text);
 
-    Q_INVOKABLE void expandApplet(bool expanded);
     Q_INVOKABLE void setLocation(Plasma::Types::Location loc);
 
 Q_SIGNALS:
@@ -85,7 +85,6 @@ Q_SIGNALS:
 
 private Q_SLOTS:
     void syncStatus(QString status);
-    void syncExpanded(bool expanded);
 
 private:
     void updateStatus();
