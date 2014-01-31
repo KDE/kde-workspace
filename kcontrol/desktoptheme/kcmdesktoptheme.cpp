@@ -43,8 +43,7 @@
 #include <kpluginfactory.h>
 #include <kpluginloader.h>
 
-K_PLUGIN_FACTORY(KCMDesktopThemeFactory, registerPlugin<KCMDesktopTheme>();)
-K_EXPORT_PLUGIN(KCMDesktopThemeFactory("kcmdesktoptheme","kcm_desktopthemedetails"))
+K_PLUGIN_FACTORY_WITH_JSON(KCMDesktopThemeFactory, "desktoptheme.json", registerPlugin<KCMDesktopTheme>();)
 
 
 KCMDesktopTheme::KCMDesktopTheme( QWidget* parent, const QVariantList& )

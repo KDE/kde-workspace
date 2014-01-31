@@ -4,6 +4,8 @@ project(desktoptheme)
 set(kcmdesktoptheme_SRCS kcmdesktoptheme.cpp desktopthemedetails.cpp thememodel.cpp)
 kde4_add_ui_files(kcmdesktoptheme_SRCS DesktopTheme.ui DesktopThemeDetails.ui)
 
+kservice_desktop_to_json(desktoptheme.desktop)
+
 add_library(kcm_desktoptheme MODULE ${kcmdesktoptheme_SRCS})
 target_link_libraries(kcm_desktoptheme ${X11_LIBRARIES}
     KF5::Archive
