@@ -29,6 +29,9 @@
 #include <kio/copyjob.h>
 #include <kio/deletejob.h>
 #include <kio/job.h>
+#include <qstandardpaths.h>
+
+#include <QDebug>
 
 struct ThemeItemNameType {
         const char* m_type;
@@ -65,7 +68,7 @@ DesktopThemeDetails::DesktopThemeDetails(QWidget* parent)
     setupUi(this);
 
     QFont font = QFont();
-    font.setBold(true);
+    //font.setBold(true);
     font.setPointSize(1.2*font.pointSize());
     m_themeInfoName->setFont(font);
 
@@ -575,7 +578,7 @@ void DesktopThemeDetails::themeSelectionChanged(const QItemSelection newSelectio
 
 void DesktopThemeDetails::setDesktopTheme(QString themeRoot)
 {
-    KConfig config(KStandardDirs::locate("config", "plasmarc"));
+    KConfig config(QStandardPaths::locate(QStandardPaths::ConfigLocation, "plasmarc"));
     KConfigGroup cg = KConfigGroup(&config, "Theme");
     if (themeRoot == "default") {
         cg.deleteEntry("name");
