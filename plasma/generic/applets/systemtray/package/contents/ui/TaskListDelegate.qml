@@ -28,7 +28,7 @@ TaskDelegate {
     id: taskListDelegate
     objectName: "taskListDelegate"
 
-    property bool expanded: (root.currentTask == "")
+    snExpanded: (root.currentTask == "")
 
     width: snExpanded ? parent.width : height * 1.5 // be a bit more lenient to input
     height: (root.baseSize * 2)
@@ -52,7 +52,7 @@ TaskDelegate {
             right: parent.right
             verticalCenter: parent.verticalCenter
         }
-        opacity: taskListDelegate.expanded ? 1 : 0
+        opacity: snExpanded ? 1 : 0
         Behavior on opacity { NumberAnimation { duration: 250 } }
         text: name
         elide: Text.ElideRight

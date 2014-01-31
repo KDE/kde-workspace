@@ -43,13 +43,6 @@ QtExtraComponents.MouseEventListener {
         //print("******************* Task changed:" + task.taskId + " " + task.name)
     }
 
-    Connections {
-        target: task
-        onExpandedChanged: {
-            print("FFFFFFFF"+expanded+"  "+task.name)
-        }
-        
-    }
 
     onClicked: {
         if (taskType == SystemTray.Task.TypePlasmoid) {
@@ -104,15 +97,36 @@ QtExtraComponents.MouseEventListener {
         }
     }
 
-    onExpandedItemChanged: {
-        if (expandedItem && root.expandedItem != expandedItem) {
+
+    property bool isExpanded: expanded
+    onIsExpandedChanged: {
+        if (!expandedItem) {
+            return;
+        }
+        print("AAA"+expanded+root.expandedItem+expandedItem)
+        expandedItem.visible = false;
+        if (expanded) {
             root.currentTask = taskId;
             root.expandedItem = expandedItem;
-        } else if (root.currentTask == taskId) {
+        } else {
             // release
             root.currentTask = ""
             root.expandedItem = null;
         }
+    }
+    onExpandedItemChanged: {
+        if (!expandedItem) {
+            return;
+        }
+
+        /*if (expanded && root.expandedItem == expandedItem) {
+            root.expandedItem.visible = false;
+            root.currentTask = taskId;
+            root.expandedItem = expandedItem;
+            expandedItem.visible = true;
+        } else {
+            expandedItem.visible = false;
+        }*/
     }
 
     PulseAnimation {
@@ -151,6 +165,7 @@ QtExtraComponents.MouseEventListener {
         } else if (taskItem != undefined) {
             sniLoader.source = "PlasmoidItem.qml";
             taskItem.parent = taskItemContainer;
+            taskItem.z = 999;
             updatePlasmoidGeometry();
         }
     }

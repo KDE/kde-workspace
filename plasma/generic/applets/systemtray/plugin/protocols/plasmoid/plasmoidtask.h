@@ -67,6 +67,7 @@ public:
     virtual QIcon icon() const;
     virtual bool isWidget() const;
     virtual TaskType type() const { return TypePlasmoid; };
+    virtual bool expanded() const;
 
     QString iconName() const { return m_iconName; }
     KPluginInfo pluginInfo() const;

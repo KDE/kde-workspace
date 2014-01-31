@@ -33,7 +33,7 @@ Item {
 
     property bool vertical: (plasmoid.formFactor == PlasmaCore.Types.Vertical)
 
-    Layout.minimumWidth: minimumHeight * 1.333
+    Layout.minimumWidth: Layout.minimumHeight * 1.333
     Layout.minimumHeight: theme.mSize(theme.defaultFont).height * 14
 
     Layout.preferredWidth: Layout.minimumWidth * 1.5
@@ -51,6 +51,7 @@ Item {
     property Item expandedItem: null
     property string currentTask: ""
     property string currentName: ""
+
 
     function togglePopup() {
         print("toggle popup => " + !plasmoid.expanded);

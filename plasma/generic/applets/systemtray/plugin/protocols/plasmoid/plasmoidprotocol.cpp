@@ -82,7 +82,10 @@ void PlasmoidProtocol::init()
     foreach (const KPluginInfo &info, applets) {
         KService::Ptr service = info.service();
         //HACK
-        if (info.pluginName() == "org.kde.plasma.mediacontroller" && !blacklist.contains(info.pluginName()) && service->property("X-Plasma-NotificationArea", QVariant::Bool).toBool()) {
+        if (/*(info.pluginName()=="org.kde.plasma.mediacontroller" ||
+            info.pluginName()=="org.kde.plasma.notifications" ||
+            info.pluginName()=="org.kde.plasma.batterymonitor")&&*/
+            !blacklist.contains(info.pluginName()) && service->property("X-Plasma-NotificationArea", QVariant::Bool).toBool()) {
             // if we already have a plugin with this exact name in it, then check if it is the
             // same plugin and skip it if it is indeed already listed
             if (sortedApplets.contains(info.name())) {

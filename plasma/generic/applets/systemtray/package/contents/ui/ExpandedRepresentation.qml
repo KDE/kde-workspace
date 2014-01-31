@@ -52,6 +52,7 @@ Item {
     Connections {
         target: root
         onExpandedItemChanged: {
+            print(root.expandedItem)
             if (root.expandedItem != null) {
                 root.expandedItem.parent = expandedItemContainer;
                 root.expandedItem.anchors.fill = expandedItemContainer;
@@ -107,13 +108,13 @@ Item {
         id: separator
 
         width: lineSvg.elementSize("vertical-line").width;
-        height: parent.width;
         visible: root.expandedItem != null
 
         anchors {
             right: expandedItemContainer.left;
             rightMargin: units.largeSpacing
             bottom: parent.bottom;
+            top: parent.top;
         }
         elementId: "vertical-line";
 
