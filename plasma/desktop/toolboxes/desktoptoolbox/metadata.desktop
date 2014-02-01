@@ -1,5 +1,6 @@
 [Desktop Entry]
 Name=Declarative Toolbox
+Name[bs]=Deklarativna kutija s alatom
 Name[ca]=Quadre d'eines declaratiu
 Name[ca@valencia]=Quadre d'eines declaratiu
 Name[de]=Deklarativer Werkzeugkasten
@@ -27,6 +28,7 @@ Name[uk]=Декларативний набір інструментів
 Name[x-test]=xxDeclarative Toolboxxx
 Name[zh_TW]=宣告元件工具盒
 Comment=Manage Plasma
+Comment[bs]=Upravljanje Plasmom
 Comment[ca]=Gestió del Plasma
 Comment[ca@valencia]=Gestió del Plasma
 Comment[de]=Plasma verwalten
