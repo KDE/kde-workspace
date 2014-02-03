@@ -41,7 +41,9 @@ namespace SystemTray
 
 PlasmoidProtocol::PlasmoidProtocol(QObject *parent)
     : Protocol(parent),
-      m_tasks()
+      m_tasks(),
+      m_corona(0),
+      m_containment(0)
 {
 }
 
@@ -51,16 +53,22 @@ PlasmoidProtocol::~PlasmoidProtocol()
 
 void PlasmoidProtocol::init()
 {
-    Plasma::Corona *c = new Plasma::Corona(this);
+    //this should never happen
+    if (m_corona) {
+        return;
+    }
 
-    m_containment = c->createContainment("null");
+    m_corona = new Plasma::Corona(this);
+
+    m_containment = m_corona->createContainment("null");
     m_containment->setFormFactor(Plasma::Types::Horizontal);
     m_containment->init();
     Plasma::Package package = Plasma::PluginLoader::self()->loadPackage("Plasma/Shell");
     package.setDefaultPackageRoot("plasma/plasmoids/");
     package.setPath("org.kde.plasma.systemtray");
     m_systrayPackageRoot = package.path();
-    c->setPackage(package);
+    //the systray package acts as a shell package for this internal corona
+    m_corona->setPackage(package);
 
     qCDebug(SYSTEMTRAY) << "ST2 PackagePathQml: " << m_systrayPackageRoot;
 

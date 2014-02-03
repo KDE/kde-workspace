@@ -28,6 +28,7 @@ class QmlObject;
 
 namespace Plasma {
     class Containment;
+    class Corona;
 }
 
 namespace SystemTray
@@ -52,6 +53,7 @@ protected Q_SLOTS:
 private:
     QHash<QString, PlasmoidTask*> m_tasks;
     QString m_systrayPackageRoot;
+    Plasma::Corona *m_corona;
     Plasma::Containment *m_containment;
 };
 
