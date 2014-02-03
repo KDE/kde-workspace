@@ -45,7 +45,8 @@ PlasmoidTask::PlasmoidTask(QQuickItem* rootItem, const QString &packageName, con
     qCDebug(SYSTEMTRAY) << "Loading applet: " << packageName;
     //m_taskItem = new PlasmoidInterface(packageName, systrayPackageRoot, m_rootItem);
 
-    m_taskItem = cont->createApplet(packageName);//Plasma::PluginLoader::self()->loadApplet(packageName);
+    m_taskItem = cont->createApplet(packageName);
+
     m_taskItem->init();
     m_taskGraphicsObject = m_taskItem->property("graphicObject").value<QQuickItem *>();
 

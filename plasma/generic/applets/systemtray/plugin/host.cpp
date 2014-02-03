@@ -162,7 +162,7 @@ void Host::setRootItem(QQuickItem* rootItem)
     //qCDebug(SYSTEMTRAY) << "Set root item";
     if (s_manager && s_manager->rootItem() != rootItem) {
         s_manager->setRootItem(rootItem);
-        //emit rootItemChanged();
+        emit rootItemChanged();
     }
 }
 

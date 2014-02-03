@@ -81,7 +81,7 @@ Item {
     
     SystemTray.Host {
         id: host
-        //rootItem: hiddenView
+        rootItem: plasmoid
     }
 
 // FIXME: Doesn't work, parenting problems and no model available

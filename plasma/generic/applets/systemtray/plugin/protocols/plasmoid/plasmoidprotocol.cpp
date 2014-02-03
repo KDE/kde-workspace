@@ -58,7 +58,16 @@ void PlasmoidProtocol::init()
         return;
     }
 
+    Manager* m = qobject_cast<Manager*>(parent());
+    QQuickItem* rootItem = m->rootItem();
+    if (rootItem) {
+        m_systrayApplet = rootItem->property("_plasma_applet").value<Plasma::Applet*>();
+    }
     m_corona = new Plasma::Corona(this);
+    if (m_systrayApplet) {
+        m_corona->setParent(m_systrayApplet);
+    }
+
 
     m_containment = m_corona->createContainment("null");
     m_containment->setFormFactor(Plasma::Types::Horizontal);
@@ -69,7 +78,6 @@ void PlasmoidProtocol::init()
     m_systrayPackageRoot = package.path();
     //the systray package acts as a shell package for this internal corona
     m_corona->setPackage(package);
-
     qCDebug(SYSTEMTRAY) << "ST2 PackagePathQml: " << m_systrayPackageRoot;
 
     //X-Plasma-NotificationArea

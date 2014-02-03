@@ -27,6 +27,7 @@ class QQuickItem;
 class QmlObject;
 
 namespace Plasma {
+    class Applet;
     class Containment;
     class Corona;
 }
@@ -55,6 +56,7 @@ private:
     QString m_systrayPackageRoot;
     Plasma::Corona *m_corona;
     Plasma::Containment *m_containment;
+    Plasma::Applet *m_systrayApplet;
 };
 
 }
