@@ -38,8 +38,6 @@ DragDrop.DropArea {
 
     property Item toolBox
 
-    property Item currentLayout: (plasmoid.formFactor == PlasmaCore.Types.Vertical) ? column : row
-
     property Item dragOverlay
 //END properties
 
@@ -90,10 +88,6 @@ function addApplet(applet, x, y) {
         LayoutManager.restore();
     }
 
-    onCurrentLayoutChanged: {
-        LayoutManager.layout = currentLayout
-    }
-
     onDragEnter: {
         LayoutManager.insertAtCoordinates(dndSpacer, event.x, event.y)
     }
@@ -131,26 +125,6 @@ function addApplet(applet, x, y) {
             }
 
             LayoutManager.save();
-        }
-
-        onFormFactorChanged: {
-            lastSpacer.parent = root
-
-            if (plasmoid.formFactor == PlasmaCore.Types.Vertical) {
-                for (var container in row.children) {
-                    var item = row.children[0];
-                    item.parent = column
-                }
-                lastSpacer.parent = column
-
-            } else {
-                lastSpacer.parent = row
-                for (var container in column.children) {
-                    var item = column.children[0];
-                    item.parent = row
-                }
-                lastSpacer.parent = row
-            }
         }
 
         onUserConfiguringChanged: {
@@ -205,11 +179,6 @@ function addApplet(applet, x, y) {
                 anchors.centerIn: parent
             }
             onXChanged: {
-                if (parent !== currentLayout) {
-                    oldX = x
-                    oldY = y
-                    return;
-                }
                 translation.x = oldX - x
                 translation.y = oldY - y
                 translAnim.running = true
@@ -217,11 +186,6 @@ function addApplet(applet, x, y) {
                 oldY = y
             }
             onYChanged: {
-                if (parent !== currentLayout) {
-                    oldX = x
-                    oldY = y
-                    return;
-                }
                 translation.x = oldX - x
                 translation.y = oldY - y
                 translAnim.running = true
@@ -258,19 +222,19 @@ function addApplet(applet, x, y) {
         height: (plasmoid.formFactor == PlasmaCore.Types.Vertical) ?  theme.mSize(theme.defaultFont).width * 10 : currentLayout.height
     }
 
-    RowLayout {
-        id: row
+    GridLayout {
+        id: currentLayout
+        property bool isHorizontal: plasmoid.formFactor == PlasmaCore.Types.Horizontal
         anchors {
             fill: parent
-            rightMargin: toolBox ? toolBox.width : 0
+            rightMargin: toolBox && isHorizontal? toolBox.width : 0
+            bottomMargin: toolBox && !isHorizontal? toolBox.height : 0
         }
-    }
-    ColumnLayout {
-        id: column
-        anchors {
-            fill: parent
-            bottomMargin: toolBox ? toolBox.height : 0
-        }
+        rows: 1
+        columns: 1
+        //when horizontal layout top-to-bottom, this way it will obey our limit of one row and actually lay out left to right
+        flow: isHorizontal ? GridLayout.TopToBottom : GridLayout.LeftToRight
+
     }
 //END UI elements
 }
