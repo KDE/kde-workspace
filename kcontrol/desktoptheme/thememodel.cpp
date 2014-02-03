@@ -204,7 +204,7 @@ void ThemeDelegate::paint(QPainter *painter,
     // draw text
     painter->save();
     QFont font = painter->font();
-    font.setWeight(QFont::Bold);
+    //font.setWeight(QFont::Bold);
     const QString colorFile = QStandardPaths::locate(QStandardPaths::GenericDataLocation, "desktoptheme/" + package + "/colors");
     if (!colorFile.isEmpty()) {
         KSharedConfigPtr colors = KSharedConfig::openConfig(colorFile);

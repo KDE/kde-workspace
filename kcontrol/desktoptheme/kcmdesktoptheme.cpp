@@ -80,7 +80,7 @@ KCMDesktopTheme::KCMDesktopTheme( QWidget* parent, const QVariantList& )
     m_themeModel = new ThemeModel(this);
     m_theme->setModel(m_themeModel);
     m_theme->setItemDelegate(new ThemeDelegate(m_theme));
-    m_theme->setVerticalScrollMode(QAbstractItemView::ScrollPerPixel);
+    m_theme->setVerticalScrollMode(QAbstractItemView::ScrollPerItem);
 
     connect(m_detailsWidget, SIGNAL(changed()), this, SLOT(detailChanged()));
 
