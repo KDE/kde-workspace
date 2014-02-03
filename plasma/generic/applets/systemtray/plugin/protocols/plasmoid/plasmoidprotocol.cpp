@@ -19,7 +19,6 @@
 
 #include "plasmoidtask.h"
 #include "plasmoidprotocol.h"
-#include "plasmoidinterface.h"
 
 #include "debug.h"
 

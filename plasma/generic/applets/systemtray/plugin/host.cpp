@@ -23,7 +23,6 @@
 #include "manager.h"
 #include "task.h"
 #include "debug.h"
-#include "protocols/plasmoid/plasmoidinterface.h"
 
 #include <klocalizedstring.h>
 
