@@ -218,7 +218,7 @@ void AppMenuModule::slotActionActivationRequested(QAction* a)
 void AppMenuModule::slotActiveWindowChanged(WId id)
 {
     KWindowInfo info = KWindowSystem::windowInfo(id, NET::WMWindowType);
-    unsigned long mask = NET::AllTypesMask;
+    NET::WindowTypes mask = NET::AllTypesMask;
 
     m_currentScreen = currentScreen();
 

@@ -135,7 +135,7 @@ WId MenuImporter::recursiveMenuId(WId id)
 void MenuImporter::RegisterWindow(WId id, const QDBusObjectPath& path)
 {
     KWindowInfo info = KWindowSystem::windowInfo(id, NET::WMWindowType);
-    unsigned long mask = NET::AllTypesMask;
+    NET::WindowTypes mask = NET::AllTypesMask;
 
     // Menu can try to register, right click in gimp for exemple
     if (info.windowType(mask) & (NET::Menu|NET::DropdownMenu||NET::PopupMenu)) {
