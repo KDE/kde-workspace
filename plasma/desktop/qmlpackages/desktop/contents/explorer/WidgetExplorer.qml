@@ -93,7 +93,7 @@ Item {
         mainItem: Tooltip { id: tooltipWidget }
 
         Behavior on y {
-            NumberAnimation { duration: 250 }
+            NumberAnimation { duration: units.longDuration }
         }
     }
     Timer {
@@ -197,7 +197,7 @@ Item {
                     properties: "x"
                     from: -list.width
                     to: 0
-                    duration: 150
+                    duration: units.shortDuration * 3
 
                 }
             }
@@ -207,7 +207,7 @@ Item {
                 NumberAnimation {
                     properties: "x"
                     to: list.width
-                    duration: 150
+                    duration: units.shortDuration * 3
                 }
             }
 
@@ -220,7 +220,7 @@ Item {
             displaced: Transition {
                 NumberAnimation {
                     properties: "y"
-                    duration: 150
+                    duration: units.shortDuration * 3
                 }
             }
         }

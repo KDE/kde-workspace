@@ -32,10 +32,10 @@ PlasmaCore.FrameSvgItem {
     prefix: Current ? (mainMouseArea.containsMouse ? "selected+hover" : "selected") : (mainMouseArea.containsMouse ? "hover" : "normal")
 
     Behavior on width {
-        NumberAnimation { duration: 250 }
+        NumberAnimation { duration: units.longDuration }
     }
     Behavior on height {
-        NumberAnimation { duration: 250 }
+        NumberAnimation { duration: units.longDuration }
     }
 
     PlasmaComponents.PageStack {

@@ -137,32 +137,32 @@ MouseArea {
         Behavior on x {
             enabled: !configurationArea.pressed
             NumberAnimation {
-                duration: 250
+                duration: units.longDuration
                 easing.type: Easing.InOutQuad
             }
         }
         Behavior on y {
             enabled: !configurationArea.pressed
             NumberAnimation {
-                duration: 250
+                duration: units.longDuration
                 easing.type: Easing.InOutQuad
             }
         }
         Behavior on width {
             NumberAnimation {
-                duration: 250
+                duration: units.longDuration
                 easing.type: Easing.InOutQuad
             }
         }
         Behavior on height {
             NumberAnimation {
-                duration: 250
+                duration: units.longDuration
                 easing.type: Easing.InOutQuad
             }
         }
         Behavior on opacity {
             NumberAnimation {
-                duration: 250
+                duration: units.longDuration
                 easing.type: Easing.InOutQuad
             }
         }

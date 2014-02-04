@@ -115,7 +115,7 @@ Item {
 
         Behavior on height {
             NumberAnimation {
-                duration: 50
+                duration: units.shortDuration
                 easing.type: Easing.OutQuad
             }
         }
@@ -161,19 +161,19 @@ Item {
             height: (toolBoxFrame.currentItem != null) ? toolBoxFrame.currentItem.height : 0
             Behavior on x {
                 NumberAnimation {
-                    duration: 150
+                    duration: units.shortDuration * 3
                     easing.type: Easing.InOutQuad
                 }
             }
             Behavior on opacity {
                 NumberAnimation {
-                    duration: 150
+                    duration: units.shortDuration * 3
                     easing.type: Easing.InOutQuad
                 }
             }
             Behavior on y {
                 NumberAnimation {
-                    duration: 150
+                    duration: units.shortDuration * 3
                     easing.type: Easing.InOutQuad
                 }
             }
@@ -198,13 +198,13 @@ Item {
                     target: toolBoxItem
                     properties: "opacity"
                     easing.type: Easing.InExpo
-                    duration: 250
+                    duration: units.longDuration
                 }
                 NumberAnimation {
                     target: toolBoxItem
                     properties: "scale"
                     easing.type: Easing.InExpo
-                    duration: 150
+                    duration: units.shortDuration * 3
                 }
             }
         }

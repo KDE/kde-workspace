@@ -130,7 +130,7 @@ MouseArea {
         }
         opacity: local ? 1 : 0
         Behavior on opacity {
-            NumberAnimation { duration: 250 }
+            NumberAnimation { duration: units.longDuration }
         }
         iconSource: "application-exit"
         text: i18n("Uninstall")

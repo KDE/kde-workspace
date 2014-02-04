@@ -144,7 +144,7 @@ Rectangle {
                 target: internal.newContainment
                 properties: "x"
                 to: 0
-                duration: 250
+                duration: units.longDuration
                 easing.type: Easing.InOutQuad
             }
         }

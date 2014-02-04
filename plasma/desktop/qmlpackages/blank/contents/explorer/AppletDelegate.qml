@@ -48,14 +48,14 @@ PlasmaCore.FrameSvgItem {
             target: background
             property: widgetExplorer.orientation == Qt.Horizontal ? "y" : "x"
             to: widgetExplorer.orientation == Qt.Horizontal ? list.delegateHeight : list.delegateWidth
-            duration: 150
+            duration: units.shortDuration * 3
             easing.type: Easing.InOutQuad
         }
         NumberAnimation {
             target: background
             property: widgetExplorer.orientation == Qt.Horizontal ? "y" : "x"
             to: widgetExplorer.orientation == Qt.Horizontal ? list.delegateHeight : list.delegateWidth
-            duration: 150
+            duration: units.shortDuration * 3
             easing.type: Easing.InOutQuad
         }
         NumberAnimation {
@@ -63,7 +63,7 @@ PlasmaCore.FrameSvgItem {
             property: widgetExplorer.orientation == Qt.Horizontal ? "width" : "height"
             from: widgetExplorer.orientation == Qt.Horizontal ? list.delegateWidth : list.delegateHeight
             to: 0
-            duration: 150
+            duration: units.shortDuration * 3
             easing.type: Easing.InOutQuad
         }
         PropertyAction {
@@ -84,14 +84,14 @@ PlasmaCore.FrameSvgItem {
             property: widgetExplorer.orientation == Qt.Horizontal ? "width" : "height"
             from: 0
             to: widgetExplorer.orientation == Qt.Horizontal ? list.delegateWidth : list.delegateHeight
-            duration: 150
+            duration: units.shortDuration * 3
             easing.type: Easing.InOutQuad
         }
         NumberAnimation {
             target: background
             property: widgetExplorer.orientation == Qt.Horizontal ? "y" : "x"
             to: 0
-            duration: 150
+            duration: units.shortDuration * 3
             easing.type: Easing.InOutQuad
         }
     }

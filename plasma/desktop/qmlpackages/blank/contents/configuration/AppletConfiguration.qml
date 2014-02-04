@@ -128,7 +128,7 @@ Rectangle {
                             y: index * height
                             Behavior on y {
                                 NumberAnimation {
-                                    duration: 250
+                                    duration: units.longDuration
                                     easing.type: "InOutQuad"
                                 }
                             }

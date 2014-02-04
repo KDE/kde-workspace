@@ -233,7 +233,7 @@ function addApplet(applet, x, y) {
             }
             NumberAnimation {
                 id: translAnim
-                duration: 250
+                duration: units.longDuration
                 easing.type: Easing.InOutQuad
                 target: translation
                 properties: "x,y"

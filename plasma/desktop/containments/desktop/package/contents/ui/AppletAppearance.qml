@@ -152,7 +152,7 @@ Item {
             Behavior on width {
                 enabled: animationsEnabled
                 NumberAnimation {
-                    duration: !animationsEnabled ? 0 : 250
+                    duration: units.longDuration
                     easing.type: Easing.InOutQuad
                 }
             }
@@ -271,7 +271,7 @@ Item {
             }
             Behavior on opacity {
                 NumberAnimation {
-                    duration: 250
+                    duration: units.longDuration
                     easing.type: Easing.InOutQuad
                 }
             }
@@ -367,21 +367,21 @@ Item {
     }
     Behavior on controlsOpacity {
         NumberAnimation {
-            duration: 250
+            duration: units.longDuration
             easing.type: Easing.InOutQuad
         }
     }
     Behavior on x {
         enabled: animationsEnabled
         NumberAnimation {
-            duration: 250
+            duration: units.longDuration
             easing.type: Easing.InOutQuad
         }
     }
     Behavior on y {
         enabled: animationsEnabled
         NumberAnimation {
-            duration: 250
+            duration: units.longDuration
             easing.type: Easing.InOutQuad
         }
     }
@@ -389,7 +389,7 @@ Item {
         enabled: animationsEnabled
         NumberAnimation {
             id: widthAnimation
-            duration: 250
+            duration: units.longDuration
             easing.type: Easing.InOutQuad
         }
     }
@@ -397,7 +397,7 @@ Item {
         enabled: animationsEnabled
         NumberAnimation {
             id: heightAnimation
-            duration: 250
+            duration: units.longDuration
             easing.type: Easing.InOutQuad
         }
     }

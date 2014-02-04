@@ -37,7 +37,7 @@ Item {
         x: state == "left" ? -height : state == "right" ? height : 0
         Behavior on x {
             NumberAnimation {
-                duration: 150;
+                duration: units.shortDuration * 3;
                 easing.type: Easing.InOutExpo;
             }
         }
@@ -45,19 +45,19 @@ Item {
     transformOrigin: Item.Center
     Behavior on rotation {
         NumberAnimation {
-            duration: 150;
+            duration: units.shortDuration * 3;
             easing.type: Easing.InOutExpo;
         }
     }
     Behavior on x {
         NumberAnimation {
-            duration: 150;
+            duration: units.shortDuration * 3;
             easing.type: Easing.InOutExpo;
         }
     }
     Behavior on y {
         NumberAnimation {
-            duration: 150;
+            duration: units.shortDuration * 3;
             easing.type: Easing.InOutExpo;
         }
     }
@@ -138,7 +138,7 @@ Item {
                 toolBoxButton.cornerElement = corner;
             }
         }
-        Behavior on opacity { NumberAnimation { duration: 150; easing.type: Easing.InOutExpo; } }
+        Behavior on opacity { NumberAnimation { duration: units.shortDuration * 3; easing.type: Easing.InOutExpo; } }
     }
 
     PlasmaCore.FrameSvgItem {

@@ -261,11 +261,11 @@ DragDrop.DropArea {
             z: 0
             visible: false
 
-            property int moveDuration: 75
+            property int moveDuration: units.shortAnimtion * 1.5
 
             Behavior on opacity {
                 NumberAnimation {
-                    duration: 250
+                    duration: units.longDuration
                     easing.type: Easing.InOutQuad
                 }
             }

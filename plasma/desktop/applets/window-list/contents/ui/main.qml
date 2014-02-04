@@ -56,13 +56,13 @@ PlasmaExtras.ConditionalLoader {
 
                 Behavior on opacity {
                     NumberAnimation {
-                        duration: 250
+                        duration: units.longDuration
                         easing: Easing.InOutQuad
                     }
                 }
                 Behavior on y {
                     NumberAnimation {
-                        duration: 250
+                        duration: units.longDuration
                         easing: Easing.InOutQuad
                     }
                 }

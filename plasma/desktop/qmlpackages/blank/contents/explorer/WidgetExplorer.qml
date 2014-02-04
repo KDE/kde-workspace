@@ -114,11 +114,11 @@ Item {
         mainItem: Tooltip { id: tooltipWidget }
         Behavior on x {
             enabled: widgetExplorer.orientation == Qt.Horizontal
-            NumberAnimation { duration: 250 }
+            NumberAnimation { duration: units.longDuration }
         }
         Behavior on y {
             enabled: widgetExplorer.orientation == Qt.Vertical
-            NumberAnimation { duration: 250 }
+            NumberAnimation { duration: units.longDuration }
         }
     }
     Timer {

@@ -199,14 +199,14 @@ Item {
             Transition {
                 to: "OutgoingLeft"
                 SequentialAnimation {
-                    NumberAnimation { properties: "x,opacity"; easing.type: Easing.InQuad; duration: 250 }
+                    NumberAnimation { properties: "x,opacity"; easing.type: Easing.InQuad; duration: units.longDuration }
                     ScriptAction { script: appViewScrollArea.moveRight() }
                 }
             },
             Transition {
                 to: "OutgoingRight"
                 SequentialAnimation {
-                    NumberAnimation { properties: "x,opacity"; easing.type: Easing.InQuad; duration: 250 }
+                    NumberAnimation { properties: "x,opacity"; easing.type: Easing.InQuad; duration: units.longDuration }
                     ScriptAction { script: appViewScrollArea.moveLeft() }
                 }
             }
