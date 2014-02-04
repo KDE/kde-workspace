@@ -31,7 +31,7 @@ Item {
 
     property int toolIconSize: units.iconSizes.smallMedium
     property int layoutSpacing: units.largeSpacing / 4
-    property int animationDuration: 100
+    property int animationDuration: units.shortAnimation * 2
     property bool flatButtons: true
 
     property string labelName0: getData(jobsSource.data, "labelName0", '')
