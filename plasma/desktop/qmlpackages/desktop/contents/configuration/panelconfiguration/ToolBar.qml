@@ -41,64 +41,93 @@ Item {
         SizeHandle {}
     }
 
-    PlasmaComponents.Button {
+    GridLayout {
         id: moreSettingsButton
-        property QtObject contextMenu
-        text: i18n("More settings")
-        onClicked: {
-            if (!contextMenu) {
-                contextMenu = contextMenuComponent.createObject(moreSettingsButton)
-            }
-            contextMenu.open()
-        }
-    }
+        rows: 1
+        columns: 1
+        flow:plasmoid.formFactor == PlasmaCore.Types.Horizontal ? GridLayout.TopToBottom : GridLayout.LeftToRight
 
-    Component {
-        id: contextMenuComponent
-        PlasmaComponents.ContextMenu {
-            visualParent: moreSettingsButton
-            PlasmaComponents.MenuItem {
-                id: leftToggle
-                text: i18n("Left")
-                checkable: true
-                checked: panel.alignment == Qt.AlignLeft
-                onClicked: panel.alignment = Qt.AlignLeft
-                onToggled: {
-                    if (checked) {
-                        centerToggle.checked = false
-                        rightToggle.checked = false
-                    }
-                }
-            }
-            PlasmaComponents.MenuItem {
-                id: centerToggle
-                text: i18n("Center")
-                checkable: true
-                checked: panel.alignment == Qt.AlignCenter
-                onClicked: panel.alignment = Qt.AlignCenter
-                onToggled: {
-                    if (checked) {
-                        leftToggle.checked = false
-                        rightToggle.checked = false
-                    }
-                }
-            }
-            PlasmaComponents.MenuItem {
-                id: rightToggle
-                text: i18n("Right")
-                checkable: true
-                checked: panel.alignment == Qt.AlignRight
-                onClicked: panel.alignment = Qt.AlignRight
-                onToggled: {
-                    if (checked) {
-                        centerToggle.checked = false
-                        leftToggle.checked = false
-                    }
-                }
+        PlasmaComponents.Button {
+            text: i18n("Add Widgets...")
+            iconSource: "list-add"
+            onClicked: {
+                configDialog.showAddWidgetDialog();
             }
         }
-    }
 
+//TODO
+//         PlasmaComponents.Button {
+//             iconSource: "distribute-horizontal-x"
+//             text: i18n("Add spacer")
+//             onClicked: {
+//             }
+//         }
+
+        PlasmaComponents.Button {
+            iconSource: "configure"
+            text: i18n("More Settings...")
+            onClicked: {
+                if (!contextMenu) {
+                    contextMenu = contextMenuComponent.createObject(moreSettingsButton)
+                }
+                contextMenu.open()
+            }
+        }
+
+        PlasmaComponents.ToolButton {
+            iconSource: "window-close"
+            onClicked: {
+                configDialog.close()
+            }
+        }
+
+        Component {
+            id: contextMenuComponent
+            PlasmaComponents.ContextMenu {
+                visualParent: moreSettingsButton
+                PlasmaComponents.MenuItem {
+                    id: leftToggle
+                    text: i18n("Left")
+                    checkable: true
+                    checked: panel.alignment == Qt.AlignLeft
+                    onClicked: panel.alignment = Qt.AlignLeft
+                    onToggled: {
+                        if (checked) {
+                            centerToggle.checked = false
+                            rightToggle.checked = false
+                        }
+                    }
+                }
+                PlasmaComponents.MenuItem {
+                    id: centerToggle
+                    text: i18n("Center")
+                    checkable: true
+                    checked: panel.alignment == Qt.AlignCenter
+                    onClicked: panel.alignment = Qt.AlignCenter
+                    onToggled: {
+                        if (checked) {
+                            leftToggle.checked = false
+                            rightToggle.checked = false
+                        }
+                    }
+                }
+                PlasmaComponents.MenuItem {
+                    id: rightToggle
+                    text: i18n("Right")
+                    checkable: true
+                    checked: panel.alignment == Qt.AlignRight
+                    onClicked: panel.alignment = Qt.AlignRight
+                    onToggled: {
+                        if (checked) {
+                            centerToggle.checked = false
+                            leftToggle.checked = false
+                        }
+                    }
+                }
+            }
+        }
+
+    }
 //BEGIN States
     states: [
         State {
