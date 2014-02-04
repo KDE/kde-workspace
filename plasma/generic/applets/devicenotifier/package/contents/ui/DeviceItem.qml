@@ -166,7 +166,7 @@ Item {
                     color: "#99"+(theme.textColor.toString().substr(1))
                     opacity: deviceItem.state != 0 || container.containsMouse || expanded ? 1 : 0;
 
-                    Behavior on opacity { NumberAnimation { duration: 150 } }
+                    Behavior on opacity { NumberAnimation { duration: units.shortDuration * 3 } }
                 }
             }
         }
@@ -271,7 +271,7 @@ Item {
             opacity: expanded ? 1 : 0
             delegate: actionItem
             highlight: PlasmaComponents.Highlight{}
-            Behavior on opacity { NumberAnimation { duration: 150 } }
+            Behavior on opacity { NumberAnimation { duration: units.shortDuration * 3 } }
 
             Component.onCompleted: currentIndex = -1
         }

@@ -103,7 +103,7 @@ ColumnLayout {
             height: 0
             Behavior on height {
                 NumberAnimation {
-                    duration: 250
+                    duration: units.longDuration
                     easing.type: "InOutQuad"
                 }
             }

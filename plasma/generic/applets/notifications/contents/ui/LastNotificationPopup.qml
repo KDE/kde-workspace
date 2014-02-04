@@ -406,7 +406,7 @@ PlasmaCore.Dialog {
              NumberAnimation {
                  properties: "opacity"
                  easing.type: Easing.InOutQuad
-                 duration: 250
+                 duration: units.longDuration
             }
          }
         ]

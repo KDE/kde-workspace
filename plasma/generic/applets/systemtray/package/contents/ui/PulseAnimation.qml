@@ -26,7 +26,7 @@ SequentialAnimation {
 
     property Item targetItem
     //property int duration: Animations.normalDuration
-    property int duration: 1500
+    property int duration: units.longDuration * 6
 
     onRunningChanged: {
         // Make sure we reset the scale (which is manipulated by the Animation

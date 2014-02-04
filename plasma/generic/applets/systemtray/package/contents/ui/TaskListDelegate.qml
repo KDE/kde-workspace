@@ -53,7 +53,7 @@ TaskDelegate {
             verticalCenter: parent.verticalCenter
         }
         opacity: taskListDelegate.expanded ? 1 : 0
-        Behavior on opacity { NumberAnimation { duration: 250 } }
+        Behavior on opacity { NumberAnimation { duration: units.longDuration } }
         text: name
         elide: Text.ElideRight
     }

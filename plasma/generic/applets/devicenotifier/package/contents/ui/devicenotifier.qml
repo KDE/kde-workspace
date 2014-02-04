@@ -376,7 +376,7 @@ Item {
                                 popupIconTimer.restart()
                             }
                         }
-                        Behavior on height { NumberAnimation { duration: 150 } }
+                        Behavior on height { NumberAnimation { duration: units.shortDuration * 3 } }
                     }
                 }
 

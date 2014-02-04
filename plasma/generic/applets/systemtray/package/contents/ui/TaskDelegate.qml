@@ -64,7 +64,7 @@ QtExtraComponents.MouseEventListener {
 
     // opacity is raised when: plasmoid is collapsed, we are the current task, or it's hovered
     opacity: (containsMouse || !plasmoid.expanded || root.currentTask == taskId) || (plasmoid.expanded && root.currentTask == "") ? 1.0 : 0.6
-    Behavior on opacity { NumberAnimation { duration: 150 } }
+    Behavior on opacity { NumberAnimation { duration: units.shortDuration * 3 } }
 
     property int taskStatus: status
     property int taskType: type

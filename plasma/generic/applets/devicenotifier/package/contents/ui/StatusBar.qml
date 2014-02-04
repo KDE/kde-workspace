@@ -28,7 +28,7 @@ Item {
     visible: false
     height: visible ? (expanded ? statusText.paintedHeight+detailsText.paintedHeight+3 : statusText.paintedHeight) : 0
 
-    Behavior on height { NumberAnimation { duration: 200 } }
+    Behavior on height { NumberAnimation { duration: units.longDuration } }
 
     function setData(error, details, udi) {
         shown = visible;
@@ -142,6 +142,6 @@ Item {
         wrapMode: Text.WordWrap
         height: expanded ? paintedHeight : 0
 
-        Behavior on height { NumberAnimation { duration: 200 } }
+        Behavior on height { NumberAnimation { duration: units.longDuration } }
     }
 }

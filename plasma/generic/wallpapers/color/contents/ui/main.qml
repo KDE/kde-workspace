@@ -24,6 +24,6 @@ Rectangle {
     color: wallpaper.configuration.Color
 
     Behavior on color {
-        ColorAnimation { duration: 250 }
+        ColorAnimation { duration: units.longDuration }
     }
 }

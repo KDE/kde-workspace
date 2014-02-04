@@ -61,7 +61,7 @@ Rectangle {
     }
 
     Behavior on color {
-        ColorAnimation { duration: 250 }
+        ColorAnimation { duration: units.longDuration }
     }
 
     Wallpaper.Image {
@@ -83,7 +83,7 @@ Rectangle {
             properties: "opacity"
             from: 0
             to: 1
-            duration: 250
+            duration: units.longDuration
         }
         ScriptAction {
             script: otherImage.opacity = 0

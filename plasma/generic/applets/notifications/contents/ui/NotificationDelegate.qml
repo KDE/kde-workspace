@@ -72,14 +72,14 @@ PlasmaComponents.ListItem {
                 target: notificationItem
                 properties: "x"
                 to: removeAnimation.exitFromRight ? notificationItem.width-1 : 1-notificationItem.width
-                duration: 250
+                duration: units.longDuration
                 easing.type: Easing.InOutQuad
             }
             NumberAnimation {
                 target: notificationItem
                 properties: "height"
                 to: 0
-                duration: 250
+                duration: units.longDuration
                 easing.type: Easing.InOutQuad
             }
             ScriptAction {
@@ -93,7 +93,7 @@ PlasmaComponents.ListItem {
                 target: notificationItem
                 properties: "x"
                 to: 0
-                duration: 250
+                duration: units.longDuration
                 easing.type: Easing.InOutQuad
             }
         }

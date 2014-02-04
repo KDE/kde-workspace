@@ -55,7 +55,7 @@ Item {
         id: calendarLoader
         anchors.fill: parent
         opacity: (calendarLoader.status == Loader.Ready) ? 1 : 0
-        Behavior on opacity { NumberAnimation { duration: 200 } }
+        Behavior on opacity { NumberAnimation { duration: units.longDuration } }
 
         onStatusChanged: {
             if (status == Loader.Error) {
@@ -75,7 +75,7 @@ Item {
             right: parent.right
         }
         opacity: (calendarLoader.status == Loader.Ready) ? 0 : 0.7
-        Behavior on opacity { NumberAnimation { duration: 200 } }
+        Behavior on opacity { NumberAnimation { duration: units.longDuration } }
     }
 
     PlasmaComponents.Label {

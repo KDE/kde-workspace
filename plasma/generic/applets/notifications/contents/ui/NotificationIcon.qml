@@ -130,18 +130,18 @@ Item {
 
                 NumberAnimation {
                     target: notificationAnimatedItem
-                    duration: 250
+                    duration: units.longDuration
                     properties: "opacity, scale"
                     to: 1
                     easing.type: Easing.InOutQuad
                 }
 
-                PauseAnimation { duration: 500 }
+                PauseAnimation { duration: units.longDuration * 2 }
 
                 ParallelAnimation {
                     NumberAnimation {
                         target: notificationAnimatedItem
-                        duration: 250
+                        duration: units.longDuration
                         properties: "opacity"
                         to: 0
                         easing.type: Easing.InOutQuad
@@ -149,7 +149,7 @@ Item {
 
                     NumberAnimation {
                         target: notificationAnimatedItem
-                        duration: 250
+                        duration: units.longDuration
                         properties: "scale"
                         to: 2
                         easing.type: Easing.InOutQuad
