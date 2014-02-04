@@ -43,8 +43,7 @@
 #include <kpluginfactory.h>
 #include <kpluginloader.h>
 
-K_PLUGIN_FACTORY(KCMDesktopThemeFactory, registerPlugin<KCMDesktopTheme>();)
-K_EXPORT_PLUGIN(KCMDesktopThemeFactory("kcmdesktoptheme","kcm_desktopthemedetails"))
+K_PLUGIN_FACTORY_WITH_JSON(KCMDesktopThemeFactory, "desktoptheme.json", registerPlugin<KCMDesktopTheme>();)
 
 
 KCMDesktopTheme::KCMDesktopTheme( QWidget* parent, const QVariantList& )
@@ -81,7 +80,7 @@ KCMDesktopTheme::KCMDesktopTheme( QWidget* parent, const QVariantList& )
     m_themeModel = new ThemeModel(this);
     m_theme->setModel(m_themeModel);
     m_theme->setItemDelegate(new ThemeDelegate(m_theme));
-    m_theme->setVerticalScrollMode(QAbstractItemView::ScrollPerPixel);
+    m_theme->setVerticalScrollMode(QAbstractItemView::ScrollPerItem);
 
     connect(m_detailsWidget, SIGNAL(changed()), this, SLOT(detailChanged()));
 
@@ -110,6 +109,7 @@ void KCMDesktopTheme::load()
 
 void KCMDesktopTheme::save()
 {
+    qDebug() << "Save!";
     // Don't do anything if we don't need to.
     if ( !( m_bDesktopThemeDirty) && !(m_bDetailsDirty) )
         return;
@@ -118,10 +118,12 @@ void KCMDesktopTheme::save()
     if ( m_bDesktopThemeDirty )
     {
         QString theme = m_themeModel->data(m_theme->currentIndex(), ThemeModel::PackageNameRole).toString();
+        qDebug() << "theme changed to " << theme;
         if (m_isNetbook) {
             KConfigGroup cg(KSharedConfig::openConfig("plasmarc"), "Theme-plasma-netbook");
             cg.writeEntry("name", theme);
         } else {
+            qDebug() << "m-defaultTheme" << theme;
             m_defaultTheme->setThemeName(theme);
         }
     }
@@ -135,6 +137,7 @@ void KCMDesktopTheme::save()
     m_bDesktopThemeDirty = false;
     m_bDetailsDirty = false;
     emit changed( false );
+    qDebug() << "saved.";
 }
 
 void KCMDesktopTheme::defaults()
@@ -164,12 +167,9 @@ void KCMDesktopTheme::loadDesktopTheme()
     QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
     m_themeModel->reload();
     QString themeName;
-    if (m_isNetbook) {
-        KConfigGroup cg(KSharedConfig::openConfig("plasmarc"), "Theme-plasma-netbook");
-        themeName = cg.readEntry("name", "air-netbook");
-    } else {
-        themeName = m_defaultTheme->themeName();
-    }
+    KConfigGroup cg(KSharedConfig::openConfig("plasmarc"), "Theme");
+    themeName = cg.readEntry("name", m_defaultTheme->themeName());
+
     m_theme->setCurrentIndex(m_themeModel->indexOf(themeName));
     QApplication::restoreOverrideCursor();
 }

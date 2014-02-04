@@ -4,6 +4,8 @@ project(desktoptheme)
 set(kcmdesktoptheme_SRCS kcmdesktoptheme.cpp desktopthemedetails.cpp thememodel.cpp)
 kde4_add_ui_files(kcmdesktoptheme_SRCS DesktopTheme.ui DesktopThemeDetails.ui)
 
+kservice_desktop_to_json(desktoptheme.desktop)
+
 add_library(kcm_desktoptheme MODULE ${kcmdesktoptheme_SRCS})
 target_link_libraries(kcm_desktoptheme ${X11_LIBRARIES}
     KF5::Archive
@@ -18,6 +20,7 @@ target_link_libraries(kcm_desktoptheme ${X11_LIBRARIES}
 )
 
 install(TARGETS kcm_desktoptheme DESTINATION ${PLUGIN_INSTALL_DIR} )
+install( FILES plasma-themes.knsrc  DESTINATION  ${CONFIG_INSTALL_DIR} )
 
 ########### install files ###############
 install( FILES desktoptheme.desktop  DESTINATION  ${SERVICES_INSTALL_DIR} )

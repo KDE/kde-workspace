@@ -28,15 +28,19 @@
 #include "thememodel.h"
 
 #include <QApplication>
+#include <QDir>
 #include <QFile>
 #include <QPainter>
+#include <QStandardPaths>
 
 #include <KDesktopFile>
 #include <KColorScheme>
-#include <KStandardDirs>
 
 #include <Plasma/FrameSvg>
 #include <Plasma/Theme>
+#include <qstandardpaths.h>
+
+#include <QDebug>
 
 ThemeModel::ThemeModel( QObject *parent )
 : QAbstractListModel( parent )
@@ -63,9 +67,20 @@ void ThemeModel::reload()
     clearThemeList();
 
     // get all desktop themes
-    KStandardDirs dirs;
-    const QStringList themes = dirs.findAllResources("data", "desktoptheme/*/metadata.desktop",
-                                               KStandardDirs::NoDuplicates);
+    QStringList themes;
+    const QStringList &packs = QStandardPaths::locateAll(QStandardPaths::GenericDataLocation, "desktoptheme", QStandardPaths::LocateDirectory);
+    foreach (const QString &ppath, packs) {
+        const QDir cd(ppath);
+        const QStringList &entries = cd.entryList(QDir::Dirs | QDir::Hidden);
+        foreach (const QString pack, entries) {
+            const QString _metadata = ppath+QLatin1Char('/')+pack+QStringLiteral("/metadata.desktop");
+            if ((pack != "." && pack != "..") &&
+                (QFile::exists(_metadata))) {
+                themes << _metadata;
+            }
+        }
+    }
+
     foreach (const QString &theme, themes) {
         int themeSepIndex = theme.lastIndexOf('/', -1);
         QString themeRoot = theme.left(themeSepIndex);
@@ -88,7 +103,7 @@ void ThemeModel::reload()
 
 
         Plasma::FrameSvg *svg = new Plasma::FrameSvg(this);
-        const QString svgFile = themeRoot + "/widgets/background.svg";
+        const QString svgFile = themeRoot + QStringLiteral("/widgets/background.svg");
         if (QFile::exists(svgFile)) {
             svg->setImagePath(svgFile);
         } else {
@@ -189,8 +204,8 @@ void ThemeDelegate::paint(QPainter *painter,
     // draw text
     painter->save();
     QFont font = painter->font();
-    font.setWeight(QFont::Bold);
-    const QString colorFile = KStandardDirs::locate("data", "desktoptheme/" + package + "/colors");
+    //font.setWeight(QFont::Bold);
+    const QString colorFile = QStandardPaths::locate(QStandardPaths::GenericDataLocation, "desktoptheme/" + package + "/colors");
     if (!colorFile.isEmpty()) {
         KSharedConfigPtr colors = KSharedConfig::openConfig(colorFile);
         KColorScheme colorScheme(QPalette::Active, KColorScheme::Window, colors);
