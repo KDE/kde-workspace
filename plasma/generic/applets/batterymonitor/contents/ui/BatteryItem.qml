@@ -112,12 +112,11 @@ Item {
 
         SequentialAnimation {
           id: chargeAnimation
-          running: dialog.popupShown && model["State"] == "Charging" && model["Is Power Supply"]
+          running: units.longDuration > 0 && dialog.popupShown && model["State"] == "Charging" && model["Is Power Supply"]
           alwaysRunToEnd: true
           loops: Animation.Infinite
 
           NumberAnimation {
-              enabled: units.longDuration > 0
               target: batteryIcon
               properties: "opacity"
               from: 1.0
@@ -126,7 +125,6 @@ Item {
               easing.type: Easing.InCubic
           }
           NumberAnimation {
-              enabled: units.longDuration > 0
               target: batteryIcon
               properties: "opacity"
               from: 0.5
