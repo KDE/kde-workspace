@@ -117,6 +117,7 @@ Item {
           loops: Animation.Infinite
 
           NumberAnimation {
+              enabled: units.longDuration > 0
               target: batteryIcon
               properties: "opacity"
               from: 1.0
@@ -125,6 +126,7 @@ Item {
               easing.type: Easing.InCubic
           }
           NumberAnimation {
+              enabled: units.longDuration > 0
               target: batteryIcon
               properties: "opacity"
               from: 0.5
