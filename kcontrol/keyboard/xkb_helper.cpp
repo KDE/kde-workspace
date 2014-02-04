@@ -24,6 +24,7 @@
 #include <QStringList>
 #include <QTime>
 #include <QX11Info>
+#include <QStandardPaths>
 
 #include <kglobal.h>
 #include <kstandarddirs.h>
@@ -51,7 +52,7 @@ QString getSetxkbmapExe()
 		return "";
 
 	if( setxkbmapExe.isEmpty() ) {
-		setxkbmapExe = KGlobal::dirs()->findExe(SETXKBMAP_EXEC);
+        setxkbmapExe = QStandardPaths::findExecutable(SETXKBMAP_EXEC);
 		if( setxkbmapExe.isEmpty() ) {
 			setxkbmapNotFound = true;
 			kError() << "Can't find" << SETXKBMAP_EXEC << "- keyboard layouts won't be configured";
@@ -69,7 +70,7 @@ void executeXmodmap(const QString& configFileName)
 
     if( QFile(configFileName).exists() ) {
     	if( xmodmapExe.isEmpty() ) {
-    		xmodmapExe = KGlobal::dirs()->findExe(XMODMAP_EXEC);
+            xmodmapExe = QStandardPaths::findExecutable(XMODMAP_EXEC);
         	if( xmodmapExe.isEmpty() ) {
     			xmodmapNotFound = true;
     			kError() << "Can't find" << XMODMAP_EXEC << "- xmodmap files won't be run";

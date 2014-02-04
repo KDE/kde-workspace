@@ -24,6 +24,7 @@
 #ifndef __KCMMISC_H__
 #define __KCMMISC_H__
 
+#include <QButtonGroup>
 #include <QString>
 #include <QWidget>
 
@@ -33,11 +34,10 @@ enum TriState {
 	STATE_ON = 0,  STATE_OFF = 1, STATE_UNCHANGED = 2
 };
 
-class KButtonGroup;
 class TriStateHelper {
 public:
-	static void setTriState(KButtonGroup* group, TriState state);
-	static TriState getTriState(const KButtonGroup* group);
+    static void setTriState(QButtonGroup* group, TriState state);
+    static TriState getTriState(const QButtonGroup* group);
 
 	static TriState getTriState(int state) { return static_cast<TriState>(state); }
 	static int getInt(TriState state) { return static_cast<int>(state); }
@@ -85,6 +85,8 @@ private:
   enum TriState numlockState;
 
   Ui_KeyboardConfigWidget& ui;
+  QButtonGroup numlockButtons, keyboardRepButtons;
+
 };
 
 #endif
