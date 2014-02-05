@@ -56,7 +56,7 @@ void Paste::doPaste()
     Q_ASSERT(c);
 
     //get the actual graphic object of the containment
-    QObject *graphicObject = c->property("graphicObject").value<QObject *>();
+    QObject *graphicObject = c->property("_plasma_graphicObject").value<QObject *>();
     if (!graphicObject) {
         return;
     }

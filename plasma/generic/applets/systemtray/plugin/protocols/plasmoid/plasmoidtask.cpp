@@ -48,7 +48,7 @@ PlasmoidTask::PlasmoidTask(QQuickItem* rootItem, const QString &packageName, con
     m_taskItem = cont->createApplet(packageName);
 
     m_taskItem->init();
-    m_taskGraphicsObject = m_taskItem->property("graphicObject").value<QQuickItem *>();
+    m_taskGraphicsObject = m_taskItem->property("_plasma_graphicObject").value<QQuickItem *>();
 
     if (m_taskGraphicsObject) {
         QMetaObject::invokeMethod(m_taskGraphicsObject, "init", Qt::DirectConnection);
