@@ -66,8 +66,10 @@ Item {
 //         }
 
         PlasmaComponents.Button {
+            id: settingsButton
             iconSource: "configure"
             text: i18n("More Settings...")
+            property var contextMenu
             onClicked: {
                 if (!contextMenu) {
                     contextMenu = contextMenuComponent.createObject(buttonsLayout)
@@ -86,7 +88,7 @@ Item {
         Component {
             id: contextMenuComponent
             PlasmaComponents.ContextMenu {
-                visualParent: buttonsLayout
+                visualParent: settingsButton
                 PlasmaComponents.MenuItem {
                     id: leftToggle
                     text: i18n("Left")
