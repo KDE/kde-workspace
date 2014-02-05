@@ -47,6 +47,7 @@ Item {
         columns: 1
         flow:plasmoid.formFactor == PlasmaCore.Types.Horizontal ? GridLayout.TopToBottom : GridLayout.LeftToRight
 
+        anchors.margins: rowSpacing
 
         PlasmaComponents.Button {
             text: i18n("Add Widgets...")
