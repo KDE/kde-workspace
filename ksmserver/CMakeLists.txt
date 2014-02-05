@@ -53,7 +53,7 @@ qt5_add_dbus_interface( ksmserver_KDEINIT_SRCS ${kcminit_xml} kcminit_interface 
 # # generated version, thus at certain circumstances leading to strange crashes.
 # # This should be fixed for KDE5.
 # # KLauchner.xml is installed by kdelibs, so it is in KDE4_DBUS_INTERFACES_DIR
-set(klauncher_xml ${KINIT_DBUS_INTERFACES_DIR}/org.kde.KLauncher.xml)
+set(klauncher_xml ${KINIT_DBUS_INTERFACES_DIR}/kf5_org.kde.KLauncher.xml)
 qt5_add_dbus_interface( ksmserver_KDEINIT_SRCS ${klauncher_xml} klauncher_interface )
 
 qt5_add_dbus_adaptor( ksmserver_KDEINIT_SRCS org.kde.KSMServerInterface.xml server.h KSMServer )

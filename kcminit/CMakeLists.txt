@@ -2,7 +2,7 @@
 
 set(kcminit_KDEINIT_SRCS main.cpp)
 
-set(klauncher_xml ${KINIT_DBUS_INTERFACES_DIR}/org.kde.KLauncher.xml)
+set(klauncher_xml ${KINIT_DBUS_INTERFACES_DIR}/kf5_org.kde.KLauncher.xml)
 qt5_add_dbus_interface(kcminit_KDEINIT_SRCS ${klauncher_xml} klauncher_iface)
 
 kf5_add_kdeinit_executable( kcminit ${kcminit_KDEINIT_SRCS})

@@ -1,7 +1,7 @@
 
 set(kcm_colors_SRCS ../krdb/krdb.cpp colorscm.cpp previewwidget.cpp setpreviewwidget.cpp)
 
-set(klauncher_xml ${KINIT_DBUS_INTERFACES_DIR}/org.kde.KLauncher.xml)
+set(klauncher_xml ${KINIT_DBUS_INTERFACES_DIR}/kf5_org.kde.KLauncher.xml)
 qt5_add_dbus_interface(kcm_colors_SRCS ${klauncher_xml} klauncher_iface)
 
 kde4_add_ui_files(kcm_colors_SRCS colorsettings.ui preview.ui setpreview.ui)
