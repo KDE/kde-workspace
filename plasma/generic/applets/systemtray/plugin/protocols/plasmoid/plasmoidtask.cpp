@@ -37,7 +37,7 @@
 namespace SystemTray
 {
 
-PlasmoidTask::PlasmoidTask(QQuickItem* rootItem, const QString &packageName, const QString &systrayPackageRoot, Plasma::Containment *cont, QObject *parent)
+PlasmoidTask::PlasmoidTask(QQuickItem* rootItem, const QString &packageName, Plasma::Containment *cont, QObject *parent)
     : Task(parent),
       m_taskId(packageName),
       m_taskItem(0),
@@ -45,7 +45,6 @@ PlasmoidTask::PlasmoidTask(QQuickItem* rootItem, const QString &packageName, con
       m_valid(true)
 {
     qCDebug(SYSTEMTRAY) << "Loading applet: " << packageName;
-    //m_taskItem = new PlasmoidInterface(packageName, systrayPackageRoot, m_rootItem);
 
     m_taskItem = Plasma::PluginLoader::self()->loadApplet(packageName);//cont->createApplet(packageName);
     cont->addApplet(m_taskItem);

@@ -26,7 +26,6 @@
 
 #include <Plasma/PluginLoader>
 #include <Plasma/Containment>
-#include <Plasma/Corona>
 #include <kdeclarative/qmlobject.h>
 #include <KLocalizedString>
 #include <kplugintrader.h>
@@ -42,7 +41,6 @@ namespace SystemTray
 PlasmoidProtocol::PlasmoidProtocol(QObject *parent)
     : Protocol(parent),
       m_tasks(),
-      m_corona(0),
       m_containment(0)
 {
 }
@@ -54,7 +52,7 @@ PlasmoidProtocol::~PlasmoidProtocol()
 void PlasmoidProtocol::init()
 {
     //this should never happen
-    if (m_corona) {
+    if (m_containment) {
         return;
     }
 
@@ -63,14 +61,12 @@ void PlasmoidProtocol::init()
     if (rootItem) {
         m_systrayApplet = rootItem->property("_plasma_applet").value<Plasma::Applet*>();
     }
-    m_corona = new Plasma::Corona(this);
+
+
+    m_containment = new Plasma::Containment;
     if (m_systrayApplet) {
-        m_corona->setParent(m_systrayApplet);
+        m_containment->setParent(m_systrayApplet);
     }
-
-
-    m_containment = m_corona->createContainment("null");
-
     
 
     m_containment->setFormFactor(Plasma::Types::Horizontal);
@@ -86,14 +82,6 @@ void PlasmoidProtocol::init()
         }
     }
     qWarning() << "Known plasmoid ids:"<< m_knownPlugins;
-
-    Plasma::Package package = Plasma::PluginLoader::self()->loadPackage("Plasma/Shell");
-    package.setDefaultPackageRoot("plasma/plasmoids/");
-    package.setPath("org.kde.plasma.systemtray");
-    m_systrayPackageRoot = package.path();
-    //the systray package acts as a shell package for this internal corona
-    m_corona->setPackage(package);
-    qCDebug(SYSTEMTRAY) << "ST2 PackagePathQml: " << m_systrayPackageRoot;
 
     //X-Plasma-NotificationArea
     KPluginInfo::List applets = Plasma::PluginLoader::self()->listAppletInfo(QString());
@@ -158,7 +146,7 @@ void PlasmoidProtocol::newTask(const QString &service)
     Manager* m = qobject_cast<Manager*>(parent());
     QQuickItem* rootItem = m->rootItem();
 
-    PlasmoidTask *task = new PlasmoidTask(rootItem, service, m_systrayPackageRoot, m_containment, this);
+    PlasmoidTask *task = new PlasmoidTask(rootItem, service, m_containment, this);
 
     if (task->pluginInfo().isValid()) {
         m_tasks[service] = task;

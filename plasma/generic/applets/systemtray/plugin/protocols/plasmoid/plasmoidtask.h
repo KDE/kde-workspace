@@ -58,7 +58,7 @@ class PlasmoidTask : public Task
     friend class PlasmoidProtocol;
 
 public:
-    PlasmoidTask(QQuickItem *rootItem, const QString &packageName, const QString &systrayPackageRoot, Plasma::Containment *cont, QObject *parent);
+    PlasmoidTask(QQuickItem *rootItem, const QString &packageName, Plasma::Containment *cont, QObject *parent);
     ~PlasmoidTask();
 
     bool isValid() const;

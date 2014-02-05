@@ -54,8 +54,6 @@ protected Q_SLOTS:
 private:
     QHash<QString, PlasmoidTask*> m_tasks;
     QHash<QString, int> m_knownPlugins;
-    QString m_systrayPackageRoot;
-    Plasma::Corona *m_corona;
     Plasma::Containment *m_containment;
     Plasma::Applet *m_systrayApplet;
 };
