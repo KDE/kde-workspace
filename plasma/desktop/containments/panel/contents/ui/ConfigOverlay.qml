@@ -119,12 +119,14 @@ MouseArea {
     }
     Item {
         id: placeHolder
+        visible: configurationArea.containsMouse
         Layout.fillWidth: currentApplet ? currentApplet.Layout.fillWidth : false
         Layout.fillHeight: currentApplet ? currentApplet.Layout.fillHeight : false
     }
 
     Rectangle {
         id: handle
+        visible: configurationArea.containsMouse
         color: theme.backgroundColor
         radius: 3
         opacity: currentApplet ? 0.5 : 0
