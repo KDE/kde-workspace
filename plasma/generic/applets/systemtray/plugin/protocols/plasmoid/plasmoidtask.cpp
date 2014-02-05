@@ -32,6 +32,8 @@
 #include <Plasma/Applet>
 #include <Plasma/PluginLoader>
 
+#include <plasmaquick/appletquickitem.h>
+
 namespace SystemTray
 {
 
@@ -45,16 +47,22 @@ PlasmoidTask::PlasmoidTask(QQuickItem* rootItem, const QString &packageName, con
     qCDebug(SYSTEMTRAY) << "Loading applet: " << packageName;
     //m_taskItem = new PlasmoidInterface(packageName, systrayPackageRoot, m_rootItem);
 
-    m_taskItem = cont->createApplet(packageName);
+    m_taskItem = Plasma::PluginLoader::self()->loadApplet(packageName);//cont->createApplet(packageName);
+    cont->addApplet(m_taskItem);
 
     m_taskItem->init();
-    m_taskGraphicsObject = m_taskItem->property("_plasma_graphicObject").value<QQuickItem *>();
+    m_taskGraphicsObject = m_taskItem->property("_plasma_graphicObject").value<AppletQuickItem *>();
 
     if (m_taskGraphicsObject) {
+        Plasma::Package package = Plasma::PluginLoader::self()->loadPackage("Plasma/Shell");
+        package.setDefaultPackageRoot("plasma/plasmoids/");
+        package.setPath("org.kde.plasma.systemtray");
+
+        m_taskGraphicsObject->setCoronaPackage(package);
         QMetaObject::invokeMethod(m_taskGraphicsObject, "init", Qt::DirectConnection);
         qWarning()<<m_taskGraphicsObject->property("compactRepresentationItem");
         qWarning()<<m_taskGraphicsObject->property("fullRepresentationItem");
-        
+
         //old syntax, because we are connecting blindly
         connect(m_taskGraphicsObject, SIGNAL(expandedChanged(bool)),
                 this, SIGNAL(expandedChanged(bool)));

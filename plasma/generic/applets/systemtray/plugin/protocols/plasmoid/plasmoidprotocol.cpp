@@ -70,8 +70,23 @@ void PlasmoidProtocol::init()
 
 
     m_containment = m_corona->createContainment("null");
+
+    
+
     m_containment->setFormFactor(Plasma::Types::Horizontal);
     m_containment->init();
+
+    KConfigGroup cg = m_containment->config();
+    cg = KConfigGroup(&cg, "Applets");
+    foreach (const QString &group, cg.groupList()) {
+        KConfigGroup appletConfig(&cg, group);
+        QString plugin = appletConfig.readEntry("plugin");
+        if (!plugin.isEmpty()) {
+            m_knownPlugins[plugin] = group.toInt();
+        }
+    }
+    qWarning() << "Known plasmoid ids:"<< m_knownPlugins;
+
     Plasma::Package package = Plasma::PluginLoader::self()->loadPackage("Plasma/Shell");
     package.setDefaultPackageRoot("plasma/plasmoids/");
     package.setPath("org.kde.plasma.systemtray");

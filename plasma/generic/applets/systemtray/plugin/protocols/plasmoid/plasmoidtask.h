@@ -38,6 +38,8 @@ class Contaiment;
 
 }
 
+class AppletQuickItem;
+
 namespace SystemTray
 {
 
@@ -92,7 +94,7 @@ private:
     Plasma::Applet *m_taskItem;
     QQuickItem* m_rootItem;
 
-    QQuickItem* m_taskGraphicsObject;
+    AppletQuickItem* m_taskGraphicsObject;
     QQuickItem* m_compactRepresentationItem;
     QQuickItem* m_fullRepresentationItem;
 
