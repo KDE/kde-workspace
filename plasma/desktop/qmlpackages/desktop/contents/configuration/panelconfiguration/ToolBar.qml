@@ -42,10 +42,12 @@ Item {
     }
 
     GridLayout {
-        id: moreSettingsButton
+        id: buttonsLayout
         rows: 1
         columns: 1
         flow:plasmoid.formFactor == PlasmaCore.Types.Horizontal ? GridLayout.TopToBottom : GridLayout.LeftToRight
+
+        anchors.margins: rowSpacing
 
         PlasmaComponents.Button {
             text: i18n("Add Widgets...")
@@ -64,11 +66,13 @@ Item {
 //         }
 
         PlasmaComponents.Button {
+            id: settingsButton
             iconSource: "configure"
             text: i18n("More Settings...")
+            property var contextMenu
             onClicked: {
                 if (!contextMenu) {
-                    contextMenu = contextMenuComponent.createObject(moreSettingsButton)
+                    contextMenu = contextMenuComponent.createObject(buttonsLayout)
                 }
                 contextMenu.open()
             }
@@ -84,7 +88,7 @@ Item {
         Component {
             id: contextMenuComponent
             PlasmaComponents.ContextMenu {
-                visualParent: moreSettingsButton
+                visualParent: settingsButton
                 PlasmaComponents.MenuItem {
                     id: leftToggle
                     text: i18n("Left")
@@ -146,7 +150,7 @@ Item {
                 }
             }
             AnchorChanges {
-                target: moreSettingsButton
+                target: buttonsLayout
                 anchors {
                     verticalCenter: root.verticalCenter
                     horizontalCenter: undefined
@@ -173,7 +177,7 @@ Item {
                 }
             }
             AnchorChanges {
-                target: moreSettingsButton
+                target: buttonsLayout
                 anchors {
                     verticalCenter: root.verticalCenter
                     horizontalCenter: undefined
@@ -200,7 +204,7 @@ Item {
                 }
             }
             AnchorChanges {
-                target: moreSettingsButton
+                target: buttonsLayout
                 anchors {
                     verticalCenter: undefined
                     horizontalCenter: root.verticalCenter
@@ -227,7 +231,7 @@ Item {
                 }
             }
             AnchorChanges {
-                target: moreSettingsButton
+                target: buttonsLayout
                 anchors {
                     verticalCenter: undefined
                     horizontalCenter: root.verticalCenter
