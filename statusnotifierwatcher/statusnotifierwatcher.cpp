@@ -30,11 +30,12 @@
 #include <kpluginloader.h>
 #include "statusnotifierwatcheradaptor.h"
 #include "statusnotifieritem_interface.h"
+#include <config-workspace.h>
 
 
 static inline KAboutData aboutData()
 {
-    return KAboutData("statusnotifierwatcher", 0, ki18n("statusnotifierwatcher"), KDE_VERSION_STRING);
+    return KAboutData("statusnotifierwatcher", 0, ki18n("statusnotifierwatcher"), WORKSPACE_VERSION_STRING);
 }
 
 K_PLUGIN_FACTORY(StatusNotifierWatcherFactory,

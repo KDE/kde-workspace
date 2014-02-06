@@ -41,6 +41,7 @@
 #endif
 #include <QFrame>
 #include <kservicetypetrader.h>
+#include <config-workspace.h>
 
 void usage(char *name)
 {
@@ -67,7 +68,7 @@ static QString exeFromActionGroup(const QList<KServiceAction>& actions, const ch
 int main(int argc, char *argv[])
 {
 	KCmdLineArgs::init(argc, argv, appName, "kscreensaver", ki18n("Random screen saver"), 
-                KDE_VERSION_STRING, ki18n(description));
+                WORKSPACE_VERSION_STRING, ki18n(description));
 
 
 	KCmdLineOptions options;

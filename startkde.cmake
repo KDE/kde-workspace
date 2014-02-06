@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-#  DEFAULT KDE STARTUP SCRIPT ( @KDE_VERSION_STRING@ )
+#  DEFAULT KDE STARTUP SCRIPT ( @KDE4WORKSPACE_VERSION@ )
 #
 
 if test "x$1" = x--failsafe; then

@@ -47,6 +47,7 @@
 #include <KDE/KLocale>
 #include <KDE/KMessageBox>
 #include <KDE/KPluginLoader>
+#include <config-workspace.h>
 
 
 
@@ -107,7 +108,7 @@ KCMHotkeys::KCMHotkeys( QWidget *parent, const QVariantList & /* args */ )
         "khotkeys",
         0,
         ki18n("KDE Hotkeys Configuration Module"),
-        KDE_VERSION_STRING,
+        WORKSPACE_VERSION_STRING,
         KLocalizedString(),
         KAboutData::License_GPL,
         ki18n("Copyright 2008 (c) Michael Jansen")
