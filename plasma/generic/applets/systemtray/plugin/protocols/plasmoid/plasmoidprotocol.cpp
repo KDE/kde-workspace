@@ -144,9 +144,8 @@ void PlasmoidProtocol::newTask(const QString &service)
     }
 
     Manager* m = qobject_cast<Manager*>(parent());
-    QQuickItem* rootItem = m->rootItem();
 
-    PlasmoidTask *task = new PlasmoidTask(rootItem, service, m_containment, this);
+    PlasmoidTask *task = new PlasmoidTask(service, m_containment, this);
 
     if (task->pluginInfo().isValid()) {
         m_tasks[service] = task;

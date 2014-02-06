@@ -58,7 +58,7 @@ class PlasmoidTask : public Task
     friend class PlasmoidProtocol;
 
 public:
-    PlasmoidTask(QQuickItem *rootItem, const QString &packageName, Plasma::Containment *cont, QObject *parent);
+    PlasmoidTask(const QString &packageName, Plasma::Containment *cont, QObject *parent);
     ~PlasmoidTask();
 
     bool isValid() const;
@@ -92,7 +92,6 @@ private:
     void updateStatus();
     QString m_taskId;
     Plasma::Applet *m_taskItem;
-    QQuickItem* m_rootItem;
 
     AppletQuickItem* m_taskGraphicsObject;
     QQuickItem* m_compactRepresentationItem;

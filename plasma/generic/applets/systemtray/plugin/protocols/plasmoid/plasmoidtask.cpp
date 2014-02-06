@@ -37,11 +37,10 @@
 namespace SystemTray
 {
 
-PlasmoidTask::PlasmoidTask(QQuickItem* rootItem, const QString &packageName, Plasma::Containment *cont, QObject *parent)
+PlasmoidTask::PlasmoidTask(const QString &packageName, Plasma::Containment *cont, QObject *parent)
     : Task(parent),
       m_taskId(packageName),
       m_taskItem(0),
-      m_rootItem(rootItem),
       m_valid(true)
 {
     qCDebug(SYSTEMTRAY) << "Loading applet: " << packageName;
