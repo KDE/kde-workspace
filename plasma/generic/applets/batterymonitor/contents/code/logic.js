@@ -194,7 +194,7 @@ function updateTooltip() {
     batteries.tooltipImage = image;
 }
 
-function updateBrightness(source) {
+function updateBrightness(dialogItem, source) {
     // we don't want passive brightness change send setBrightness call
     if (!source.data["PowerDevil"]) {
         return;

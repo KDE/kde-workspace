@@ -44,7 +44,7 @@ Item {
         show_remaining_time = plasmoid.readConfig("showRemainingTime");
     }
 
-    function updateLogic(updateBrightness) {
+    function updateLogic() {
         Logic.updateCumulative();
         plasmoid.status = Logic.plasmoidStatus();
 
@@ -54,9 +54,6 @@ Item {
         print(plasmoid.status);
 
         Logic.updateTooltip();
-        if (updateBrightness) {
-            Logic.updateBrightness(pmSource);
-        }
     }
 
     Plasmoid.compactRepresentation: CompactRepresentation { }
@@ -66,7 +63,7 @@ Item {
         engine: "powermanagement"
         connectedSources: sources
         onDataChanged: {
-            updateLogic(true);
+            updateLogic();
         }
         onSourceAdded: {
             if (source == "Battery0") {
@@ -128,6 +125,13 @@ Item {
 
         Component.onCompleted: {
             dialogItem.forceActiveFocus();
+        }
+
+        Connections {
+            target: pmSource
+            onDataChanged : {
+                Logic.updateBrightness(dialogItem, pmSource);
+            }
         }
 
         onBrightnessChanged: {
