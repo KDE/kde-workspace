@@ -115,7 +115,6 @@ Item {
         Connections {
             target: plasmoid
             onExpandedChanged: {
-                dialogItem.popupShown = popped;
                 if (popped) {
                     dialogItem.forceActiveFocus();
                 }

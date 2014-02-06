@@ -35,8 +35,6 @@ FocusScope {
     property int remainingTime
     property bool showRemainingTime
 
-    property bool popupShown // somehow plasmoid.popupShowing isn't working
-
     property bool isBrightnessAvailable
     property alias screenBrightness: brightnessSlider.value
     property alias screenBrightnessPercentage: brightnessSlider.percentage
