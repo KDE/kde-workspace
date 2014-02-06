@@ -37,18 +37,19 @@
 namespace SystemTray
 {
 
-PlasmoidTask::PlasmoidTask(const QString &packageName, Plasma::Containment *cont, QObject *parent)
+PlasmoidTask::PlasmoidTask(const QString &packageName, int appletId, Plasma::Containment *cont, QObject *parent)
     : Task(parent),
       m_taskId(packageName),
       m_taskItem(0),
       m_valid(true)
 {
-    qCDebug(SYSTEMTRAY) << "Loading applet: " << packageName;
+    qCDebug(SYSTEMTRAY) << "Loading applet: " << packageName << appletId;
 
-    m_taskItem = Plasma::PluginLoader::self()->loadApplet(packageName);//cont->createApplet(packageName);
+    m_taskItem = Plasma::PluginLoader::self()->loadApplet(packageName, appletId);//cont->createApplet(packageName);
     cont->addApplet(m_taskItem);
 
     m_taskItem->init();
+    
     m_taskGraphicsObject = m_taskItem->property("_plasma_graphicObject").value<AppletQuickItem *>();
 
     if (m_taskGraphicsObject) {

@@ -62,17 +62,24 @@ void PlasmoidProtocol::init()
         m_systrayApplet = rootItem->property("_plasma_applet").value<Plasma::Applet*>();
     }
 
-
-    m_containment = new Plasma::Containment;
-    if (m_systrayApplet) {
-        m_containment->setParent(m_systrayApplet);
+    if (!m_systrayApplet) {
+        qWarning() << "Don't have a parent applet, Can't initialize the Plasmoid protocol!!!";
+        return;
     }
-    
 
+    int containmentId = 0;
+
+    KConfigGroup cg = m_systrayApplet->config();
+    cg = KConfigGroup(&cg, "Containments");
+    if (cg.isValid() && cg.groupList().size()) {
+        containmentId = cg.groupList().first().toInt();
+    }
+
+    m_containment = new Plasma::Containment(m_systrayApplet, "null", containmentId);
     m_containment->setFormFactor(Plasma::Types::Horizontal);
     m_containment->init();
 
-    KConfigGroup cg = m_containment->config();
+    cg = m_containment->config();
     cg = KConfigGroup(&cg, "Applets");
     foreach (const QString &group, cg.groupList()) {
         KConfigGroup appletConfig(&cg, group);
@@ -139,13 +146,14 @@ void PlasmoidProtocol::init()
 void PlasmoidProtocol::newTask(const QString &service)
 {
     qCDebug(SYSTEMTRAY) << "ST new task " << service;
+    //don't allow duplicates
     if (m_tasks.contains(service)) {
         return;
     }
 
     Manager* m = qobject_cast<Manager*>(parent());
 
-    PlasmoidTask *task = new PlasmoidTask(service, m_containment, this);
+    PlasmoidTask *task = new PlasmoidTask(service, m_knownPlugins.value(service), m_containment, this);
 
     if (task->pluginInfo().isValid()) {
         m_tasks[service] = task;
