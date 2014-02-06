@@ -45,11 +45,10 @@ PlasmoidTask::PlasmoidTask(const QString &packageName, int appletId, Plasma::Con
 {
     qCDebug(SYSTEMTRAY) << "Loading applet: " << packageName << appletId;
 
-    m_taskItem = Plasma::PluginLoader::self()->loadApplet(packageName, appletId);//cont->createApplet(packageName);
+    m_taskItem = Plasma::PluginLoader::self()->loadApplet(packageName, appletId);
     cont->addApplet(m_taskItem);
-
     m_taskItem->init();
-    
+
     m_taskGraphicsObject = m_taskItem->property("_plasma_graphicObject").value<AppletQuickItem *>();
 
     if (m_taskGraphicsObject) {
