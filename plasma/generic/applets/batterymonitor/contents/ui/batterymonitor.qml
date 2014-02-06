@@ -27,10 +27,8 @@ import "plasmapackage:/code/logic.js" as Logic
 
 Item {
     id: batterymonitor
-    Layout.minimumWidth: units.iconSizes.medium * 9
-    Layout.minimumHeight: dialogItem.implicitHeight
-    Layout.maximumHeight: dialogItem.implicitHeight
-
+    Plasmoid.switchWidth: units.gridUnit * 10
+    Plasmoid.switchHeight: units.gridUnit * 10
     property bool show_remaining_time: false
 
     LayoutMirroring.enabled: Qt.application.layoutDirection == Qt.RightToLeft
@@ -58,13 +56,6 @@ Item {
         Logic.updateTooltip();
         if (updateBrightness) {
             Logic.updateBrightness(pmSource);
-        }
-    }
-
-    function popupEventSlot(popped) {
-        dialogItem.popupShown = popped;
-        if (popped) {
-            dialogItem.forceActiveFocus();
         }
     }
 
@@ -115,8 +106,21 @@ Item {
         property string tooltipImage
     }
 
-    PopupDialog {
+    Plasmoid.fullRepresentation: PopupDialog {
         id: dialogItem
+        Layout.minimumWidth: units.iconSizes.medium * 9
+        Layout.minimumHeight: dialogItem.implicitHeight
+        Layout.maximumHeight: dialogItem.implicitHeight
+
+        Connections {
+            target: plasmoid
+            onExpandedChanged: {
+                dialogItem.popupShown = popped;
+                if (popped) {
+                    dialogItem.forceActiveFocus();
+                }
+            }
+        }
         model: batteries
         anchors.fill: parent
         focus: true

@@ -155,9 +155,12 @@ FocusScope {
         id: noControlsLabel
         visible: !isKeyboardBrightnessAvailable && !isBrightnessAvailable
         text: i18n("No screen or keyboard brightness controls available")
+        wrapMode: Text.Wrap
         anchors {
             top: plasmoid.location == PlasmaCore.Types.BottomEdge ? undefined : settingsColumn.bottom
             bottom: plasmoid.location == PlasmaCore.Types.BottomEdge ? settingsColumn.top : undefined
+            left: parent.left
+            right: parent.right
             leftMargin: padding.margins.left
             rightMargin: padding.margins.right
             topMargin: 5
