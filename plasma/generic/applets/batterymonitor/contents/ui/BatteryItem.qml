@@ -112,7 +112,7 @@ Item {
 
         SequentialAnimation {
           id: chargeAnimation
-          running: units.longDuration > 0 && dialog.popupShown && model["State"] == "Charging" && model["Is Power Supply"]
+          running: units.longDuration > 0 && model["State"] == "Charging" && model["Is Power Supply"]
           alwaysRunToEnd: true
           loops: Animation.Infinite
 
