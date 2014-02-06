@@ -42,6 +42,17 @@ Item {
 
     property bool vertical: plasmoid.formFactor == PlasmaCore.Types.Vertical
 
+    property bool showSeconds: plasmoid.configuration.showSeconds
+    property bool showTimezone: plasmoid.configuration.showTimezone
+    property string timeFormat
+
+    onShowSecondsChanged: {
+        timeFormatCorrection(Qt.locale().timeFormat(Locale.ShortFormat))
+    }
+    onShowTimezoneChanged: {
+        timeFormatCorrection(Qt.locale().timeFormat(Locale.ShortFormat))
+    }
+
     onWidthChanged: geotimer.start()
     onHeightChanged: geotimer.start()
 
@@ -58,7 +69,7 @@ Item {
         font.pixelSize: Math.min(main.width/6, main.height)
         width: Math.max(paintedWidth, time.paintedWidth)
         // We need to adjust the timeformat a bit, see more at timeFormatCorrection(..) comments
-        text: Qt.formatTime(dataSource.data["Local"]["Time"], timeFormatCorrection(Qt.locale().timeFormat(Locale.ShortFormat)));
+        text: Qt.formatTime(dataSource.data["Local"]["Time"], main.timeFormat);
         //horizontalAlignment: Text.AlignHCenter
         verticalAlignment: Text.AlignVCenter
         anchors {
@@ -150,19 +161,19 @@ Item {
     // It can happen that Qt uses the 'C' locale (it's a fallback) and that locale
     // has always ":ss" part in ShortFormat, so we need to remove it.
     function timeFormatCorrection(timeFormatString) {
-        if (plasmoid.configuration.showSeconds && timeFormatString.indexOf('s') == -1) {
+        if (main.showSeconds && timeFormatString.indexOf('s') == -1) {
             timeFormatString = timeFormatString.replace(/(.*h)(.+)(mm)(.*)/gi,
                                                         function(match, firstPart, delimiter, secondPart, rest, offset, original) {
                 return firstPart + delimiter + secondPart + delimiter + "ss" + rest
             });
-        } else if (!plasmoid.configuration.showSeconds && timeFormatString.indexOf('s') != -1) {
+        } else if (!main.showSeconds && timeFormatString.indexOf('s') != -1) {
             timeFormatString = timeFormatString.replace(/.ss?/i, "");
         }
 
         //FIXME: this always appends the timezone part at the end, it should probably be
         //       Locale-driven, however QLocale does not provide any hint about where to
         //       put it
-        if (plasmoid.configuration.showTimezone && timeFormatString.indexOf('t') == -1) {
+        if (main.showTimezone && timeFormatString.indexOf('t') == -1) {
             timeFormatString = timeFormatString + " t";
         }
 
@@ -176,6 +187,10 @@ Item {
             sizehelper.text = st;
         }
 
-        return timeFormatString;
+        main.timeFormat = timeFormatString;
+    }
+
+    Component.onCompleted: {
+        timeFormatCorrection(Qt.locale().timeFormat(Locale.ShortFormat))
     }
 }
