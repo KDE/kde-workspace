@@ -29,19 +29,12 @@ Item {
     id: batterymonitor
     Plasmoid.switchWidth: units.gridUnit * 10
     Plasmoid.switchHeight: units.gridUnit * 10
-    property bool show_remaining_time: false
 
     LayoutMirroring.enabled: Qt.application.layoutDirection == Qt.RightToLeft
     LayoutMirroring.childrenInherit: true
 
     Component.onCompleted: {
-        updateLogic(true);
-        plasmoid.addEventListener('ConfigChanged', configChanged);
-        plasmoid.popupEvent.connect(popupEventSlot);
-    }
-
-    function configChanged() {
-        show_remaining_time = plasmoid.readConfig("showRemainingTime");
+        updateLogic();
     }
 
     function updateLogic() {
@@ -118,7 +111,7 @@ Item {
         isBrightnessAvailable: pmSource.data["PowerDevil"]["Screen Brightness Available"] ? true : false
         isKeyboardBrightnessAvailable: pmSource.data["PowerDevil"]["Keyboard Brightness Available"] ? true : false
 
-        showRemainingTime: show_remaining_time
+        showRemainingTime: Plasmoid.configuration.showRemainingTime
         remainingTime: Number(pmSource.data["Battery"]["Remaining msec"])
 
         pluggedIn: pmSource.data["AC Adapter"]["Plugged in"]
