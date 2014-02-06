@@ -112,14 +112,6 @@ Item {
         Layout.minimumHeight: dialogItem.implicitHeight
         Layout.maximumHeight: dialogItem.implicitHeight
 
-        Connections {
-            target: plasmoid
-            onExpandedChanged: {
-                if (popped) {
-                    dialogItem.forceActiveFocus();
-                }
-            }
-        }
         model: batteries
         anchors.fill: parent
         focus: true
@@ -133,6 +125,10 @@ Item {
         remainingTime: Number(pmSource.data["Battery"]["Remaining msec"])
 
         pluggedIn: pmSource.data["AC Adapter"]["Plugged in"]
+
+        Component.onCompleted: {
+            dialogItem.forceActiveFocus();
+        }
 
         onBrightnessChanged: {
             if (disableBrightnessUpdate) {
