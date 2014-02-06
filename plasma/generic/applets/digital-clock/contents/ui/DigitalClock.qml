@@ -162,7 +162,7 @@ Item {
     // has always ":ss" part in ShortFormat, so we need to remove it.
     function timeFormatCorrection(timeFormatString) {
         if (main.showSeconds && timeFormatString.indexOf('s') == -1) {
-            timeFormatString = timeFormatString.replace(/(.*h)(.+)(mm)(.*)/gi,
+            timeFormatString = timeFormatString.replace(/^(hh*)(.+)(mm)(.*?)/i,
                                                         function(match, firstPart, delimiter, secondPart, rest, offset, original) {
                 return firstPart + delimiter + secondPart + delimiter + "ss" + rest
             });
