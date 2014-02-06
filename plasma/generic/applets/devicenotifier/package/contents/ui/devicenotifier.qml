@@ -251,9 +251,8 @@ Item {
                     }
                     filterRole: "Removable"
                     filterRegExp: {
-                        // FIXME: This crashes
-                        //var all = plasmoid.configuration.allDevices;
-                        //var removable = plasmoid.configuration.removableDevices;
+                        var all = Plasmoid.configuration.allDevices;
+                        var removable = Plasmoid.configuration.removableDevices;
                         print("FIXME: Disabled reading from config due to crash");
                         var all = false;
                         var removable = true;
