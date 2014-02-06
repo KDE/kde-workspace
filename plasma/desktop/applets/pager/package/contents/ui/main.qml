@@ -30,14 +30,16 @@ Item {
 
     property bool vertical: (plasmoid.formFactor == PlasmaCore.Types.Vertical)
 
-    Layout.minimumWidth
-    Layout.minimumHeight
+    Layout.minimumWidth: Layout.maximumWidth
+    Layout.minimumHeight: Layout.maximumHeight
 
     Layout.maximumWidth: !root.vertical ? pager.preferredSize.width : undefined
     Layout.maximumHeight: root.vertical ? pager.preferredSize.height : undefined
 
-    Layout.fillHeight: root.vertical && root.visible
-    Layout.fillWidth: !root.vertical && root.visible
+    Plasmoid.preferredRepresentation: Plasmoid.fullRepresentation
+    Layout.fillWidth: true
+    Layout.fillHeight: true
+
 
     property bool dragging: false
     property int dragId
