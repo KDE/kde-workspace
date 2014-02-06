@@ -126,7 +126,7 @@ Item {
 
     Component.onCompleted: {
         //plasmoid.addEventListener ('ConfigChanged', configChanged);
-        if (notifierDialog.count == 0) {
+        if (sdSource.connectedSources.count == 0) {
             plasmoid.status = PlasmaCore.Types.PassiveStatus;
         }
         updateTooltip()
@@ -219,6 +219,12 @@ Item {
 
         onEntered: notifierDialog.itemHovered()
         onExited: notifierDialog.itemUnhovered()
+
+
+        PlasmaCore.Svg {
+            id: lineSvg
+            imagePath: "widgets/line"
+        }
 
         PlasmaComponents.Label {
             id: header
