@@ -146,12 +146,17 @@ Item {
     // What happens here is that it looks for the delimiter between "h" and "m", takes it
     // and appends it after "mm" and then appends "ss" for the seconds. Also it checks
     // if the format string already does not contain the seconds part.
+    //
+    // It can happen that Qt uses the 'C' locale (it's a fallback) and that locale
+    // has always ":ss" part in ShortFormat, so we need to remove it.
     function timeFormatCorrection(timeFormatString) {
         if (plasmoid.configuration.showSeconds && timeFormatString.indexOf('s') == -1) {
             timeFormatString = timeFormatString.replace(/(.*h)(.+)(mm)(.*)/gi,
                                                         function(match, firstPart, delimiter, secondPart, rest, offset, original) {
                 return firstPart + delimiter + secondPart + delimiter + "ss" + rest
             });
+        } else if (!plasmoid.configuration.showSeconds && timeFormatString.indexOf('s') != -1) {
+            timeFormatString = timeFormatString.replace(/.ss?/i, "");
         }
 
         //FIXME: this always appends the timezone part at the end, it should probably be
