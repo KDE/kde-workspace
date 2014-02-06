@@ -104,8 +104,9 @@ void KSMServer::performLegacySessionSave()
         wm_client_leader = atoms[ 2 ];
         sm_client_id = atoms[ 3 ];
     }
-    for ( QList<WId>::ConstIterator it = KWindowSystem::windows().begin();
-        it != KWindowSystem::windows().end(); ++it) {
+    const QList<WId> windows = KWindowSystem::windows();
+    for ( QList<WId>::ConstIterator it = windows.begin();
+        it != windows.end(); ++it) {
         WId leader = windowWmClientLeader( *it );
         if (!legacyWindows.contains(leader) && windowSessionId( *it, leader ).isEmpty()) {
             SMType wtype = SM_WMCOMMAND;

@@ -121,8 +121,9 @@ void WindowsHandler::set_action_window( WId window_P )
 
 WId WindowsHandler::find_window( const Windowdef_list* window_P )
     {
-    for( QList< WId >::const_iterator it = KWindowSystem::windows().begin();
-         it != KWindowSystem::windows().end();
+    const QList<WId> windows = KWindowSystem::windows();
+    for( auto it = windows.begin();
+         it != windows.end();
          ++it )
         {
         Window_data tmp( *it );
