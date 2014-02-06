@@ -19,6 +19,7 @@
     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 */
 import QtQuick 2.0
+import QtQuick.Layouts 1.1
 import org.kde.plasma.core 2.0 as PlasmaCore
 import org.kde.plasma.components 2.0 as PlasmaComponents
 import org.kde.plasma.extras 2.0 as PlasmaExtras
@@ -27,8 +28,8 @@ import org.kde.qtextracomponents 2.0
 
 PlasmaExtras.ConditionalLoader {
     id: root
-    property int minimumWidth: theme.mSize(theme.defaultFont).width * 55
-    property int minimumHeight: theme.mSize(theme.defaultFont).height * 40
+    Layout.minimumWidth: theme.mSize(theme.defaultFont).width * 55
+    Layout.minimumHeight: theme.mSize(theme.defaultFont).height * 40
     property string previousState
     property bool switchTabsOnHover: plasmoid.configuration.switchTabsOnHover
     property bool showAppsByName: plasmoid.configuration.showAppsByName

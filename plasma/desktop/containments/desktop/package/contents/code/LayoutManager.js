@@ -201,7 +201,7 @@ function positionItem(item)
     var backY = y
     var avail
 
-    while (1) {
+    while (forwardY < plasmoid.height) {
         //look forward
         var forwardAvail = availableSpace(forwardX, forwardY,
                                           Math.max(item.minimumWidth, item.width),

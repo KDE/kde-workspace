@@ -18,24 +18,25 @@
  */
 
 import QtQuick 2.0
+import QtQuick.Layouts 1.1
 import org.kde.plasma.core 2.0 as PlasmaCore
 import org.kde.plasma.components 2.0 as Components
 
 Item {
     id: main
 
-    property int minimumWidth: sizehelper.paintedWidth + (units.smallSpacing * 2)
-    property int maximumWidth: minimumWidth
+    Layout.minimumWidth: sizehelper.paintedWidth + (units.smallSpacing * 2)
+    Layout.maximumWidth: Layout.minimumWidth
 
-    property int minimumHeight: sizehelper.paintedHeight + (units.smallSpacing * 2)
-    property int maximumHeight: minimumHeight
+    Layout.minimumHeight: sizehelper.paintedHeight + (units.smallSpacing * 2)
+    Layout.maximumHeight: Layout.minimumHeight
 
     property int formFactor: plasmoid.formFactor
     property int timePixelSize: theme.defaultFont.pixelSize
     property int timezonePixelSize: theme.smallestFont.pixelSize
 
-    property bool fillWidth: true
-    property bool fillHeight: true
+    Layout.fillWidth: true
+    Layout.fillHeight: true
 
     property bool constrained: formFactor == PlasmaCore.Types.Vertical || formFactor == PlasmaCore.Types.Horizontal
 

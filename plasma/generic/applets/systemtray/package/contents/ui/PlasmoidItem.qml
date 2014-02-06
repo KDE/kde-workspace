@@ -35,10 +35,6 @@ Item {
         anchors {
             fill: parent
         }
-        onClicked: {
-            print("PlasmoidItem.qml clicked: "  + plasmoid.expanded);
-            //plasmoid.expanded = !plasmoid.expanded;
-            expandApplet(true);
-        }
+        onClicked: expanded = true;
     }
 }

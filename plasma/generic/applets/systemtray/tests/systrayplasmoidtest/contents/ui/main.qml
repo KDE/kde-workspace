@@ -18,6 +18,8 @@
  ***************************************************************************/
 
 import QtQuick 2.0
+import QtQuick.Layouts 1.1
+import org.kde.plasma.plasmoid 2.0
 import org.kde.plasma.core 2.0 as PlasmaCore
 import org.kde.plasma.components 2.0 as PlasmaComponents
 
@@ -29,8 +31,8 @@ Item {
 //     height: 48
     property bool vertical: (plasmoid.formFactor == PlasmaCore.Types.Vertical)
 
-    property bool fillWidth: !vertical
-    property bool fillHeight: vertical
+    Layout.fillWidth: !vertical
+    Layout.fillHeight: vertical
 
     property int dim: 128
 
@@ -40,23 +42,23 @@ Item {
     property int implicitWidth: dim * 2
     property int implicitHeight: dim
 
-    property int minimumWidth: dim * 2
-    property int minimumHeight: dim
+    Layout.minimumWidth: dim * 2
+    Layout.minimumHeight: dim
 
     //
     //Rectangle { anchors.fill: parent; color: "orange"; opacity: 0.8; }
 
     /*
-    property Component compactRepresentation: Component {
+    Plasmoid.compactRepresentation: Component {
         Rectangle { color: "orange"; opacity: 1; }
 
     }
     */
-    property Component compactRepresentation: Component {
+    Plasmoid.compactRepresentation: Component {
         Item {
             Rectangle {
-                property bool fillWidth: !vertical
-                property bool fillHeight: vertical
+                Layout.fillWidth: !vertical
+                Layout.fillHeight: vertical
 
     //             property int preferredWidth: 100
     //             property int preferredHeight: 22

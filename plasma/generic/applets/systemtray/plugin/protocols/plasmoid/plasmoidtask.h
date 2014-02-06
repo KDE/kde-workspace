@@ -23,6 +23,7 @@
 #include "../../task.h"
 
 #include <Plasma/DataEngine>
+#include <Plasma/Containment>
 
 class KIconLoader;
 class KJob;
@@ -32,8 +33,12 @@ namespace Plasma
 {
 
 class Service;
+class Applet;
+class Contaiment;
 
 }
+
+class AppletQuickItem;
 
 namespace SystemTray
 {
@@ -53,7 +58,7 @@ class PlasmoidTask : public Task
     friend class PlasmoidProtocol;
 
 public:
-    PlasmoidTask(QQuickItem *rootItem, const QString &packageName, const QString &systrayPackageRoot, QObject *parent);
+    PlasmoidTask(const QString &packageName, int appletId, Plasma::Containment *cont, QObject *parent);
     ~PlasmoidTask();
 
     bool isValid() const;
@@ -64,20 +69,20 @@ public:
     virtual QIcon icon() const;
     virtual bool isWidget() const;
     virtual TaskType type() const { return TypePlasmoid; };
+    virtual bool expanded() const;
+    virtual void setExpanded(bool expanded);
 
     QString iconName() const { return m_iconName; }
     KPluginInfo pluginInfo() const;
     QString shortcut() const { return m_shortcut; }
     void    setShortcut(QString text);
 
-    Q_INVOKABLE void expandApplet(bool expanded);
     Q_INVOKABLE void setLocation(Plasma::Types::Location loc);
 
 Q_SIGNALS:
     void changedShortcut();
     void taskItemChanged();
     void taskItemExpandedChanged();
-    void expandedChanged();
     void iconNameChanged();
 
 private Q_SLOTS:
@@ -86,9 +91,12 @@ private Q_SLOTS:
 private:
     void updateStatus();
     QString m_taskId;
-    PlasmoidInterface* m_taskItem;
-    QQuickItem* m_rootItem;
-    PlasmoidInterface* m_qmlObject;
+    Plasma::Applet *m_taskItem;
+
+    AppletQuickItem* m_taskGraphicsObject;
+    QQuickItem* m_compactRepresentationItem;
+    QQuickItem* m_fullRepresentationItem;
+
     QIcon m_icon;
     QString m_iconName;
     QString m_shortcut;

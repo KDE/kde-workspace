@@ -16,6 +16,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import QtQuick 2.0
+import QtQuick.Layouts 1.1
+import org.kde.plasma.plasmoid 2.0
 import org.kde.plasma.core 2.0 as PlasmaCore
 import org.kde.plasma.components 2.0 as PlasmaComponents
 import org.kde.plasma.extras 2.0 as PlasmaExtras
@@ -24,24 +26,21 @@ import org.kde.plasma.extras 2.0 as PlasmaExtras
 Item {
     id: main
 
-    // Override the minimumwidth to force the collapsed version
-    // Some people want to show a really big digital clock.
-    // Moreover, semantically, the calendar is not a more complete
-    // representation, but really a popup dialog.
-    property int minimumWidth: 4000
-    property int minimumHeight: 2000
+    Layout.minimumWidth: _minimumWidth
+    Layout.minimumHeight: _minimumHeight
 
     // The "sensible" values
     property int _minimumWidth: _minimumHeight * 2.2
     property int _minimumHeight: theme.mSize(theme.defaultFont).height * 14
-    property int implicitWidth: _minimumWidth * 1.5
-    property int implicitHeight: _minimumHeight * 1.5
+    Layout.preferredWidth: _minimumWidth * 1.5
+    Layout.preferredHeight: _minimumHeight * 1.5
 
     property int formFactor: plasmoid.formFactor
 
     property alias calendarLoader: calendarLoader
 
-    property Component compactRepresentation: DigitalClock { }
+    Plasmoid.preferredRepresentation: Plasmoid.compactRepresentation
+    Plasmoid.compactRepresentation: DigitalClock { }
 
     PlasmaCore.DataSource {
         id: dataSource

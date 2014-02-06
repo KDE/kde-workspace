@@ -199,9 +199,16 @@ PlasmaCore.ToolTipArea {
         print("__processClick");
         var pos = popupPosition(taskItemContainer, 0, 0);
         switch (buttons) {
-        case Qt.LeftButton:    activate1(pos.x, pos.y); break
-        case Qt.RightButton:   activateContextMenu(pos.x, pos.y); break
-        case Qt.MiddleButton:  activate2(pos.x, pos.y); break
+        case Qt.LeftButton:
+            root.expandedTask = null;
+            activate1(pos.x, pos.y);
+            break;
+        case Qt.RightButton:
+            activateContextMenu(pos.x, pos.y);
+            break;
+        case Qt.MiddleButton:
+            activate2(pos.x, pos.y);
+            break;
         }
         plasmoid.expanded = false;
     }

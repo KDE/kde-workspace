@@ -18,6 +18,7 @@
  ***************************************************************************/
 
 import QtQuick 2.0
+import QtQuick.Layouts 1.1
 import org.kde.plasma.core 2.0 as PlasmaCore
 import org.kde.plasma.components 2.0 as PlasmaComponents
 import org.kde.plasma.extras 2.0 as PlasmaExtras
@@ -29,13 +30,13 @@ import org.kde.private.systemtray 2.0 as SystemTray
 QtExtraComponents.MouseEventListener {
     id: compactRepresentation
 
-    property int minimumWidth: !root.vertical ? computeDimension() : computeDimensionHeight()
-    property int minimumHeight: root.vertical ? computeDimension() : computeDimensionHeight()
-    property int maximumWidth: minimumWidth
-    property int maximumHeight: minimumHeight
+    Layout.minimumWidth: !root.vertical ? computeDimension() : computeDimensionHeight()
+    Layout.minimumHeight: root.vertical ? computeDimension() : computeDimensionHeight()
+    Layout.maximumWidth: Layout.minimumWidth
+    Layout.maximumHeight: Layout.minimumHeight
 
-    property bool fillWidth: false
-    property bool fillHeight: false
+    Layout.fillWidth: false
+    Layout.fillHeight: false
 
     property QtObject systrayhost: undefined
 
@@ -48,8 +49,8 @@ QtExtraComponents.MouseEventListener {
         running: false
         repeat: false
         onTriggered: {
-            //print("hidetimer triggered, collapsing " + (root.currentTask == "") )
-            if (root.currentTask == "") {
+            //print("hidetimer triggered, collapsing " + (root.expandedTask == null) )
+            if (root.expandedTask == null) {
                 plasmoid.expanded = false
             }
         }
@@ -83,8 +84,6 @@ QtExtraComponents.MouseEventListener {
         anchors.fill: parent
         onClicked: {
             plasmoid.expanded = true;
-            root.currentTask = "";
-            root.expandedItem = null
         }
     }
 

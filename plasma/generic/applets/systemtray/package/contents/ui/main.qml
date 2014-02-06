@@ -18,12 +18,14 @@
  ***************************************************************************/
 
 import QtQuick 2.0
+import QtQuick.Layouts 1.1
+import org.kde.plasma.plasmoid 2.0
 import org.kde.plasma.core 2.0 as PlasmaCore
 // import org.kde.plasma.components 2.0 as PlasmaComponents
 // import org.kde.plasma.extras 2.0 as PlasmaExtras
 
 import org.kde.private.systemtray 2.0 as SystemTray
-import "plasmapackage:/code/Layout.js" as Layout
+import "plasmapackage:/code/Layout.js" as LayoutManager
 
 Item {
     id: root
@@ -31,23 +33,23 @@ Item {
 
     property bool vertical: (plasmoid.formFactor == PlasmaCore.Types.Vertical)
 
-    property int minimumWidth: minimumHeight * 1.333
-    property int minimumHeight: theme.mSize(theme.defaultFont).height * 14
-
-    property int implicitWidth: minimumWidth * 1.5
-    property int implicitHeight: minimumHeight * 1.5
+    Plasmoid.preferredRepresentation: Plasmoid.compactRepresentation
+    Plasmoid.onExpandedChanged: {
+        if (!plasmoid.expanded) {
+            root.expandedTask = null;
+        }
+    }
 
     property int preferredItemSize: 128 // will be set by the grid, just needs a high-enough default
 
     // Sizes depend on the font, and thus on DPI
     property int baseSize: theme.mSize(theme.defaultFont).height
-    property int itemSize: Layout.alignedSize(Math.min(baseSize * 2, preferredItemSize))
+    property int itemSize: LayoutManager.alignedSize(Math.min(baseSize * 2, preferredItemSize))
 
     property bool debug: plasmoid.configuration.debug
 
-    property Item expandedItem: null
-    property string currentTask: ""
-    property string currentName: ""
+    property QtObject expandedTask: null;
+
 
     function togglePopup() {
         print("toggle popup => " + !plasmoid.expanded);
@@ -58,8 +60,14 @@ Item {
         }
     }
 
-    property Component compactRepresentation: CompactRepresentation {
+    Plasmoid.compactRepresentation: CompactRepresentation {
         systrayhost: host
+    }
+    Plasmoid.fullRepresentation: ExpandedRepresentation {
+        Layout.minimumWidth: Layout.minimumHeight * 1.333
+        Layout.minimumHeight: theme.mSize(theme.defaultFont).height * 14
+        Layout.preferredWidth: Layout.minimumWidth * 1.5
+        Layout.preferredHeight: Layout.minimumHeight * 1.5
     }
 
     Rectangle {
@@ -73,7 +81,7 @@ Item {
     
     SystemTray.Host {
         id: host
-        //rootItem: hiddenView
+        rootItem: plasmoid
     }
 
 // FIXME: Doesn't work, parenting problems and no model available
@@ -92,7 +100,4 @@ Item {
 //         id: expandedLoader
 //     }
 
-    ExpandedRepresentation {
-        anchors.fill: parent
-    }
 }

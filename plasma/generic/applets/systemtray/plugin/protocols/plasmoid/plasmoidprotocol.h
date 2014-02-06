@@ -26,6 +26,12 @@
 class QQuickItem;
 class QmlObject;
 
+namespace Plasma {
+    class Applet;
+    class Containment;
+    class Corona;
+}
+
 namespace SystemTray
 {
 
@@ -47,7 +53,9 @@ protected Q_SLOTS:
 
 private:
     QHash<QString, PlasmoidTask*> m_tasks;
-    QString m_systrayPackageRoot;
+    QHash<QString, int> m_knownPlugins;
+    Plasma::Containment *m_containment;
+    Plasma::Applet *m_systrayApplet;
 };
 
 }

@@ -19,13 +19,13 @@
 
 #include "plasmoidtask.h"
 #include "plasmoidprotocol.h"
-#include "plasmoidinterface.h"
 
 #include "debug.h"
 
 #include "../../manager.h"
 
 #include <Plasma/PluginLoader>
+#include <Plasma/Containment>
 #include <kdeclarative/qmlobject.h>
 #include <KLocalizedString>
 #include <kplugintrader.h>
@@ -40,7 +40,8 @@ namespace SystemTray
 
 PlasmoidProtocol::PlasmoidProtocol(QObject *parent)
     : Protocol(parent),
-      m_tasks()
+      m_tasks(),
+      m_containment(0)
 {
 }
 
@@ -50,11 +51,44 @@ PlasmoidProtocol::~PlasmoidProtocol()
 
 void PlasmoidProtocol::init()
 {
-    Plasma::Package package = Plasma::PluginLoader::self()->loadPackage("Plasma/Applet");
-    package.setPath("org.kde.plasma.systemtray");
-    m_systrayPackageRoot = package.path();
+    //this should never happen
+    if (m_containment) {
+        return;
+    }
 
-    qCDebug(SYSTEMTRAY) << "ST2 PackagePathQml: " << m_systrayPackageRoot;
+    Manager* m = qobject_cast<Manager*>(parent());
+    QQuickItem* rootItem = m->rootItem();
+    if (rootItem) {
+        m_systrayApplet = rootItem->property("_plasma_applet").value<Plasma::Applet*>();
+    }
+
+    if (!m_systrayApplet) {
+        qWarning() << "Don't have a parent applet, Can't initialize the Plasmoid protocol!!!";
+        return;
+    }
+
+    int containmentId = 0;
+
+    KConfigGroup cg = m_systrayApplet->config();
+    cg = KConfigGroup(&cg, "Containments");
+    if (cg.isValid() && cg.groupList().size()) {
+        containmentId = cg.groupList().first().toInt();
+    }
+
+    m_containment = new Plasma::Containment(m_systrayApplet, "null", containmentId);
+    m_containment->setFormFactor(Plasma::Types::Horizontal);
+    m_containment->init();
+
+    cg = m_containment->config();
+    cg = KConfigGroup(&cg, "Applets");
+    foreach (const QString &group, cg.groupList()) {
+        KConfigGroup appletConfig(&cg, group);
+        QString plugin = appletConfig.readEntry("plugin");
+        if (!plugin.isEmpty()) {
+            m_knownPlugins[plugin] = group.toInt();
+        }
+    }
+    qWarning() << "Known plasmoid ids:"<< m_knownPlugins;
 
     //X-Plasma-NotificationArea
     KPluginInfo::List applets = Plasma::PluginLoader::self()->listAppletInfo(QString());
@@ -72,6 +106,7 @@ void PlasmoidProtocol::init()
     QMap<QString, KPluginInfo> sortedApplets;
     foreach (const KPluginInfo &info, applets) {
         KService::Ptr service = info.service();
+        //HACK
         if (!blacklist.contains(info.pluginName()) && service->property("X-Plasma-NotificationArea", QVariant::Bool).toBool()) {
             // if we already have a plugin with this exact name in it, then check if it is the
             // same plugin and skip it if it is indeed already listed
@@ -111,14 +146,14 @@ void PlasmoidProtocol::init()
 void PlasmoidProtocol::newTask(const QString &service)
 {
     qCDebug(SYSTEMTRAY) << "ST new task " << service;
+    //don't allow duplicates
     if (m_tasks.contains(service)) {
         return;
     }
 
     Manager* m = qobject_cast<Manager*>(parent());
-    QQuickItem* rootItem = m->rootItem();
 
-    PlasmoidTask *task = new PlasmoidTask(rootItem, service, m_systrayPackageRoot, this);
+    PlasmoidTask *task = new PlasmoidTask(service, m_knownPlugins.value(service), m_containment, this);
 
     if (task->pluginInfo().isValid()) {
         m_tasks[service] = task;

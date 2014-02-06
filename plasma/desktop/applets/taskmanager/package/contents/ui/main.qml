@@ -18,12 +18,14 @@
  ***************************************************************************/
 
 import QtQuick 2.0
+import QtQuick.Layouts 1.1
+import org.kde.plasma.plasmoid 2.0
 
 import org.kde.plasma.core 2.0 as PlasmaCore
 
 import org.kde.plasma.private.taskmanager 0.1 as TaskManager
 
-import "../code/layout.js" as Layout
+import "../code/layout.js" as LayoutManager
 import "../code/tools.js" as TaskTools
 
 Item {
@@ -33,10 +35,12 @@ Item {
 
     property bool vertical: (plasmoid.formFactor == PlasmaCore.Types.Vertical)
 
-    property bool fillWidth: true
-    property bool fillHeight:true
-    property int minimumWidth: tasks.vertical ? 0 : Layout.preferredMinWidth()
-    property int minimumHeight: !tasks.vertical ? 0 : Layout.preferredMinHeight()
+    Plasmoid.preferredRepresentation: Plasmoid.fullRepresentation
+
+    Layout.fillWidth: true
+    Layout.fillHeight:true
+    Layout.minimumWidth: tasks.vertical ? 0 : LayoutManager.preferredMinWidth()
+    Layout.minimumHeight: !tasks.vertical ? 0 : LayoutManager.preferredMinHeight()
     property int preferredWidth: taskList.width
     property int preferredHeight: taskList.height
 
@@ -49,19 +53,19 @@ Item {
     signal itemGeometryChanged(Item item, int id)
 
     onWidthChanged: {
-        taskList.width = Layout.layoutWidth();
+        taskList.width = LayoutManager.layoutWidth();
 
         if (plasmoid.configuration.forceStripes) {
-            taskList.height = Layout.layoutHeight();
+            taskList.height = LayoutManager.layoutHeight();
         }
     }
 
     onHeightChanged: {
         if (plasmoid.configuration.forceStripes) {
-            taskList.width = Layout.layoutWidth();
+            taskList.width = LayoutManager.layoutWidth();
         }
 
-        taskList.height = Layout.layoutHeight();
+        taskList.height = LayoutManager.layoutHeight();
     }
 
     TaskManager.Backend {
@@ -95,7 +99,7 @@ Item {
     Binding {
         target: backend.groupManager
         property: "fullLimit"
-        value: Layout.optimumCapacity(width, height) + 1
+        value: LayoutManager.optimumCapacity(width, height) + 1
     }
 
     Binding {
@@ -163,8 +167,8 @@ Item {
             top: parent.top
         }
 
-        onWidthChanged: Layout.layout(taskRepeater)
-        onHeightChanged: Layout.layout(taskRepeater)
+        onWidthChanged: LayoutManager.layout(taskRepeater)
+        onHeightChanged: LayoutManager.layout(taskRepeater)
 
         flow: tasks.vertical ? Flow.TopToBottom : Flow.LeftToRight
 
@@ -180,9 +184,9 @@ Item {
             model: visualModel
 
             onCountChanged: {
-                taskList.width = Layout.layoutWidth();
-                taskList.height = Layout.layoutHeight();
-                Layout.layout(taskRepeater);
+                taskList.width = LayoutManager.layoutWidth();
+                taskList.height = LayoutManager.layoutHeight();
+                LayoutManager.layout(taskRepeater);
             }
         }
     }

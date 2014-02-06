@@ -18,83 +18,113 @@
  ***************************************************************************/
 
 import QtQuick 2.0
+import QtQuick.Layouts 1.1
 import org.kde.plasma.core 2.0 as PlasmaCore
 import org.kde.plasma.components 2.0 as PlasmaComponents
 import org.kde.plasma.extras 2.0 as PlasmaExtras
 
-Item {
+ColumnLayout {
     id: expandedRepresentation
 
-    anchors {
-        margins: units.largeSpacing
-        //fill: parent
-    }
+    Layout.minimumWidth: Layout.minimumHeight * 1.333
+    Layout.minimumHeight: theme.mSize(theme.defaultFont).height * 8
+    Layout.preferredWidth: Layout.minimumWidth * 1.5
+    Layout.preferredHeight: Layout.minimumHeight * 1.5
 
+    property int controlSize: Math.min(height, width) / 4
+
+    //anchors.margins: units.largeSpacing
     //Rectangle { color: "orange"; anchors.fill: parent }
 
-    PlasmaExtras.Heading {
-        id: song
-        level: 3
-        opacity: 0.6
+    RowLayout {
+        id: titleRow
+        spacing: units.largeSpacing
         anchors {
             left: parent.left
             top: parent.top
             right: parent.right
         }
-        elide: Text.ElideRight
-        text: root.track == "" ? i18n("No media playing") : root.track
+        Image {
+            source: mpris2Source.data[mpris2Source.last].Metadata["mpris:artUrl"]
+            Layout.preferredHeight: Math.min(expandedRepresentation.height/2, sourceSize.height)
+            Layout.preferredWidth: Layout.preferredHeight
+            visible: status == Image.Ready
+        }
+        Column {
+            Layout.fillWidth: true
+            anchors.top: parent.top
+            spacing: units.largeSpacing
+            PlasmaExtras.Heading {
+                id: song
+                anchors {
+                    left: parent.left
+                    right: parent.right
+                }
+                level: 3
+                opacity: 0.6
+
+                elide: Text.ElideRight
+                text: root.track == "" ? i18n("No media playing") : root.track
+            }
+
+            PlasmaExtras.Heading {
+                id: artist
+                anchors {
+                    left: parent.left
+                    right: parent.right
+                }
+                level: 4
+                opacity: 0.3
+
+                elide: Text.ElideRight
+                text: root.noPlayer ? "" : root.artist
+            }
+        }
     }
 
-    PlasmaExtras.Heading {
-        id: artist
-        level: 4
-        opacity: 0.3
+    PlasmaComponents.Slider {
+        z: 999
+        maximumValue: mpris2Source.data[mpris2Source.last].Metadata["mpris:length"]
+        value: mpris2Source.data[mpris2Source.last].Position
         anchors {
-            top: song.bottom
-            topMargin: units.smallSpacing
             left: parent.left
             right: parent.right
         }
-        elide: Text.ElideRight
-        text: root.noPlayer ? "" : root.artist
+        onValueChanged: {
+            if (pressed) {
+                var service = mpris2Source.serviceForSource(mpris2Source.last);
+                var operation = service.operationDescription("Seek");
+                operation.microseconds = value
+                service.startOperationCall(operation);
+            }
+        }
     }
+
     Item {
-
+        Layout.fillHeight: true
         anchors {
-            top: artist.bottom
-            //topMargin: (parent.height - artist.height - song.height - root.controlsSize) / 2
-            bottom: parent.bottom
-            //bottom: parent.bottom
-            //horizontalCenter: parent.horizontalCenter
             left: parent.left
             right: parent.right
         }
+
+
         Row {
             id: playerControls
             property int controlsSize: theme.mSize(theme.defaultFont).height * 3
 
             //Rectangle { color: "orange"; anchors.fill: parent }
 
-            anchors {
-                //top: artist.bottom
-                //topMargin: (parent.height - artist.height - song.height - root.controlsSize) / 2
-                verticalCenter: parent.verticalCenter
-                //bottom: parent.bottom
-                horizontalCenter: parent.horizontalCenter
-                //left: parent.left
-            }
-
-            height: root.controlsSize
-            //height: 20
-            width: (root.controlsSize * 3) + (units.largeSpacing * 2)
+            anchors.centerIn: parent
             spacing: units.largeSpacing
 
             MediaControl {
+                anchors.verticalCenter: parent.verticalCenter
                 source: "media-skip-backward"
                 onTriggered: root.previous();
             }
 
             MediaControl {
+                width: expandedRepresentation.controlSize * 1.5
                 source: root.state == "playing" ? "media-playback-pause" : "media-playback-start"
                 onTriggered: {
                     print("Clicked" + source + " " + root.state);
@@ -107,6 +137,7 @@ Item {
             }
 
             MediaControl {
+                anchors.verticalCenter: parent.verticalCenter
                 source: "media-skip-forward"
                 onTriggered: root.next();
             }

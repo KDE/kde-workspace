@@ -15,6 +15,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import QtQuick 2.0
+import QtQuick.Layouts 1.1
+import org.kde.plasma.plasmoid 2.0
 import org.kde.plasma.core 2.0 as PlasmaCore
 import org.kde.plasma.components 2.0 as Components
 import org.kde.qtextracomponents 2.0
@@ -23,8 +25,8 @@ import org.kde.dirmodel 2.0
 MouseArea {
     id:root
 
-    property int minimumWidth: formFactor == PlasmaCore.Types.Horizontal ? height: 1
-    property int minimumHeight: formFactor == PlasmaCore.Types.Vertical ? width : 1
+    Layout.minimumWidth: formFactor == PlasmaCore.Types.Horizontal ? height: 1
+    Layout.minimumHeight: formFactor == PlasmaCore.Types.Vertical ? width : 1
     property int formFactor: plasmoid.formFactor
     property bool constrained: formFactor==PlasmaCore.Types.Vertical||formFactor==PlasmaCore.Types.Horizontal
     hoverEnabled: true

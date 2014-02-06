@@ -22,7 +22,7 @@ import org.kde.plasma.core 2.0 as PlasmaCore
 import org.kde.qtextracomponents 2.0 as QtExtraComponents
 
 import org.kde.private.systemtray 2.0 as SystemTray
-import "plasmapackage:/code/Layout.js" as Layout
+//import "plasmapackage:/code/Layout.js" as LayoutManager
 
 
 QtExtraComponents.MouseEventListener {
@@ -35,13 +35,14 @@ QtExtraComponents.MouseEventListener {
     hoverEnabled: true
 
     property variant task: null
-    property bool isCurrentTask: (root.currentTask == taskId)
+    property bool isCurrentTask: (root.expandedTask == modelData)
 
     property bool isHiddenItem: false
 
     onTaskChanged: {
         //print("******************* Task changed:" + task.taskId + " " + task.name)
     }
+
 
     onClicked: {
         if (taskType == SystemTray.Task.TypePlasmoid) {
@@ -55,16 +56,17 @@ QtExtraComponents.MouseEventListener {
         running: false
         repeat: false
         onTriggered: {
-            print("hidetimer triggered, collapsing " + (root.currentTask == "") )
-            if (root.currentTask == "") {
+            print("hidetimer triggered, collapsing " + (root.expandedTask == null) )
+            if (root.expandedTask == null) {
                 plasmoid.expanded = false
             }
         }
     }
 
     // opacity is raised when: plasmoid is collapsed, we are the current task, or it's hovered
-    opacity: (containsMouse || !plasmoid.expanded || root.currentTask == taskId) || (plasmoid.expanded && root.currentTask == "") ? 1.0 : 0.6
+    opacity: (containsMouse || !plasmoid.expanded || isCurrentTask) || (plasmoid.expanded && root.expandedTask == null) ? 1.0 : 0.6
     Behavior on opacity { NumberAnimation { duration: units.shortDuration * 3 } }
+
 
     property int taskStatus: status
     property int taskType: type
@@ -81,31 +83,23 @@ QtExtraComponents.MouseEventListener {
         opacity: 0.8;
     }
 
-    Component {
-        id: exandedStatusItemComponent
-        Item {
-            Rectangle {
-                anchors.fill: parent;
-                border.width: 1;
-                border.color: "black";
-                color: "green";
-                visible: root.debug;
-                opacity: 0.7;
+    property bool isExpanded: expanded
+
+    onIsExpandedChanged: {
+        if (expanded) {
+            var task;
+            if (root.expandedTask) {
+                task = root.expandedTask;
             }
-
+            root.expandedTask = modelData;
+            if (task) {
+                task.expanded = false;
+            }
+        } else if (root.expandedTask == modelData) {
+            root.expandedTask = null;
         }
     }
 
-    onExpandedItemChanged: {
-        if (expandedItem && root.expandedItem != expandedItem) {
-            root.currentTask = taskId;
-            root.expandedItem = expandedItem;
-        } else if (root.currentTask == taskId) {
-            // release
-            root.currentTask = ""
-            root.expandedItem = null;
-        }
-    }
 
     PulseAnimation {
         targetItem: taskItemContainer
@@ -134,15 +128,11 @@ QtExtraComponents.MouseEventListener {
     Component.onCompleted: {
         if (taskType == SystemTray.Task.TypeStatusItem) {
             sniLoader.source = "StatusNotifierItem.qml";
-            var component = Qt.createComponent("ExpandedStatusNotifier.qml");
-            if (component.status == Component.Ready) {
-                expandedItem = component.createObject(taskItemContainer, {"x": 300, "y": 300});
-            } else {
-                print("Error loading statusitem: " + component.errorString());
-            }
+
         } else if (taskItem != undefined) {
             sniLoader.source = "PlasmoidItem.qml";
             taskItem.parent = taskItemContainer;
+            taskItem.z = 999;
             updatePlasmoidGeometry();
         }
     }

@@ -10,7 +10,6 @@ set(systemtrayplugin_SRCS
 
     protocols/plasmoid/plasmoidtask.cpp
     protocols/plasmoid/plasmoidprotocol.cpp
-    protocols/plasmoid/plasmoidinterface.cpp
 )
 
 add_library(systemtrayplugin SHARED ${systemtrayplugin_SRCS})

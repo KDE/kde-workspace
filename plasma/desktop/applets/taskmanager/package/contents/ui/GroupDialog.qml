@@ -22,7 +22,7 @@ import QtQuick 2.0
 import org.kde.plasma.core 2.0 as PlasmaCore
 import org.kde.draganddrop 2.0
 
-import "../code/layout.js" as Layout
+import "../code/layout.js" as LayoutManager
 
 PlasmaCore.Dialog {
     property Item target
@@ -106,11 +106,11 @@ PlasmaCore.Dialog {
                 task.textWidthChanged.connect(updateSize);
             }
 
-            maxWidth += Layout.horizontalMargins() + units.iconSizes.small + 6;
+            maxWidth += LayoutManager.horizontalMargins() + units.iconSizes.small + 6;
 
             // TODO: Properly derive limits from work area size (screen size sans struts).
             mainItem.width = Math.min(maxWidth, (tasks.vertical ? 640 - tasks.width : Math.max(tasks.width, 640)) - 20);
-            mainItem.height = groupRepeater.count * (Layout.verticalMargins() + units.iconSizes.small);
+            mainItem.height = groupRepeater.count * (LayoutManager.verticalMargins() + units.iconSizes.small);
         }
     }
 }

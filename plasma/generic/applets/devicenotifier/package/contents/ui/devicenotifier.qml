@@ -19,14 +19,16 @@
  */
 
 import QtQuick 2.0
+import QtQuick.Layouts 1.1
+import org.kde.plasma.plasmoid 2.0
 import org.kde.plasma.core 2.0 as PlasmaCore
 import org.kde.plasma.components 2.0 as PlasmaComponents
 import org.kde.plasma.extras 2.0 as PlasmaExtras
 
 Item {
     id: devicenotifier
-    property int minimumWidth: 290
-    property int minimumHeight: 340
+    Layout.minimumWidth: 290
+    Layout.minimumHeight: 340
     property string devicesType: "removable"
     property string expandedDevice
     property string popupIcon: "device-notifier"
@@ -38,7 +40,7 @@ Item {
         interval: 0
     }
 
-    property Component compactRepresentation: PlasmaCore.IconItem {
+    Plasmoid.compactRepresentation: PlasmaCore.IconItem {
         source: devicenotifier.popupIcon
         width: 36;
         height: 36;

@@ -19,7 +19,6 @@
 
 #include "plasmoidtask.h"
 #include "plasmoidprotocol.h"
-#include "plasmoidinterface.h"
 #include "../../host.h"
 #include "debug.h"
 
@@ -30,25 +29,52 @@
 
 #include <QLoggingCategory>
 
+#include <Plasma/Applet>
+#include <Plasma/PluginLoader>
+
+#include <plasmaquick/appletquickitem.h>
+
 namespace SystemTray
 {
 
-PlasmoidTask::PlasmoidTask(QQuickItem* rootItem, const QString &packageName, const QString &systrayPackageRoot, QObject *parent)
+PlasmoidTask::PlasmoidTask(const QString &packageName, int appletId, Plasma::Containment *cont, QObject *parent)
     : Task(parent),
       m_taskId(packageName),
       m_taskItem(0),
-      m_rootItem(rootItem),
       m_valid(true)
 {
-    qCDebug(SYSTEMTRAY) << "Loading applet: " << packageName;
-    m_taskItem = new PlasmoidInterface(packageName, systrayPackageRoot, m_rootItem);
+    qCDebug(SYSTEMTRAY) << "Loading applet: " << packageName << appletId;
+
+    m_taskItem = Plasma::PluginLoader::self()->loadApplet(packageName, appletId);
+    cont->addApplet(m_taskItem);
+    m_taskItem->init();
+
+    m_taskGraphicsObject = m_taskItem->property("_plasma_graphicObject").value<AppletQuickItem *>();
+
+    if (m_taskGraphicsObject) {
+        Plasma::Package package = Plasma::PluginLoader::self()->loadPackage("Plasma/Shell");
+        package.setDefaultPackageRoot("plasma/plasmoids/");
+        package.setPath("org.kde.plasma.systemtray");
+
+        m_taskGraphicsObject->setCoronaPackage(package);
+        QMetaObject::invokeMethod(m_taskGraphicsObject, "init", Qt::DirectConnection);
+        qWarning()<<m_taskGraphicsObject->property("compactRepresentationItem");
+        qWarning()<<m_taskGraphicsObject->property("fullRepresentationItem");
+
+        //old syntax, because we are connecting blindly
+        connect(m_taskGraphicsObject, SIGNAL(expandedChanged(bool)),
+                this, SIGNAL(expandedChanged(bool)));
+    }
+
+
+
     if (!m_taskItem) {
         qCDebug(SYSTEMTRAY) << "Invalid applet taskitem";
         m_valid = false;
         return;
     }
-    connect(m_taskItem, &PlasmoidInterface::statusChanged, this, &PlasmoidTask::updateStatus);
-    connect(m_taskItem, &PlasmoidInterface::defaultRepresentationChanged, this, &PlasmoidTask::taskItemExpandedChanged);
+    connect(m_taskItem, &Plasma::Applet::statusChanged, this, &PlasmoidTask::updateStatus);
+   // connect(m_taskItem, &PlasmoidInterface::defaultRepresentationChanged, this, &PlasmoidTask::taskItemExpandedChanged);
 
     if (pluginInfo().isValid()) {
         setName(pluginInfo().name());
@@ -87,17 +113,6 @@ void PlasmoidTask::updateStatus()
     }
 }
 
-void PlasmoidTask::expandApplet(bool expanded)
-{
-    qCDebug(SYSTEMTRAY) << "ST2P expandApplet() " << expanded;
-    //if (m_taskItem->isExpanded() != expanded) {
-    if (m_taskItem && m_taskItem->isExpanded() != expanded) {
-        qCDebug(SYSTEMTRAY) << "ST2P set plasmoid.expand = " << expanded;
-        m_taskItem->setExpanded(expanded);
-        //m_taskItem->setCollapsed();
-    }
-}
-
 bool PlasmoidTask::isValid() const
 {
     return m_valid && pluginInfo().isValid();
@@ -123,7 +138,7 @@ void PlasmoidTask::setShortcut(QString text) {
 void PlasmoidTask::setLocation(Plasma::Types::Location loc)
 {
     if (m_taskItem) {
-        m_taskItem->setLocation(loc);
+//        m_taskItem->setLocation(loc);
     }
 }
 
@@ -134,7 +149,11 @@ QString PlasmoidTask::taskId() const
 
 QQuickItem* PlasmoidTask::taskItem()
 {
-    return m_taskItem;
+    if (m_taskGraphicsObject) {
+        return m_taskGraphicsObject;
+    }
+    //FIXME
+    return new QQuickItem();//m_taskItem;
 }
 
 QQuickItem* PlasmoidTask::taskItemExpanded()
@@ -142,7 +161,12 @@ QQuickItem* PlasmoidTask::taskItemExpanded()
     if (!m_taskItem) {
         return 0;
     }
-    return m_taskItem->defaultRepresentation();
+
+    if (m_taskGraphicsObject && m_taskGraphicsObject->property("fullRepresentationItem").value<QQuickItem *>()) {
+        return m_taskGraphicsObject->property("fullRepresentationItem").value<QQuickItem *>();
+    }
+    //FIXME
+    return new QQuickItem();//m_taskItem->defaultRepresentation();
 }
 
 QIcon PlasmoidTask::icon() const
@@ -161,6 +185,23 @@ void PlasmoidTask::syncStatus(QString newStatus)
 
     setStatus(status);
 }
+
+bool PlasmoidTask::expanded() const
+{
+    if (m_taskGraphicsObject) {
+        return m_taskGraphicsObject->property("expanded").toBool();
+    } else {
+        return false;
+    }
+}
+
+void PlasmoidTask::setExpanded(bool expanded)
+{
+    if (m_taskGraphicsObject) {
+        m_taskGraphicsObject->setProperty("expanded", expanded);
+    }
+}
+
 
 }
 

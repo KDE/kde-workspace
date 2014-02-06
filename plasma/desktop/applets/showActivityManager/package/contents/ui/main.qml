@@ -18,6 +18,8 @@
  */
 
 import QtQuick 2.0
+import QtQuick.Layouts 1.1
+import org.kde.plasma.plasmoid 2.0
 import org.kde.plasma.core 2.0 as PlasmaCore
 
 MouseArea {
@@ -25,8 +27,8 @@ MouseArea {
     property string activeSource: "Status"
     height: 16
     width: 16
-    property int minimumWidth: 16
-    property int minimumHeight: 16
+    Layout.minimumWidth: 16
+    Layout.minimumHeight: 16
     implicitWidth: units.iconSizes["panel"]
     implicitHeight: implicitWidth
     onClicked: {

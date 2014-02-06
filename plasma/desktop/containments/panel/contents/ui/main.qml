@@ -32,9 +32,9 @@ DragDrop.DropArea {
     height: 48
 
 //BEGIN properties
-    property int minimumWidth: currentLayout.Layout.minimumWidth
-    property int maximumWidth: currentLayout.Layout.maximumWidth
-    implicitWidth: currentLayout.implicitWidth
+    Layout.minimumWidth: currentLayout.Layout.minimumWidth
+    Layout.maximumWidth: currentLayout.Layout.maximumWidth
+    Layout.preferredWidth: currentLayout.Layout.preferredWidth
 
     property Item toolBox
 
@@ -46,9 +46,6 @@ function addApplet(applet, x, y) {
     var container = appletContainerComponent.createObject(root)
     print("Applet added in test panel: " + applet + applet.title + " at: " + x + ", " + y);
 
-    if (applet.fillWidth) {
-        lastSpacer.parent = root;
-    }
     applet.parent = container;
     container.applet = applet;
     applet.anchors.fill = container;
@@ -74,6 +71,40 @@ function addApplet(applet, x, y) {
         //else put it in last position
         } else {
             container.parent = currentLayout;
+        }
+    }
+
+    if (applet.Layout.fillWidth) {
+        lastSpacer.parent = root;
+    }
+}
+
+
+function checkLastSpacer() {
+    lastSpacer.parent = root
+
+    var expands = false;
+
+    if (plasmoid.formFactor == PlasmaCore.Types.Vertical) {
+        for (var container in column.children) {
+            var item = column.children[container];
+            if (item.Layout && item.Layout.fillHeight) {
+                expands = true;
+            }
+        }
+        if (expands) {
+            lastSpacer.parent = column
+        }
+
+    } else {
+        for (var container in row.children) {
+            var item = row.children[container];
+            if (item.Layout && item.Layout.fillWidth) {
+                expands = true;
+            }
+        }
+        if (!expands) {
+            lastSpacer.parent = row
         }
     }
 }
@@ -115,7 +146,7 @@ function addApplet(applet, x, y) {
         onAppletRemoved: {
             var flexibleFound = false;
             for (var i = 0; i < currentLayout.children.length; ++i) {
-                if (currentLayout.children[i].applet.fillWidth) {
+                if (currentLayout.children[i].applet.Layout.fillWidth) {
                     flexibleFound = true;
                     break
                 }
@@ -125,6 +156,37 @@ function addApplet(applet, x, y) {
             }
 
             LayoutManager.save();
+        }
+
+        onFormFactorChanged: {
+            lastSpacer.parent = root
+
+            var expands = false;
+
+            if (plasmoid.formFactor == PlasmaCore.Types.Vertical) {
+                for (var container in row.children) {
+                    var item = row.children[0];
+                    if (item.Layout && item.Layout.fillHeight) {
+                        expands = true;
+                    }
+                    item.parent = column
+                }
+                if (expands) {
+                    lastSpacer.parent = column
+                }
+
+            } else {
+                for (var container in column.children) {
+                    var item = column.children[0];
+                    if (item.Layout && item.Layout.fillWidth) {
+                        expands = true;
+                    }
+                    item.parent = row
+                }
+                if (!expands) {
+                    lastSpacer.parent = row
+                }
+            }
         }
 
         onUserConfiguringChanged: {
@@ -150,17 +212,27 @@ function addApplet(applet, x, y) {
             id: container
             visible: false
 
-            Layout.fillWidth: applet && applet.fillWidth
-            Layout.fillHeight: applet && applet.fillHeight
+            Layout.fillWidth: applet && applet.Layout.fillWidth
+            Layout.onFillWidthChanged: {
+                if (plasmoid.formFactor != PlasmaCore.Types.Vertical) {
+                    checkLastSpacer();
+                }
+            }
+            Layout.fillHeight: applet && applet.Layout.fillHeight
+            Layout.onFillHeightChanged: {
+                if (plasmoid.formFactor == PlasmaCore.Types.Vertical) {
+                    checkLastSpacer();
+                }
+            }
 
-            Layout.minimumWidth: (plasmoid.formFactor != PlasmaCore.Types.Vertical ? (applet && applet.minimumWidth > 0 ? applet.minimumWidth : root.height) : root.width)
-            Layout.minimumHeight: (plasmoid.formFactor == PlasmaCore.Types.Vertical ? (applet && applet.minimumHeight > 0 ? applet.minimumHeight : root.width) : root.height)
+            Layout.minimumWidth: (plasmoid.formFactor != PlasmaCore.Types.Vertical ? (applet && applet.Layout.minimumWidth > 0 ? applet.Layout.minimumWidth : root.height) : root.width)
+            Layout.minimumHeight: (plasmoid.formFactor == PlasmaCore.Types.Vertical ? (applet && applet.Layout.minimumHeight > 0 ? applet.Layout.minimumHeight : root.width) : root.height)
 
-            Layout.preferredWidth: (plasmoid.formFactor != PlasmaCore.Types.Vertical ? (applet && applet.implicitWidth > 0 ? applet.implicitWidth : root.height) : root.width)
-            Layout.preferredHeight: (plasmoid.formFactor == PlasmaCore.Types.Vertical ? (applet && applet.implicitHeight > 0 ? applet.implicitHeight : root.width) : root.height)
+            Layout.preferredWidth: (plasmoid.formFactor != PlasmaCore.Types.Vertical ? (applet && applet.Layout.preferredWidth > 0 ? applet.Layout.preferredWidth : root.height) : root.width)
+            Layout.preferredHeight: (plasmoid.formFactor == PlasmaCore.Types.Vertical ? (applet && applet.Layout.preferredHeight > 0 ? applet.Layout.preferredHeight : root.width) : root.height)
 
-            Layout.maximumWidth: (plasmoid.formFactor != PlasmaCore.Types.Vertical ? (applet && applet.maximumWidth > 0 ? applet.maximumWidth : (Layout.fillWidth ? -1 : root.height)) : (Layout.fillHeight ? -1 : root.width))
-            Layout.maximumHeight: (plasmoid.formFactor == PlasmaCore.Types.Vertical ? (applet && applet.maximumHeight > 0 ? applet.maximumHeight : (Layout.fillHeight ? -1 : root.width)) : (Layout.fillWidth ? -1 : root.height))
+            Layout.maximumWidth: (plasmoid.formFactor != PlasmaCore.Types.Vertical ? (applet && applet.Layout.maximumWidth > 0 ? applet.Layout.maximumWidth : (Layout.fillWidth ? -1 : root.height)) : (Layout.fillHeight ? -1 : root.width))
+            Layout.maximumHeight: (plasmoid.formFactor == PlasmaCore.Types.Vertical ? (applet && applet.Layout.maximumHeight > 0 ? applet.Layout.maximumHeight : (Layout.fillHeight ? -1 : root.width)) : (Layout.fillWidth ? -1 : root.height))
 
             property int oldX: x
             property int oldY: y

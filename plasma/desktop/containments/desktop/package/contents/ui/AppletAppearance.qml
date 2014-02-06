@@ -251,6 +251,9 @@ Item {
 
             property QtObject applet
 
+            property int minimumWidth: applet && applet.Layout ? applet.Layout.minimumWidth : 0
+            property int minimumHeight: applet && applet.Layout ? applet.Layout.minimumHeight : 0
+
             function appletDestroyed() {
                 print("Applet DESTROYED.");
                 LayoutManager.setSpaceAvailable(appletItem.x, appletItem.y, appletItem.width, appletItem.height, true)

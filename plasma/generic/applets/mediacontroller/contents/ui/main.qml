@@ -18,6 +18,8 @@
  ***************************************************************************/
 
 import QtQuick 2.0
+import QtQuick.Layouts 1.1
+import org.kde.plasma.plasmoid 2.0
 import org.kde.plasma.core 2.0 as PlasmaCore
 import org.kde.plasma.components 2.0 as PlasmaComponents
 import org.kde.plasma.extras 2.0 as PlasmaExtras
@@ -30,18 +32,12 @@ Item {
     property string playerIcon: ""
 
 
-    property int minimumWidth: minimumHeight * 1.333
-    property int minimumHeight: theme.mSize(theme.defaultFont).height * 8
-    property int implicitWidth: minimumWidth * 1.5
-    property int implicitHeight: minimumHeight * 1.5
-
-    property int baseSize: theme.mSize(theme.defaultFont).height
-    property int controlSize: Math.min(parent.height / 3, parent.width / 5)
     property bool noPlayer: true
 
-    property alias expandedLoader: expandedLoader
-
-    property Component compactRepresentation: CompactRepresentation {}
+    Plasmoid.switchWidth: units.gridUnit * 10
+    Plasmoid.switchHeight: units.gridUnit * 8
+    Plasmoid.icon: root.state == "playing" ? "media-playback-pause" : "media-playback-start"
+    Plasmoid.fullRepresentation: ExpandedRepresentation {}
 
     state: "off"
 
@@ -49,7 +45,7 @@ Item {
         id: mpris2Source
         engine: "mpris2"
         connectedSources: sources
-        interval: 0
+        interval: 800
         property string last
         onSourceAdded: {
             //print("XXX source added: " + source);
@@ -121,23 +117,6 @@ Item {
         var service = mpris2Source.serviceForSource(src);
         var operation = service.operationDescription(op);
         return service.startOperationCall(operation);
-    }
-
-    Loader {
-        id: expandedLoader
-        anchors.fill: parent
-    }
-
-    Timer {
-        interval: 500
-        running: true
-        onTriggered: {
-            if (plasmoid.expanded) {
-                if (expandedLoader.source == "") {
-                    expandedLoader.setSource("ExpandedRepresentation.qml", { 'anchors.fill': root});
-                }
-            }
-        }
     }
 
     states: [

@@ -117,6 +117,14 @@ void Task::setShown(bool show)
     }
 }
 
+bool Task::expanded() const
+{
+    return false;
+}
+
+void Task::setExpanded(bool expanded)
+{
+}
 
 QQuickItem* Task::taskItem() const
 {

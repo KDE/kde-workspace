@@ -25,14 +25,14 @@ import org.kde.qtextracomponents 2.0
 
 import org.kde.plasma.private.taskmanager 0.1 as TaskManager
 
-import "../code/layout.js" as Layout
+import "../code/layout.js" as LayoutManager
 import "../code/tools.js" as TaskTools
 
 MouseEventListener {
     id: task
 
     width: groupDialog.mainItem.width
-    height: units.iconSizes.small + Layout.verticalMargins()
+    height: units.iconSizes.small + LayoutManager.verticalMargins()
 
     visible: false
 
@@ -55,11 +55,11 @@ MouseEventListener {
     hoverEnabled: true
 
     onItemIndexChanged: {
-        if (!inPopup && !tasks.vertical && Layout.calculateStripes() > 1) {
-            var newWidth = Layout.taskWidth();
+        if (!inPopup && !tasks.vertical && LayoutManager.calculateStripes() > 1) {
+            var newWidth = LayoutManager.taskWidth();
 
             if (index == backend.tasksModel.launcherCount) {
-                newWidth += Layout.launcherLayoutWidthDiff();
+                newWidth += LayoutManager.launcherLayoutWidthDiff();
             }
 
             width = newWidth;
@@ -192,10 +192,10 @@ MouseEventListener {
             verticalCenter: parent.verticalCenter
         }
 
-        width: inPopup ? units.iconSizes.small : Math.min(height, parent.width - Layout.horizontalMargins())
+        width: inPopup ? units.iconSizes.small : Math.min(height, parent.width - LayoutManager.horizontalMargins())
         height: Math.min(units.iconSizes.huge,
-                         parent.height - (parent.height - Layout.verticalMargins() < units.iconSizes.small ?
-                                          Math.min(9, Layout.verticalMargins()) : Layout.verticalMargins()))
+                         parent.height - (parent.height - LayoutManager.verticalMargins() < units.iconSizes.small ?
+                                          Math.min(9, LayoutManager.verticalMargins()) : LayoutManager.verticalMargins()))
 
         PlasmaCore.IconItem {
             id: icon
