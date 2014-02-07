@@ -21,20 +21,22 @@
 import QtQuick 2.0
 import org.kde.plasma.core 2.0 as PlasmaCore
 import org.kde.plasma.components 2.0 as PlasmaComponents
+import org.kde.plasma.plasmoid 2.0
 
 Item {
     id: main
 
     width: toolBoxButton.width
     height: toolBoxButton.height
+    property bool isVertical: Plasmoid.formFactor == 3
 
     anchors {
         left: undefined
         top: undefined
-        right: (plasmoid.formFactor == 3) ? undefined : parent.right
-        bottom: (plasmoid.formFactor == 3) ? parent.bottom : undefined
-        verticalCenter: (plasmoid.formFactor == 3) ? undefined : parent.verticalCenter
-        horizontalCenter: (plasmoid.formFactor == 3) ? parent.horizontalCenter : undefined
+        right: isVertical ? undefined : parent.right
+        bottom: isVertical ? parent.bottom : undefined
+        verticalCenter: isVertical ? undefined : parent.verticalCenter
+        horizontalCenter: isVertical ? parent.horizontalCenter : undefined
     }
 
     PlasmaCore.Svg {
@@ -48,7 +50,7 @@ Item {
         width: naturalSize.width
         height: naturalSize.height
         elementId: {
-            if (plasmoid.formFactor == 3) {
+            if (isVertical) {
                 return "panel-south"
             } else {
                 return "panel-east"
@@ -58,17 +60,17 @@ Item {
             id: mouseArea
             anchors {
                 fill: parent
-                topMargin: (plasmoid.formFactor == 3) ? 5 : 0
-                leftMargin: (plasmoid.formFactor == 3) ? 0 : 5
+                topMargin: isVertical ? 5 : 0
+                leftMargin: isVertical ? 0 : 5
             }
             hoverEnabled: true
             onClicked: {
-                plasmoid.action("configure").trigger()
+                main.Plasmoid.action("configure").trigger()
             }
             PlasmaCore.IconItem {
                 anchors.fill: parent
                 source: "plasma"
-                enabled: mouseArea.containsMouse || plasmoid.userConfiguring
+                enabled: mouseArea.containsMouse || main.Plasmoid.userConfiguring
             }
         }
     }
