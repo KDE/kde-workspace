@@ -18,6 +18,7 @@
 
 import QtQuick 2.0
 import org.kde.plasma.wallpapers.image 2.0 as Wallpaper
+import org.kde.plasma.core 2.0 as PlasmaCore
 
 Rectangle {
     id: root
