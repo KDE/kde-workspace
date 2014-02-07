@@ -186,7 +186,7 @@ Item {
         }
 
         drag {
-            target: plasmoid.immutable ? undefined : toolBoxButton
+            target: main.Plasmoid.immutable ? undefined : toolBoxButton
             minimumX: 0
             maximumX: container.width - toolBoxIcon.width
             minimumY: 0
