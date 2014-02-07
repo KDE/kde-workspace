@@ -206,13 +206,6 @@ Item {
             print("Saved coordinates for ToolBox in config: " + toolBoxButton.x + ", " +toolBoxButton.x);
             main.placeToolBox();
         }
-
-        Connections {
-            target: plasmoid
-            onImmutableChanged: {
-                buttonMouse.drag.target = plasmoid.immutable ? undefined : toolBoxButton
-            }
-        }
     }
 
     states: [
