@@ -86,7 +86,7 @@ Column {
             service.startOperationCall(op)
         //try to open the id as url
         } else if (source.indexOf("Job") !== -1) {
-            plasmoid.openUrl(id)
+            Qt.openUrlExternally(id)
         }
     }
 

@@ -194,7 +194,7 @@ PlasmaCore.Dialog {
                         topMargin: 6
                         leftMargin: 6
                     }
-                    onLinkActivated: plasmoid.openUrl(link)
+                    onLinkActivated: Qt.openUrlExternally(link)
                 }
 
                 QIconItem {
@@ -243,7 +243,7 @@ PlasmaCore.Dialog {
                         wrapMode: Text.Wrap
                         elide: Text.ElideRight
                         maximumLineCount: 4
-                        onLinkActivated: plasmoid.openUrl(link)
+                        onLinkActivated: Qt.openUrlExternally(link)
                     }
                 }
                 Column {
