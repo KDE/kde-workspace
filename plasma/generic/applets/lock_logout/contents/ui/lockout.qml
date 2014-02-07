@@ -31,12 +31,13 @@ Flow {
 
     property int minButtonSize: 16
 
-    property bool show_lock: true
-    property bool show_switchUser: false
-    property bool show_leave: true
-    property bool show_suspend: false
-    property bool show_hibernate: false
-    property int visibleButtons: 2
+    property bool show_lock: Plasmoid.configuration.show_lock
+    property bool show_switchUser: Plasmoid.show_switchUser
+    property bool show_leave: Plasmoid.configuration.show_leave
+    property bool show_suspend: Plasmoid.configuration.show_suspend
+    property bool show_hibernate: Plasmoid.configuration.show_hibernate
+    property int visibleButtons: show_lock+show_switchUser+show_leave+show_suspend+show_hibernate;
+
     property int orientation: Qt.Vertical
 
     flow: orientation==Qt.Vertical ? Flow.TopToBottom : Flow.LeftToRight
@@ -48,10 +49,6 @@ Flow {
         id: dataEngine
         engine: "powermanagement"
         connectedSources: ["PowerDevil"]
-    }
-
-    Component.onCompleted: {
-        plasmoid.addEventListener('ConfigChanged', configChanged);
     }
 
     function checkLayout() {
@@ -94,35 +91,16 @@ Flow {
         }
     }
 
-    function configChanged() {
-        show_lock = plasmoid.readConfig("show_lock");
-        show_switchUser = plasmoid.readConfig("show_switchUser");
-        show_leave = plasmoid.readConfig("show_leave");
-        show_suspend = plasmoid.readConfig("show_suspend");
-        show_hibernate = plasmoid.readConfig("show_hibernate");
-
-        visibleButtons = show_lock+show_switchUser+show_leave+show_suspend+show_hibernate;
-
-        showModel.get(0).show = show_lock;
-        showModel.get(1).show = show_switchUser;
-        showModel.get(2).show = show_leave;
-        showModel.get(3).show = show_suspend;
-        showModel.get(4).show = show_hibernate;
-
-        checkLayout();
-    }
-
     // model for setting whether an icon is shown
     // this cannot be put in data.js because the the variables need to be
     // notifiable for delegates to instantly respond to config changes
     ListModel {
         id: showModel
-        // defaults:
-        ListElement { show: true } // lock
-        ListElement { show: false} // switch user
-        ListElement { show: true } // leave
-        ListElement { show: false} // suspend
-        ListElement { show: false} // hibernate
+        ListElement { show: lockout.show_lock }
+        ListElement { show: lockout.show_switchUser}
+        ListElement { show: lockout.show_leave }
+        ListElement { show: lockout.show_suspend}
+        ListElement { show: lockout.show_hibernate}
     }
 
     Repeater {
