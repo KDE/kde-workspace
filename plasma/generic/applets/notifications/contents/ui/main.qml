@@ -47,9 +47,6 @@ MouseEventListener {
 
     property real globalProgress: 0
 
-    property bool showNotifications: true
-    property bool showJobs: false
-
     property Item notifications: notificationsLoader.item
     property Item jobs: jobsLoader.item
 
@@ -101,15 +98,6 @@ MouseEventListener {
         }
     }
 
-    function configChanged()
-    {
-        //FIXME: reenable config?
-        //showNotifications = plasmoid.readConfig("ShowNotifications")
-        showNotifications = true;
-        //showJobs = plasmoid.readConfig("ShowJobs")
-        showJobs = true;
-    }
-
     PlasmaCore.Svg {
         id: configIconsSvg
         imagePath: "widgets/configuration-icons"
@@ -143,7 +131,7 @@ MouseEventListener {
                 //TODO: load those on demand based on configuration
                 Loader {
                     id: jobsLoader
-                    source: showJobs ? "Jobs.qml" : ""
+                    source: notificationsApplet.Plasmoid.configuration.ShowJobs ? "Jobs.qml" : ""
                     anchors {
                         left: parent.left
                         right: parent.right
@@ -162,7 +150,7 @@ MouseEventListener {
                         right: parent.right
                     }
 
-                    source: showNotifications ? "Notifications.qml" : ""
+                    source: notificationsApplet.Plasmoid.configuration.ShowNotifications ? "Notifications.qml" : ""
                 }
             }
         }
@@ -192,7 +180,5 @@ MouseEventListener {
         //plasmoid.popupIcon = QIcon("preferences-desktop-notification")
         plasmoid.status = PlasmaCore.Types.PassiveStatus
         //var allApplications = new Object
-        //plasmoid.addEventListener('ConfigChanged', configChanged); // FIXME
-        configChanged()
     }
 }

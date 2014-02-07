@@ -62,14 +62,14 @@ PlasmaCore.Dialog {
             Math.abs(popupPos.y - pos.y) > 40)) {
             finalPos = pos
             if (writeConfig) {
-                main.Plasmoid.configuration.CustomPosition = pos
+                notificationsApplet.Plasmoid.configuration.CustomPosition = pos
                 lastNotificationPopup.savedPos = pos
                 lastNotificationPopup.customPosition = true
             }
         } else {
             finalPos = popupPos
             if (writeConfig) {
-                main.Plasmoid.configuration.CustomPosition = QPoint(-1,-1))
+                notificationsApplet.Plasmoid.configuration.CustomPosition = QPoint(-1,-1))
                 lastNotificationPopup.savedPos = QPoint(-1,-1)
                 lastNotificationPopup.customPosition = false
             }
@@ -83,7 +83,7 @@ PlasmaCore.Dialog {
     Component.onCompleted: {
         setAttribute(Qt.WA_X11NetWmWindowTypeDock, true)
 
-        lastNotificationPopup.savedPos = plasmoid.readConfig("CustomPosition")
+        lastNotificationPopup.savedPos = notificationsApplet.Plasmoid.configuration.CustomPosition
         setCustomPosition(lastNotificationPopup.savedPos, true)
         plasmoid.popupEvent.connect(lastNotificationPopup.popupEvent)
     }
