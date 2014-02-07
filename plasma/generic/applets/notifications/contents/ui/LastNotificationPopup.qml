@@ -62,14 +62,14 @@ PlasmaCore.Dialog {
             Math.abs(popupPos.y - pos.y) > 40)) {
             finalPos = pos
             if (writeConfig) {
-                plasmoid.writeConfig("CustomPosition", pos)
+                main.Plasmoid.CustomPosition = pos
                 lastNotificationPopup.savedPos = pos
                 lastNotificationPopup.customPosition = true
             }
         } else {
             finalPos = popupPos
             if (writeConfig) {
-                plasmoid.writeConfig("CustomPosition", QPoint(-1,-1))
+                main.Plasmoid.CustomPosition = QPoint(-1,-1))
                 lastNotificationPopup.savedPos = QPoint(-1,-1)
                 lastNotificationPopup.customPosition = false
             }
