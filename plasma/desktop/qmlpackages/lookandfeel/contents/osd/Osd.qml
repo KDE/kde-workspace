@@ -101,7 +101,7 @@ PlasmaCore.Dialog {
             }
 
             visible: !root.showingProgress
-            text: root.showingProgress ? "" : root.osdValue
+            text: root.showingProgress ? "" : (root.osdValue ? root.osdValue : "")
             horizontalAlignment: Text.AlignHCenter
         }
     }
