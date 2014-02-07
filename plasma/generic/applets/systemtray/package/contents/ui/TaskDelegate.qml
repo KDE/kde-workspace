@@ -38,6 +38,7 @@ QtExtraComponents.MouseEventListener {
     property bool isCurrentTask: (root.expandedTask == modelData)
 
     property bool isHiddenItem: false
+    property int location: plasmoid.location
 
     onTaskChanged: {
         //print("******************* Task changed:" + task.taskId + " " + task.name)

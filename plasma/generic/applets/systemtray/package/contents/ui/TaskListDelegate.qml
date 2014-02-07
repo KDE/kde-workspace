@@ -34,6 +34,7 @@ TaskDelegate {
     height: (root.baseSize * 2)
 
     isHiddenItem: true
+    location: PlasmaCore.Types.LeftEdge
 
     PlasmaComponents.Highlight {
         anchors.fill: parent
