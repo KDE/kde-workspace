@@ -23,6 +23,8 @@ import org.kde.plasma.core 2.0 as PlasmaCore
 import org.kde.plasma.components 2.0 as PlasmaComponents
 import org.kde.qtextracomponents 2.0 as QtExtras
 import org.kde.plasma.extras 2.0 as PlasmaExtras
+import org.kde.plasma.plasmoid 2.0
+
 
 Item {
     id: main
@@ -37,12 +39,16 @@ Item {
     signal preferredHeightChanged
 
     property int iconSize: 16
-    property variant availScreenRect: plasmoid.availableScreenRegion(plasmoid.screen)[0]
+    property variant availScreenRect: Plasmoid.availableScreenRegion(plasmoid.screen)[0]
     property int iconWidth: 22
     property int iconHeight: iconWidth
 
-    onWidthChanged: placeToolBoxTimer.restart();
-    onHeightChanged: placeToolBoxTimer.restart();
+    onWidthChanged: {
+        placeToolBoxTimer.restart();
+    }
+    onHeightChanged: {
+        placeToolBoxTimer.restart();
+    }
 
     MouseArea {
         id: toolBoxDismisser
@@ -68,7 +74,7 @@ Item {
         id: placeToolBoxTimer
         interval: 100
         repeat: false
-        running: true
+        running: false
         onTriggered: {
             placeToolBox();
         }
@@ -107,9 +113,9 @@ Item {
     }
 
     function placeToolBox() {
-        var ts = plasmoid.readConfig("ToolBoxButtonState")
-        var tx = plasmoid.readConfig("ToolBoxButtonX")
-        var ty = plasmoid.readConfig("ToolBoxButtonY")
+        var ts = Plasmoid.configuration.ToolBoxButtonState
+        var tx = Plasmoid.configuration.ToolBoxButtonX
+        var ty = Plasmoid.configuration.ToolBoxButtonY
 
         switch (ts) {
         case "top":
@@ -142,7 +148,7 @@ Item {
             ty = main.height - toolBoxButton.height;
             break;
         }
-        print("XXX Setting toolbox to: " + tx + "x" + ty + " screen: " + main.width+ "x" + main.height+"");
+        print("XXXY Setting toolbox to: " + tx + "x" + ty + " screen: " + main.width+ "x" + main.height+"");
         toolBoxButton.x = tx;
         toolBoxButton.y = ty;
 

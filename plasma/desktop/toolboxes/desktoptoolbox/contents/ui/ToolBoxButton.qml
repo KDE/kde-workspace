@@ -21,11 +21,12 @@ import QtQuick 2.0
 import org.kde.plasma.core 2.0 as PlasmaCore
 import org.kde.plasma.components 2.0 as PlasmaComponents
 import org.kde.qtextracomponents 2.0 as QtExtras
+import org.kde.plasma.plasmoid 2.0
 
 Item {
     id: toolBoxButton
 
-    property string text: plasmoid.activityName
+    property string text: main.Plasmoid.activityName
     property string cornerElement: "desktop-northeast"
     property bool isCorner: ((state == "topleft") || (state == "topright") ||
                              (state == "bottomright") || (state == "bottomleft"))
@@ -199,9 +200,9 @@ Item {
             toolBoxItem.showing = !toolBoxItem.showing;
         }
         onReleased: {
-            plasmoid.writeConfig("ToolBoxButtonState", toolBoxButton.state);
-            plasmoid.writeConfig("ToolBoxButtonX", toolBoxButton.x);
-            plasmoid.writeConfig("ToolBoxButtonY", toolBoxButton.y);
+            main.Plasmoid.configuration.ToolBoxButtonState = toolBoxButton.state;
+            main.Plasmoid.configuration.ToolBoxButtonX = toolBoxButton.x;
+            main.Plasmoid.configuration.ToolBoxButtonY = toolBoxButton.y;
             print("Saved coordinates for ToolBox in config: " + toolBoxButton.x + ", " +toolBoxButton.x);
             main.placeToolBox();
         }
