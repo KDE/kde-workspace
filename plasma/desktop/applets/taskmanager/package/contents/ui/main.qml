@@ -159,6 +159,10 @@ Item {
         delegate: Task {}
     }
 
+    ToolTipDelegate {
+        id: toolTipDelegate
+    }
+
     TaskList {
         id: taskList
 

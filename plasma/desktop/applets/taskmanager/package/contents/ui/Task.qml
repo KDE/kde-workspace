@@ -135,13 +135,16 @@ MouseEventListener {
 
         PlasmaCore.ToolTipArea {
             id: toolTip
+            property variant windows: model.WindowList
 
             anchors.fill: parent
+            mainItem: toolTipDelegate
 
             //FIXME TODO: highlightWindows: plasmoid.configuration.highlightWindows
             onContainsMouseChanged:  {
                 if (containsMouse) {
                     if (!inPopup && plasmoid.configuration.showToolTips || true) {
+                        toolTip.windows = model.WindowList;
                         //toolTip.target = frame;
                         toolTip.mainText = model.DisplayRole;
                         //FIXME TODO:
