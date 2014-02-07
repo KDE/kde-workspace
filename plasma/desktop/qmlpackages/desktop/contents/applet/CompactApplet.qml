@@ -34,6 +34,13 @@ PlasmaCore.ToolTipArea {
     property Item fullRepresentation
     property Item compactRepresentation
 
+    onCompactRepresentationChanged: {
+        compactRepresentation.parent = root;
+        compactRepresentation.anchors.fill = root;
+        compactRepresentation.visible = true;
+        root.visible = true;
+    }
+
     onFullRepresentationChanged: {
 
         //if the fullRepresentation size was restored to a stored size, or if is dragged from the desktop, restore popup size
