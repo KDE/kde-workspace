@@ -36,10 +36,11 @@ Item {
 
     Plasmoid.switchWidth: units.gridUnit * 10
     Plasmoid.switchHeight: units.gridUnit * 8
-    Plasmoid.icon: root.state == "playing" ? "media-playback-pause" : "media-playback-start"
+    //Plasmoid.icon: root.state == "playing" ? "media-playback-pause" : "media-playback-start"
+    Plasmoid.icon: "media-playback-start"
     Plasmoid.fullRepresentation: ExpandedRepresentation {}
 
-    state: "off"
+    state: "playing"
 
     PlasmaCore.DataSource {
         id: mpris2Source
