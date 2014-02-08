@@ -23,6 +23,7 @@
 #include "../../protocol.h"
 #include <QHash>
 
+class QDBusPendingCallWatcher;
 class QQuickItem;
 class QmlObject;
 
@@ -51,9 +52,17 @@ protected Q_SLOTS:
     void newTask(const QString &service);
     void cleanupTask(const QString &taskId);
 
+private Q_SLOTS:
+    void serviceNameFetchFinished(QDBusPendingCallWatcher* watcher);
+    void serviceRegistered(const QString &service);
+    void serviceUnregistered(const QString &service);
+
 private:
+    void initDBusActivatables();
+    void newDBusActivatableTask(const QString &pluginName, const QString &dbusService);
     QHash<QString, PlasmoidTask*> m_tasks;
     QHash<QString, int> m_knownPlugins;
+    QHash<QString, QString> m_dbusActivatableTasks;
     Plasma::Containment *m_containment;
     Plasma::Applet *m_systrayApplet;
 };

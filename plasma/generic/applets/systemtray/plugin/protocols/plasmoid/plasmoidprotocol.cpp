@@ -35,6 +35,11 @@
 #include <QQmlEngine>
 #include <QQuickItem>
 
+#include <QDBusConnection>
+#include <QDBusConnectionInterface>
+#include <QDBusServiceWatcher>
+#include <QDBusPendingCallWatcher>
+
 namespace SystemTray
 {
 
@@ -106,8 +111,17 @@ void PlasmoidProtocol::init()
     QMap<QString, KPluginInfo> sortedApplets;
     foreach (const KPluginInfo &info, applets) {
         KService::Ptr service = info.service();
-        //HACK
-        if (!blacklist.contains(info.pluginName()) && service->property("X-Plasma-NotificationArea", QVariant::Bool).toBool()) {
+        const QString dbusactivation = service->property("X-Plasma-DBusActivationService",
+                                                         QVariant::String).toString();
+        if (!dbusactivation.isEmpty()) {
+            qCDebug(SYSTEMTRAY) << "ST Found DBus-able Applet: " << info.pluginName() << dbusactivation;
+            m_dbusActivatableTasks[info.pluginName()] = dbusactivation;
+        }
+
+        //FIXME: should consider config
+        if (!blacklist.contains(info.pluginName())
+                && service->property("X-Plasma-NotificationArea", QVariant::Bool).toBool()
+                && dbusactivation.isEmpty()) {
             // if we already have a plugin with this exact name in it, then check if it is the
             // same plugin and skip it if it is indeed already listed
             if (sortedApplets.contains(info.name())) {
@@ -141,7 +155,9 @@ void PlasmoidProtocol::init()
         }
     }
 
+    initDBusActivatables();
 }
+
 
 void PlasmoidProtocol::newTask(const QString &service)
 {
@@ -175,6 +191,71 @@ void PlasmoidProtocol::cleanupTask(const QString &service)
         task->deleteLater();
     }
 }
+
+void PlasmoidProtocol::initDBusActivatables()
+{
+    /* Loading and unloading Plasmoids when dbus services come and go
+     *
+     * This works as follows:
+     * - we collect a list of plugins and related services in m_dbusActivatableTasks
+     * - we query DBus for the list of services, async (initDBusActivatables())
+     * - we go over that list, adding tasks when a service and plugin match (serviceNameFetchFinished())
+     * - we start watching for new services, and do the same (serviceNameFetchFinished())
+     * - whenever a service is gone, we check whether to unload a Plasmoid (serviceUnregistered())
+     */
+    QDBusPendingCall async = QDBusConnection::sessionBus().interface()->asyncCall("ListNames");
+    QDBusPendingCallWatcher *callWatcher = new QDBusPendingCallWatcher(async, this);
+    connect(callWatcher, &QDBusPendingCallWatcher::finished,
+            this,        &PlasmoidProtocol::serviceNameFetchFinished);
+
+}
+
+void PlasmoidProtocol::serviceNameFetchFinished(QDBusPendingCallWatcher* watcher)
+{
+    QDBusPendingReply<QStringList> propsReply = *watcher;
+    watcher->deleteLater();
+
+    if (propsReply.isError()) {
+        qCWarning(SYSTEMTRAY) << "Could not get list of available D-Bus services";
+    } else {
+        foreach (const QString& serviceName, propsReply.value()) {
+            serviceRegistered(serviceName);
+        }
+    }
+
+    // Watch for new services
+    // We need to watch for all of new services here, since we want to "match" the names,
+    // not just compare them
+    // This makes mpris work, since it wants to match org.mpris.MediaPlayer2.dragonplayer
+    // against org.mpris.MediaPlayer2
+    QDBusServiceWatcher *serviceWatcher = new QDBusServiceWatcher(QString(),
+                                                QDBusConnection::sessionBus(),
+                                                QDBusServiceWatcher::WatchForOwnerChange,
+                                                this);
+    connect(serviceWatcher, &QDBusServiceWatcher::serviceRegistered, this, &PlasmoidProtocol::serviceRegistered);
+    connect(serviceWatcher, &QDBusServiceWatcher::serviceUnregistered, this, &PlasmoidProtocol::serviceUnregistered);
+}
+
+void PlasmoidProtocol::serviceRegistered(const QString &service)
+{
+    foreach (const QString &plugin, m_dbusActivatableTasks.keys()) {
+        if (service.startsWith(m_dbusActivatableTasks.value(plugin))) {
+            qDebug() << "ST : DBus service " << m_dbusActivatableTasks[plugin] << "appeared. Loading " << plugin;
+            newTask(plugin);
+        }
+    }
+}
+
+void PlasmoidProtocol::serviceUnregistered(const QString &service)
+{
+    foreach (const QString &plugin, m_dbusActivatableTasks.keys()) {
+        if (service.startsWith(m_dbusActivatableTasks.value(plugin))) {
+            qDebug() << "ST : DBus service " << m_dbusActivatableTasks[plugin] << " disappeared. Unloading " << plugin;
+            cleanupTask(plugin);
+        }
+    }
+}
+
 
 }
 
