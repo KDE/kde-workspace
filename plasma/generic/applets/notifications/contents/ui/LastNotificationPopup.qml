@@ -69,7 +69,7 @@ PlasmaCore.Dialog {
         } else {
             finalPos = popupPos
             if (writeConfig) {
-                notificationsApplet.Plasmoid.configuration.CustomPosition = QPoint(-1,-1))
+                notificationsApplet.Plasmoid.configuration.CustomPosition = QPoint(-1,-1)
                 lastNotificationPopup.savedPos = QPoint(-1,-1)
                 lastNotificationPopup.customPosition = false
             }
