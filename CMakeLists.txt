@@ -22,7 +22,6 @@ set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules ${CMAKE_MODULE_P
 
 find_package(ECM 0.0.8 REQUIRED NO_MODULE)
 
-include(CMakePackageConfigHelpers)
 include(FeatureSummary)
 include(WriteBasicConfigVersionFile)
 
@@ -40,15 +39,7 @@ include(ECMInstallIcons)
 #TODO: this was coming from KDELibs4, we need a replacement
 set(KDE_PLATFORM_PROFILE "Desktop")
 
-find_package(Qt5Core REQUIRED NO_MODULE)
-find_package(Qt5DBus REQUIRED NO_MODULE)
-find_package(Qt5Quick REQUIRED NO_MODULE)
-find_package(Qt5Widgets REQUIRED NO_MODULE)
-find_package(Qt5WebKitWidgets NO_MODULE)
-find_package(Qt5Concurrent REQUIRED NO_MODULE)
-find_package(Qt5X11Extras REQUIRED NO_MODULE)
-find_package(Qt5Test REQUIRED NO_MODULE)
-find_package(Qt5UiTools REQUIRED NO_MODULE)
+find_package(Qt5 CONFIG REQUIRED COMPONENTS Core DBus Quick Widgets WebKitWidgets Concurrent X11Extras Test UiTools)
 
 #include(ConfigureChecks.cmake)
 
