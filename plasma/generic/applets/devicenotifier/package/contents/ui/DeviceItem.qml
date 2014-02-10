@@ -32,7 +32,7 @@ Item {
     property int state
     property alias leftActionIcon: leftAction.source
     property bool mounted
-    property bool expanded: (notifierDialog.currentExpanded == index)
+    property bool expanded: (ListView.view.currentExpanded == index)
     property alias percentUsage: freeSpaceBar.value
     signal leftActionTriggered
 
@@ -57,17 +57,17 @@ Item {
         }
         hoverEnabled: true
         onEntered: {
-            notifierDialog.currentIndex = index;
-            notifierDialog.highlightItem.opacity = 1;
+            deviceItem.ListView.view.currentIndex = index;
+            deviceItem.ListView.view.highlightItem.opacity = 1;
             var service = sdSource.serviceForSource(udi);
             var operation = service.operationDescription("updateFreespace");
             service.startOperationCall(operation);
         }
         onExited: {
-            notifierDialog.highlightItem.opacity = expanded ? 1 : 0;
+            deviceItem.ListView.view.highlightItem.opacity = expanded ? 1 : 0;
         }
         onClicked: {
-            notifierDialog.itemFocused();
+            deviceItem.ListView.view.itemFocused();
 
             var actions = hpSource.data[udi]["actions"];
             if (actions.length == 1) {
@@ -76,7 +76,7 @@ Item {
                 operation.predicate = actions[0]["predicate"];
                 service.startOperationCall(operation);
             } else {
-                notifierDialog.currentExpanded = expanded ? -1 : index;
+                deviceItem.ListView.view.currentExpanded = expanded ? -1 : index;
             }
         }
 
@@ -193,7 +193,7 @@ Item {
             }
 
             onClicked: {
-                notifierDialog.itemFocused();
+                ListView.view.itemFocused();
                 if (leftAction.visible) {
                     leftActionTriggered()
                 }
@@ -285,7 +285,7 @@ Item {
 
     function makeCurrent()
     {
-        notifierDialog.currentIndex = index;
-        notifierDialog.highlightItem.opacity = 1;
+        deviceItem.ListView.view.currentIndex = index;
+        deviceItem.ListView.view.highlightItem.opacity = 1;
     }
 }
