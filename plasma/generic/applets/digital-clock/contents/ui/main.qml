@@ -42,6 +42,9 @@ Item {
     Plasmoid.preferredRepresentation: Plasmoid.compactRepresentation
     Plasmoid.compactRepresentation: DigitalClock { }
 
+    Plasmoid.toolTipMainText: Qt.formatDate(dataSource.data["Local"]["Date"],"dddd")
+    Plasmoid.toolTipSubText: Qt.formatDate(dataSource.data["Local"]["Date"],"MMM d yyyy")
+
     PlasmaCore.DataSource {
         id: dataSource
         engine: "time"
@@ -96,13 +99,5 @@ Item {
                 minimumHeight=main.height/3.5
             }
         }
-    }
-
-    Component.onCompleted: {
-        var toolTipData = new Object;
-        toolTipData["image"] = "preferences-system-time";
-        toolTipData["mainText"] ="Current Time"
-        toolTipData["subText"] = Qt.formatDate( dataSource.data["Local"]["Date"],"dddd dd MMM yyyy" )+"\n"+Qt.formatTime( dataSource.data["Local"]["Time"], "HH:MM")
-        plasmoid.popupIconToolTip = toolTipData;
     }
 }

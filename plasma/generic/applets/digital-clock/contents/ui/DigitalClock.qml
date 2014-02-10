@@ -95,14 +95,6 @@ Item {
                     }
                 }
             }
-            PlasmaCore.ToolTipArea {
-                id: tooltip
-                anchors.fill: parent
-                //subText: time.text
-                mainText: Qt.formatDate(dataSource.data["Local"]["Date"],"dddd")
-                subText: Qt.formatDate(dataSource.data["Local"]["Date"],"MMM d yyyy")
-                icon: "preferences-system-time"
-            }
         }
     }
 
