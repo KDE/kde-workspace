@@ -17,9 +17,10 @@
  */
 
 import QtQuick 2.0
+import QtQuick.Controls 1.1 as Controls
+import QtQuick.Layouts 1.1 as Layouts
 
 import org.kde.plasma.core 2.0 as PlasmaCore
-import org.kde.plasma.components 2.0 as PlasmaComponents
 
 
 Item {
@@ -33,18 +34,24 @@ Item {
     property alias cfg_nonRemovableDevices: nonRemovableOnly.checked
     property alias cfg_allDevices: allDevices.checked
 
-     PlasmaComponents.ButtonColumn {
-            PlasmaComponents.RadioButton {
-		id: removableOnly
-                text: "Removable devices only"
-            }
-            PlasmaComponents.RadioButton {
-		id: nonRemovableOnly
-                text: "Non-removable devices only"
-            }
-            PlasmaComponents.RadioButton {
-		id: allDevices
-                text: "All devices"
-            }
+    Layouts.ColumnLayout {
+        Controls.ExclusiveGroup{
+            id: deviceFilter
         }
+        Controls.RadioButton {
+            id: removableOnly
+            text: "Removable devices only"
+            exclusiveGroup: deviceFilter
+        }
+        Controls.RadioButton {
+            id: nonRemovableOnly
+            text: "Non-removable devices only"
+            exclusiveGroup: deviceFilter
+        }
+        Controls.RadioButton {
+            id: allDevices
+            text: "All devices"
+            exclusiveGroup: deviceFilter
+        }
+    }
 }
