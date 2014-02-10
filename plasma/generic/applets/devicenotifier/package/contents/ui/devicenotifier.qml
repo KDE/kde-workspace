@@ -37,6 +37,10 @@ Item {
         popupEventSlot(plasmoid.expanded);
     }
 
+    Plasmoid.icon: !sdSource.last ? "device-notifier" : sdSource.data[sdSource.last]["Icon"]
+    Plasmoid.toolTipMainText: !sdSource.last ? i18n("No devices available") : i18n("Most recent device")
+    Plasmoid.toolTipSubText: !sdSource.last ? "" : sdSource.data[sdSource.last]["Description"]
+
     function popupEventSlot(popped) {
         if (!popped) {
             // reset the property that lets us remember if an item was clicked
@@ -97,7 +101,6 @@ Item {
                 if (devicesType == "all" ||
                     (devicesType == "removable" && data[last] && data[last]["Removable"] == true) ||
                     (devicesType == "nonRemovable" && data[last] && data[last]["Removable"] == false)) {
-                    updateTooltip();
                     if (expand) {
                         expandDevice(last)
                     }
@@ -129,7 +132,6 @@ Item {
         if (sdSource.connectedSources.count == 0) {
             plasmoid.status = PlasmaCore.Types.PassiveStatus;
         }
-        updateTooltip()
     }
 
     function configChanged()
@@ -163,20 +165,6 @@ Item {
         devicenotifier.popupIcon = "preferences-desktop-notification";
         plasmoid.expanded = true;
         popupIconTimer.restart()
-    }
-
-    function updateTooltip()
-    {
-        var tooltip = new Object
-        if (notifierDialog.count == 0) {
-            tooltip["image"] = "device-notifier"
-            tooltip["mainText"] = i18n("No devices available")
-        } else if (sdSource.last != "") {
-            tooltip["image"] = sdSource.data[sdSource.last]["Icon"]
-            tooltip["mainText"] = i18n("Most recent device")
-            tooltip["subText"] = sdSource.data[sdSource.last]["Description"]
-        }
-        //plasmoid.popupIconToolTip = tooltip // FIXME
     }
 
     function isMounted (udi) {
@@ -286,7 +274,6 @@ Item {
 
                 onCountChanged: {
                     if (count == 0) {
-                        updateTooltip();
                         passiveTimer.restart()
                     } else {
                         passiveTimer.stop()
