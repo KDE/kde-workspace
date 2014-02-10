@@ -1,1 +1,0 @@
-kservice_desktop_to_json(plasma-dataengine-share.desktop)

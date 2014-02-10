@@ -12,7 +12,6 @@ qt5_add_dbus_interface(
    ActivityRankingInterface
    )
 
-kservice_desktop_to_json(plasma-engine-activities.desktop)
 add_library(plasma_engine_activities MODULE ${activity_engine_SRCS})
 target_link_libraries(plasma_engine_activities
                       KF5::CoreAddons
@@ -22,6 +21,7 @@ target_link_libraries(plasma_engine_activities
                       KF5::Service
                       Qt5::DBus
                       )
+kservice_desktop_to_json(plasma_engine_activities plasma-engine-activities.desktop)
 
 install(TARGETS plasma_engine_activities
         DESTINATION ${PLUGIN_INSTALL_DIR}/plasma/dataengine)

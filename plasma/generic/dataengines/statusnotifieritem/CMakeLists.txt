@@ -25,8 +25,6 @@ set_source_files_properties(${statusnotifieritem_xml} PROPERTIES
 )
 qt5_add_dbus_interface(statusnotifieritem_engine_SRCS ${statusnotifieritem_xml} statusnotifieritem_interface)
 
-kservice_desktop_to_json(plasma-engine-statusnotifieritem.desktop)
-
 add_library(plasma_engine_statusnotifieritem MODULE ${statusnotifieritem_engine_SRCS})
 target_link_libraries(plasma_engine_statusnotifieritem
     Qt5::DBus
@@ -36,6 +34,8 @@ target_link_libraries(plasma_engine_statusnotifieritem
     ${DBusMenuQt5_LIBRARIES}
     KF5::KDE4Support
 )
+
+kservice_desktop_to_json(plasma_engine_statusnotifieritem plasma-engine-statusnotifieritem.desktop)
 
 install(TARGETS plasma_engine_statusnotifieritem DESTINATION ${PLUGIN_INSTALL_DIR}/plasma/dataengine)
 install(FILES plasma-engine-statusnotifieritem.desktop DESTINATION ${SERVICES_INSTALL_DIR})

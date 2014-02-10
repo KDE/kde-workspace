@@ -7,8 +7,6 @@ set(soliddevice_engine_SRCS
     soliddevicejob.cpp
 )
 
-kservice_desktop_to_json(plasma-dataengine-soliddevice.desktop)
-
 add_library(plasma_engine_soliddevice MODULE ${soliddevice_engine_SRCS})
 
 target_link_libraries(plasma_engine_soliddevice
@@ -19,6 +17,8 @@ target_link_libraries(plasma_engine_soliddevice
   KF5::Solid
   KF5::CoreAddons
 )
+
+kservice_desktop_to_json(plasma_engine_soliddevice plasma-dataengine-soliddevice.desktop)
 
 install(TARGETS plasma_engine_soliddevice DESTINATION ${PLUGIN_INSTALL_DIR}/plasma/dataengine)
 install(FILES plasma-dataengine-soliddevice.desktop DESTINATION ${SERVICES_INSTALL_DIR} )

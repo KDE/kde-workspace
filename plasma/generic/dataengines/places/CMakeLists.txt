@@ -8,8 +8,6 @@ set(places_engine_SRCS
 
 set(CMAKE_AUTOMOC TRUE)
 
-kservice_desktop_to_json(plasma-dataengine-places.desktop)
-
 add_library(plasma_engine_places MODULE ${places_engine_SRCS})
 
 target_link_libraries(plasma_engine_places
@@ -18,6 +16,8 @@ target_link_libraries(plasma_engine_places
     KF5::KIOFileWidgets
     KF5::Solid
 )
+
+kservice_desktop_to_json(plasma_engine_places plasma-dataengine-places.desktop)
 
 install(TARGETS plasma_engine_places
         DESTINATION ${PLUGIN_INSTALL_DIR}/plasma/dataengine)

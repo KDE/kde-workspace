@@ -11,8 +11,6 @@ set(mpris2_engine_SRCS
     playercontainer.cpp
 )
 
-kservice_desktop_to_json(plasma-dataengine-mpris2.desktop)
-
 set_source_files_properties(
    org.freedesktop.DBus.Properties.xml
    org.mpris.MediaPlayer2.Player.xml
@@ -31,6 +29,8 @@ target_link_libraries(plasma_engine_mpris2
    KF5::Service
    KF5::Plasma
 )
+
+kservice_desktop_to_json(plasma_engine_mpris2 plasma-dataengine-mpris2.desktop)
 
 install(TARGETS plasma_engine_mpris2 DESTINATION ${PLUGIN_INSTALL_DIR}/plasma/dataengine)
 install(FILES plasma-dataengine-mpris2.desktop DESTINATION ${SERVICES_INSTALL_DIR})

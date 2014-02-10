@@ -4,9 +4,10 @@ set(switchdesktop_SRCS
     desktop.cpp
 )
 
-kservice_desktop_to_json(plasma-containmentactions-switchdesktop.desktop)
-
 add_library(plasma_containmentactions_switchdesktop MODULE ${switchdesktop_SRCS})
+
+kservice_desktop_to_json(plasma_containmentactions_switchdesktop plasma-containmentactions-switchdesktop.desktop)
+
 target_link_libraries(plasma_containmentactions_switchdesktop
                         KF5::Plasma
                         KF5::WindowSystem

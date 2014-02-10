@@ -4,8 +4,6 @@ set(hotplug_engine_SRCS
     hotplugjob.cpp
 )
 
-kservice_desktop_to_json(plasma-dataengine-hotplug.desktop)
-
 add_library(plasma_engine_hotplug MODULE ${hotplug_engine_SRCS})
 target_link_libraries(plasma_engine_hotplug
                 Qt5::DBus
@@ -16,6 +14,8 @@ target_link_libraries(plasma_engine_hotplug
 		KF5::KIOCore
 		KF5::KIOWidgets
                 )
+
+kservice_desktop_to_json(plasma_engine_hotplug plasma-dataengine-hotplug.desktop)
 
 install(TARGETS plasma_engine_hotplug DESTINATION ${PLUGIN_INSTALL_DIR}/plasma/dataengine)
 install(FILES plasma-dataengine-hotplug.desktop DESTINATION ${SERVICES_INSTALL_DIR} )

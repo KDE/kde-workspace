@@ -5,8 +5,6 @@ set(time_engine_SRCS
     solarsystem.cpp
 )
 
-kservice_desktop_to_json(plasma-dataengine-time.desktop)
-
 add_library(plasma_engine_time MODULE ${time_engine_SRCS})
 
 target_link_libraries(plasma_engine_time
@@ -16,6 +14,8 @@ target_link_libraries(plasma_engine_time
     KF5::I18n
     KF5::Service
 )
+
+kservice_desktop_to_json(plasma_engine_time plasma-dataengine-time.desktop)
 
 install(TARGETS plasma_engine_time DESTINATION ${PLUGIN_INSTALL_DIR}/plasma/dataengine)
 install(FILES plasma-dataengine-time.desktop DESTINATION ${SERVICES_INSTALL_DIR} )

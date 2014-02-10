@@ -21,7 +21,6 @@ install(FILES geolocationprovider.h geolocation_export.h
 # -------------------------------------------------------------------------------------------------
 
 set(plasma_dataengine_geolocation_SRCS geolocation.cpp)
-kservice_desktop_to_json(plasma-dataengine-geolocation.desktop)
 add_library(plasma_engine_geolocation MODULE ${plasma_dataengine_geolocation_SRCS})
 target_link_libraries(plasma_engine_geolocation
     plasma-geolocation-interface
@@ -30,6 +29,7 @@ target_link_libraries(plasma_engine_geolocation
     KF5::KIOCore
     KF5::Service
     KF5::Solid)
+kservice_desktop_to_json(plasma_engine_geolocation plasma-dataengine-geolocation.desktop)
 
 install(TARGETS plasma_engine_geolocation DESTINATION ${PLUGIN_INSTALL_DIR}/plasma/dataengine)
 install(FILES plasma-dataengine-geolocation.desktop DESTINATION ${SERVICES_INSTALL_DIR})

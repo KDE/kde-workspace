@@ -6,8 +6,6 @@ set(share_engine_SRCS
         shareservice.cpp
         share_package.cpp)
 
-add_subdirectory(data)
-
 add_library(plasma_engine_share MODULE ${share_engine_SRCS})
 target_link_libraries(plasma_engine_share
                       KF5::Plasma
@@ -15,6 +13,7 @@ target_link_libraries(plasma_engine_share
                       KF5::JsEmbed
                       KF5::KDE4Support
 )
+kservice_desktop_to_json(plasma_engine_share data/plasma-dataengine-share.desktop)
 
 install(TARGETS plasma_engine_share
         DESTINATION ${PLUGIN_INSTALL_DIR}/plasma/dataengine)
