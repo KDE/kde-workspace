@@ -33,6 +33,9 @@ Item {
 
     property bool vertical: (plasmoid.formFactor == PlasmaCore.Types.Vertical)
 
+    Plasmoid.toolTipMainText: ""
+    Plasmoid.toolTipSubText: ""
+
     Plasmoid.preferredRepresentation: Plasmoid.compactRepresentation
     Plasmoid.onExpandedChanged: {
         if (!plasmoid.expanded) {
