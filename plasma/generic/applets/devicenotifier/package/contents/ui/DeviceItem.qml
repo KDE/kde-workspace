@@ -130,8 +130,9 @@ Item {
                 enabled: deviceItem.state == 0
             }
 
-            Item {
+            PlasmaCore.ToolTipArea {
                 height:freeSpaceBar.height
+                subText: i18nc("@info:status Free disk space", "%1 free", sdSource.data[udi]["Free Space Text"])
                 anchors {
                     left: parent.left
                     right: parent.right
@@ -181,11 +182,6 @@ Item {
         }
 
 
-        PlasmaCore.ToolTipArea {
-            anchors.fill: freeSpaceBar
-            subText: i18nc("@info:status Free disk space", "%1 free", sdSource.data[udi]["Free Space Text"])
-        }
-
         MouseEventListener {
             id: leftActionArea
             width: units.iconSizes.medium*0.8
@@ -208,6 +204,21 @@ Item {
                 anchors.fill: parent
                 active: leftActionArea.containsMouse
                 visible: !busySpinner.visible
+
+                PlasmaCore.ToolTipArea {
+                    anchors.fill: leftAction
+                    subText: {
+                        if (!model["Accessible"]) {
+                            return i18n("Click to mount this device.")
+                        } else if (model["Device Types"].indexOf("OpticalDisc") != -1) {
+                            return i18n("Click to eject this disc.")
+                        } else if (model["Removable"]) {
+                            return i18n("Click to safely remove this device.")
+                        } else {
+                            return i18n("Click to access this device from other applications.")
+                        }
+                    }
+                }
             }
 
             PlasmaComponents.BusyIndicator {
@@ -215,21 +226,6 @@ Item {
                 anchors.fill: parent
                 running: visible
                 visible: deviceItem.state != 0
-            }
-        }
-
-        PlasmaCore.ToolTipArea {
-            anchors.fill: leftAction
-            subText: {
-                if (!model["Accessible"]) {
-                    return i18n("Click to mount this device.")
-                } else if (model["Device Types"].indexOf("OpticalDisc") != -1) {
-                    return i18n("Click to eject this disc.")
-                } else if (model["Removable"]) {
-                    return i18n("Click to safely remove this device.")
-                } else {
-                    return i18n("Click to access this device from other applications.")
-                }
             }
         }
 
