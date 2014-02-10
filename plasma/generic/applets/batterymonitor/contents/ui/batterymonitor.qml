@@ -33,6 +33,10 @@ Item {
     LayoutMirroring.enabled: Qt.application.layoutDirection == Qt.RightToLeft
     LayoutMirroring.childrenInherit: true
 
+    Plasmoid.toolTipMainText: ""
+    Plasmoid.toolTipSubText: batteries.tooltipText
+    Plasmoid.icon: batteries.tooltipImage
+
     Component.onCompleted: {
         updateLogic();
     }

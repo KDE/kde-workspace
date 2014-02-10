@@ -97,12 +97,5 @@ ListView {
         anchors.fill: parent
         hoverEnabled: true
         onClicked: plasmoid.expanded = !plasmoid.expanded
-
-        PlasmaCore.ToolTipArea {
-            id: tooltip
-            anchors.fill: mouseArea
-            icon: batteries.tooltipImage
-            subText: batteries.tooltipText
-        }
     }
 }
