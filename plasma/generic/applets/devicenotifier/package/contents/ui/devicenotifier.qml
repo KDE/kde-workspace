@@ -128,28 +128,9 @@ Item {
     }
 
     Component.onCompleted: {
-        //plasmoid.addEventListener ('ConfigChanged', configChanged);
         if (sdSource.connectedSources.count == 0) {
             plasmoid.status = PlasmaCore.Types.PassiveStatus;
         }
-    }
-
-    function configChanged()
-    {
-        var all = plasmoid.configuration.allDevices;
-        var removable = plasmoid.configuration.removableDevices;
-        if (all == true) {
-            devicesType = "all";
-            filterModel.filterRegExp = "";
-        } else if (removable == true) {
-            devicesType = "removable";
-            filterModel.filterRegExp = "true";
-        } else {
-            devicesType = "nonRemovable";
-            filterModel.filterRegExp = "false";
-        }
-        notifierDialog.currentIndex = -1;
-        notifierDialog.currentExpanded = -1;
     }
 
     function expandDevice(udi)
@@ -239,11 +220,8 @@ Item {
                     }
                     filterRole: "Removable"
                     filterRegExp: {
-                        var all = Plasmoid.configuration.allDevices;
-                        var removable = Plasmoid.configuration.removableDevices;
-                        print("FIXME: Disabled reading from config due to crash");
-                        var all = false;
-                        var removable = true;
+                        var all = devicenotifier.Plasmoid.configuration.allDevices;
+                        var removable = devicenotifier.Plasmoid.configuration.removableDevices;
 
                         if (all == true) {
                             devicesType = "all";
