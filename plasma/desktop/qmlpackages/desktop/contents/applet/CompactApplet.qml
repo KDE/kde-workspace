@@ -31,6 +31,7 @@ PlasmaCore.ToolTipArea {
     mainText: plasmoid.toolTipMainText
     subText: plasmoid.toolTipSubText
     location: plasmoid.location
+    active: !plasmoid.expanded
     property Item fullRepresentation
     property Item compactRepresentation
 
