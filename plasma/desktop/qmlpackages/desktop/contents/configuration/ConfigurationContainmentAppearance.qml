@@ -77,6 +77,10 @@ ColumnLayout {
         }
     }
 
+    Item {
+        id: emptyConfig
+    }
+
     QtControls.StackView {
         id: main
         Layout.fillHeight: true;
@@ -88,6 +92,8 @@ ColumnLayout {
         onSourceFileChanged: {
             if (sourceFile != "") {
                 replace(Qt.resolvedUrl(sourceFile))
+            } else {
+                replace(emptyConfig);
             }
         }
     }
