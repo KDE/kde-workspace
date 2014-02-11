@@ -237,6 +237,9 @@ bool ThemePage::haveXfixes()
     bool result = false;
 
 #ifdef HAVE_XFIXES
+    if (!QX11Info::isPlatformX11()) {
+        return result;
+    }
     int event_base, error_base;
     if (XFixesQueryExtension(QX11Info::display(), &event_base, &error_base))
     {
@@ -340,7 +343,10 @@ void ThemePage::load()
 {
     view->selectionModel()->clear();
     // Get the name of the theme libXcursor currently uses
-    QString currentTheme = XcursorGetTheme(QX11Info::display());
+    QString currentTheme;
+    if (QX11Info::isPlatformX11()) {
+        currentTheme = XcursorGetTheme(QX11Info::display());
+    }
 
     // Get the name of the theme KDE is configured to use
     KConfig c("kcminputrc");
