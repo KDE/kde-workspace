@@ -20,7 +20,7 @@
 #ifndef QS_QUERYMATCHITEM_H
 #define QS_QUERYMATCHITEM_H
 
-#include <Plasma/QueryMatch>
+#include <QueryMatch>
 
 #include "qs_matchitem.h"
 

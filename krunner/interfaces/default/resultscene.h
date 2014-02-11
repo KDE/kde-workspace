@@ -28,7 +28,7 @@
 #include <QtCore/QTimer>
 #include <QtGui/QGraphicsScene>
 
-#include <Plasma/QueryMatch>
+#include <QueryMatch>
 
 #include "resultitem.h"
 

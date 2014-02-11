@@ -44,7 +44,7 @@ target_link_libraries(kickoffplugin
                               KF5::KIOCore
 			      KF5::KIOWidgets
 			      KF5::KIOFileWidgets
-                              KF5::Plasma
+                              KF5::Runner
                               KF5::Solid
                               KF5::Service
                               KF5::KDE4Support

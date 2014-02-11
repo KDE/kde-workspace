@@ -31,7 +31,7 @@
 #include <KWindowSystem>
 
 //#include <Plasma/QueryAction>
-#include <Plasma/QueryMatch>
+#include <QueryMatch>
 #include <Plasma/RunnerManager>
 #include <Plasma/Svg>
 #include <Plasma/Theme>

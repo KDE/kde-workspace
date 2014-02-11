@@ -25,7 +25,7 @@
 #include <QString>
 #include <QIcon>
 #include <QList>
-#include <Plasma/QueryMatch>
+#include <QueryMatch>
 
 class Favicon;
 class BookmarkMatch

@@ -30,7 +30,7 @@
 #include <KIcon>
 #include <QDebug>
 
-#include <Plasma/QueryMatch>
+#include <QueryMatch>
 
 CalculatorRunner::CalculatorRunner( QObject* parent, const QVariantList &args )
     : Plasma::AbstractRunner(parent, args)

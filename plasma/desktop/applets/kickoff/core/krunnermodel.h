@@ -24,7 +24,9 @@
 #include "kickoffmodel.h"
 #include "urlitemlauncher.h"
 
-#include <Plasma/QueryMatch>
+namespace Plasma {
+    class QueryMatch;
+}
 
 namespace Kickoff {
 

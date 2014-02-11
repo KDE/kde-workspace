@@ -26,7 +26,7 @@
 #include <QIcon>
 #include <QTimer>
 
-#include <Plasma/QueryMatch>
+#include <QueryMatch>
 
 class QGraphicsLinearLayout;
 class QGraphicsProxyWidget;

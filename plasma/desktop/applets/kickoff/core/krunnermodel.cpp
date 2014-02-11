@@ -33,8 +33,8 @@
 #include <KStandardDirs>
 #include <KLocalizedString>
 #include <KUrl>
-#include <Plasma/AbstractRunner>
-#include <Plasma/RunnerManager>
+#include <KRunner/AbstractRunner>
+#include <KRunner/RunnerManager>
 
 // Local
 #include "recentapplications.h"
