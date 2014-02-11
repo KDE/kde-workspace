@@ -65,7 +65,7 @@ Item {
         onEntered: {
             actionsList.currentIndex = index;
             actionsList.highlightItem.opacity = 1;
-            makeCurrent();
+//             makeCurrent();
         }
         onExited: {
             actionsList.highlightItem.opacity = 0;

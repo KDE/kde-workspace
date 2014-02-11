@@ -1,6 +1,8 @@
 /*
  *   Copyright 2011 Viranch Mehta <viranch.mehta@gmail.com>
  *   Copyright 2012 Jacopo De Simoi <wilderkde@gmail.com>
+ *   Copyright 2014 David Edmundson <davidedmundson@kde.org>
+ *
  *
  *   This program is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU Library General Public License as
@@ -186,10 +188,6 @@ Item {
         hoverEnabled: true
         anchors.fill: parent
 
-        onEntered: notifierDialog.itemHovered()
-        onExited: notifierDialog.itemUnhovered()
-
-
         PlasmaCore.Svg {
             id: lineSvg
             imagePath: "widgets/line"
@@ -212,6 +210,7 @@ Item {
 
             ListView {
                 id: notifierDialog
+                focus: true
 
                 model: PlasmaCore.SortFilterModel {
                     id: filterModel
@@ -244,7 +243,9 @@ Item {
                 property int currentExpanded: -1
                 property bool itemClicked: true
                 delegate: deviceItem
-                highlight: PlasmaComponents.Highlight{}
+                highlight: PlasmaComponents.Highlight{
+
+                }
 
                 //this is needed to make SectionScroller actually work
                 //acceptable since one doesn't have a billion of devices
@@ -256,28 +257,6 @@ Item {
                     } else {
                         passiveTimer.stop()
                         plasmoid.status = PlasmaCore.Types.ActiveStatus
-                    }
-                }
-
-                function itemHovered()
-                {
-                    // prevent autohide from catching us!
-                    plasmoid.expanded = true;
-                }
-
-                function itemUnhovered()
-                {
-                    if (!itemClicked) {
-                        plasmoid.expanded = true;
-                    }
-                }
-
-                function itemFocused()
-                {
-                    if (!itemClicked) {
-                        // prevent autohide from catching us!
-                        itemClicked = true;
-                        plasmoid.expanded = true;
                     }
                 }
 
@@ -305,8 +284,6 @@ Item {
                         }
                     }
                 }
-
-                Component.onCompleted: currentIndex=-1
             }
 
         }
@@ -329,6 +306,8 @@ Item {
                     var used = size-freeSpace;
                     return used*100/size;
                 }
+                freeSpaceText: sdSource.data[udi]["Free Space Text"]
+
                 leftActionIcon: {
                     if (mounted) {
                         return "media-eject";
@@ -350,7 +329,6 @@ Item {
                 onIsLastChanged: {
                     if (isLast) {
                         notifierDialog.currentExpanded = index
-                        makeCurrent();
                     }
                 }
                 onOperationResultChanged: {

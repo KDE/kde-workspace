@@ -34,6 +34,7 @@ Item {
     property bool mounted
     property bool expanded: (ListView.view.currentExpanded == index)
     property alias percentUsage: freeSpaceBar.value
+    property string freeSpaceText
     signal leftActionTriggered
 
     height: container.childrenRect.height + padding.margins.top + padding.margins.bottom
@@ -55,16 +56,21 @@ Item {
             rightMargin: padding.margins.right
             bottomMargin: padding.margins.bottom
         }
+
         hoverEnabled: true
         onEntered: {
             deviceItem.ListView.view.currentIndex = index;
-            deviceItem.ListView.view.highlightItem.opacity = 1;
-            var service = sdSource.serviceForSource(udi);
-            var operation = service.operationDescription("updateFreespace");
-            service.startOperationCall(operation);
+
+            //this is done to hide the highlight if the mouse moves out of the list view
+            //and we are not mouseoverring anything
+            if (deviceItem.ListView.view.highlightItem) {
+                deviceItem.ListView.view.highlightItem.opacity = 1
+            }
         }
         onExited: {
-            deviceItem.ListView.view.highlightItem.opacity = expanded ? 1 : 0;
+            if (deviceItem.ListView.view.highlightItem) {
+                deviceItem.ListView.view.highlightItem.opacity = 0
+            }
         }
         onClicked: {
             deviceItem.ListView.view.itemFocused();
@@ -131,12 +137,17 @@ Item {
             }
 
             PlasmaCore.ToolTipArea {
+                id: freeSpaceToolip
                 height:freeSpaceBar.height
-                subText: i18nc("@info:status Free disk space", "%1 free", sdSource.data[udi]["Free Space Text"])
+
+                subText: i18nc("@info:status Free disk space", "%1 free", deviceItem.freeSpaceText)
                 anchors {
                     left: parent.left
                     right: parent.right
                 }
+
+
+
                 opacity: (deviceItem.state == 0 && mounted) ? 1 : 0
                 PlasmaComponents.ProgressBar {
                     id: freeSpaceBar
@@ -281,11 +292,5 @@ Item {
                 predicate: modelData["predicate"]
             }
         }
-    }
-
-    function makeCurrent()
-    {
-        deviceItem.ListView.view.currentIndex = index;
-        deviceItem.ListView.view.highlightItem.opacity = 1;
     }
 }
