@@ -120,7 +120,7 @@ class Pager : public QObject
         void windowChanged(WId id, const unsigned long *dirty);
         void startTimer();
         void startTimerFast();
-#ifdef Q_WS_X11
+#if HAVE_X11
         void slotAddDesktop();
         void slotRemoveDesktop();
 #endif
@@ -159,6 +159,9 @@ class Pager : public QObject
         bool m_validSizes : 1;
 
         QDesktopWidget *m_desktopWidget;
+#if HAVE_X11
+        bool m_isX11;
+#endif
     };
 
 #endif

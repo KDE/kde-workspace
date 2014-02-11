@@ -22,10 +22,13 @@
 
 #include <math.h>
 
+#include <QAction>
 #include <QApplication>
 #include <QFont>
 #include <QTimer>
+#if HAVE_X11
 #include <QX11Info>
+#endif
 #include <QDBusInterface>
 #include <QTextDocument>
 #include <QDesktopWidget>
@@ -33,8 +36,11 @@
 #include <KColorScheme>
 #include <KGlobalSettings>
 #include <KIconLoader>
+#include <KLocalizedString>
 #include <KWindowSystem>
+#if HAVE_X11
 #include <NETRootInfo>
+#endif
 
 #include <Plasma/FrameSvg>
 #include <Plasma/Package>
@@ -63,9 +69,12 @@ Pager::Pager(QObject *parent)
       m_desktopDown(false),
       m_validSizes(false),
       m_desktopWidget(QApplication::desktop())
+#if HAVE_X11
+      , m_isX11(QX11Info::isPlatformX11())
+#endif
 {
     // initialize with a decent default
-    m_desktopCount = KWindowSystem::numberOfDesktops();
+    m_desktopCount = qMax(1, KWindowSystem::numberOfDesktops());
     
     m_pagerModel = new PagerModel(this);
 
@@ -201,7 +210,7 @@ void Pager::setDisplayedText(Pager::DisplayedText disp)
 
 void Pager::createMenu()
 {
-#ifdef Q_WS_X11
+#if HAVE_X11
     m_addDesktopAction = new QAction(SmallIcon("list-add"),i18n("&Add Virtual Desktop"), this);
     m_actions.append(m_addDesktopAction);
     connect(m_addDesktopAction, SIGNAL(triggered(bool)), this , SLOT(slotAddDesktop()));
@@ -222,16 +231,22 @@ QList<QAction*> Pager::contextualActions()
   return m_actions;
 }
 
-#ifdef Q_WS_X11
+#if HAVE_X11
 void Pager::slotAddDesktop()
 {
-    NETRootInfo info(QX11Info::display(), NET::NumberOfDesktops);
+    if (!m_isX11) {
+        return;
+    }
+    NETRootInfo info(QX11Info::connection(), NET::NumberOfDesktops);
     info.setNumberOfDesktops(info.numberOfDesktops() + 1);
 }
 
 void Pager::slotRemoveDesktop()
 {
-    NETRootInfo info(QX11Info::display(), NET::NumberOfDesktops);
+    if (!m_isX11) {
+        return;
+    }
+    NETRootInfo info(QX11Info::connection(), NET::NumberOfDesktops);
     int desktops = info.numberOfDesktops();
     if (desktops > 1) {
         info.setNumberOfDesktops(info.numberOfDesktops() - 1);
@@ -357,6 +372,7 @@ void Pager::recalculateWindowRects()
     QList<WId> windows = KWindowSystem::stackingOrder();
     m_pagerModel->clearWindowRects();
 
+#if HAVE_X11
     foreach (WId window, windows) {
         KWindowInfo info = KWindowSystem::windowInfo(window, NET::WMGeometry | NET::WMFrameExtents |
                                                              NET::WMWindowType | NET::WMDesktop |
@@ -410,6 +426,7 @@ void Pager::recalculateWindowRects()
             m_pagerModel->appendWindowRect(i, window, windowRect, active, icon, info.visibleName());
         }
     }
+#endif
 }
 
 void Pager::currentDesktopChanged(int desktop)
@@ -435,7 +452,7 @@ void Pager::numberOfDesktopsChanged(int num)
         return; // refuse to update to zero desktops
     }
 
-#ifdef Q_WS_X11
+#if HAVE_X11
     m_removeDesktopAction->setEnabled(num > 1);
     m_addDesktopAction->setEnabled(num < MAXDESKTOPS);
 #endif
@@ -487,6 +504,10 @@ void Pager::startTimerFast()
 
 void Pager::moveWindow(int window, double x, double y, int targetDesktop, int sourceDesktop)
 {
+#if HAVE_X11
+    if (!m_isX11) {
+        return;
+    }
     WId windowId = (WId) window;
 
     QPointF dest = QPointF(x, y) - m_pagerModel->desktopRectAt(targetDesktop).topLeft();
@@ -523,10 +544,21 @@ void Pager::moveWindow(int window, double x, double y, int targetDesktop, int so
         info.moveResizeWindowRequest(windowId, flags, d.x(), d.y(), 0, 0);
     }
     m_timer->start();
+#else
+    Q_UNUSED(window)
+    Q_UNUSED(x)
+    Q_UNUSED(y)
+    Q_UNUSED(targetDesktop)
+    Q_UNUSED(sourceDesktop)
+#endif
 }
 
 void Pager::changeDesktop(int newDesktop)
 {
+#if HAVE_X11
+    if (!m_isX11) {
+        return;
+    }
     if (m_currentDesktop == newDesktop+1) {
         // toogle the desktop or the dashboard
         if (m_currentDesktopSelected == ShowDesktop) {
@@ -541,6 +573,9 @@ void Pager::changeDesktop(int newDesktop)
         KWindowSystem::setCurrentDesktop(newDesktop + 1);
         setCurrentDesktop(newDesktop + 1);
     }
+#else
+    Q_UNUSED(newDesktop)
+#endif
 }
 
 // KWindowSystem does not translate position when mapping viewports
