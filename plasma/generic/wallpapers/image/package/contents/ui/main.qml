@@ -67,6 +67,9 @@ Rectangle {
 
     Wallpaper.Image {
         id: imageWallpaper
+        //the oneliner of difference between image and slideshow wallpapers
+        //renderingMode: Wallpaper.Image.SlideShow
+        slidePaths: wallpaper.configuration.SlidePaths
     }
 
     onConfiguredImageChanged: {

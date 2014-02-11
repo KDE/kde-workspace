@@ -202,6 +202,27 @@ ColumnLayout {
         }
     }
 
+    //TODO: this should be shown instead of the main one when in slideshow mode
+    /*QtControls.ScrollView {
+        anchors {
+            left: parent.left
+            right: parent.right
+        }
+        height: units.gridUnit * 10
+        ListView {
+            id: slidePathsView
+            model: imageWallpaper.slidePaths
+            delegate: QtControls.Label {
+                text: modelData
+                width: slidePathsView.width
+            }
+        }
+    }
+    QtControls.Button {
+        text: i18n("Add Folder")
+        onClicked: imageWallpaper.showAddSlidePathsDialog()
+    }*/
+
     QtControls.ScrollView {
         Layout.fillHeight: true;
         anchors {

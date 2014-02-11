@@ -156,6 +156,7 @@ class Image : public QObject
         RenderingMode m_mode;
         Plasma::Package m_wallpaperPackage;
         QStringList m_slideshowBackgrounds;
+        QStringList m_unseenSlideshowBackgrounds;
         QStringList m_slidePaths;
         QTimer m_timer;
         int m_currentSlide;
