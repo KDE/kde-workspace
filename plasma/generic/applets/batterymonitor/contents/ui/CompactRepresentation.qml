@@ -85,7 +85,7 @@ ListView {
                 width: parent.width
                 height: visible ? paintedHeight : 0
                 horizontalAlignment: Text.AlignHCenter
-                text: percent + "%"// FIXME i18nc("battery percentage below battery icon", "%1%", percent)
+                text: i18nc("battery percentage below battery icon", "%1%", percent)
                 font.pixelSize: Math.max(batteryContainer.iconSize/8, theme.mSize(theme.smallestFont).height)
                 visible: false//!isConstrained()
             }
