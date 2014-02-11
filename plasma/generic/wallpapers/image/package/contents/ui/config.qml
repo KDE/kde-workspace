@@ -26,9 +26,15 @@ ColumnLayout {
     id: root
     property alias cfg_Color: picker.color
     property string cfg_Image
+    property var cfg_SlidePaths: ""
 
     Wallpaper.Image {
         id: imageWallpaper
+        onSlidePathsChanged: cfg_SlidePaths = slidePaths
+    }
+
+    onCfg_SlidePathsChanged: {
+        imageWallpaper.slidePaths = cfg_SlidePaths
     }
 
     SystemPalette {id: syspal}

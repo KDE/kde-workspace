@@ -73,6 +73,8 @@ class Image : public QObject
         Q_INVOKABLE void addUrl(const QString &url);
         Q_INVOKABLE void addUrls(const QStringList &urls);
 
+        Q_INVOKABLE void addSlidePath(const QString &path);
+        Q_INVOKABLE void removeSlidePath(const QString &path);
 
         RenderingMode renderingMode() const;
         void setRenderingMode(RenderingMode mode);
@@ -108,8 +110,7 @@ class Image : public QObject
     protected Q_SLOTS:
         void removeWallpaper(QString name);
         void timeChanged(const QTime& time);
-        void addDir();
-        void removeDir();
+        void showAddSlidePathsDialog();
         void getNewWallpaper();
         void wallpaperBrowseCompleted();
         void nextSlide();

@@ -233,7 +233,7 @@ void Image::timeChanged(const QTime& time)
     }
 }
 
-void Image::addDir()
+void Image::showAddSlidePathsDialog()
 {
     QUrl empty;
     KDirSelectDialog *dialog = new KDirSelectDialog(empty, true);
@@ -241,15 +241,30 @@ void Image::addDir()
     dialog->show();
 }
 
-void Image::removeDir()
+void Image::addSlidePath(const QString &path)
 {
-    //TODO
-    int row = 0;
-    /*if (row != -1) {
-        m_dirlist->takeItem(row);
-        updateDirs();
+    if (!path.isEmpty() && !m_slidePaths.contains(path)) {
+        m_slidePaths.append(path);
+        if (m_mode == SlideShow) {
+            updateDirWatch(m_slidePaths);
+        }
+
+        emit slidePathsChanged();
         startSlideshow();
-    }*/
+    }
+}
+
+void Image::removeSlidePath(const QString &path)
+{
+    if (!path.isEmpty() && m_slidePaths.contains(path)) {
+        m_slidePaths.removeAll(path);
+        if (m_mode == SlideShow) {
+            updateDirWatch(m_slidePaths);
+        }
+
+        emit slidePathsChanged();
+        startSlideshow();
+    }
 }
 
 void Image::pathDirty(const QString& path)
@@ -276,7 +291,10 @@ void Image::updateDirWatch(const QStringList &newDirs)
 
 void Image::addDirFromSelectionDialog()
 {
-    //TODO
+    KDirSelectDialog *dialog = qobject_cast<KDirSelectDialog *>(sender());
+    if (dialog) {
+        addSlidePath(dialog->url().path());
+    }
 }
 
 void Image::setSingleImage()

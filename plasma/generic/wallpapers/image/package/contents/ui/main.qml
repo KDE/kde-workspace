@@ -33,7 +33,7 @@ Rectangle {
         print("Url dropped: " + url)
         wallpaper.configuration.Image = url
     }
-    
+
     function action_open() {
         Qt.openUrlExternally(imageWallpaper.wallpaperPath);
     }

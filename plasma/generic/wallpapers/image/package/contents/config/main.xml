@@ -14,6 +14,10 @@
       <label>Wallpaper image path or wallpaper name</label>
       <default></default>
     </entry>
+    <entry name="SlidePaths" type="StringList">
+      <label>Paths used for the slideshow</label>
+      <default></default>
+    </entry>
   </group>
 
 </kcfg>
