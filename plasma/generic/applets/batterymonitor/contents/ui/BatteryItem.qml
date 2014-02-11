@@ -31,7 +31,7 @@ Item {
     height: expanded ? batteryInfos.height + padding.margins.top + padding.margins.bottom * 2 + actionRow.height
                      : batteryInfos.height + padding.margins.top + padding.margins.bottom
 
-    Behavior on height { PropertyAnimation {} }
+    Behavior on height { PropertyAnimation { duration: units.shortDuration *2 } }
 
     property bool expanded
 
