@@ -47,7 +47,7 @@ function restore()
     }
 
     itemsConfig = new Object();
-    var configString = String(plasmoid.readConfig("ItemsGeometries"))
+    var configString = String(plasmoid.configuration.ItemsGeometries)
     //print("Config read from configfile: " + configString);
     //array, a cell for encoded item geometry
     var itemsStrings = configString.split(";")
@@ -88,7 +88,7 @@ function save()
             configString +=  idstring + ":" + rect.x + "," + rect.y + "," + rect.width + "," + rect.height + "," + rect.rotation + ";";
         }
     }
-    plasmoid.writeConfig("ItemsGeometries", configString);
+    plasmoid.configuration.ItemsGeometries = configString;
 }
 
 function resetPositions()
