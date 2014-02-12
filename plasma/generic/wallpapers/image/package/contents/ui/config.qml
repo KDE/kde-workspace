@@ -42,18 +42,19 @@ ColumnLayout {
 
     Row {
         //x: formAlignment - positionLabel.paintedWidth
-        //spacing: 4
+        spacing: units.largeSpacing / 2
         QtControls.Label {
             id: positionLabel
-            width: formAlignment
+            width: formAlignment - units.largeSpacing
             anchors {
                 verticalCenter: pluginComboBox.verticalCenter
             }
             text: i18nc("Label for positioning combo", "Positioning:")
+            horizontalAlignment: Text.AlignRight
         }
         QtControls.ComboBox {
             id: resizeComboBox
-            property int textLength: 2
+            property int textLength: 24
             width: theme.mSize(theme.defaultFont).width * textLength
             model: [
                         {
@@ -87,7 +88,7 @@ ColumnLayout {
                     if (model[i]["method"] == wallpaper.configuration.ResizeMethod) {
                         resizeComboBox.currentIndex = i;
                         var tl = model[i]["label"].length;
-                        resizeComboBox.textLength = Math.max(resizeComboBox.textLength, tl+10);
+                        //resizeComboBox.textLength = Math.max(resizeComboBox.textLength, tl+5);
                     }
                 }
             }
@@ -96,6 +97,7 @@ ColumnLayout {
 
     ColorPicker {
         id: picker
+        visible: ~[2,3].indexOf(resizeComboBox.currentIndex)
     }
 
     //TODO: this should be shown instead of the main one when in slideshow mode

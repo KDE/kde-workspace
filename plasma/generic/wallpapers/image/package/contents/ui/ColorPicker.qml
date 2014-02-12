@@ -74,7 +74,7 @@ Column {
         spacing: 4
         QtControls.Label {
             anchors.verticalCenter: colorRect.verticalCenter
-            text: "Color:"
+            text: "Background Color:"
         }
         Rectangle {
             id: colorRect

@@ -24,7 +24,7 @@ import QtQuick.Layouts 1.0
 ColumnLayout {
     id: root
 
-    property int formAlignment: pluginComboBox.x
+    property int formAlignment: pluginComboBox.x + (units.largeSpacing/2)
     property string currentWallpaper: ""
 
 //BEGIN functions
@@ -59,7 +59,11 @@ ColumnLayout {
     }
 
     Row {
-        spacing: 4
+        spacing: units.largeSpacing / 2
+        Item {
+            width: units.largeSpacing
+            height: parent.height
+        }
         QtControls.Label {
             anchors.verticalCenter: pluginComboBox.verticalCenter
             text: i18n("Wallpaper plugin:")
@@ -67,6 +71,7 @@ ColumnLayout {
         QtControls.ComboBox {
             id: pluginComboBox
             model: configDialog.wallpaperConfigModel
+            width: theme.mSize(theme.defaultFont).width * 24
             textRole: "name"
             onCurrentIndexChanged: {
                 var model = configDialog.wallpaperConfigModel.get(currentIndex)
