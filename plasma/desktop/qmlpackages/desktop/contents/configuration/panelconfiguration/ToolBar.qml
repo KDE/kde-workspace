@@ -74,7 +74,7 @@ Item {
                 if (!contextMenu) {
                     contextMenu = contextMenuComponent.createObject(buttonsLayout)
                 }
-                contextMenu.open()
+                contextMenu.visible = true;
             }
         }
 
@@ -87,44 +87,113 @@ Item {
 
         Component {
             id: contextMenuComponent
-            PlasmaComponents.ContextMenu {
+            PlasmaCore.Dialog {
                 visualParent: settingsButton
-                PlasmaComponents.MenuItem {
-                    id: leftToggle
-                    text: i18n("Left")
-                    checkable: true
-                    checked: panel.alignment == Qt.AlignLeft
-                    onClicked: panel.alignment = Qt.AlignLeft
-                    onToggled: {
-                        if (checked) {
-                            centerToggle.checked = false
-                            rightToggle.checked = false
+                location: PlasmaCore.Types.Floating
+                type: PlasmaCore.Dialog.PopupMenu
+                mainItem: Column {
+                    id: menuColumn
+                    Layout.minimumWidth: menuColumn.implicitWidth
+                    Layout.minimumHeight: menuColumn.implicitHeight
+                    spacing: units.largeSpacing
+                    PlasmaExtras.Heading {
+                        level: 3
+                        text: i18n("Panel Alignment")
+                    }
+                    PlasmaComponents.ButtonColumn {
+                        spacing: 0
+                        anchors {
+                            left: parent.left
+                            right: parent.right
+                        }
+                        PlasmaComponents.ToolButton {
+                            anchors {
+                                left: parent.left
+                                right: parent.right
+                            }
+                            text: i18n("Left")
+                            checkable: true
+                            checked: panel.alignment == Qt.AlignLeft
+                            onClicked: panel.alignment = Qt.AlignLeft
+                            flat: false
+                        }
+                        PlasmaComponents.ToolButton {
+                            anchors {
+                                left: parent.left
+                                right: parent.right
+                            }
+                            text: i18n("Center")
+                            checkable: true
+                            checked: panel.alignment == Qt.AlignCenter
+                            onClicked: panel.alignment = Qt.AlignCenter
+                            flat: false
+                        }
+                        PlasmaComponents.ToolButton {
+                            anchors {
+                                left: parent.left
+                                right: parent.right
+                            }
+                            text: i18n("Right")
+                            checkable: true
+                            checked: panel.alignment == Qt.AlignRight
+                            onClicked: panel.alignment = Qt.AlignRight
+                            flat: false
                         }
                     }
-                }
-                PlasmaComponents.MenuItem {
-                    id: centerToggle
-                    text: i18n("Center")
-                    checkable: true
-                    checked: panel.alignment == Qt.AlignCenter
-                    onClicked: panel.alignment = Qt.AlignCenter
-                    onToggled: {
-                        if (checked) {
-                            leftToggle.checked = false
-                            rightToggle.checked = false
-                        }
+
+                    PlasmaExtras.Heading {
+                        level: 3
+                        text: i18n("Visibility")
                     }
-                }
-                PlasmaComponents.MenuItem {
-                    id: rightToggle
-                    text: i18n("Right")
-                    checkable: true
-                    checked: panel.alignment == Qt.AlignRight
-                    onClicked: panel.alignment = Qt.AlignRight
-                    onToggled: {
-                        if (checked) {
-                            centerToggle.checked = false
-                            leftToggle.checked = false
+                    PlasmaComponents.ButtonColumn {
+                        spacing: 0
+                        anchors {
+                            left: parent.left
+                            right: parent.right
+                        }
+                        PlasmaComponents.ToolButton {
+                            anchors {
+                                left: parent.left
+                                right: parent.right
+                            }
+                            text: i18n("Always visible")
+                            checkable: true
+                            checked: panel.visibilityMode == 0
+                            onClicked: panel.visibilityMode = 0
+                            flat: false
+                        }
+                        PlasmaComponents.ToolButton {
+                            anchors {
+                                left: parent.left
+                                right: parent.right
+                            }
+                            text: i18n("Auto Hide")
+                            checkable: true
+                            checked: panel.visibilityMode == 1
+                            onClicked: panel.visibilityMode = 1
+                            flat: false
+                        }
+                        PlasmaComponents.ToolButton {
+                            anchors {
+                                left: parent.left
+                                right: parent.right
+                            }
+                            text: i18n("Windows can cover")
+                            checkable: true
+                            checked: panel.visibilityMode == 2
+                            onClicked: panel.visibilityMode = 2
+                            flat: false
+                        }
+                        PlasmaComponents.ToolButton {
+                            anchors {
+                                left: parent.left
+                                right: parent.right
+                            }
+                            text: i18n("Windows go below")
+                            checkable: true
+                            checked: panel.visibilityMode == 3
+                            onClicked: panel.visibilityMode = 3
+                            flat: false
                         }
                     }
                 }
