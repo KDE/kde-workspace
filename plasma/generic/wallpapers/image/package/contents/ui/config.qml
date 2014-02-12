@@ -41,10 +41,11 @@ ColumnLayout {
     //Rectangle { color: "orange"; x: formAlignment; width: formAlignment; height: 20 }
 
     Row {
-        x: formAlignment - positionLabel.paintedWidth
-        spacing: 4
+        //x: formAlignment - positionLabel.paintedWidth
+        //spacing: 4
         QtControls.Label {
             id: positionLabel
+            width: formAlignment
             anchors {
                 verticalCenter: pluginComboBox.verticalCenter
             }
@@ -52,6 +53,8 @@ ColumnLayout {
         }
         QtControls.ComboBox {
             id: resizeComboBox
+            property int textLength: 2
+            width: theme.mSize(theme.defaultFont).width * textLength
             model: [
                         {
                             'label': i18n("Scaled & Cropped"),
@@ -83,6 +86,8 @@ ColumnLayout {
                 for (var i = 0; i < model.length; i++) {
                     if (model[i]["method"] == wallpaper.configuration.ResizeMethod) {
                         resizeComboBox.currentIndex = i;
+                        var tl = model[i]["label"].length;
+                        resizeComboBox.textLength = Math.max(resizeComboBox.textLength, tl+10);
                     }
                 }
             }
