@@ -199,6 +199,30 @@ Item {
                             flat: false
                         }
                     }
+                    PlasmaComponents.ToolButton {
+                        anchors {
+                            left: parent.left
+                            right: parent.right
+                        }
+                        text: i18n("Maximize Panel")
+                        onClicked: panel.maximize();
+                    }
+                    PlasmaComponents.ToolButton {
+                        anchors {
+                            left: parent.left
+                            right: parent.right
+                        }
+                        text: i18n("Lock Widgets")
+                        onClicked: configDialog.action("lock widgets").trigger();
+                    }
+                    PlasmaComponents.ToolButton {
+                        anchors {
+                            left: parent.left
+                            right: parent.right
+                        }
+                        text: i18n("Remove this panel")
+                        onClicked: configDialog.action("remove").trigger();
+                    }
                 }
             }
         }
