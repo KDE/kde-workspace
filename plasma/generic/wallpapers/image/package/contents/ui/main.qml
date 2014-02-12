@@ -70,6 +70,10 @@ Rectangle {
         //the oneliner of difference between image and slideshow wallpapers
         //renderingMode: Wallpaper.Image.SlideShow
         slidePaths: wallpaper.configuration.SlidePaths
+        //resizeMethod: wallpaper.configuration.ResizeMethod
+        onResizeMethodChanged:{
+            print("Resize method now " + resizeMethod)
+        }
     }
 
     onConfiguredImageChanged: {
@@ -98,6 +102,8 @@ Rectangle {
         id: imageA
         anchors.fill: parent
         asynchronous: true
+        clip: true
+        fillMode: wallpaper.configuration.ResizeMethod
         sourceSize {
             width: imageA.width
             height: imageA.height
@@ -107,6 +113,8 @@ Rectangle {
         id: imageB
         anchors.fill: parent
         asynchronous: true
+        clip: true
+        fillMode: wallpaper.configuration.ResizeMethod
         sourceSize {
             width: imageB.width
             height: imageB.height

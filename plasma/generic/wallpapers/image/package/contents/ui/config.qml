@@ -26,6 +26,7 @@ ColumnLayout {
     id: root
     property alias cfg_Color: picker.color
     property string cfg_Image
+    property int cfg_ResizeMethod
     property var cfg_SlidePaths: ""
 
     Wallpaper.Image {
@@ -36,6 +37,60 @@ ColumnLayout {
     onCfg_SlidePathsChanged: {
         imageWallpaper.slidePaths = cfg_SlidePaths
     }
+
+    Rectangle { color: "orange"; x: formAlignment; width: formAlignment; height: 20 }
+
+    Row {
+        x: formAlignment - positionLabel.paintedWidth
+        spacing: 4
+        QtControls.Label {
+            id: positionLabel
+            anchors {
+                verticalCenter: pluginComboBox.verticalCenter
+            }
+            text: i18nc("Label for positioning combo", "Positioning:")
+        }
+        QtControls.ComboBox {
+            id: resizeComboBox
+            model: [
+                        {
+                            'label': i18n("Scaled & Cropped"),
+                            'method': Image.PreserveAspectCrop
+                        },
+                        {
+                            'label': i18n("Scaled"),
+                            'method': Image.Stretch
+                        },
+                        {
+                            'label': i18n("Scaled, Keep Proportions"),
+                            'method': Image.PreserveAspectFit
+                        },
+                        {
+                            'label': i18n("Centered"),
+                            'method': Image.Pad
+                        },
+                        {
+                            'label': i18n("Tiled"),
+                            'method': Image.Tile
+                        },
+                        {
+                            'label': i18n("Center Tiled"),
+                            'method': Image.Tile
+                        },
+                    ]
+
+            textRole: "label"
+            onCurrentIndexChanged: {
+                print("!!! Resize mode changed to " + currentIndex);
+                var _d = model[currentIndex]["label"];
+                var _method = model[currentIndex]["method"];
+                print ("        Chosen: " + _d + " " + _method);
+                //Wallpaper.Image.resizeMethod = _method;
+                cfg_ResizeMethod = _method;
+            }
+        }
+    }
+
 
     SystemPalette {id: syspal}
 
