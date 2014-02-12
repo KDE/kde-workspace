@@ -131,7 +131,7 @@ void Task::resize()
 
 void Task::setMaximized(bool maximize)
 {
-    KWindowInfo info = KWindowSystem::windowInfo(d->win, NET::WMState | NET::XAWMState | NET::WMDesktop);
+    KWindowInfo info(d->win, NET::WMState | NET::XAWMState | NET::WMDesktop);
     bool on_current = info.isOnCurrentDesktop();
 
     if (!on_current) {
@@ -157,7 +157,7 @@ void Task::setMaximized(bool maximize)
 
 void Task::restore()
 {
-    KWindowInfo info = KWindowSystem::windowInfo(d->win, NET::WMState | NET::XAWMState | NET::WMDesktop);
+    KWindowInfo info(d->win, NET::WMState | NET::XAWMState | NET::WMDesktop);
     bool on_current = info.isOnCurrentDesktop();
 
     if (!on_current) {

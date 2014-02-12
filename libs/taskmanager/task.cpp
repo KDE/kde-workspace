@@ -108,7 +108,7 @@ void Task::refreshIcon()
     }
 
     d->lastUpdate.restart();
-    KWindowInfo info = KWindowSystem::windowInfo(d->win, windowInfoFlags, windowInfoFlags2);
+    KWindowInfo info(d->win, windowInfoFlags, windowInfoFlags2);
     TaskChanges changes = TaskUnchanged;
 
     if (d->info.windowClassClass() != info.windowClassClass() ||
@@ -497,7 +497,7 @@ void Task::setIconified(bool iconify)
     if (iconify) {
         KWindowSystem::minimizeWindow(d->win);
     } else {
-        KWindowInfo info = KWindowSystem::windowInfo(d->win, NET::WMState | NET::XAWMState | NET::WMDesktop);
+        KWindowInfo info(d->win, NET::WMState | NET::XAWMState | NET::WMDesktop);
         bool on_current = info.isOnCurrentDesktop();
 
         if (!on_current) {
@@ -539,7 +539,7 @@ void Task::activate()
     } else if (!d->transients.isEmpty()) {
         WindowList::const_iterator it = d->transients.end();
         --it;
-        KWindowInfo info = KWindowSystem::windowInfo(*it, NET::WMState | NET::XAWMState | NET::WMDesktop);
+        KWindowInfo info(*it, NET::WMState | NET::XAWMState | NET::WMDesktop);
         //this is a work around for (at least?) kwin where a shaded transient will prevent the main
         //window from being brought forward unless the transient is actually pulled forward, most
         //easily reproduced by opening a modal file open/save dialog on an app then shading the file
