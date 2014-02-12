@@ -72,22 +72,11 @@ ColumnLayout {
                         {
                             'label': i18n("Tiled"),
                             'method': Image.Tile
-                        },
-                        {
-                            'label': i18n("Center Tiled"),
-                            'method': Image.Tile
-                        },
+                        }
                     ]
 
             textRole: "label"
-            onCurrentIndexChanged: {
-                print("!!! Resize mode changed to " + currentIndex);
-                var _d = model[currentIndex]["label"];
-                var _method = model[currentIndex]["method"];
-                print ("        Chosen: " + _d + " " + _method);
-                //Wallpaper.Image.resizeMethod = _method;
-                cfg_ResizeMethod = _method;
-            }
+            onCurrentIndexChanged: cfg_ResizeMethod = model[currentIndex]["method"]
         }
     }
 
