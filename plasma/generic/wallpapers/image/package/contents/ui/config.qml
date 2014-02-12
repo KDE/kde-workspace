@@ -61,33 +61,33 @@ ColumnLayout {
             model: [
                         {
                             'label': i18n("Scaled & Cropped"),
-                            'method': Image.PreserveAspectCrop
+                            'fillMode': Image.PreserveAspectCrop
                         },
                         {
                             'label': i18n("Scaled"),
-                            'method': Image.Stretch
+                            'fillMode': Image.Stretch
                         },
                         {
                             'label': i18n("Scaled, Keep Proportions"),
-                            'method': Image.PreserveAspectFit
+                            'fillMode': Image.PreserveAspectFit
                         },
                         {
                             'label': i18n("Centered"),
-                            'method': Image.Pad
+                            'fillMode': Image.Pad
                         },
                         {
                             'label': i18n("Tiled"),
-                            'method': Image.Tile
+                            'fillMode': Image.Tile
                         }
                     ]
 
             textRole: "label"
-            onCurrentIndexChanged: cfg_FillMode = model[currentIndex]["method"]
+            onCurrentIndexChanged: cfg_FillMode = model[currentIndex]["fillMode"]
             Component.onCompleted: setMethod();
 
             function setMethod() {
                 for (var i = 0; i < model.length; i++) {
-                    if (model[i]["method"] == wallpaper.configuration.FillMode) {
+                    if (model[i]["fillMode"] == wallpaper.configuration.FillMode) {
                         resizeComboBox.currentIndex = i;
                         var tl = model[i]["label"].length;
                         //resizeComboBox.textLength = Math.max(resizeComboBox.textLength, tl+5);
