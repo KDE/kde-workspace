@@ -74,8 +74,6 @@ public:
     QModelIndex indexOf(const QString &path) const;
     virtual bool contains(const QString &bg) const;
 
-    void setResizeMethod(Image::ResizeMethod resizeMethod);
-
 protected Q_SLOTS:
     void removeBackground(const QString &path);
     void showPreview(const KFileItem &item, const QPixmap &preview);
@@ -94,7 +92,6 @@ private:
     QHash<QUrl, QPersistentModelIndex> m_previewJobs;
     KDirWatch m_dirwatch;
 
-    Image::ResizeMethod m_resizeMethod;
     QString m_findToken;
     QPixmap m_previewUnavailablePix;
 };

@@ -40,8 +40,7 @@ protected:
 private:
     QSize resSize(const QString &str) const;
     void findBestPaper(Plasma::Package *package);
-    float distance(const QSize& size, const QSize& desired,
-                   Image::ResizeMethod method) const;
+    float distance(const QSize& size, const QSize& desired) const;
 
 private Q_SLOTS:
     void paperDestroyed();
@@ -51,7 +50,6 @@ private:
     Image *m_paper;
     bool m_fullPackage;
     QSize m_targetSize;
-    Image::ResizeMethod m_resizeMethod;
 };
 
 #endif

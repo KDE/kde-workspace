@@ -47,8 +47,7 @@ void ImageSizeFinder::run()
 
 BackgroundListModel::BackgroundListModel(Image *listener, QObject *parent)
     : QAbstractListModel(parent),
-      m_structureParent(listener),
-      m_resizeMethod(Image::ScaledResize)
+      m_structureParent(listener)
 {
     connect(&m_dirwatch, SIGNAL(deleted(QString)), this, SLOT(removeBackground(QString)));
     m_previewUnavailablePix.fill(Qt::transparent);
@@ -342,11 +341,6 @@ void BackgroundListModel::previewFailed(const KFileItem &item)
 Plasma::Package BackgroundListModel::package(int index) const
 {
     return m_packages.at(index);
-}
-
-void BackgroundListModel::setResizeMethod(Image::ResizeMethod resizeMethod)
-{
-    m_resizeMethod = resizeMethod;
 }
 
 BackgroundFinder::BackgroundFinder(Image *structureParent, const QStringList &paths)

@@ -31,8 +31,7 @@ WallpaperPackage::WallpaperPackage(Image *paper, QObject *parent, const QVariant
     : Plasma::PackageStructure(parent, args),
       m_paper(paper),
       m_fullPackage(true),
-      m_targetSize(100000, 100000),
-      m_resizeMethod(Image::ScaledResize)
+      m_targetSize(100000, 100000)
 {
 }
 
@@ -50,9 +49,7 @@ void WallpaperPackage::initPackage(Plasma::Package *package)
 
     if (m_paper) {
         m_targetSize = m_paper->targetSize();
-        m_resizeMethod = m_paper->resizeMethod();
 
-        connect(m_paper, SIGNAL(resizeMethodChanged()), this, SLOT(renderHintsChanged()));
         connect(m_paper, SIGNAL(renderingModeChanged()), this, SLOT(renderHintsChanged()));
         connect(m_paper, SIGNAL(destroyed(QObject*)), this, SLOT(paperDestroyed()));
     }
@@ -62,7 +59,6 @@ void WallpaperPackage::renderHintsChanged()
 {
     if (m_paper) {
         m_targetSize = m_paper->targetSize();
-        m_resizeMethod = m_paper->resizeMethod();
 
         if (m_fullPackage) {
             findBestPaper(m_paper->package());
@@ -131,7 +127,7 @@ void WallpaperPackage::findBestPaper(Plasma::Package *package)
             continue;
         }
 
-        double dist = distance(candidate, m_targetSize, m_resizeMethod);
+        double dist = distance(candidate, m_targetSize);
         //qDebug() << "candidate" << candidate << "distance" << dist;
         if (bestImage.isEmpty() || dist < best) {
             bestImage = entry;
@@ -148,8 +144,7 @@ void WallpaperPackage::findBestPaper(Plasma::Package *package)
     package->addFileDefinition("preferred", "images/" + bestImage, i18n("Recommended wallpaper file"));
 }
 
-float WallpaperPackage::distance(const QSize& size, const QSize& desired,
-                                 Image::ResizeMethod method) const
+float WallpaperPackage::distance(const QSize& size, const QSize& desired) const
 {
     // compute difference of areas
     float delta = size.width() * size.height() -
@@ -157,25 +152,8 @@ float WallpaperPackage::distance(const QSize& size, const QSize& desired,
     // scale down to about 1.0
     delta /= ((desired.width() * desired.height())+(size.width() * size.height()))/2;
 
-
-    switch (method) {
-    case Image::ScaledResize: {
-        // Consider first the difference in aspect ratio,
-        // then in areas. Prefer scaling down.
-        float deltaRatio = 1.0;
-        if (size.height() > 0 && desired.height() > 0) {
-            deltaRatio = float(size.width()) / float(size.height()) -
-                         float(desired.width()) / float(desired.height());
-        }
-        return fabs(deltaRatio) * 3.0 + (delta >= 0.0 ? delta : -delta + 5.0);
-    }
-    case Image::ScaledAndCroppedResize:
-        // Difference of areas, slight preference to scale down
-        return delta >= 0.0 ? delta : -delta + 2.0;
-    default:
-        // Difference in areas
-        return fabs(delta);
-    }
+    // Difference of areas, slight preference to scale down
+    return delta >= 0.0 ? delta : -delta + 2.0;
 }
 
 void WallpaperPackage::paperDestroyed()

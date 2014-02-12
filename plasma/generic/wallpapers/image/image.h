@@ -36,7 +36,6 @@ class Image : public QObject
 {
     Q_OBJECT
     Q_PROPERTY(RenderingMode renderingMode READ renderingMode WRITE setRenderingMode NOTIFY renderingModeChanged)
-    Q_PROPERTY(ResizeMethod resizeMethod READ resizeMethod NOTIFY resizeMethodChanged)
     Q_PROPERTY(QString wallpaperPath READ wallpaperPath NOTIFY wallpaperPathChanged)
     Q_PROPERTY(QAbstractItemModel *wallpaperModel READ wallpaperModel CONSTANT)
     Q_PROPERTY(int slideTimer READ slideTimer WRITE setSlideTimer NOTIFY slideTimerChanged)
@@ -44,19 +43,6 @@ class Image : public QObject
     Q_PROPERTY(QStringList slidePaths READ slidePaths WRITE setSlidePaths NOTIFY slidePathsChanged)
 
     public:
-        /**
-         * Various resize modes supported by the built in image renderer
-         */
-        enum ResizeMethod {
-            ScaledResize /**< Scales the image to fit the full area*/,
-            CenteredResize /**< Centers the image within the area */,
-            ScaledAndCroppedResize /**< Scales and crops the image, preserving the aspect ratio */,
-            TiledResize /**< Tiles the image to fill the area */,
-            CenterTiledResize /**< Tiles the image to fill the area, starting with a centered tile */,
-            MaxpectResize /**< Best fit resize */,
-            LastResizeMethod = MaxpectResize
-        };
-        Q_ENUMS(ResizeMethod)
 
         enum RenderingMode {
             SingleImage,
@@ -80,9 +66,6 @@ class Image : public QObject
 
         RenderingMode renderingMode() const;
         void setRenderingMode(RenderingMode mode);
-
-        ResizeMethod resizeMethod() const;
-        void setResizeMethod(ResizeMethod method);
 
         QSize targetSize() const;
         void setTargetSize(const QSize &size);
@@ -151,7 +134,6 @@ class Image : public QObject
         QStringList m_usersWallpapers;
         KDirWatch *m_dirWatch;
         bool m_scanDirty;
-        ResizeMethod m_resizeMethod;
         QSize m_targetSize;
 
         RenderingMode m_mode;

@@ -40,7 +40,6 @@ Image::Image(QObject *parent)
     : QObject(parent),
       m_delay(10),
       m_dirWatch(new KDirWatch(this)),
-      m_resizeMethod(ScaledResize),
       m_mode(SingleImage),
       m_currentSlide(-1),
       m_model(0),
@@ -115,22 +114,6 @@ void Image::setRenderingMode(RenderingMode mode)
     emit renderingModeChanged();
 }
 
-Image::ResizeMethod Image::resizeMethod() const
-{
-    return m_resizeMethod;
-}
-
-void Image::setResizeMethod(ResizeMethod method)
-{
-    if (m_resizeMethod == method) {
-        return;
-    }
-
-    m_resizeMethod = method;
-
-    emit resizeMethodChanged();
-}
-
 QSize Image::targetSize() const
 {
     return m_targetSize;
@@ -160,7 +143,6 @@ QAbstractItemModel* Image::wallpaperModel()
 {
     if (!m_model) {
         m_model = new BackgroundListModel(this, this);
-        m_model->setResizeMethod(ScaledResize);
         m_model->reload(m_usersWallpapers);
     }
 
