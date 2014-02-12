@@ -74,7 +74,7 @@ Item {
                 if (!contextMenu) {
                     contextMenu = contextMenuComponent.createObject(buttonsLayout)
                 }
-                contextMenu.visible = true;
+                contextMenu.visible = !contextMenu.visible;
             }
         }
 
