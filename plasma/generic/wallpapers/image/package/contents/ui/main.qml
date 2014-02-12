@@ -27,6 +27,7 @@ Rectangle {
     property string modelImage: imageWallpaper.wallpaperPath
     property Item currentImage: imageB
     property Item otherImage: imageA
+    property int fillMode: wallpaper.configuration.ResizeMethod
 
     //public API, the C++ part will look for those
     function setUrl(url) {
@@ -55,6 +56,23 @@ Rectangle {
         fadeAnim.running = true
     }
 
+    function fadeFillMode() {
+        fadeAnim.running = false
+        if (currentImage == imageA) {
+            currentImage = imageB
+            otherImage = imageA
+        } else {
+            currentImage = imageA
+            otherImage = imageB
+        }
+        currentImage.source = modelImage
+        currentImage.opacity = 0
+        otherImage.z = 0
+        currentImage.fillMode = fillMode
+        currentImage.z = 1
+        fadeAnim.running = true
+    }
+
     Component.onCompleted: {
         imageWallpaper.addUrl(configuredImage)
         wallpaper.setAction("open", i18n("Open Wallpaper Image"),"document-open");
@@ -76,6 +94,9 @@ Rectangle {
         }
     }
 
+    onFillModeChanged: {
+        fadeFillMode();
+    }
     onConfiguredImageChanged: {
         imageWallpaper.addUrl(configuredImage)
     }
@@ -94,7 +115,13 @@ Rectangle {
             duration: units.longDuration
         }
         ScriptAction {
-            script: otherImage.opacity = 0
+            script: {
+                otherImage.opacity = 0;
+                // This leads to flicker, but it would be nice to release the image's memory
+                // after the animation is finished
+                //otherImage.source = "";
+                otherImage.fillMode = fillMode;
+            }
         }
     }
 
