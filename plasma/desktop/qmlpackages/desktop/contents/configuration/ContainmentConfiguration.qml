@@ -32,7 +32,7 @@ AppletConfiguration {
     ConfigModel {
         id: globalContainmentConfigModel
         ConfigCategory {
-            name: "Appearance"
+            name: "Wallpaper"
             icon: "preferences-desktop-wallpaper"
             source: "ConfigurationContainmentAppearance.qml"
         }
