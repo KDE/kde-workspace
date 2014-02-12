@@ -5,6 +5,7 @@ Type=Service
 X-KDE-ServiceTypes=KCModule,KCModuleInit
 X-DocPath=kcontrol/bell/index.html
 Categories=Qt;KDE;X-KDE-settings-sound;
+X-KDE-OnlyShowOnQtPlatforms=xcb;
 
 X-KDE-Library=kcm_bell
 X-KDE-Init-Symbol=bell
