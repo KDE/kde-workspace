@@ -26,7 +26,7 @@ ColumnLayout {
     id: root
     property alias cfg_Color: picker.color
     property string cfg_Image
-    property int cfg_ResizeMethod
+    property int cfg_FillMode
     property var cfg_SlidePaths: ""
 
     spacing: units.largeSpacing / 2
@@ -82,12 +82,12 @@ ColumnLayout {
                     ]
 
             textRole: "label"
-            onCurrentIndexChanged: cfg_ResizeMethod = model[currentIndex]["method"]
+            onCurrentIndexChanged: cfg_FillMode = model[currentIndex]["method"]
             Component.onCompleted: setMethod();
 
             function setMethod() {
                 for (var i = 0; i < model.length; i++) {
-                    if (model[i]["method"] == wallpaper.configuration.ResizeMethod) {
+                    if (model[i]["method"] == wallpaper.configuration.FillMode) {
                         resizeComboBox.currentIndex = i;
                         var tl = model[i]["label"].length;
                         //resizeComboBox.textLength = Math.max(resizeComboBox.textLength, tl+5);

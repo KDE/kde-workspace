@@ -27,7 +27,7 @@ Rectangle {
     property string modelImage: imageWallpaper.wallpaperPath
     property Item currentImage: imageB
     property Item otherImage: imageA
-    property int fillMode: wallpaper.configuration.ResizeMethod
+    property int fillMode: wallpaper.configuration.FillMode
 
     //public API, the C++ part will look for those
     function setUrl(url) {
@@ -88,10 +88,6 @@ Rectangle {
         //the oneliner of difference between image and slideshow wallpapers
         //renderingMode: Wallpaper.Image.SlideShow
         slidePaths: wallpaper.configuration.SlidePaths
-        //resizeMethod: wallpaper.configuration.ResizeMethod
-        onResizeMethodChanged:{
-            print("Resize method now " + resizeMethod)
-        }
     }
 
     onFillModeChanged: {
@@ -131,7 +127,7 @@ Rectangle {
         asynchronous: true
         clip: true
         cache: false
-        fillMode: wallpaper.configuration.ResizeMethod
+        fillMode: wallpaper.configuration.FillMode
         sourceSize {
             width: imageA.width
             height: imageA.height
@@ -143,7 +139,7 @@ Rectangle {
         asynchronous: true
         clip: true
         cache: false
-        fillMode: wallpaper.configuration.ResizeMethod
+        fillMode: wallpaper.configuration.FillMode
         sourceSize {
             width: imageB.width
             height: imageB.height
