@@ -27,7 +27,8 @@ MouseArea {
     width: wallpapersGrid.cellWidth
     height: wallpapersGrid.cellHeight
 
-    hoverEnabled: true
+    property bool selected: (wallpapersGrid.currentIndex == index)
+    //hoverEnabled: true
 
     Column {
         anchors {
@@ -38,16 +39,23 @@ MouseArea {
         QPixmapItem {
             anchors.horizontalCenter: parent.horizontalCenter
             //height: wallpaperDelegate.height - wallpaperName.height -20
-            height: wallpaperDelegate.height * 0.8
+            height: wallpaperDelegate.height
             width: height
             pixmap: model.screenshot
-            scale: wallpaperDelegate.containsMouse ? 1/0.7 : 1.0
+            //scale: wallpaperDelegate.containsMouse ? 1/0.9 : 1.0
             z:  wallpaperDelegate.containsMouse ? 1 : 0
             Rectangle {
+                opacity: selected ? 1.0 : 0
                 anchors.fill: parent
-                border.width: (wallpapersGrid.currentIndex == index) ? units.smallSpacing : 0
-                border.color: (wallpapersGrid.currentIndex == index) ? syspal.highlight : "transparent"
+                border.width: units.smallSpacing * 2
+                border.color: syspal.highlight
                 color: "transparent"
+                Behavior on opacity {
+                    PropertyAnimation {
+                        duration: units.longDuration
+                        easing.type: Easing.OutQuad
+                    }
+                }
             }
             Behavior on scale {
                 SequentialAnimation {
