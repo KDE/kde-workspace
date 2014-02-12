@@ -68,6 +68,9 @@ Item {
 
     ToolBoxButton {
         id: toolBoxButton
+        Component.onCompleted: {
+            placeToolBox();
+        }
     }
 
     Timer {

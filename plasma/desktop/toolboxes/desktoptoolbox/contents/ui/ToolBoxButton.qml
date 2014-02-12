@@ -68,8 +68,6 @@ Item {
 
     width: isCorner ? toolBoxIcon.width : buttonLayout.width
     height: buttonLayout.height
-    y: 0
-    x: main.width - width
 
     state: ""
 
