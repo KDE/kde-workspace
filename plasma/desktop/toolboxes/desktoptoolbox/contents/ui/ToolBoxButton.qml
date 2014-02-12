@@ -74,6 +74,10 @@ Item {
     onXChanged: updateState()
     onYChanged: updateState()
 
+    Component.onCompleted: {
+        updateState();
+    }
+
     function updateState() {
         var container = main;
         //print("    w: " + container.width +"x"+container.height+" : "+x+"/"+y+" tbw: " + toolBoxButton.width);
