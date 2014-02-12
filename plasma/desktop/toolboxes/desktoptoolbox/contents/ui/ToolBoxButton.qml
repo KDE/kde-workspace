@@ -55,12 +55,15 @@ Item {
             duration: units.shortDuration * 3;
             easing.type: Easing.InOutExpo;
         }
+        enabled: Component.status === Component.Ready
+
     }
     Behavior on y {
         NumberAnimation {
             duration: units.shortDuration * 3;
             easing.type: Easing.InOutExpo;
         }
+        enabled: Component.status === Component.Ready
     }
 
     width: isCorner ? toolBoxIcon.width : buttonLayout.width
