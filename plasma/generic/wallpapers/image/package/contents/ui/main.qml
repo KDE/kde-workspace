@@ -130,6 +130,7 @@ Rectangle {
         anchors.fill: parent
         asynchronous: true
         clip: true
+        cache: false
         fillMode: wallpaper.configuration.ResizeMethod
         sourceSize {
             width: imageA.width
@@ -141,6 +142,7 @@ Rectangle {
         anchors.fill: parent
         asynchronous: true
         clip: true
+        cache: false
         fillMode: wallpaper.configuration.ResizeMethod
         sourceSize {
             width: imageB.width
