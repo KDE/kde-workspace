@@ -68,8 +68,10 @@ Item {
 
     ToolBoxButton {
         id: toolBoxButton
+        visible: false
         Component.onCompleted: {
             placeToolBox();
+            toolBoxButton.visible = true
         }
     }
 

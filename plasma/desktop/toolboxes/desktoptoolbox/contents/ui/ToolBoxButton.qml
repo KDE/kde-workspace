@@ -55,7 +55,7 @@ Item {
             duration: units.shortDuration * 3;
             easing.type: Easing.InOutExpo;
         }
-        enabled: Component.status === Component.Ready
+        enabled: visible
 
     }
     Behavior on y {
@@ -63,20 +63,18 @@ Item {
             duration: units.shortDuration * 3;
             easing.type: Easing.InOutExpo;
         }
-        enabled: Component.status === Component.Ready
+        enabled: visible
     }
 
     width: isCorner ? toolBoxIcon.width : buttonLayout.width
     height: buttonLayout.height
 
-    state: ""
+    //x and y default to 0, so top left would be correct
+    //If the position is anything else it will updated via onXChanged during intialisation
+    state: "topleft"
 
     onXChanged: updateState()
     onYChanged: updateState()
-
-    Component.onCompleted: {
-        updateState();
-    }
 
     function updateState() {
         var container = main;
