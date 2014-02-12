@@ -180,7 +180,7 @@ void WindowsHandler::activate_window( WId id_P )
 Window_data::Window_data( WId id_P )
     : type( NET::Unknown )
     {
-    KWindowInfo kwin_info = KWindowSystem::windowInfo( id_P, NET::WMName | NET::WMWindowType ); // TODO optimize
+    KWindowInfo kwin_info( id_P, NET::WMName | NET::WMWindowType ); // TODO optimize
     if( kwin_info.valid())
         {
         title = kwin_info.name();

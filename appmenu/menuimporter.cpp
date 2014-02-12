@@ -104,7 +104,7 @@ bool MenuImporter::connectToBus()
 
 WId MenuImporter::recursiveMenuId(WId id)
 {
-    KWindowInfo info = KWindowSystem::windowInfo(id, 0, NET::WM2WindowClass);
+    KWindowInfo info(id, 0, NET::WM2WindowClass);
     QString classClass = info.windowClassClass();
     WId classId = 0;
 
@@ -134,7 +134,7 @@ WId MenuImporter::recursiveMenuId(WId id)
 
 void MenuImporter::RegisterWindow(WId id, const QDBusObjectPath& path)
 {
-    KWindowInfo info = KWindowSystem::windowInfo(id, NET::WMWindowType);
+    KWindowInfo info(id, NET::WMWindowType, NET::WM2WindowClass);
     NET::WindowTypes mask = NET::AllTypesMask;
 
     // Menu can try to register, right click in gimp for exemple
@@ -147,7 +147,6 @@ void MenuImporter::RegisterWindow(WId id, const QDBusObjectPath& path)
 
     QString service = message().service();
 
-    info = KWindowSystem::windowInfo(id, 0, NET::WM2WindowClass);
     QString classClass = info.windowClassClass();
     m_windowClasses.insert(id, classClass);
     m_menuServices.insert(id, service);
