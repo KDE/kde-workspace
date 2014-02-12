@@ -34,8 +34,8 @@ Item {
         rows: dialogRoot.vertical ? 2 : 1
         anchors.centerIn: parent
 
-        rowSpacing: 0
-        columnSpacing: 0
+        rowSpacing: units.smallSpacing
+        columnSpacing: units.smallSpacing
 
         EdgeHandle {}
         SizeHandle {}
@@ -48,6 +48,9 @@ Item {
         flow:plasmoid.formFactor == PlasmaCore.Types.Horizontal ? GridLayout.TopToBottom : GridLayout.LeftToRight
 
         anchors.margins: rowSpacing
+
+        rowSpacing: units.smallSpacing
+        columnSpacing: units.smallSpacing
 
         PlasmaComponents.Button {
             text: i18n("Add Widgets...")
@@ -91,14 +94,14 @@ Item {
                 visualParent: settingsButton
                 location: PlasmaCore.Types.Floating
                 type: PlasmaCore.Dialog.PopupMenu
-                flags: Qt.Popup | Qt.FramelessWindowHint | Qt.WindowDoesNotAcceptFocus 
+                flags: Qt.Popup | Qt.FramelessWindowHint | Qt.WindowDoesNotAcceptFocus
                 mainItem: Column {
                     id: menuColumn
                     width: implicitWidth
                     height: units.gridUnit * 10
                     Layout.minimumWidth: menuColumn.implicitWidth
                     Layout.minimumHeight: menuColumn.implicitHeight
-                    spacing: units.largeSpacing
+                    spacing: units.smallSpacing
                     PlasmaExtras.Heading {
                         level: 3
                         text: i18n("Panel Alignment")
