@@ -30,8 +30,8 @@ Rectangle {
 
 //BEGIN properties
     color: syspal.window
-    width: 640
-    height: 480
+    width: units.gridUnit * 40
+    height: units.gridUnit * 30
 //END properties
 
 //BEGIN model
