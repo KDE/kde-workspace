@@ -74,8 +74,10 @@ Rectangle {
     Component.onCompleted: {
         if (configDialog.configModel && configDialog.configModel.count > 0) {
             main.sourceFile = configDialog.configModel.get(0).source
+            main.title = configDialog.configModel.get(0).name
         } else {
             main.sourceFile = globalConfigModel.get(0).source
+            main.title = globalConfigModel.get(0).name
         }
         root.restoreConfig()
 //         root.width = mainColumn.implicitWidth
@@ -89,6 +91,8 @@ Rectangle {
     ColumnLayout {
         id: mainColumn
         anchors.fill: parent
+        anchors.leftMargin: units.largeSpacing / 2
+        anchors.topMargin: units.largeSpacing / 2
         property int implicitWidth: Math.max(contentRow.implicitWidth, buttonsRow.implicitWidth) + 8
         property int implicitHeight: contentRow.implicitHeight + buttonsRow.implicitHeight + 8
 
@@ -98,6 +102,7 @@ Rectangle {
                 left: parent.left
                 right: parent.right
             }
+            spacing: units.largeSpacing / 2
             Layout.fillHeight: true
             Layout.preferredHeight: parent.height - buttonsRow.height
 
@@ -149,7 +154,10 @@ Rectangle {
                             Repeater {
                                 model: configDialog.configModel
                                 delegate: ConfigCategoryDelegate {
-                                    onClicked: categoriesView.currentIndex = index
+                                    onClicked: {
+                                        categoriesView.currentIndex = index
+                                        pageTitle.text = name;
+                                    }
 
                                 }
                             }
@@ -161,42 +169,62 @@ Rectangle {
                     }
                 }
             }
-
-            QtControls.StackView {
-                id: main
-                clip: true
+            Item {
                 anchors {
                     top: parent.top
                     bottom: parent.bottom
                 }
                 Layout.fillWidth: true
-                height: Math.max(categoriesScroll.height, currentItem != null ? currentItem.implicitHeight : 0)
-                property string sourceFile
-                Timer {
-                    id: pageSizeSync
-                    interval: 100
-                    onTriggered: {
-//                                     root.width = mainColumn.implicitWidth
-//                                     root.height = mainColumn.implicitHeight
+                height: Math.max(categoriesScroll.height, main.currentItem != null ? main.currentItem.implicitHeight : 0)
+
+                QtControls.Label {
+                    id: pageTitle
+                    anchors {
+                        top: parent.top
+                        left: parent.left
+                        right: parent.right
+                    }
+                    font.pointSize: theme.defaultFont.pointSize*2
+                    text: main.title
+                }
+
+                QtControls.StackView {
+                    id: main
+                    property string title: ""
+                    anchors {
+                        top: pageTitle.bottom
+                        topMargin: units.largeSpacing / 2
+                        left: parent.left
+                        right: parent.right
+                        bottom: parent.bottom
+                    }
+                    clip: true
+                    property string sourceFile
+                    Timer {
+                        id: pageSizeSync
+                        interval: 100
+                        onTriggered: {
+    //                                     root.width = mainColumn.implicitWidth
+    //                                     root.height = mainColumn.implicitHeight
+                        }
+                    }
+                    onImplicitWidthChanged: pageSizeSync.restart()
+                    onImplicitHeightChanged: pageSizeSync.restart()
+                    onSourceFileChanged: {
+                        print("Source file changed in flickable" + sourceFile);
+                        replace(Qt.resolvedUrl(sourceFile))
+                        /*
+                            * This is not needed on a desktop shell that has ok/apply/cancel buttons, i'll leave it here only for future reference until we have a prototype for the active shell.
+                            * root.pageChanged will start a timer, that in turn will call saveConfig() when triggered
+
+                        for (var prop in currentPage) {
+                            if (prop.indexOf("cfg_") === 0) {
+                                currentPage[prop+"Changed"].connect(root.pageChanged)
+                            }
+                        }*/
                     }
                 }
-                onImplicitWidthChanged: pageSizeSync.restart()
-                onImplicitHeightChanged: pageSizeSync.restart()
-                onSourceFileChanged: {
-                    print("Source file changed in flickable" + sourceFile);
-                    replace(Qt.resolvedUrl(sourceFile))
-                    /*
-                        * This is not needed on a desktop shell that has ok/apply/cancel buttons, i'll leave it here only for future reference until we have a prototype for the active shell.
-                        * root.pageChanged will start a timer, that in turn will call saveConfig() when triggered
-
-                    for (var prop in currentPage) {
-                        if (prop.indexOf("cfg_") === 0) {
-                            currentPage[prop+"Changed"].connect(root.pageChanged)
-                        }
-                    }*/
-                }
             }
-
         }
         RowLayout {
             id: buttonsRow

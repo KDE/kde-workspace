@@ -31,6 +31,7 @@ MouseArea {
     width: childrenRect.width
     height: childrenRect.height + 4
     property bool current: model.source == main.sourceFile
+    property string name: model.name
 //END properties
 
 //BEGIN connections
@@ -43,6 +44,7 @@ MouseArea {
                 categoriesView.currentItem = delegate;
             }
             main.sourceFile = model.source
+            main.title = model.name
             root.restoreConfig()
         }
     }

@@ -66,7 +66,7 @@ ColumnLayout {
         }
         QtControls.Label {
             anchors.verticalCenter: pluginComboBox.verticalCenter
-            text: i18n("Wallpaper plugin:")
+            text: i18n("Wallpaper Type:")
         }
         QtControls.ComboBox {
             id: pluginComboBox
