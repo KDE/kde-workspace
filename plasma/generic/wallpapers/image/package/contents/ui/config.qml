@@ -38,7 +38,7 @@ ColumnLayout {
         imageWallpaper.slidePaths = cfg_SlidePaths
     }
 
-    Rectangle { color: "orange"; x: formAlignment; width: formAlignment; height: 20 }
+    //Rectangle { color: "orange"; x: formAlignment; width: formAlignment; height: 20 }
 
     Row {
         x: formAlignment - positionLabel.paintedWidth
@@ -77,6 +77,15 @@ ColumnLayout {
 
             textRole: "label"
             onCurrentIndexChanged: cfg_ResizeMethod = model[currentIndex]["method"]
+            Component.onCompleted: setMethod();
+
+            function setMethod() {
+                for (var i = 0; i < model.length; i++) {
+                    if (model[i]["method"] == wallpaper.configuration.ResizeMethod) {
+                        resizeComboBox.currentIndex = i;
+                    }
+                }
+            }
         }
     }
 
