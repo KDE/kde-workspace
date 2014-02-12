@@ -29,6 +29,8 @@ ColumnLayout {
     property int cfg_ResizeMethod
     property var cfg_SlidePaths: ""
 
+    spacing: units.largeSpacing / 2
+
     Wallpaper.Image {
         id: imageWallpaper
         onSlidePathsChanged: cfg_SlidePaths = slidePaths
@@ -47,7 +49,7 @@ ColumnLayout {
             id: positionLabel
             width: formAlignment - units.largeSpacing
             anchors {
-                verticalCenter: pluginComboBox.verticalCenter
+                verticalCenter: resizeComboBox.verticalCenter
             }
             text: i18nc("Label for positioning combo", "Positioning:")
             horizontalAlignment: Text.AlignRight

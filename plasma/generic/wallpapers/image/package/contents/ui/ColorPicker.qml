@@ -70,8 +70,8 @@ Column {
     SystemPalette {id: syspal}
 
     Row {
-        x: formAlignment - colorRect.x
-        spacing: 4
+        x: formAlignment - colorRect.x - units.largeSpacing / 2 + 2
+        spacing: units.largeSpacing / 2 + 2
         QtControls.Label {
             anchors.verticalCenter: colorRect.verticalCenter
             text: "Background Color:"
@@ -81,7 +81,7 @@ Column {
             width: 128
             height: 24
             color: Qt.hsla(picker.hue, picker.saturation, picker.lightness, 1)
-            radius: 3
+            radius: units.smallSpacing * 2
             MouseArea {
                 anchors.fill: parent
                 onClicked: pickerRow.height = (pickerRow.height == 0 ? pickerRow.implicitHeight : 0)
