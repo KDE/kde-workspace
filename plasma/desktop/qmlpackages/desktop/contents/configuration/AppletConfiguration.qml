@@ -102,7 +102,7 @@ Rectangle {
                 left: parent.left
                 right: parent.right
             }
-            spacing: units.largeSpacing / 2
+            spacing: units.largeSpacing
             Layout.fillHeight: true
             Layout.preferredHeight: parent.height - buttonsRow.height
 
