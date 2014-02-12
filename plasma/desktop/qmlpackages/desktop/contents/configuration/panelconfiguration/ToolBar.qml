@@ -91,8 +91,11 @@ Item {
                 visualParent: settingsButton
                 location: PlasmaCore.Types.Floating
                 type: PlasmaCore.Dialog.PopupMenu
+                flags: Qt.Popup | Qt.FramelessWindowHint | Qt.WindowDoesNotAcceptFocus 
                 mainItem: Column {
                     id: menuColumn
+                    width: implicitWidth
+                    height: units.gridUnit * 10
                     Layout.minimumWidth: menuColumn.implicitWidth
                     Layout.minimumHeight: menuColumn.implicitHeight
                     spacing: units.largeSpacing
