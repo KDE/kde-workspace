@@ -131,7 +131,7 @@ ColumnLayout {
         }
         height: units.gridUnit * 30
 
-        frameVisible: false
+        frameVisible: true
         highlightOnFocus: true;
 
         GridView {
@@ -143,46 +143,7 @@ ColumnLayout {
                 radius: 3
                 color: syspal.highlight
             }
-            delegate: MouseArea {
-                id: wallpaperDelegate
-                width: wallpapersGrid.cellWidth
-                height: wallpapersGrid.cellHeight
-
-                Column {
-                    anchors {
-                        left: parent.left
-                        right: parent.right
-                        verticalCenter: parent.verticalCenter
-                    }
-                    QPixmapItem {
-                        anchors.horizontalCenter: parent.horizontalCenter
-                        height: wallpaperDelegate.height - wallpaperName.height -20
-                        width: height
-                        pixmap: model.screenshot
-                    }
-                    QtControls.Label {
-                        id: wallpaperName
-                        anchors {
-                            left: parent.left
-                            right: parent.right
-                        }
-                        text: model.display
-                        wrapMode: Text.Wrap
-                        horizontalAlignment: Text.AlignHCenter
-                        color: (wallpapersGrid.currentIndex == index) ? syspal.highlightedText : syspal.text
-                    }
-                }
-                onClicked: {
-                    cfg_Image = model.path
-                    wallpapersGrid.currentIndex = index
-                }
-                Component.onCompleted: {
-                    if (cfg_Image == model.path) {
-                        makeCurrentTimer.pendingIndex = model.index
-                        makeCurrentTimer.restart()
-                    }
-                }
-            }
+            delegate: WallpaperDelegate {}
             Timer {
                 id: makeCurrentTimer
                 interval: 100
