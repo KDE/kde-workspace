@@ -122,7 +122,7 @@ ColumnLayout {
         }
         height: units.gridUnit * 30
 
-        frameVisible: true;
+        frameVisible: false
         highlightOnFocus: true;
 
         GridView {
