@@ -155,4 +155,25 @@ ColumnLayout {
             }
         }
     }
+    RowLayout {
+        id: buttonsRow
+        anchors {
+            left: parent.left
+            //rightMargin: units.largeSpacing/2
+        }
+        QtControls.Button {
+            iconName: "document-open-folder"
+            text: i18n("Open...")
+            onClicked: {
+                print("Open file.");
+            }
+        }
+        QtControls.Button {
+            iconName: "bookmarks"
+            text: i18n("Download Wallpapers")
+            onClicked: {
+                print("Get new Wallpapers.");
+            }
+        }
+    }
 }
