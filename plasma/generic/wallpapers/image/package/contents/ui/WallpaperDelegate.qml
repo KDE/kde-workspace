@@ -1,5 +1,6 @@
 /*
  *  Copyright 2013 Marco Martin <mart@kde.org>
+ *  Copyright 2014 Sebastian Kügler <sebas@kde.org>
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -17,9 +18,6 @@
  */
 
 import QtQuick 2.0
-// import QtQuick.Controls 1.0 as QtControls
-// import QtQuick.Layouts 1.0
-// import org.kde.plasma.wallpapers.image 2.0 as Wallpaper
 import org.kde.qtextracomponents 2.0
 
 MouseArea {
@@ -38,10 +36,12 @@ MouseArea {
         }
         QPixmapItem {
             anchors.horizontalCenter: parent.horizontalCenter
-            height: wallpaperDelegate.height
+            height: wallpaperDelegate.height + 1
             width: height
+            smooth: true
             pixmap: model.screenshot
-            z:  wallpaperDelegate.containsMouse ? 1 : 0
+            fillMode: QPixmapItem.PreserveAspectCrop
+
             Rectangle {
                 opacity: selected ? 1.0 : 0
                 anchors.fill: parent
@@ -58,7 +58,6 @@ MouseArea {
         }
     }
     onClicked: {
-        print("WP : model.path: " + model.path)
         cfg_Image = model.path
         wallpapersGrid.currentIndex = index
     }
