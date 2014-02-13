@@ -99,16 +99,9 @@ void BackgroundListModel::reload(const QStringList &selected)
         processPaths(selected);
     }
 
-    //const QStringList dirs = KGlobal::dirs()->findDirs("wallpaper", QString());
-
     const QStringList dirs = QStandardPaths::locateAll(QStandardPaths::GenericDataLocation, "wallpapers/", QStandardPaths::LocateDirectory);
     qDebug() << " WP : -------" << dirs;
-    //dirs.append(QStandardPaths::locateAll(QStandardPaths::GenericDataLocation, "plasma/wallpapers/", QStandardPaths::LocateDirectory));
 
-    qDebug() << " WP : ....--" << dirs;
-
-    //qDebug() << "WP going looking in" << dirs;
-    //qDebug() << "WP QSP looking in" << _dirs;
     BackgroundFinder *finder = new BackgroundFinder(m_structureParent.data(), dirs);
     connect(finder, SIGNAL(backgroundsFound(QStringList,QString)), this, SLOT(backgroundsFound(QStringList,QString)));
     m_findToken = finder->token();
@@ -338,8 +331,8 @@ void BackgroundListModel::showPreview(const KFileItem &item, const QPixmap &prev
     }
 
     m_previews.insert(b.path(), preview);
+    //qDebug() << "WP preview size:" << preview.size();
     emit dataChanged(index, index);
-    //qDebug() << "preview size:" << preview.size();
 }
 
 void BackgroundListModel::previewFailed(const KFileItem &item)
@@ -413,7 +406,7 @@ void BackgroundFinder::run()
                     pkg.setPath(filePath);
                     if (pkg.isValid()) {
                         papersFound << pkg.path();
-                        qDebug() << "WP gots a" << wp.filePath();
+                        //qDebug() << "WP gots a" << wp.filePath();
                         continue;
                     }
                 }
@@ -421,7 +414,7 @@ void BackgroundFinder::run()
                 // add this to the directories we should be looking at
                 m_paths.append(filePath);
             } else if (fileSuffixes.contains(wp.suffix().toLower())) {
-                qDebug() << "WP     adding image file" << wp.filePath();
+                //qDebug() << "WP     adding image file" << wp.filePath();
                 papersFound << wp.filePath();
             }
         }
