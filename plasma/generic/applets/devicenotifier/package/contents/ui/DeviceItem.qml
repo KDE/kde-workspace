@@ -73,8 +73,6 @@ Item {
             }
         }
         onClicked: {
-            deviceItem.ListView.view.itemFocused();
-
             var actions = hpSource.data[udi]["actions"];
             if (actions.length == 1) {
                 var service = hpSource.serviceForSource(udi);
@@ -204,7 +202,6 @@ Item {
             }
 
             onClicked: {
-                ListView.view.itemFocused();
                 if (leftAction.visible) {
                     leftActionTriggered()
                 }
