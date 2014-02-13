@@ -41,6 +41,8 @@ class Image : public QObject
     Q_PROPERTY(int slideTimer READ slideTimer WRITE setSlideTimer NOTIFY slideTimerChanged)
     Q_PROPERTY(QStringList usersWallpapers READ usersWallpapers WRITE setUsersWallpapers NOTIFY usersWallpapersChanged)
     Q_PROPERTY(QStringList slidePaths READ slidePaths WRITE setSlidePaths NOTIFY slidePathsChanged)
+    Q_PROPERTY(int width MEMBER m_width READ width WRITE setWidth NOTIFY sizeChanged)
+    Q_PROPERTY(int height MEMBER m_height READ height WRITE setHeight NOTIFY sizeChanged)
 
     public:
 
@@ -70,6 +72,11 @@ class Image : public QObject
         QSize targetSize() const;
         void setTargetSize(const QSize &size);
 
+        int width() const;
+        int height() const;
+        void setWidth(int w);
+        void setHeight(int h);
+
         Plasma::Package *package();
 
         QAbstractItemModel* wallpaperModel();
@@ -91,6 +98,7 @@ class Image : public QObject
         void usersWallpapersChanged();
         void slidePathsChanged();
         void resizeMethodChanged();
+        void sizeChanged(QSize s);
 
     protected Q_SLOTS:
         void removeWallpaper(QString name);
@@ -146,6 +154,8 @@ class Image : public QObject
         BackgroundListModel *m_model;
         KFileDialog *m_dialog;
         QSize m_size;
+        int m_width;
+        int m_height;
         QString m_img;
         QDateTime m_previousModified;
         QWeakPointer<KNS3::DownloadDialog> m_newStuffDialog;

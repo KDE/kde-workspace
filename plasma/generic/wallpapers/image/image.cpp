@@ -57,6 +57,8 @@ Image::Image(QObject *parent)
     connect(m_dirWatch, SIGNAL(deleted(QString)), SLOT(pathDeleted(QString)));
     m_dirWatch->startScan();
 
+    connect(this, &Image::sizeChanged, this, &Image::setTargetSize);
+
     useSingleImageDefaults();
     setSingleImage();
 }
@@ -124,6 +126,34 @@ void Image::setTargetSize(const QSize &size)
 {
     m_targetSize = size;
 }
+
+int Image::height() const
+{
+    return m_height;
+}
+
+void Image::setHeight(int h)
+{
+    if (m_height != h) {
+        m_height = h;
+        emit sizeChanged(QSize(m_width, m_height));
+    }
+}
+
+int Image::width() const
+{
+    return m_width;
+}
+
+void Image::setWidth(int w)
+{
+    if (m_width != w) {
+        m_width = w;
+        emit sizeChanged(QSize(m_width, m_height));
+    }
+}
+
+
 
 Plasma::Package *Image::package()
 {
