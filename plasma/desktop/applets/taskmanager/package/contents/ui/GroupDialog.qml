@@ -25,10 +25,10 @@ import org.kde.draganddrop 2.0
 import "../code/layout.js" as LayoutManager
 
 PlasmaCore.Dialog {
-    property Item target
-
     visible: false
-    flags: Qt.Popup
+
+    type: PlasmaCore.Dialog.PopupMenu
+    hideOnWindowDeactivate: true
 
     mainItem: Item {
         MouseHandler {
@@ -55,6 +55,7 @@ PlasmaCore.Dialog {
     data: [
         VisualDataModel {
             id: groupFilter
+
             delegate: Task {
                 visible: true
                 inPopup: true
@@ -62,31 +63,27 @@ PlasmaCore.Dialog {
         }
     ]
 
+    onVisualParentChanged: {
+        if (!visualParent) {
+            visible = false;
+        }
+    }
+
     onVisibleChanged: {
-        if (visible && target) {
-            groupFilter.model = tasksModel;
-            groupFilter.rootIndex = visualModel.modelIndex(target.itemIndex);
+        if (visible && visualParent) {
+            groupFilter.model = backend.tasksModel;
+            groupFilter.rootIndex = groupFilter.modelIndex(visualParent.itemIndex);
             groupRepeater.model = groupFilter;
-            updatePosition();
         } else {
+            visualParent = null;
             groupRepeater.model = undefined;
             groupFilter.model = undefined;
             groupFilter.rootIndex = undefined;
         }
     }
 
-    onHeightChanged: updatePosition()
-
-    function updatePosition() {
-        if (target) {
-            var pos = groupDialog.popupPosition(target, Qt.AlignCenter);
-            x = pos.x;
-            y = pos.y;
-        }
-    }
-
     function updateSize() {
-        if (!visible || !target) {
+        if (!visible || !visualParent) {
             return;
         }
 

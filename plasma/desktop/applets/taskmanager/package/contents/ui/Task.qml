@@ -86,8 +86,12 @@ MouseEventListener {
         }
 
         if (isGroupParent) {
-            groupDialog.target = task;
-            groupDialog.visible = true;
+            if (groupDialog.visible) {
+                groupDialog.visible = false;
+            } else {
+                groupDialog.visualParent = task;
+                groupDialog.visible = true;
+            }
         } else {
             tasks.activateItem(model.Id, true);
         }
@@ -316,10 +320,11 @@ MouseEventListener {
             component.createObject(task);
         }
     }
-
+/*
     Component.onDestruction: {
         if (groupDialog.visible && groupDialog.groupItemId == model.Id) {
             groupDialog.visible = false;
         }
     }
+*/
 }

@@ -76,12 +76,6 @@ Item {
 
         groupingStrategy: plasmoid.configuration.groupingStrategy
         sortingStrategy: plasmoid.configuration.sortingStrategy
-
-        onActiveWindowIdChanged: {
-            if (activeWindowId != groupDialog.windowId) {
-                groupDialog.visible = false;
-            }
-        }
     }
 
     Binding {
