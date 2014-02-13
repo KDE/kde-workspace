@@ -277,7 +277,7 @@ Item {
                         PlasmaComponents.Label {
                             x: 8
                             y: 8
-                            opacity: 0.6
+                            enabled: false
                             text: section
                             color: theme.textColor
                         }
