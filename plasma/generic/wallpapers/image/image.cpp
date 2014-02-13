@@ -34,6 +34,7 @@
 #include <KGlobal>
 
 #include <Plasma/Theme>
+#include <qstandardpaths.h>
 #include "backgroundlistmodel.h"
 
 Image::Image(QObject *parent)
@@ -300,7 +301,7 @@ void Image::setSingleImage()
         Q_EMIT wallpaperPathChanged();
     } else {
         //if it's not an absolute path, check if it's just a wallpaper name
-        const QString path = KStandardDirs::locate("wallpaper", QString(m_wallpaper + QString::fromLatin1("/metadata.desktop")));
+        const QString path = QStandardPaths::locate(QStandardPaths::GenericDataLocation, QLatin1String("wallpapers/") + QString(m_wallpaper + QString::fromLatin1("/metadata.desktop")));
 
         if (!path.isEmpty()) {
             QDir dir(path);
@@ -355,7 +356,7 @@ void Image::addUrl(const QUrl &url, bool setAsCurrent)
             }
         }
     } else {
-        QString wallpaperPath = KGlobal::dirs()->locateLocal("wallpaper", url.path());
+        QString wallpaperPath = QStandardPaths::writableLocation(QStandardPaths::GenericDataLocation) + QLatin1String("wallpapers/") + url.path();
 
         if (!wallpaperPath.isEmpty()) {
             KIO::FileCopyJob *job = KIO::file_copy(url, QUrl(wallpaperPath));
