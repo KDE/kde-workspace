@@ -86,28 +86,16 @@ function checkLastSpacer() {
 
     var expands = false;
 
-    if (plasmoid.formFactor == PlasmaCore.Types.Vertical) {
-        for (var container in column.children) {
-            var item = column.children[container];
-            if (item.Layout && item.Layout.fillHeight) {
-                expands = true;
-            }
-        }
-        if (expands) {
-            lastSpacer.parent = column
-        }
-
-    } else {
-        for (var container in row.children) {
-            var item = row.children[container];
-            if (item.Layout && item.Layout.fillWidth) {
-                expands = true;
-            }
-        }
-        if (!expands) {
-            lastSpacer.parent = row
+    for (var container in currentLayout.children) {
+        var item = currentLayout.children[container];
+        if (item.Layout && item.Layout.fillHeight) {
+            expands = true;
         }
     }
+    if (!expands) {
+        lastSpacer.parent = currentLayout
+    }
+
 }
 
 //END functions
@@ -155,37 +143,6 @@ function checkLastSpacer() {
         }
 
         LayoutManager.save();
-    }
-
-    Plasmoid.onFormFactorChanged: {
-        lastSpacer.parent = root
-
-        var expands = false;
-
-        if (plasmoid.formFactor == PlasmaCore.Types.Vertical) {
-            for (var container in row.children) {
-                var item = row.children[0];
-                if (item.Layout && item.Layout.fillHeight) {
-                    expands = true;
-                }
-                item.parent = column
-            }
-            if (expands) {
-                lastSpacer.parent = column
-            }
-
-        } else {
-            for (var container in column.children) {
-                var item = column.children[0];
-                if (item.Layout && item.Layout.fillWidth) {
-                    expands = true;
-                }
-                item.parent = row
-            }
-            if (!expands) {
-                lastSpacer.parent = row
-            }
-        }
     }
 
     Plasmoid.onUserConfiguringChanged: {
