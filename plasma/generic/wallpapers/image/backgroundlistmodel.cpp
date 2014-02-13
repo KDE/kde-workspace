@@ -13,6 +13,7 @@
 
 #include <QFile>
 #include <QDir>
+#include <QStandardPaths>
 #include <QThreadPool>
 #include <QUuid>
 
@@ -98,8 +99,16 @@ void BackgroundListModel::reload(const QStringList &selected)
         processPaths(selected);
     }
 
-    const QStringList dirs = KGlobal::dirs()->findDirs("wallpaper", QString());
-    qDebug() << "going looking in" << dirs;
+    //const QStringList dirs = KGlobal::dirs()->findDirs("wallpaper", QString());
+
+    const QStringList dirs = QStandardPaths::locateAll(QStandardPaths::GenericDataLocation, "wallpapers/", QStandardPaths::LocateDirectory);
+    qDebug() << " WP : -------" << dirs;
+    //dirs.append(QStandardPaths::locateAll(QStandardPaths::GenericDataLocation, "plasma/wallpapers/", QStandardPaths::LocateDirectory));
+
+    qDebug() << " WP : ....--" << dirs;
+
+    //qDebug() << "WP going looking in" << dirs;
+    //qDebug() << "WP QSP looking in" << _dirs;
     BackgroundFinder *finder = new BackgroundFinder(m_structureParent.data(), dirs);
     connect(finder, SIGNAL(backgroundsFound(QStringList,QString)), this, SLOT(backgroundsFound(QStringList,QString)));
     m_findToken = finder->token();
@@ -371,12 +380,12 @@ const QSet<QString> &BackgroundFinder::suffixes()
 
 void BackgroundFinder::run()
 {
-    //QTime t;
-    //t.start();
+    QTime t;
+    t.start();
     const QSet<QString> &fileSuffixes = suffixes();
 
     QStringList papersFound;
-    //qDebug() << "starting with" << m_paths;
+    qDebug() << "WP starting with" << m_paths;
 
     QDir dir;
     dir.setFilter(QDir::AllDirs | QDir::Files | QDir::Hidden | QDir::Readable);
@@ -386,12 +395,12 @@ void BackgroundFinder::run()
     int i;
     for (i = 0; i < m_paths.count(); ++i) {
         const QString path = m_paths.at(i);
-        //qDebug() << "doing" << path;
+        qDebug() << "WP doing" << path;
         dir.setPath(path);
         const QFileInfoList files = dir.entryInfoList();
         Q_FOREACH (const QFileInfo &wp, files) {
             if (wp.isDir()) {
-                //qDebug() << "directory" << wp.fileName() << validPackages.contains(wp.fileName());
+                //qDebug() << "WP directory" << wp.fileName();
 
                 const QString name = wp.fileName();
                 if (name == QString::fromLatin1(".") || name == QString::fromLatin1("..")) {
@@ -404,21 +413,21 @@ void BackgroundFinder::run()
                     pkg.setPath(filePath);
                     if (pkg.isValid()) {
                         papersFound << pkg.path();
+                        qDebug() << "WP gots a" << wp.filePath();
                         continue;
-                        //qDebug() << "gots a" << wp.filePath();
                     }
                 }
 
                 // add this to the directories we should be looking at
                 m_paths.append(filePath);
             } else if (fileSuffixes.contains(wp.suffix().toLower())) {
-                //qDebug() << "     adding image file" << wp.filePath();
+                qDebug() << "WP     adding image file" << wp.filePath();
                 papersFound << wp.filePath();
             }
         }
     }
 
-    //qDebug() << "background found!" << papersFound.size() << "in" << i << "dirs, taking" << t.elapsed() << "ms";
+    qDebug() << "WP background found!" << papersFound.size() << "in" << i << "dirs, taking" << t.elapsed() << "ms";
     Q_EMIT backgroundsFound(papersFound, m_token);
     deleteLater();
 }
