@@ -73,7 +73,15 @@ Rectangle {
         fadeAnim.running = true
     }
 
+    function updateTargetSize() {
+        wallpaper.configuration.width = root.width
+        wallpaper.configuration.height = root.height
+        print("WPS Target size updated in config to " + wallpaper.configuration.width + "x" + wallpaper.configuration.height)
+
+    }
+
     Component.onCompleted: {
+        print("WP : configuredImage:  " + configuredImage);
         imageWallpaper.addUrl(configuredImage)
         wallpaper.setAction("open", i18n("Open Wallpaper Image"),"document-open");
         fadeWallpaper()
@@ -87,6 +95,9 @@ Rectangle {
         id: imageWallpaper
         //the oneliner of difference between image and slideshow wallpapers
         //renderingMode: Wallpaper.Image.SlideShow
+//         targetSize: "1920x1080"
+        width: parent.width
+        height: parent.height
         slidePaths: wallpaper.configuration.SlidePaths
     }
 
@@ -97,8 +108,12 @@ Rectangle {
         imageWallpaper.addUrl(configuredImage)
     }
     onModelImageChanged: {
+        print("WP onModelImageChanged: " + modelImage);
         fadeWallpaper()
     }
+
+    onWidthChanged: updateTargetSize();
+    onHeightChanged: updateTargetSize();
 
     SequentialAnimation {
         id: fadeAnim

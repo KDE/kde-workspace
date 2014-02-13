@@ -33,6 +33,8 @@ ColumnLayout {
 
     Wallpaper.Image {
         id: imageWallpaper
+        width: wallpaper.configuration.width
+        height: wallpaper.configuration.height
         onSlidePathsChanged: cfg_SlidePaths = slidePaths
     }
 
