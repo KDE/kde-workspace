@@ -17,18 +17,18 @@
  */
 
 import QtQuick 2.0
-import QtQuick.Controls 1.0 as QtControls
-import QtQuick.Layouts 1.0
-import org.kde.plasma.wallpapers.image 2.0 as Wallpaper
+// import QtQuick.Controls 1.0 as QtControls
+// import QtQuick.Layouts 1.0
+// import org.kde.plasma.wallpapers.image 2.0 as Wallpaper
 import org.kde.qtextracomponents 2.0
 
 MouseArea {
     id: wallpaperDelegate
+
     width: wallpapersGrid.cellWidth
     height: wallpapersGrid.cellHeight
 
     property bool selected: (wallpapersGrid.currentIndex == index)
-    //hoverEnabled: true
 
     Column {
         anchors {
@@ -38,11 +38,9 @@ MouseArea {
         }
         QPixmapItem {
             anchors.horizontalCenter: parent.horizontalCenter
-            //height: wallpaperDelegate.height - wallpaperName.height -20
             height: wallpaperDelegate.height
             width: height
             pixmap: model.screenshot
-            //scale: wallpaperDelegate.containsMouse ? 1/0.9 : 1.0
             z:  wallpaperDelegate.containsMouse ? 1 : 0
             Rectangle {
                 opacity: selected ? 1.0 : 0
@@ -57,25 +55,10 @@ MouseArea {
                     }
                 }
             }
-            Behavior on scale {
-                SequentialAnimation {
-                    ScriptAction { script: parent.z = 99 }
-                    PropertyAnimation { duration: units.shortDuration } }
-            }
         }
-//         QtControls.Label {
-//             id: wallpaperName
-//             anchors {
-//                 left: parent.left
-//                 right: parent.right
-//             }
-//             text: model.display
-//             wrapMode: Text.Wrap
-//             horizontalAlignment: Text.AlignHCenter
-//             color: (wallpapersGrid.currentIndex == index) ? syspal.highlightedText : syspal.text
-//         }
     }
     onClicked: {
+        print("WP : model.path: " + model.path)
         cfg_Image = model.path
         wallpapersGrid.currentIndex = index
     }
