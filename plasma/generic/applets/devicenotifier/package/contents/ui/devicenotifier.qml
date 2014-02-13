@@ -210,6 +210,7 @@ Item {
             ListView {
                 id: notifierDialog
                 focus: true
+                boundsBehavior: Flickable.StopAtBounds
 
                 model: PlasmaCore.SortFilterModel {
                     id: filterModel
