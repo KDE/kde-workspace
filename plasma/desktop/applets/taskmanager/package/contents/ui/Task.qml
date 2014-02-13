@@ -135,27 +135,23 @@ MouseEventListener {
 
         PlasmaCore.ToolTipArea {
             id: toolTip
-            property variant windows: model.WindowList
 
             anchors.fill: parent
+
+            property variant windows: model.WindowList
+
+            active: !inPopup && plasmoid.configuration.showToolTips
+
             mainItem: toolTipDelegate
 
             //FIXME TODO: highlightWindows: plasmoid.configuration.highlightWindows
             onContainsMouseChanged:  {
                 if (containsMouse) {
-                    if (!inPopup && plasmoid.configuration.showToolTips || true) {
-                        toolTip.windows = model.WindowList;
-                        //toolTip.target = frame;
-                        toolTip.mainText = model.DisplayRole;
-                        //FIXME TODO:
-                        toolTip.icon = model.DecorationRole;
-                        toolTip.subText = model.IsLauncher ? model.GenericName
-                            : toolTip.generateSubText(model);
-                        //FIXME TODO: toolTip.windowsToPreview = model.WindowList;
-                    } else {
-                        // A bit sneaky, but this works well to hide the tooltip.
-                        //toolTip.target = taskFrame;
-                    }
+                    toolTip.windows = model.WindowList;
+                    toolTip.mainText = model.DisplayRole;
+                    toolTip.icon = model.DecorationRole;
+                    toolTip.subText = model.IsLauncher ? model.GenericName
+                        : toolTip.generateSubText(model);
                 }
             }
 
