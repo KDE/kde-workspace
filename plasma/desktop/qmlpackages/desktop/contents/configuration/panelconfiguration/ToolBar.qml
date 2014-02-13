@@ -208,6 +208,7 @@ Item {
                             right: parent.right
                         }
                         text: i18n("Maximize Panel")
+                        iconSource: panel.formFactor == PlasmaCore.Types.Vertical ? "zoom-fit-height" : "zoom-fit-width"
                         onClicked: panel.maximize();
                     }
                     PlasmaComponents.ToolButton {
@@ -216,6 +217,7 @@ Item {
                             right: parent.right
                         }
                         text: i18n("Lock Widgets")
+                        iconSource: "document-encrypt"
                         onClicked: configDialog.action("lock widgets").trigger();
                     }
                     PlasmaComponents.ToolButton {
@@ -223,7 +225,8 @@ Item {
                             left: parent.left
                             right: parent.right
                         }
-                        text: i18n("Remove this panel")
+                        text: i18n("Remove Panel")
+                        iconSource: "window-close"
                         onClicked: configDialog.action("remove").trigger();
                     }
                 }
