@@ -186,7 +186,6 @@ Item {
         Layout.minimumHeight: units.gridUnit * 10
 
         hoverEnabled: true
-        anchors.fill: parent
 
         PlasmaCore.Svg {
             id: lineSvg
