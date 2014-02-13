@@ -118,7 +118,7 @@ Item {
 
     Component.onCompleted: {
         if (sdSource.connectedSources.count == 0) {
-            plasmoid.status = PlasmaCore.Types.PassiveStatus;
+            Plasmoid.status = PlasmaCore.Types.PassiveStatus;
         }
     }
 
