@@ -76,12 +76,6 @@ Item {
 
         groupingStrategy: plasmoid.configuration.groupingStrategy
         sortingStrategy: plasmoid.configuration.sortingStrategy
-
-        onActiveWindowIdChanged: {
-            if (activeWindowId != groupDialog.windowId) {
-                groupDialog.visible = false;
-            }
-        }
     }
 
     Binding {
@@ -191,6 +185,14 @@ Item {
                 taskList.width = LayoutManager.layoutWidth();
                 taskList.height = LayoutManager.layoutHeight();
                 LayoutManager.layout(taskRepeater);
+            }
+
+            function modelWasReset() {
+                LayoutManager.layout(taskRepeater);
+            }
+
+            Component.onCompleted: {
+                backend.tasksModel.modelReset.connect(modelWasReset);
             }
         }
     }

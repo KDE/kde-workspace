@@ -163,7 +163,7 @@ bool LauncherProperties::eventFilter(QObject *o, QEvent *e)
     WId window = findWindow();
 
     if (0 != window) {
-        KWindowInfo info = KWindowSystem::windowInfo(window, 0, NET::WM2WindowClass);
+        KWindowInfo info(window, 0, NET::WM2WindowClass);
         if (info.valid()) {
             ui.classClass->setText(info.windowClassClass());
             ui.className->setText(info.windowClassName());

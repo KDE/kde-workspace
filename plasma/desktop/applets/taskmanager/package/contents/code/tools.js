@@ -85,7 +85,7 @@ function publishIconGeometries(taskItems) {
         if (task.isGroupParent) {
             var taskIdList = backend.tasksModel.taskIdList(visualModel.modelIndex(task.itemIndex));
 
-            for (j = 0; j < taskIdList.length; ++j) {
+            for (var j = 0; j < taskIdList.length; ++j) {
                 tasks.itemGeometryChanged(task, taskIdList[j].itemId);
             }
         } else if (!task.isLauncher) {

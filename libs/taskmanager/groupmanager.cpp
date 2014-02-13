@@ -257,6 +257,7 @@ bool GroupManagerPrivate::addTask(::TaskManager::Task *task)
              << task->classClass(); */
 
     bool skip = false;
+
     if (!task->showInTaskbar()) {
         //kDebug() << "Do not show in taskbar";
         skip = true;

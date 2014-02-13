@@ -165,7 +165,7 @@ void AppMenuModule::slotWindowRegistered(WId id, const QString& service, const Q
     if ( m_menuStyle == "TopMenuBar" && id == KWindowSystem::self()->activeWindow()) {
         slotActiveWindowChanged(id);
     } else if (m_menuStyle == "ButtonVertical") {
-        KWindowInfo info = KWindowSystem::windowInfo(id, 0, NET::WM2WindowClass);
+        KWindowInfo info(id, 0, NET::WM2WindowClass);
         // Tell Kwin menu is available
         emit menuAvailable(id);
         // FIXME: https://bugs.kde.org/show_bug.cgi?id=317926
@@ -217,7 +217,7 @@ void AppMenuModule::slotActionActivationRequested(QAction* a)
 // See comments in slotWindowRegistered() for why we get importers here
 void AppMenuModule::slotActiveWindowChanged(WId id)
 {
-    KWindowInfo info = KWindowSystem::windowInfo(id, NET::WMWindowType);
+    KWindowInfo info(id, NET::WMWindowType);
     NET::WindowTypes mask = NET::AllTypesMask;
 
     m_currentScreen = currentScreen();
@@ -395,8 +395,7 @@ void AppMenuModule::hideMenubar()
 
 int AppMenuModule::currentScreen()
 {
-    KWindowInfo info = KWindowSystem::windowInfo(KWindowSystem::self()->activeWindow(),
-                                                 NET::WMGeometry);
+    KWindowInfo info(KWindowSystem::self()->activeWindow(), NET::WMGeometry);
     int x = info.geometry().x();
     int y = info.geometry().y();
 

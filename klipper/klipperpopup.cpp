@@ -98,7 +98,7 @@ KlipperPopup::KlipperPopup( History* history )
       m_filterWidgetAction( 0 ),
       m_nHistoryItems( 0 )
 {
-    KWindowInfo windowInfo = KWindowSystem::windowInfo( winId(), NET::WMGeometry );
+    KWindowInfo windowInfo( winId(), NET::WMGeometry );
     QRect geometry = windowInfo.geometry();
     QRect screen = qApp->desktop()->screenGeometry(geometry.center());
     int menuHeight = ( screen.height() ) * 3/4;

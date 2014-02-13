@@ -42,10 +42,8 @@ Backend::Backend(QObject* parent) : QObject(parent),
     m_groupManager(new TaskManager::GroupManager(this)),
     m_tasksModel(new TaskManager::TasksModel(m_groupManager, this)),
     m_lastWindowId(0),
-    m_activeWindowId(0),
     m_highlightWindows(false)
 {
-    connect(KWindowSystem::self(), SIGNAL(activeWindowChanged(WId)), this, SLOT(handleActiveWindowChanged(WId)));
 }
 
 Backend::~Backend()
@@ -73,17 +71,6 @@ void Backend::setTaskManagerItem(QQuickItem* item)
         m_taskManagerItem = item;
         emit taskManagerItemChanged(item);
     }
-}
-
-qulonglong Backend::activeWindowId() const
-{
-    return m_activeWindowId;
-}
-
-void Backend::handleActiveWindowChanged(WId activeWindow)
-{
-    m_activeWindowId = qulonglong(activeWindow);
-    emit activeWindowIdChanged(m_activeWindowId);
 }
 
 bool Backend::anyTaskNeedsAttention() const

@@ -42,7 +42,9 @@ Item {
 
             var above = target.childAt(event.x, event.y);
 
-            if (tasks.dragSource && tasks.manualSorting) {
+            // HACK: plasmoid.configuration.sortingStrategy is an integer representation
+            // of the TaskManager::GroupManager::TaskSortingStrategy enum.
+            if (tasks.dragSource && plasmoid.configuration.sortingStrategy == 1) {
                 if (tasks.dragSource != above && !tasks.dragSource.isLauncher
                     && !(above && "isLauncher" in above && above.isLauncher)) {
                     itemMove(tasks.dragSource.itemId,

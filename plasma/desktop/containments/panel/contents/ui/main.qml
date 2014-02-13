@@ -18,6 +18,7 @@
 
 import QtQuick 2.1
 import QtQuick.Layouts 1.0
+import org.kde.plasma.plasmoid 2.0
 
 import org.kde.plasma.core 2.0 as PlasmaCore
 import org.kde.plasma.components 2.0 as PlasmaComponents
@@ -85,28 +86,16 @@ function checkLastSpacer() {
 
     var expands = false;
 
-    if (plasmoid.formFactor == PlasmaCore.Types.Vertical) {
-        for (var container in column.children) {
-            var item = column.children[container];
-            if (item.Layout && item.Layout.fillHeight) {
-                expands = true;
-            }
-        }
-        if (expands) {
-            lastSpacer.parent = column
-        }
-
-    } else {
-        for (var container in row.children) {
-            var item = row.children[container];
-            if (item.Layout && item.Layout.fillWidth) {
-                expands = true;
-            }
-        }
-        if (!expands) {
-            lastSpacer.parent = row
+    for (var container in currentLayout.children) {
+        var item = currentLayout.children[container];
+        if (item.Layout && item.Layout.fillHeight) {
+            expands = true;
         }
     }
+    if (!expands) {
+        lastSpacer.parent = currentLayout
+    }
+
 }
 
 //END functions
@@ -135,74 +124,41 @@ function checkLastSpacer() {
         plasmoid.processMimeData(event.mimeData, event.x, event.y);
     }
 
-    Connections {
-        target: plasmoid
 
-        onAppletAdded: {
-            addApplet(applet, x, y);
-            LayoutManager.save();
-        }
+    Containment.onAppletAdded: {
+        addApplet(applet, x, y);
+        LayoutManager.save();
+    }
 
-        onAppletRemoved: {
-            var flexibleFound = false;
-            for (var i = 0; i < currentLayout.children.length; ++i) {
-                if (currentLayout.children[i].applet.Layout.fillWidth) {
-                    flexibleFound = true;
-                    break
-                }
-            }
-            if (!flexibleFound) {
-                lastSpacer.parent = currentLayout;
-            }
-
-            LayoutManager.save();
-        }
-
-        onFormFactorChanged: {
-            lastSpacer.parent = root
-
-            var expands = false;
-
-            if (plasmoid.formFactor == PlasmaCore.Types.Vertical) {
-                for (var container in row.children) {
-                    var item = row.children[0];
-                    if (item.Layout && item.Layout.fillHeight) {
-                        expands = true;
-                    }
-                    item.parent = column
-                }
-                if (expands) {
-                    lastSpacer.parent = column
-                }
-
-            } else {
-                for (var container in column.children) {
-                    var item = column.children[0];
-                    if (item.Layout && item.Layout.fillWidth) {
-                        expands = true;
-                    }
-                    item.parent = row
-                }
-                if (!expands) {
-                    lastSpacer.parent = row
-                }
+    Containment.onAppletRemoved: {
+        var flexibleFound = false;
+        for (var i = 0; i < currentLayout.children.length; ++i) {
+            if (currentLayout.children[i].applet.Layout.fillWidth) {
+                flexibleFound = true;
+                break
             }
         }
+        if (!flexibleFound) {
+            lastSpacer.parent = currentLayout;
+        }
 
-        onUserConfiguringChanged: {
-            if (plasmoid.immutable) {
-                return;
-            }
+        LayoutManager.save();
+    }
 
-            if (plasmoid.userConfiguring) {
-                var component = Qt.createComponent("ConfigOverlay.qml");
-                dragOverlay = component.createObject(root);
-                component.destroy();
-            } else {
-                dragOverlay.destroy()
-            }
+    Plasmoid.onUserConfiguringChanged: {
+        if (plasmoid.immutable) {
+            return;
+        }
+
+        if (plasmoid.userConfiguring) {
+            var component = Qt.createComponent("ConfigOverlay.qml");
+            dragOverlay = component.createObject(root);
+            component.destroy();
+        } else {
+            dragOverlay.destroy()
         }
     }
+
 //END connections
 
 //BEGIN components

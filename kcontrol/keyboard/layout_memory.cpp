@@ -70,7 +70,7 @@ QString LayoutMemory::getCurrentMapKey() {
 	switch(keyboardConfig.switchingPolicy) {
 	case KeyboardConfig::SWITCH_POLICY_WINDOW: {
 		WId wid = KWindowSystem::self()->activeWindow();
-		KWindowInfo winInfo = KWindowSystem::windowInfo(wid, NET::WMWindowType);
+		KWindowInfo winInfo(wid, NET::WMWindowType);
 		NET::WindowType windowType = winInfo.windowType( NET::NormalMask | NET::DesktopMask | NET::DialogMask );
 		kDebug() << "window type" << windowType;
 
@@ -84,7 +84,7 @@ QString LayoutMemory::getCurrentMapKey() {
 	}
 	case KeyboardConfig::SWITCH_POLICY_APPLICATION: {
 		WId wid = KWindowSystem::self()->activeWindow();
-		KWindowInfo winInfo = KWindowSystem::windowInfo(wid, NET::WMWindowType, NET::WM2WindowClass);
+		KWindowInfo winInfo(wid, NET::WMWindowType, NET::WM2WindowClass);
 		NET::WindowType windowType = winInfo.windowType( NET::NormalMask | NET::DesktopMask | NET::DialogMask );
 		kDebug() << "window type" << windowType;
 

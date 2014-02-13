@@ -33,10 +33,10 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 namespace TaskManager
 {
 
-static const unsigned long windowInfoFlags = NET::WMState | NET::XAWMState | NET::WMDesktop |
+static const NET::Properties windowInfoFlags = NET::WMState | NET::XAWMState | NET::WMDesktop |
         NET::WMVisibleName | NET::WMGeometry |
-        NET::WMWindowType | NET::WM2WindowClass | NET::WM2AllowedActions;
-static const unsigned long windowInfoFlags2 = NET::WM2WindowClass | NET::WM2AllowedActions;
+        NET::WMWindowType;
+static const NET::Properties2 windowInfoFlags2 = NET::WM2WindowClass | NET::WM2AllowedActions;
 
 class Task::Private
 {
@@ -44,7 +44,7 @@ public:
     Private(WId w)
         : win(w),
           frameId(w),
-          info(KWindowSystem::windowInfo(w, windowInfoFlags, windowInfoFlags2)),
+          info(w, windowInfoFlags, windowInfoFlags2),
           lastWidth(0),
           lastHeight(0),
           cachedChanges(0, 0),

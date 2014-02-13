@@ -34,8 +34,8 @@ Item {
         rows: dialogRoot.vertical ? 2 : 1
         anchors.centerIn: parent
 
-        rowSpacing: 0
-        columnSpacing: 0
+        rowSpacing: units.smallSpacing
+        columnSpacing: units.smallSpacing
 
         EdgeHandle {}
         SizeHandle {}
@@ -48,6 +48,9 @@ Item {
         flow:plasmoid.formFactor == PlasmaCore.Types.Horizontal ? GridLayout.TopToBottom : GridLayout.LeftToRight
 
         anchors.margins: rowSpacing
+
+        rowSpacing: units.smallSpacing
+        columnSpacing: units.smallSpacing
 
         PlasmaComponents.Button {
             text: i18n("Add Widgets...")
@@ -74,7 +77,7 @@ Item {
                 if (!contextMenu) {
                     contextMenu = contextMenuComponent.createObject(buttonsLayout)
                 }
-                contextMenu.open()
+                contextMenu.visible = !contextMenu.visible;
             }
         }
 
@@ -87,45 +90,144 @@ Item {
 
         Component {
             id: contextMenuComponent
-            PlasmaComponents.ContextMenu {
+            PlasmaCore.Dialog {
                 visualParent: settingsButton
-                PlasmaComponents.MenuItem {
-                    id: leftToggle
-                    text: i18n("Left")
-                    checkable: true
-                    checked: panel.alignment == Qt.AlignLeft
-                    onClicked: panel.alignment = Qt.AlignLeft
-                    onToggled: {
-                        if (checked) {
-                            centerToggle.checked = false
-                            rightToggle.checked = false
+                location: PlasmaCore.Types.Floating
+                type: PlasmaCore.Dialog.PopupMenu
+                flags: Qt.Popup | Qt.FramelessWindowHint | Qt.WindowDoesNotAcceptFocus
+                mainItem: Column {
+                    id: menuColumn
+                    width: implicitWidth
+                    height: units.gridUnit * 10
+                    Layout.minimumWidth: menuColumn.implicitWidth
+                    Layout.minimumHeight: menuColumn.implicitHeight
+                    spacing: units.smallSpacing
+                    PlasmaExtras.Heading {
+                        level: 3
+                        text: i18n("Panel Alignment")
+                    }
+                    PlasmaComponents.ButtonColumn {
+                        spacing: 0
+                        anchors {
+                            left: parent.left
+                            right: parent.right
+                        }
+                        PlasmaComponents.ToolButton {
+                            anchors {
+                                left: parent.left
+                                right: parent.right
+                            }
+                            text: i18n("Left")
+                            checkable: true
+                            checked: panel.alignment == Qt.AlignLeft
+                            onClicked: panel.alignment = Qt.AlignLeft
+                            flat: false
+                        }
+                        PlasmaComponents.ToolButton {
+                            anchors {
+                                left: parent.left
+                                right: parent.right
+                            }
+                            text: i18n("Center")
+                            checkable: true
+                            checked: panel.alignment == Qt.AlignCenter
+                            onClicked: panel.alignment = Qt.AlignCenter
+                            flat: false
+                        }
+                        PlasmaComponents.ToolButton {
+                            anchors {
+                                left: parent.left
+                                right: parent.right
+                            }
+                            text: i18n("Right")
+                            checkable: true
+                            checked: panel.alignment == Qt.AlignRight
+                            onClicked: panel.alignment = Qt.AlignRight
+                            flat: false
                         }
                     }
-                }
-                PlasmaComponents.MenuItem {
-                    id: centerToggle
-                    text: i18n("Center")
-                    checkable: true
-                    checked: panel.alignment == Qt.AlignCenter
-                    onClicked: panel.alignment = Qt.AlignCenter
-                    onToggled: {
-                        if (checked) {
-                            leftToggle.checked = false
-                            rightToggle.checked = false
+
+                    PlasmaExtras.Heading {
+                        level: 3
+                        text: i18n("Visibility")
+                    }
+                    PlasmaComponents.ButtonColumn {
+                        spacing: 0
+                        anchors {
+                            left: parent.left
+                            right: parent.right
+                        }
+                        PlasmaComponents.ToolButton {
+                            anchors {
+                                left: parent.left
+                                right: parent.right
+                            }
+                            text: i18n("Always visible")
+                            checkable: true
+                            checked: panel.visibilityMode == 0
+                            onClicked: panel.visibilityMode = 0
+                            flat: false
+                        }
+                        PlasmaComponents.ToolButton {
+                            anchors {
+                                left: parent.left
+                                right: parent.right
+                            }
+                            text: i18n("Auto Hide")
+                            checkable: true
+                            checked: panel.visibilityMode == 1
+                            onClicked: panel.visibilityMode = 1
+                            flat: false
+                        }
+                        PlasmaComponents.ToolButton {
+                            anchors {
+                                left: parent.left
+                                right: parent.right
+                            }
+                            text: i18n("Windows can cover")
+                            checkable: true
+                            checked: panel.visibilityMode == 2
+                            onClicked: panel.visibilityMode = 2
+                            flat: false
+                        }
+                        PlasmaComponents.ToolButton {
+                            anchors {
+                                left: parent.left
+                                right: parent.right
+                            }
+                            text: i18n("Windows go below")
+                            checkable: true
+                            checked: panel.visibilityMode == 3
+                            onClicked: panel.visibilityMode = 3
+                            flat: false
                         }
                     }
-                }
-                PlasmaComponents.MenuItem {
-                    id: rightToggle
-                    text: i18n("Right")
-                    checkable: true
-                    checked: panel.alignment == Qt.AlignRight
-                    onClicked: panel.alignment = Qt.AlignRight
-                    onToggled: {
-                        if (checked) {
-                            centerToggle.checked = false
-                            leftToggle.checked = false
+                    PlasmaComponents.ToolButton {
+                        anchors {
+                            left: parent.left
+                            right: parent.right
                         }
+                        text: i18n("Maximize Panel")
+                        iconSource: panel.formFactor == PlasmaCore.Types.Vertical ? "zoom-fit-height" : "zoom-fit-width"
+                        onClicked: panel.maximize();
+                    }
+                    PlasmaComponents.ToolButton {
+                        anchors {
+                            left: parent.left
+                            right: parent.right
+                        }
+                        text: i18n("Lock Widgets")
+                        iconSource: "document-encrypt"
+                        onClicked: configDialog.action("lock widgets").trigger();
+                    }
+                    PlasmaComponents.ToolButton {
+                        anchors {
+                            left: parent.left
+                            right: parent.right
+                        }
+                        text: i18n("Remove Panel")
+                        iconSource: "window-close"
+                        onClicked: configDialog.action("remove").trigger();
                     }
                 }
             }

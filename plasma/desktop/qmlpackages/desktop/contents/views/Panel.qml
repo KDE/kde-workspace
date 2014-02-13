@@ -27,6 +27,7 @@ PlasmaCore.FrameSvgItem {
     width: 640
     height: 32
     imagePath: "widgets/panel-background"
+    visible: false //adjust borders is run during setup. We want to avoid painting till completed
 
     property Item containment
 
@@ -148,5 +149,7 @@ PlasmaCore.FrameSvgItem {
 
     Component.onCompleted: {
         print("PanelView QML loaded")
+        adjustBorders();
+        visible = true
     }
 }

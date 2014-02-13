@@ -25,8 +25,6 @@
 #include <taskmanager/groupmanager.h>
 #include <taskmanager/tasksmodel.h>
 
-#include <KWindowSystem>
-
 class QQuickItem;
 
 class Backend : public QObject
@@ -36,7 +34,6 @@ class Backend : public QObject
     Q_PROPERTY(QObject* groupManager READ groupManager CONSTANT)
     Q_PROPERTY(QObject* tasksModel READ tasksModel CONSTANT)
     Q_PROPERTY(QQuickItem* taskManagerItem READ taskManagerItem WRITE setTaskManagerItem NOTIFY taskManagerItemChanged)
-    Q_PROPERTY(int activeWindowId READ activeWindowId NOTIFY activeWindowIdChanged)
     Q_PROPERTY(bool anyTaskNeedsAttention READ anyTaskNeedsAttention)
     Q_PROPERTY(bool highlightWindows READ highlightWindows WRITE setHighlightWindows NOTIFY highlightWindowsChanged)
     Q_PROPERTY(int groupingStrategy READ groupingStrategy WRITE setGroupingStrategy)
@@ -51,8 +48,6 @@ class Backend : public QObject
 
         QQuickItem* taskManagerItem() const;
         void setTaskManagerItem(QQuickItem *item);
-
-        qulonglong activeWindowId() const;
 
         bool anyTaskNeedsAttention() const;
 
@@ -72,11 +67,8 @@ class Backend : public QObject
         void itemMove(int id, int newIndex);
         void itemGeometryChanged(QQuickItem *item, int id);
 
-        void handleActiveWindowChanged(WId activeWindow);
-
     Q_SIGNALS:
         void taskManagerItemChanged(QQuickItem*);
-        void activeWindowIdChanged(qulonglong);
         void highlightWindowsChanged(bool);
 
     private:
@@ -84,7 +76,6 @@ class Backend : public QObject
         TaskManager::TasksModel *m_tasksModel;
         QQuickItem* m_taskManagerItem;
         WId m_lastWindowId;
-        qulonglong m_activeWindowId;
         bool m_highlightWindows;
 };
 

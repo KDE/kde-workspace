@@ -186,7 +186,6 @@ Item {
         Layout.minimumHeight: units.gridUnit * 10
 
         hoverEnabled: true
-        anchors.fill: parent
 
         PlasmaCore.Svg {
             id: lineSvg
@@ -211,6 +210,7 @@ Item {
             ListView {
                 id: notifierDialog
                 focus: true
+                boundsBehavior: Flickable.StopAtBounds
 
                 model: PlasmaCore.SortFilterModel {
                     id: filterModel
@@ -278,7 +278,7 @@ Item {
                         PlasmaComponents.Label {
                             x: 8
                             y: 8
-                            opacity: 0.6
+                            enabled: false
                             text: section
                             color: theme.textColor
                         }

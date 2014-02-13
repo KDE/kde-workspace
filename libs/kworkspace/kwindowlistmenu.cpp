@@ -101,10 +101,6 @@ void KWindowListMenu::init()
   if ( numberOfDesktops == 1 )
     addSeparator();
 
-  QList<KWindowInfo> windows;
-  foreach ( WId id, KWindowSystem::windows() )
-    windows.append( KWindowSystem::windowInfo( id, NET::WMDesktop ) );
-
   bool showAllDesktopsGroup = ( numberOfDesktops > 1 );
 
   int i = 0;
@@ -118,7 +114,11 @@ void KWindowListMenu::init()
 
     QList<KWindowInfo*> list;
 
-    foreach (const KWindowInfo &wi, windows) {
+    foreach (WId id, KWindowSystem::windows()) {
+      KWindowInfo wi(id, NET::WMDesktop);
+      if (!wi.valid()) {
+          continue;
+      }
       if ( (wi.desktop() == j) || (onAllDesktops && wi.onAllDesktops())
            || (!showAllDesktopsGroup && wi.onAllDesktops()) ) {
         list.append( new KWindowInfo( wi.win(),

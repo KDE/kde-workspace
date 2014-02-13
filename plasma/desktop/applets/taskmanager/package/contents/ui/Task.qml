@@ -86,8 +86,12 @@ MouseEventListener {
         }
 
         if (isGroupParent) {
-            groupDialog.target = task;
-            groupDialog.visible = true;
+            if (groupDialog.visible) {
+                groupDialog.visible = false;
+            } else {
+                groupDialog.visualParent = task;
+                groupDialog.visible = true;
+            }
         } else {
             tasks.activateItem(model.Id, true);
         }
@@ -135,27 +139,24 @@ MouseEventListener {
 
         PlasmaCore.ToolTipArea {
             id: toolTip
-            property variant windows: model.WindowList
 
             anchors.fill: parent
+
+            property variant windows: model.WindowList
+
+            active: !inPopup && plasmoid.configuration.showToolTips
+            interactive: true
+
             mainItem: toolTipDelegate
 
             //FIXME TODO: highlightWindows: plasmoid.configuration.highlightWindows
             onContainsMouseChanged:  {
                 if (containsMouse) {
-                    if (!inPopup && plasmoid.configuration.showToolTips || true) {
-                        toolTip.windows = model.WindowList;
-                        //toolTip.target = frame;
-                        toolTip.mainText = model.DisplayRole;
-                        //FIXME TODO:
-                        toolTip.icon = model.DecorationRole;
-                        toolTip.subText = model.IsLauncher ? model.GenericName
-                            : toolTip.generateSubText(model);
-                        //FIXME TODO: toolTip.windowsToPreview = model.WindowList;
-                    } else {
-                        // A bit sneaky, but this works well to hide the tooltip.
-                        //toolTip.target = taskFrame;
-                    }
+                    toolTip.windows = model.WindowList;
+                    toolTip.mainText = model.DisplayRole;
+                    toolTip.icon = model.DecorationRole;
+                    toolTip.subText = model.IsLauncher ? model.GenericName
+                        : toolTip.generateSubText(model);
                 }
             }
 
@@ -319,10 +320,11 @@ MouseEventListener {
             component.createObject(task);
         }
     }
-
+/*
     Component.onDestruction: {
         if (groupDialog.visible && groupDialog.groupItemId == model.Id) {
             groupDialog.visible = false;
         }
     }
+*/
 }
