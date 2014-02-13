@@ -173,6 +173,7 @@ ColumnLayout {
             text: i18n("Download Wallpapers")
             onClicked: {
                 print("Get new Wallpapers.");
+                imageWallpaper.getNewWallpaper();
             }
         }
     }
