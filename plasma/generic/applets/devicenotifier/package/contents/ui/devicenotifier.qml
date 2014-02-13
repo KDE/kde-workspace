@@ -35,24 +35,11 @@ Item {
 
     Plasmoid.switchWidth: units.gridUnit * 10
     Plasmoid.switchHeight: units.gridUnit * 15
-    Plasmoid.onExpandedChanged: {
-        popupEventSlot(plasmoid.expanded);
-    }
-
     Plasmoid.icon: !sdSource.last ? "device-notifier" : sdSource.data[sdSource.last]["Icon"]
     Plasmoid.toolTipMainText: !sdSource.last ? i18n("No devices available") : i18n("Most recent device")
     Plasmoid.toolTipSubText: !sdSource.last ? "" : sdSource.data[sdSource.last]["Description"]
 
-    function popupEventSlot(popped) {
-        if (!popped) {
-            // reset the property that lets us remember if an item was clicked
-            // (versus only hovered) for autohide purposes
-            notifierDialog.itemClicked = true;
-            expandedDevice = "";
-            notifierDialog.currentExpanded = -1;
-            notifierDialog.currentIndex = -1;
-        }
-    }
+
 
     PlasmaCore.DataSource {
         id: hpSource
@@ -286,6 +273,21 @@ Item {
                 }
             }
 
+        }
+
+        Plasmoid.onExpandedChanged: {
+            popupEventSlot(plasmoid.expanded);
+        }
+
+        function popupEventSlot(popped) {
+            if (!popped) {
+                // reset the property that lets us remember if an item was clicked
+                // (versus only hovered) for autohide purposes
+                notifierDialog.itemClicked = true;
+                expandedDevice = "";
+                notifierDialog.currentExpanded = -1;
+                notifierDialog.currentIndex = -1;
+            }
         }
 
         Component {
