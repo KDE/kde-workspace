@@ -6,7 +6,7 @@ if(NOT WIN32)
    add_subdirectory(taskmanager)
    plasma_install_package(window-list org.kde.plasma.windowlist)
 
-if(KActivities_FOUND)
+if(KF5Activities_FOUND)
    add_subdirectory(pager)
    add_subdirectory(showActivityManager)
 endif()

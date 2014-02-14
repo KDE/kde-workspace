@@ -1,6 +1,6 @@
 
 add_subdirectory(applicationjobs)
-if (KActivities_FOUND)
+if (KF5Activities_FOUND)
     add_subdirectory(activities)
 endif ()
 add_subdirectory(apps)

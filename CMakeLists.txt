@@ -53,6 +53,7 @@ find_package(KF5 CONFIG REQUIRED
     I18n GuiAddons Service ConfigWidgets ItemViews Notifications IconThemes Style Completion JobWidgets TextWidgets XmlGui Crash
     Bookmarks UnitConversion KIO KCMUtils Parts Kross NotifyConfig PrintUtils Su DocTools NewStuff KHtml Declarative Init Runner)
 
+find_package(KF5Activities NO_MODULE)
 find_package(KF5Plasma REQUIRED NO_MODULE)
 find_package(KF5PlasmaQuick REQUIRED NO_MODULE)
 
@@ -72,12 +73,6 @@ set_package_properties(ZLIB PROPERTIES DESCRIPTION "Support for gzip compressed 
                        URL "http://www.zlib.net"
                        TYPE REQUIRED
                       )
-
-# find_package(KActivities 6.0.0 CONFIG)
-# set_package_properties(KActivities PROPERTIES DESCRIPTION "Interface library for the activity manager"
-#                        URL "https://projects.kde.org/kactivities"
-#                        TYPE REQUIRED
-#                       )
 
 find_package(DBusMenuQt5)
 set_package_properties(DBusMenuQt5 PROPERTIES DESCRIPTION "Support for notification area menus via the DBusMenu protocol"
@@ -109,11 +104,6 @@ set_package_properties(OpenGLES PROPERTIES DESCRIPTION "The OpenGLES libraries"
                        TYPE OPTIONAL
                       )
 
-find_package(KActivities)
-set_package_properties(KActivities PROPERTIES DESCRIPTION "The KActivities library"
-                       URL "https://projects.kde.org/kactivities"
-                       TYPE OPTIONAL
-                      )
 find_package(Wayland)
 set_package_properties(Wayland PROPERTIES DESCRIPTION "The Wayland Client and Server libraries"
                        URL "http://wayland.freedesktop.org"
@@ -249,7 +239,7 @@ if(UNIX)
    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -std=c++0x")
 endif()
 
-include_directories(${CMAKE_SOURCE_DIR} ${CMAKE_BINARY_DIR} ${KDE4_INCLUDES} ${KACTIVITIES_INCLUDE_DIRS} ${CMAKE_SOURCE_DIR}/libs)
+include_directories(${CMAKE_SOURCE_DIR} ${CMAKE_BINARY_DIR} ${KDE4_INCLUDES} ${CMAKE_SOURCE_DIR}/libs)
 
 # libs
 # add_subdirectory(cmake)
