@@ -60,6 +60,7 @@ class TASKMANAGER_EXPORT GroupManager: public QObject
     Q_PROPERTY(bool showOnlyCurrentDesktop READ showOnlyCurrentDesktop WRITE setShowOnlyCurrentDesktop NOTIFY showOnlyCurrentDesktopChanged)
     Q_PROPERTY(bool showOnlyCurrentActvity READ showOnlyCurrentActivity WRITE setShowOnlyCurrentActivity NOTIFY showOnlyCurrentActivityChanged)
     Q_PROPERTY(bool showOnlyMinimized READ showOnlyMinimized WRITE setShowOnlyMinimized NOTIFY showOnlyMinimizedChanged)
+    Q_PROPERTY(QList<QUrl> launcherList READ launcherList WRITE setLauncherList NOTIFY launcherListChanged)
 
 public:
     GroupManager(QObject *parent);
@@ -157,16 +158,15 @@ public:
     /** Removes the given launcher*/
     void removeLauncher(const QUrl &url);
 
+    /** Get the current list of launchers */
+    QList<QUrl> launcherList() const;
+
+    /** Set a new list of launchers */
+    void setLauncherList(const QList<QUrl> launchers);
+
     /** @return true if there is a matching launcher */
     bool launcherExists(const QUrl &url) const;
     bool launcherExistsForUrl(const QUrl &url) const;
-
-    /** call when the launcher config should be read or re-read */
-    void readLauncherConfig(const KConfigGroup &config = KConfigGroup());
-
-    /** exports the launcher config to a given config group; usually not needed
-        if config() is reimplemented to provide a valid config group */
-    void exportLauncherConfig(const KConfigGroup &config);
 
     /** @return position of launcher */
     int launcherIndex(const QUrl &url) const;
@@ -207,19 +207,12 @@ public:
     /** @return true if item is associated with a launcher */
     bool isItemAssociatedWithLauncher(AbstractGroupableItem *item) const;
 
-protected:
-    // reimplement to provide a config group to read/write settings to
-    virtual KConfigGroup config() const;
-
 Q_SIGNALS:
     /** Signal that the rootGroup has to be reloaded in the visualization */
     void reload();
 
-    /** Signal that the configuration writen to the config file has changed */
-    void configChanged();
-
-    /** Signal that the order of launchers has changed */
-    void launchersChanged();
+    /** Signal that the launcher list has changed */
+    void launcherListChanged();
 
     void screenChanged(int);
     void groupingStrategyChanged(TaskGroupingStrategy);

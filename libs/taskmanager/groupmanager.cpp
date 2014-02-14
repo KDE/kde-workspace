@@ -100,12 +100,6 @@ public:
     void sycocaChanged(const QStringList &types);
     void launcherVisibilityChange();
     void checkLauncherVisibility(LauncherItem *launcher);
-    void saveLauncher(LauncherItem *launcher);
-    bool saveLauncher(LauncherItem *launcher, KConfigGroup &group);
-    void unsaveLauncher(LauncherItem *launcher);
-    void saveLauncherConfig();
-    void saveLauncherConfig(KConfigGroup &cg);
-    QList<QUrl> readLauncherConfig(KConfigGroup &cg);
     int launcherIndex(const QUrl &url);
     KConfigGroup launcherConfig(const KConfigGroup &config = KConfigGroup());
 
@@ -656,11 +650,6 @@ void GroupManager::reconnect()
     d->reloadTasks();
 }
 
-KConfigGroup GroupManager::config() const
-{
-    return KConfigGroup();
-}
-
 bool GroupManager::addLauncher(const QUrl &url, const QIcon &icon, const QString &name, const QString &genericName, const QString &wmClass, int insertPos)
 {
     if (url.isEmpty() || launchersLocked()) {
@@ -668,7 +657,9 @@ bool GroupManager::addLauncher(const QUrl &url, const QIcon &icon, const QString
     }
 
     int index = launcherIndex(url);
+
     LauncherItem *launcher = -1 != index ? d->launchers.at(index) : 0L; // Do not insert launchers twice
+
     if (!launcher) {
         launcher = new LauncherItem(d->currentRootGroup(), url);
 
@@ -713,8 +704,6 @@ bool GroupManager::addLauncher(const QUrl &url, const QIcon &icon, const QString
             d->launchers.append(launcher);
         }
 
-        d->saveLauncherConfig();
-        d->saveLauncher(launcher);
         connect(launcher, SIGNAL(associationChanged()), this, SLOT(launcherVisibilityChange()));
         d->checkLauncherVisibility(launcher);
 
@@ -726,28 +715,10 @@ bool GroupManager::addLauncher(const QUrl &url, const QIcon &icon, const QString
                     break;
                 }
             }
-
-            if (!d->readingLauncherConfig) {
-                emit launchersChanged();
-            }
-        }
-    } else if (d->readingLauncherConfig && !KDesktopFile::isDesktopFile(url.toLocalFile())) {
-        // We are reading in config, and have already added this launcher (via the launcher list config). HWoever, this
-        // is for an mebdded non-desktop launcher - so we set the details here...
-        if (!icon.isNull()) {
-            launcher->setIcon(icon);
         }
 
-        if (!name.isEmpty()) {
-            launcher->setName(name);
-        }
-
-        if (!genericName.isEmpty()) {
-            launcher->setGenericName(genericName);
-        }
-
-        if (!wmClass.isEmpty()) {
-            launcher->setWmClass(wmClass);
+        if (!d->readingLauncherConfig) {
+            emit launcherListChanged();
         }
     }
 
@@ -771,7 +742,6 @@ void GroupManager::removeLauncher(const QUrl &url)
     }
 
     d->launchers.removeAt(index);
-    d->saveLauncherConfig();
 
     typedef QHash<int, TaskGroup*> Metagroup;
     foreach (Metagroup metagroup, d->rootGroups) {
@@ -780,7 +750,6 @@ void GroupManager::removeLauncher(const QUrl &url)
         }
     }
 
-    d->unsaveLauncher(launcher);
     launcher->deleteLater();
 
     if (!d->separateLaunchers && d->abstractSortingStrategy && ManualSorting == d->abstractSortingStrategy->type()) {
@@ -791,10 +760,10 @@ void GroupManager::removeLauncher(const QUrl &url)
                 break;
             }
         }
+    }
 
-        if (!d->readingLauncherConfig) {
-            emit launchersChanged();
-        }
+    if (!d->readingLauncherConfig) {
+        emit launcherListChanged();
     }
 }
 
@@ -836,86 +805,6 @@ void GroupManagerPrivate::checkLauncherVisibility(LauncherItem *launcher)
 bool GroupManager::launcherExists(const QUrl &url) const
 {
     return d->launcherIndex(url) != -1;
-}
-
-void GroupManager::readLauncherConfig(const KConfigGroup &cg)
-{
-    KConfigGroup conf = d->launcherConfig(cg);
-    if (!conf.isValid()) {
-        return;
-    }
-
-    QList<QUrl> launchers = d->readLauncherConfig(conf);
-
-    // prevents re-writing the results out
-    d->readingLauncherConfig = true;
-    QSet<QUrl> urls;
-    foreach (QUrl l, launchers) {
-        QUrlQuery query(l);
-        QString wmClass(query.queryItemValue("wmClass"));
-        l.setQuery(QUrlQuery());
-
-        if (addLauncher(l, QIcon(), QString(), QString(), wmClass)) {
-            urls << l;
-        }
-    }
-
-    foreach (const QString &key, conf.keyList()) {
-        if ("Items" == key) {
-            continue;
-        }
-
-        QStringList item = conf.readEntry(key, QStringList());
-        if (item.length() >= 4) {
-            QUrl url(item.at(0));
-            QIcon icon;
-            if (!item.at(1).isEmpty()) {
-                icon = QIcon::fromTheme(item.at(1));
-            } else if (item.length() >= 5) {
-                QPixmap pixmap;
-                QByteArray bytes = QByteArray::fromBase64(item.at(4).toAscii());
-                pixmap.loadFromData(bytes);
-                icon.addPixmap(pixmap);
-            }
-            QString name(item.at(2));
-            QString genericName(item.at(3));
-
-            if (addLauncher(url, icon, name, genericName, genericName)) {
-                urls << url;
-            }
-        }
-    }
-
-    // a bit paranoiac, perhaps, but we check the removals first and then
-    // remove the launchers after that scan because Qt's iterators operate
-    // on a copy of the list and/or don't like multiple iterators messing
-    // with the same list. we might get away with just calling removeLauncher
-    // immediately without the removals QList<QUrl>, but this is known safe
-    // and not a performance bottleneck
-    QList<QUrl> removals;
-    foreach (LauncherItem *launcher, d->launchers) {
-        if (!urls.contains(launcher->launcherUrl())) {
-            removals << launcher->launcherUrl();
-        }
-    }
-
-    foreach (const QUrl & url, removals) {
-        removeLauncher(url);
-    }
-
-    d->readingLauncherConfig = false;
-}
-
-void GroupManager::exportLauncherConfig(const KConfigGroup &cg)
-{
-    KConfigGroup conf = d->launcherConfig(cg);
-    if (!conf.isValid()) {
-        return;
-    }
-
-    foreach (LauncherItem * launcher, d->launchers) {
-        d->saveLauncher(launcher, conf);
-    }
 }
 
 int GroupManager::launcherIndex(const QUrl &url) const
@@ -992,7 +881,7 @@ void GroupManager::moveLauncher(const QUrl &url, int newIndex)
 
     if (oldIndex >= 0 && newIndex != oldIndex) {
         d->launchers.insert(newIndex, d->launchers.takeAt(oldIndex));
-        d->saveLauncherConfig();
+        emit launcherListChanged();
     }
 }
 
@@ -1021,121 +910,91 @@ void GroupManager::createConfigurationInterface(KConfigDialog *parent)
     new LauncherConfig(parent);
 }
 
-KConfigGroup GroupManagerPrivate::launcherConfig(const KConfigGroup &config)
+QList<QUrl> GroupManager::launcherList() const
 {
-    KConfigGroup cg = config.isValid() ? config : q->config();
-    if (!cg.isValid()) {
-        return cg;
-    }
+    QList<QUrl> launchers;
 
-    return KConfigGroup(&cg, "Launchers");
-}
-
-void GroupManagerPrivate::saveLauncher(LauncherItem *launcher)
-{
-    if (readingLauncherConfig) {
-        return;
-    }
-
-    KConfigGroup cg = launcherConfig();
-    if (!cg.isValid()) {
-        return;
-    }
-
-    if (saveLauncher(launcher, cg)) {
-        emit q->configChanged();
-    }
-}
-
-bool GroupManagerPrivate::saveLauncher(LauncherItem *launcher, KConfigGroup &cg)
-{
-    // Dont save .desktop file launchers, as these are already stored in the launcher list...
-    if (launcher->launcherUrl().isValid() && KDesktopFile::isDesktopFile(launcher->launcherUrl().toLocalFile())) {
-        return false;
-    }
-
-    QVariantList launcherProperties;
-    launcherProperties.append(launcher->launcherUrl().url());
-    launcherProperties.append(launcher->icon().name());
-    launcherProperties.append(launcher->name());
-    launcherProperties.append(launcher->genericName());
-
-    if (launcher->icon().name().isEmpty()) {
-        QPixmap pixmap = launcher->icon().pixmap(QSize(64, 64));
-        QByteArray bytes;
-        QBuffer buffer(&bytes);
-        buffer.open(QIODevice::WriteOnly);
-        pixmap.save(&buffer, "PNG");
-        launcherProperties.append(bytes.toBase64());
-    }
-
-    cg.writeEntry(launcher->name(), launcherProperties);
-    return true;
-}
-
-void GroupManagerPrivate::unsaveLauncher(LauncherItem *launcher)
-{
-    KConfigGroup cg = launcherConfig();
-    if (!cg.isValid()) {
-        return;
-    }
-
-    QString launcherKey;
-
-    if (launcher->launcherUrl().scheme() == "preferred")
-        // in default config the host of the preferred application url is used as key
-        launcherKey = launcher->launcherUrl().host();
-    else
-        launcherKey = launcher->name();
-
-    if (cg.hasKey(launcherKey)) {
-        cg.deleteEntry(launcherKey);
-        emit q->configChanged();
-    }
-}
-
-void GroupManagerPrivate::saveLauncherConfig()
-{
-    if (readingLauncherConfig) {
-        return;
-    }
-
-    KConfigGroup cg = launcherConfig();
-    if (!cg.isValid()) {
-        return;
-    }
-    saveLauncherConfig(cg);
-}
-
-void GroupManagerPrivate::saveLauncherConfig(KConfigGroup &cg)
-{
-    QStringList details;
-    foreach (LauncherItem * l, launchers) {
+    foreach (LauncherItem *l, d->launchers) {
         QUrl u(l->launcherUrl());
-        if (!u.isEmpty()) {
-            if (!l->wmClass().isEmpty()) {
-                u.addQueryItem("wmClass", l->wmClass());
-            }
-            details.append(u.url());
+
+        if (!l->wmClass().isEmpty()) {
+            u.addQueryItem("wmClass", l->wmClass());
         }
+
+        if (!l->launcherUrl().isValid() || !KDesktopFile::isDesktopFile(l->launcherUrl().toLocalFile())) {
+            if (!l->name().isEmpty()) {
+                u.addQueryItem("name", l->name());
+            }
+
+            if (!l->genericName().isEmpty()) {
+                u.addQueryItem("genericName", l->genericName());
+            }
+
+            if (!l->icon().name().isEmpty()) {
+                u.addQueryItem("icon", l->icon().name());
+            } else if (!l->icon().isNull()) {
+                QPixmap pixmap = l->icon().pixmap(QSize(64, 64));
+                QByteArray bytes;
+                QBuffer buffer(&bytes);
+                buffer.open(QIODevice::WriteOnly);
+                pixmap.save(&buffer, "PNG");
+                u.addQueryItem("iconData", bytes.toBase64(QByteArray::Base64UrlEncoding));
+            }
+        }
+
+        launchers << u;
     }
 
-    cg.writeEntry("Items", details);
-    emit q->configChanged();
+    return launchers;
 }
 
-QList<QUrl> GroupManagerPrivate::readLauncherConfig(KConfigGroup &cg)
+void GroupManager::setLauncherList(QList<QUrl> launcherList)
 {
-    QStringList items = cg.readEntry("Items", QStringList());
-    QList<QUrl> details;
+    d->readingLauncherConfig = true;
 
-    foreach (QString item, items) {
-        if (!item.isEmpty()) {
-            details.append(QUrl(item));
+    QSet<QUrl> urls;
+
+    foreach (QUrl l, launcherList) {
+        QUrlQuery query(l);
+
+        QString name(query.queryItemValue("name"));
+        QString genericName(query.queryItemValue("genericName"));
+        QString wmClass(query.queryItemValue("wmClass"));
+        QString iconData(query.queryItemValue("iconData"));
+
+        QIcon icon;
+
+        if (!iconData.isEmpty()) {
+            QPixmap pixmap;
+            QByteArray bytes = QByteArray::fromBase64(iconData.toLocal8Bit(), QByteArray::Base64UrlEncoding);
+            pixmap.loadFromData(bytes);
+            icon.addPixmap(pixmap);
+        } else {
+            icon = QIcon::fromTheme(query.queryItemValue("icon"));
+        }
+
+        l.setQuery(QUrlQuery());
+
+        if (addLauncher(l, QIcon(), name, genericName, wmClass)) {
+            urls << l;
         }
     }
 
-    return details;
+    QList<QUrl> removals;
+
+    foreach (LauncherItem *launcher, d->launchers) {
+        if (!urls.contains(launcher->launcherUrl())) {
+            removals << launcher->launcherUrl();
+        }
+    }
+
+    foreach (const QUrl & url, removals) {
+        removeLauncher(url);
+    }
+
+    d->readingLauncherConfig = false;
+
+    emit launcherListChanged();
 }
 
 int GroupManagerPrivate::launcherIndex(const QUrl &url)
