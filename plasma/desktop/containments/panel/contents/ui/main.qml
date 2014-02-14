@@ -40,6 +40,9 @@ DragDrop.DropArea {
     property Item toolBox
 
     property Item dragOverlay
+
+
+    property bool isHorizontal: plasmoid.formFactor != PlasmaCore.Types.Vertical
 //END properties
 
 //BEGIN functions
@@ -159,6 +162,11 @@ function checkLastSpacer() {
         }
     }
 
+    /*Plasmoid.onFormFactorChanged: {
+        for (var i = 0; i < currentLayout.children.length; ++i) {
+            currentLayout.children[0].parent = root
+        }
+    }*/
 //END connections
 
 //BEGIN components
@@ -181,14 +189,14 @@ function checkLastSpacer() {
                 }
             }
 
-            Layout.minimumWidth: (plasmoid.formFactor != PlasmaCore.Types.Vertical ? (applet && applet.Layout.minimumWidth > 0 ? applet.Layout.minimumWidth : root.height) : root.width)
-            Layout.minimumHeight: (plasmoid.formFactor == PlasmaCore.Types.Vertical ? (applet && applet.Layout.minimumHeight > 0 ? applet.Layout.minimumHeight : root.width) : root.height)
+            Layout.minimumWidth: (isHorizontal ? (applet && applet.Layout.minimumWidth > 0 ? applet.Layout.minimumWidth : root.height) : root.width)
+            Layout.minimumHeight: (!isHorizontal ? (applet && applet.Layout.minimumHeight > 0 ? applet.Layout.minimumHeight : root.width) : root.height)
 
-            Layout.preferredWidth: (plasmoid.formFactor != PlasmaCore.Types.Vertical ? (applet && applet.Layout.preferredWidth > 0 ? applet.Layout.preferredWidth : root.height) : root.width)
-            Layout.preferredHeight: (plasmoid.formFactor == PlasmaCore.Types.Vertical ? (applet && applet.Layout.preferredHeight > 0 ? applet.Layout.preferredHeight : root.width) : root.height)
+            Layout.preferredWidth: (isHorizontal ? (applet && applet.Layout.preferredWidth > 0 ? applet.Layout.preferredWidth : root.height) : root.width)
+            Layout.preferredHeight: (!isHorizontal ? (applet && applet.Layout.preferredHeight > 0 ? applet.Layout.preferredHeight : root.width) : root.height)
 
-            Layout.maximumWidth: (plasmoid.formFactor != PlasmaCore.Types.Vertical ? (applet && applet.Layout.maximumWidth > 0 ? applet.Layout.maximumWidth : (Layout.fillWidth ? -1 : root.height)) : (Layout.fillHeight ? -1 : root.width))
-            Layout.maximumHeight: (plasmoid.formFactor == PlasmaCore.Types.Vertical ? (applet && applet.Layout.maximumHeight > 0 ? applet.Layout.maximumHeight : (Layout.fillHeight ? -1 : root.width)) : (Layout.fillWidth ? -1 : root.height))
+            Layout.maximumWidth: (isHorizontal ? (applet && applet.Layout.maximumWidth > 0 ? applet.Layout.maximumWidth : (Layout.fillWidth ? root.width : root.height)) : root.height)
+            Layout.maximumHeight: (!isHorizontal ? (applet && applet.Layout.maximumHeight > 0 ? applet.Layout.maximumHeight : (Layout.fillHeight ? root.height : root.width)) : root.width)
 
             property int oldX: x
             property int oldY: y
@@ -252,7 +260,6 @@ function checkLastSpacer() {
 
     GridLayout {
         id: currentLayout
-        property bool isHorizontal: plasmoid.formFactor == PlasmaCore.Types.Horizontal
         anchors {
             fill: parent
             rightMargin: toolBox && isHorizontal? toolBox.width : 0
@@ -264,5 +271,6 @@ function checkLastSpacer() {
         flow: isHorizontal ? GridLayout.TopToBottom : GridLayout.LeftToRight
 
     }
+
 //END UI elements
 }
