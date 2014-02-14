@@ -105,6 +105,7 @@ function checkLastSpacer() {
 
 //BEGIN connections
     Component.onCompleted: {
+        currentLayout.isLayoutHorizontal = isHorizontal
         LayoutManager.plasmoid = plasmoid;
         LayoutManager.root = root;
         LayoutManager.layout = currentLayout;
@@ -162,11 +163,9 @@ function checkLastSpacer() {
         }
     }
 
-    /*Plasmoid.onFormFactorChanged: {
-        for (var i = 0; i < currentLayout.children.length; ++i) {
-            currentLayout.children[0].parent = root
-        }
-    }*/
+    Plasmoid.onFormFactorChanged: {
+        containmentSizeSyncTimer.restart()
+    }
 //END connections
 
 //BEGIN components
@@ -189,14 +188,14 @@ function checkLastSpacer() {
                 }
             }
 
-            Layout.minimumWidth: (isHorizontal ? (applet && applet.Layout.minimumWidth > 0 ? applet.Layout.minimumWidth : root.height) : root.width)
-            Layout.minimumHeight: (!isHorizontal ? (applet && applet.Layout.minimumHeight > 0 ? applet.Layout.minimumHeight : root.width) : root.height)
+            Layout.minimumWidth: (currentLayout.isLayoutHorizontal ? (applet && applet.Layout.minimumWidth > 0 ? applet.Layout.minimumWidth : root.height) : root.width)
+            Layout.minimumHeight: (!currentLayout.isLayoutHorizontal ? (applet && applet.Layout.minimumHeight > 0 ? applet.Layout.minimumHeight : root.width) : root.height)
 
-            Layout.preferredWidth: (isHorizontal ? (applet && applet.Layout.preferredWidth > 0 ? applet.Layout.preferredWidth : root.height) : root.width)
-            Layout.preferredHeight: (!isHorizontal ? (applet && applet.Layout.preferredHeight > 0 ? applet.Layout.preferredHeight : root.width) : root.height)
+            Layout.preferredWidth: (currentLayout.isLayoutHorizontal ? (applet && applet.Layout.preferredWidth > 0 ? applet.Layout.preferredWidth : root.height) : root.width)
+            Layout.preferredHeight: (!currentLayout.isLayoutHorizontal ? (applet && applet.Layout.preferredHeight > 0 ? applet.Layout.preferredHeight : root.width) : root.height)
 
-            Layout.maximumWidth: (isHorizontal ? (applet && applet.Layout.maximumWidth > 0 ? applet.Layout.maximumWidth : (Layout.fillWidth ? root.width : root.height)) : root.height)
-            Layout.maximumHeight: (!isHorizontal ? (applet && applet.Layout.maximumHeight > 0 ? applet.Layout.maximumHeight : (Layout.fillHeight ? root.height : root.width)) : root.width)
+            Layout.maximumWidth: (currentLayout.isLayoutHorizontal ? (applet && applet.Layout.maximumWidth > 0 ? applet.Layout.maximumWidth : (Layout.fillWidth ? root.width : root.height)) : root.height)
+            Layout.maximumHeight: (!currentLayout.isLayoutHorizontal ? (applet && applet.Layout.maximumHeight > 0 ? applet.Layout.maximumHeight : (Layout.fillHeight ? root.height : root.width)) : root.width)
 
             property int oldX: x
             property int oldY: y
@@ -260,6 +259,7 @@ function checkLastSpacer() {
 
     GridLayout {
         id: currentLayout
+        property bool isLayoutHorizontal
         anchors {
             fill: parent
             rightMargin: toolBox && isHorizontal? toolBox.width : 0
@@ -269,8 +269,25 @@ function checkLastSpacer() {
         columns: 1
         //when horizontal layout top-to-bottom, this way it will obey our limit of one row and actually lay out left to right
         flow: isHorizontal ? GridLayout.TopToBottom : GridLayout.LeftToRight
-
     }
 
+    onWidthChanged: {
+        containmentSizeSyncTimer.restart()
+    }
+    onHeightChanged: {
+        containmentSizeSyncTimer.restart()
+    }
+
+    Timer {
+        id: containmentSizeSyncTimer
+        interval: 150
+        onTriggered: {
+            currentLayout.x = 0
+            currentLayout.y = 0
+            currentLayout.width = root.width - (isHorizontal ? toolBox.width : 0)
+            currentLayout.height = root.height - (!isHorizontal ? toolBox.height : 0)
+            currentLayout.isLayoutHorizontal = isHorizontal
+        }
+    }
 //END UI elements
 }
