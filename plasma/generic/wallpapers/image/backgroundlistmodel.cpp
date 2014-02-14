@@ -403,7 +403,6 @@ void BackgroundFinder::run()
     const QSet<QString> &fileSuffixes = suffixes();
 
     QStringList papersFound;
-    qDebug() << "WP starting with" << m_paths;
 
     QDir dir;
     dir.setFilter(QDir::AllDirs | QDir::Files | QDir::Hidden | QDir::Readable);
@@ -413,12 +412,11 @@ void BackgroundFinder::run()
     int i;
     for (i = 0; i < m_paths.count(); ++i) {
         const QString path = m_paths.at(i);
-        qDebug() << "WP doing" << path;
         dir.setPath(path);
         const QFileInfoList files = dir.entryInfoList();
         Q_FOREACH (const QFileInfo &wp, files) {
             if (wp.isDir()) {
-                //qDebug() << "WP directory" << wp.fileName();
+                //qDebug() << "scanning directory" << wp.fileName();
 
                 const QString name = wp.fileName();
                 if (name == QString::fromLatin1(".") || name == QString::fromLatin1("..")) {
@@ -431,7 +429,7 @@ void BackgroundFinder::run()
                     pkg.setPath(filePath);
                     if (pkg.isValid()) {
                         papersFound << pkg.path();
-                        //qDebug() << "WP gots a" << wp.filePath();
+                        //qDebug() << "adding package" << wp.filePath();
                         continue;
                     }
                 }
@@ -439,13 +437,13 @@ void BackgroundFinder::run()
                 // add this to the directories we should be looking at
                 m_paths.append(filePath);
             } else if (fileSuffixes.contains(wp.suffix().toLower())) {
-                qDebug() << "WP     adding image file" << wp.filePath();
+                //qDebug() << "adding image file" << wp.filePath();
                 papersFound << wp.filePath();
             }
         }
     }
 
-    qDebug() << "WP background found!" << papersFound.size() << "in" << i << "dirs, taking" << t.elapsed() << "ms";
+    //qDebug() << "WP background found!" << papersFound.size() << "in" << i << "dirs, taking" << t.elapsed() << "ms";
     Q_EMIT backgroundsFound(papersFound, m_token);
     deleteLater();
 }

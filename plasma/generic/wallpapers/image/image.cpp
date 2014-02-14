@@ -337,7 +337,6 @@ void Image::setSingleImage()
         m_wallpaperPackage.setPath(m_wallpaper);
         img = m_wallpaperPackage.filePath("preferred");
         m_wallpaperPath = m_wallpaperPackage.filePath("preferred");
-        //qDebug() << img << m_wallpaper;
 
         if (img.isEmpty() && QFile::exists(m_wallpaper)) {
             img = m_wallpaper;
@@ -553,8 +552,6 @@ void Image::fileDialogFinished()
 void Image::wallpaperBrowseCompleted()
 {
     Q_ASSERT(m_model);
-
-    qDebug() << "dialog accepted WP : " << m_dialog->selectedFiles();
     addUsersWallpaper(m_dialog->selectedFiles()[0]); // FIXME
 
 }
@@ -568,36 +565,25 @@ void Image::addUsersWallpaper(const QString &file)
     //the full file path, so it isn't broken when dealing with symlinks
     const QString wallpaper = info.canonicalFilePath();
 
-    qDebug() << "WP WAllpaper: " << info.canonicalFilePath() << file;
     if (wallpaper.isEmpty()) {
         return;
     }
     if (m_model) {
         if (m_model->contains(wallpaper)) {
-            qDebug() << "WP model contains" << wallpaper;
             return;
         }
-
-        qDebug() << "WP WAllpaper: " << wallpaper;
         // add background to the model
         m_model->addBackground(wallpaper);
     }
-    qDebug() << "WP WALLPAPER ADD: " << wallpaper;
     // save it
-    qDebug() << "WP pre usersWallpapers: " << m_usersWallpapers;
     KConfigGroup cfg = KConfigGroup(KSharedConfig::openConfig(QStringLiteral("plasmarc")),
                                                               QStringLiteral("Wallpapers"));
     m_usersWallpapers = cfg.readEntry("usersWallpapers", m_usersWallpapers);
-    qDebug() << "WP post usersWallpapers: " << m_usersWallpapers;
-    qDebug() << "WP contains: " << (m_usersWallpapers.contains(wallpaper));
+
     if (!m_usersWallpapers.contains(wallpaper)) {
-        qDebug() << "WP usersWallpapers CHANGED: " << m_usersWallpapers;
-        qDebug() << "WP usersWallpapers CHANGED: " << m_usersWallpapers;
-        qDebug() << "WP usersWallpapers CHANGED: " << m_usersWallpapers;
         m_usersWallpapers.prepend(wallpaper);
         cfg.writeEntry("usersWallpapers", m_usersWallpapers);
         cfg.sync();
-        qDebug() << "WP usersWallpapers CHANGED: " << m_usersWallpapers;
         emit usersWallpapersChanged();
     }
 }
