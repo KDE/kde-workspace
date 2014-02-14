@@ -49,6 +49,7 @@ Item {
             duration: units.shortDuration * 3;
             easing.type: Easing.InOutExpo;
         }
+        enabled: visible
     }
     Behavior on x {
         NumberAnimation {
