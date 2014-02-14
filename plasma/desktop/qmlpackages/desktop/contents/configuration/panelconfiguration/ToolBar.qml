@@ -255,7 +255,6 @@ Item {
                 target: buttonsLayout
                 anchors {
                     verticalCenter: root.verticalCenter
-                    horizontalCenter: undefined
                     top: undefined
                     bottom: undefined
                     left: undefined
@@ -282,7 +281,6 @@ Item {
                 target: buttonsLayout
                 anchors {
                     verticalCenter: root.verticalCenter
-                    horizontalCenter: undefined
                     top: undefined
                     bottom: undefined
                     left: undefined
@@ -309,11 +307,10 @@ Item {
                 target: buttonsLayout
                 anchors {
                     verticalCenter: undefined
-                    horizontalCenter: root.verticalCenter
                     top: undefined
                     bottom: root.bottom
-                    left: undefined
-                    right: undefined
+                    left: root.left
+                    right: root.right
                 }
             }
         },
@@ -336,11 +333,10 @@ Item {
                 target: buttonsLayout
                 anchors {
                     verticalCenter: undefined
-                    horizontalCenter: root.verticalCenter
                     top: undefined
                     bottom: root.bottom
-                    left: undefined
-                    right: undefined
+                    left: root.left
+                    right: root.right
                 }
             }
         }
