@@ -44,6 +44,7 @@ Backend::Backend(QObject* parent) : QObject(parent),
     m_lastWindowId(0),
     m_highlightWindows(false)
 {
+    connect(m_groupManager, SIGNAL(launcherListChanged()), this, SLOT(updateLaunchersCache()));
 }
 
 Backend::~Backend()
@@ -111,6 +112,50 @@ void Backend::setSortingStrategy(int sortingStrategy)
 {
     // FIXME TODO: This is fucking terrible.
     m_groupManager->setSortingStrategy(static_cast<TaskManager::GroupManager::TaskSortingStrategy>(sortingStrategy));
+}
+
+void Backend::updateLaunchersCache()
+{
+    const QList<QUrl> launcherList = m_groupManager->launcherList();
+
+    QStringList launchers;
+
+    foreach(const QUrl& launcher, launcherList) {
+        launchers.append(launcher.toString());
+    }
+
+    QString joined(launchers.join(','));
+
+    if (joined != m_launchers) {
+        m_launchers = joined;
+        emit launchersChanged();
+    }
+}
+
+QString Backend::launchers() const
+{
+    return m_launchers;
+}
+
+void Backend::setLaunchers(const QString& launchers)
+{
+    if (launchers == m_launchers) {
+        return;
+    }
+
+    m_launchers = launchers;
+
+    QList<QUrl> launcherList;
+
+    foreach(const QString& launcher, launchers.split(',')) {
+        launcherList.append(launcher);
+    }
+
+    disconnect(m_groupManager, SIGNAL(launcherListChanged()), this, SLOT(updateLaunchersCache()));
+    m_groupManager->setLauncherList(launcherList);
+    connect(m_groupManager, SIGNAL(launcherListChanged()), this, SLOT(updateLaunchersCache()));
+
+    emit launchersChanged();
 }
 
 void Backend::activateItem(int id, bool toggle)

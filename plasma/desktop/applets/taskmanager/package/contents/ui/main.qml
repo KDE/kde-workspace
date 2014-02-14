@@ -76,6 +76,17 @@ Item {
 
         groupingStrategy: plasmoid.configuration.groupingStrategy
         sortingStrategy: plasmoid.configuration.sortingStrategy
+
+        onLaunchersChanged: plasmoid.configuration.launchers = launchers
+
+        Component.onCompleted: {
+            launchers = plasmoid.configuration.launchers;
+        }
+    }
+
+    Connections {
+        target: plasmoid.configuration
+        onLaunchersChanged: backend.launchers = plasmoid.configuration.launchers
     }
 
     Binding {

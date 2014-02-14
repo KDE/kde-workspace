@@ -38,6 +38,7 @@ class Backend : public QObject
     Q_PROPERTY(bool highlightWindows READ highlightWindows WRITE setHighlightWindows NOTIFY highlightWindowsChanged)
     Q_PROPERTY(int groupingStrategy READ groupingStrategy WRITE setGroupingStrategy)
     Q_PROPERTY(int sortingStrategy READ sortingStrategy WRITE setSortingStrategy)
+    Q_PROPERTY(QString launchers READ launchers WRITE setLaunchers NOTIFY launchersChanged)
 
     public:
         Backend(QObject *parent = 0);
@@ -60,6 +61,9 @@ class Backend : public QObject
         int sortingStrategy() const;
         void setSortingStrategy(int sortingStrategy);
 
+        QString launchers() const;
+        void setLaunchers(const QString& launchers);
+
     public Q_SLOTS:
         void activateItem(int id, bool toggle);
         void itemContextMenu(QQuickItem *item, QObject *configAction);
@@ -67,9 +71,13 @@ class Backend : public QObject
         void itemMove(int id, int newIndex);
         void itemGeometryChanged(QQuickItem *item, int id);
 
+    private Q_SLOTS:
+        void updateLaunchersCache();
+
     Q_SIGNALS:
         void taskManagerItemChanged(QQuickItem*);
         void highlightWindowsChanged(bool);
+        void launchersChanged();
 
     private:
         TaskManager::GroupManager *m_groupManager;
@@ -77,6 +85,7 @@ class Backend : public QObject
         QQuickItem* m_taskManagerItem;
         WId m_lastWindowId;
         bool m_highlightWindows;
+        QString m_launchers;
 };
 
 #endif
