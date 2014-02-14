@@ -17,7 +17,7 @@
  */
 
 import QtQuick 2.0
-//import org.kde.plasma 2.0
+import QtQuick.Layouts 1.1
 
 import org.kde.plasma.core 2.0 as PlasmaCore
 
@@ -80,49 +80,56 @@ PlasmaCore.FrameSvgItem {
     }
 
     onContainmentChanged: {
-        print("New panel Containment: " + containment)
-        //containment.parent = root
-        containment.visible = true
-        containment.anchors.fill = root
+        print("New panel Containment: " + containment);
+        containment.parent = root;
+        containment.visible = true;
+        containment.anchors.fill = root;
+
+        containment.locationChanged.connect(adjustBorders);
+        if (containment.Layout) {
+            containment.Layout.minimumWidthChanged.connect(minimumWidthChanged);
+            containment.Layout.maximumWidthChanged.connect(maximumWidthChanged);
+            containment.Layout.preferredWidthChanged.connect(preferredWidthChanged);
+
+            containment.Layout.minimumHeightChanged.connect(minimumHeightChanged);
+            containment.Layout.maximumHeightChanged.connect(maximumHeightChanged);
+            containment.Layout.preferredHeightChanged.connect(preferredHeightChanged);
+        }
     }
 
-    Connections {
-        target: containment
-        onLocationChanged: {
-            adjustBorders()
-        }
-        onMinimumWidthChanged: {
-            if (containment.formFactor === PlasmaCore.Types.Horizontal) {
-                panel.width = Math.max(panel.width, panel.minimumLength);
-            }
-        }
-        onMaximumWidthChanged: {
-            if (containment.formFactor === PlasmaCore.Types.Horizontal) {
-                panel.width = Math.min(panel.width, panel.maximumLength);
-            }
-        }
-        onImplicitWidthChanged: {
-            if (containment.formFactor === PlasmaCore.Types.Horizontal) {
-                panel.width = Math.min(panel.maximumLength, Math.max(containment.implicitWidth, panel.minimumLength));
-            }
-        }
 
-        onMinimumHeightChanged: {
-            if (containment.formFactor === PlasmaCore.Types.Vertical) {
-                panel.height = Math.max(panel.height, panel.minimumLength);
-            }
-        }
-        onMaximumHeightChanged: {
-            if (containment.formFactor === PlasmaCore.Types.Vertical) {
-                panel.height = Math.min(panel.height, panel.maximumLength);
-            }
-        }
-        onImplicitHeightChanged: {
-            if (containment.formFactor === PlasmaCore.Types.Vertical) {
-                panel.height = Math.min(panel.maximumLength, Math.max(containment.implicitHeight, panel.minimumLength));
-            }
+    function minimumWidthChanged() {
+        if (containment.formFactor === PlasmaCore.Types.Horizontal) {
+            panel.width = Math.max(panel.width, panel.Layout.minimumLength);
         }
     }
+    function maximumWidthChanged() {
+        if (containment.formFactor === PlasmaCore.Types.Horizontal) {
+            panel.width = Math.min(panel.width, panel.Layout.maximumLength);
+        }
+    }
+    function preferredWidthChanged() {
+        if (containment.formFactor === PlasmaCore.Types.Horizontal) {
+            panel.width = Math.min(panel.maximumLength, Math.max(containment.preferredWidth, panel.Layout.minimumLength));
+        }
+    }
+
+    function minimumHeightChanged() {
+        if (containment.formFactor === PlasmaCore.Types.Vertical) {
+            panel.height = Math.max(panel.height, panel.Layout.minimumLength);
+        }
+    }
+    function maximumHeightChanged() {
+        if (containment.formFactor === PlasmaCore.Types.Vertical) {
+            panel.height = Math.min(panel.height, panel.Layout.maximumLength);
+        }
+    }
+    function preferredHeightChanged() {
+        if (containment.formFactor === PlasmaCore.Types.Vertical) {
+            panel.height = Math.min(panel.maximumLength, Math.max(containment.preferredHeight, panel.Layout.minimumLength));
+        }
+    }
+
 
     Connections {
         target: panel
