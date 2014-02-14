@@ -67,7 +67,7 @@ public:
         ResolutionRole,
         PathRole
     };
-    static const int SCREENSHOT_SIZE = 128;
+    static const int SCREENSHOT_SIZE = 96;
     static const int BLUR_INCREMENT = 9;
     static const int MARGIN = 6;
 

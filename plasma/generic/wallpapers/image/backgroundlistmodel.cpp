@@ -107,6 +107,7 @@ void BackgroundListModel::reload(const QStringList &selected)
     }
 
     if (!selected.isEmpty()) {
+        qDebug() << "selected" << selected;
         processPaths(selected);
     }
 
@@ -189,8 +190,16 @@ QModelIndex BackgroundListModel::indexOf(const QString &path) const
         if (path.startsWith(package)) {
             // FIXME: ugly hack to make a difference between local files in the same dir
             // package->path does not contain the actual file name
-            if ((!m_packages[i].contentsPrefixPaths().isEmpty()) ||
-                (path == m_packages[i].filePath("preferred"))) {
+            qDebug() << "WP prefix" << m_packages[i].contentsPrefixPaths() << m_packages[i].filePath("preferred") << package << path;
+            QStringList ps = m_packages[i].contentsPrefixPaths();
+            bool prefixempty = ps.count() == 0;
+            if (!prefixempty) {
+                prefixempty = ps[0].isEmpty();
+            }
+//             if ((!m_packages[i].contentsPrefixPaths().isEmpty()) ||
+//                 (path == m_packages[i].filePath("preferred"))) {
+            if ((path == m_packages[i].filePath("preferred"))) {
+                qDebug() << "WP TRUE" << (!m_packages[i].contentsPrefixPaths().isEmpty()) << (path == m_packages[i].filePath("preferred"));
                 return index(i, 0);
             }
         }
@@ -200,6 +209,7 @@ QModelIndex BackgroundListModel::indexOf(const QString &path) const
 
 bool BackgroundListModel::contains(const QString &path) const
 {
+    //qDebug() << "WP contains: " << path << indexOf(path).isValid();
     return indexOf(path).isValid();
 }
 
@@ -271,8 +281,8 @@ QVariant BackgroundListModel::data(const QModelIndex &index, int role) const
     break;
 
     case ScreenshotRole: {
-        if (m_previews.contains(b.path())) {
-            return m_previews.value(b.path());
+        if (m_previews.contains(b.filePath("preferred"))) {
+            return m_previews.value(b.filePath("preferred"));
         }
 //         qDebug() << "WP preferred: " << b.filePath("preferred");
 //         qDebug() << "WP screenshot: " << b.filePath("screenshot");
@@ -282,8 +292,8 @@ QVariant BackgroundListModel::data(const QModelIndex &index, int role) const
             KFileItemList list;
             list.append(KFileItem(file, QString(), 0));
             KIO::PreviewJob* job = KIO::filePreview(list,
-                                                    QSize(SCREENSHOT_SIZE,
-                                                    SCREENSHOT_SIZE/1.6));
+                                                    QSize(SCREENSHOT_SIZE*1.6,
+                                                    SCREENSHOT_SIZE));
             job->setIgnoreMaximumSize(true);
             connect(job, SIGNAL(gotPreview(KFileItem,QPixmap)),
                     this, SLOT(showPreview(KFileItem,QPixmap)));
@@ -292,7 +302,7 @@ QVariant BackgroundListModel::data(const QModelIndex &index, int role) const
             const_cast<BackgroundListModel *>(this)->m_previewJobs.insert(file, QPersistentModelIndex(index));
         }
 
-        const_cast<BackgroundListModel *>(this)->m_previews.insert(b.path(), m_previewUnavailablePix);
+        const_cast<BackgroundListModel *>(this)->m_previews.insert(b.filePath("preferred"), m_previewUnavailablePix);
         return m_previewUnavailablePix;
     }
     break;
@@ -345,7 +355,7 @@ void BackgroundListModel::showPreview(const KFileItem &item, const QPixmap &prev
         return;
     }
 
-    m_previews.insert(b.path(), preview);
+    m_previews.insert(b.filePath("preferred"), preview);
     //qDebug() << "WP preview size:" << preview.size();
     emit dataChanged(index, index);
 }

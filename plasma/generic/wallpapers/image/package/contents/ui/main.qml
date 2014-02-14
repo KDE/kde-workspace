@@ -34,6 +34,7 @@ Rectangle {
     function setUrl(url) {
         print("Url dropped: " + url)
         wallpaper.configuration.Image = url
+        imageWallpaper.addUsersWallpaper(url);
     }
 
     function action_open() {

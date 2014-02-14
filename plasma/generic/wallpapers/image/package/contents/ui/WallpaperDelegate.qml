@@ -58,6 +58,7 @@ MouseArea {
         }
     }
     onClicked: {
+        print("WP wallie selected: " + model.path);
         cfg_Image = model.path
         wallpapersGrid.currentIndex = index
     }

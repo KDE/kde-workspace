@@ -79,6 +79,8 @@ class Image : public QObject
         Q_INVOKABLE void getNewWallpaper();
         Q_INVOKABLE void showFileDialog();
 
+        Q_INVOKABLE void addUsersWallpaper(const QString &file);
+
         RenderingMode renderingMode() const;
         void setRenderingMode(RenderingMode mode);
 
