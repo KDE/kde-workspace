@@ -44,21 +44,25 @@ PlasmaComponents.ToolButton {
 
             switch (panel.location) {
             case PlasmaCore.Types.TopEdge:
-                configDialog.y = mouse.screenY - mapToItem(dialogRoot, 0, startMouseY).y
-                panel.y = configDialog.y - panel.height
+                var y = Math.max(mouse.screenY - mapToItem(dialogRoot, 0, startMouseY).y, panel.height);
+                configDialog.y = y;
+                panel.y = y - panel.height;
                 break
             case PlasmaCore.Types.LeftEdge:
-                configDialog.x = mouse.screenX - mapToItem(dialogRoot, startMouseX, 0).x
-                panel.x = configDialog.x - panel.width
+                var x = Math.max(mouse.screenX - mapToItem(dialogRoot, startMouseX, 0).x, panel.width);
+                configDialog.x = x;
+                panel.x = configDialog.x - panel.width;
                 break;
             case PlasmaCore.Types.RightEdge:
-                configDialog.x = mouse.screenX - mapToItem(dialogRoot, startMouseX, 0).x
-                panel.x = configDialog.x + configDialog.width
+                var x = Math.min(mouse.screenX - mapToItem(dialogRoot, startMouseX, 0).x, mouse.screen.size.width - panel.width - configDialog.width);
+                configDialog.x = x;
+                panel.x = configDialog.x + configDialog.width;
                 break;
             case PlasmaCore.Types.BottomEdge:
             default:
-                configDialog.y = mouse.screenY - mapToItem(dialogRoot, 0, startMouseY).y
-                panel.y = configDialog.y + configDialog.height
+                var y = Math.min(mouse.screenY - mapToItem(dialogRoot, 0, startMouseY).y, mouse.screen.size.height - panel.height - configDialog.height);
+                configDialog.y = y;
+                panel.y = y + configDialog.height;
             }
 
             lastX = mouse.screenX
