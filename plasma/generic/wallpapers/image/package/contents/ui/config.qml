@@ -168,6 +168,7 @@ ColumnLayout {
             text: i18n("Open...")
             onClicked: {
                 print("Open file.");
+                imageWallpaper.showFileDialog();
             }
         }
         QtControls.Button {
