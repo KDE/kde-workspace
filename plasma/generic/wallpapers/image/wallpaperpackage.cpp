@@ -68,6 +68,7 @@ void WallpaperPackage::renderHintsChanged()
 
 void WallpaperPackage::pathChanged(Plasma::Package *package)
 {
+    qDebug() << "WP Path changed" << package->path();
     static bool guard = false;
 
     if (guard) {
@@ -75,8 +76,14 @@ void WallpaperPackage::pathChanged(Plasma::Package *package)
     }
 
     guard = true;
-
-    QFileInfo info(package->path());
+    QString ppath = package->path();
+    if (ppath.endsWith('/')) {
+        ppath.chop(1);
+        if (!QFile::exists(ppath)) {
+            ppath = package->path();
+        }
+    }
+    QFileInfo info(ppath);
     m_fullPackage = info.isDir();
     package->removeDefinition("preferred");
     package->setRequired("images", m_fullPackage);
@@ -85,13 +92,16 @@ void WallpaperPackage::pathChanged(Plasma::Package *package)
         package->setContentsPrefixPaths(QStringList() << "contents/");
         findBestPaper(package);
     } else {
+        qDebug() << "WP image file " << info.path() << info.fileName() << ppath;
         // dirty trick to support having a file passed in instead of a directory
         package->addFileDefinition("preferred", info.fileName(), i18n("Recommended wallpaper file"));
+        package->addFileDefinition("sceenshot", info.fileName(), i18n("Preview"));
         package->setContentsPrefixPaths(QStringList());
-        //qDebug() << "changing" << path() << "to" << info.path();
+        qDebug() << "WP changing" << package->path() << "to" << info.path();
         package->setPath(info.path());
     }
 
+    qDebug() << "WP preferred now: " << package->filePath("preferred");
     guard = false;
 }
 
