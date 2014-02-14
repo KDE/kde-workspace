@@ -33,9 +33,9 @@
 
 
 class QPropertyAnimation;
+class QFileDialog;
 
 class KDirWatch;
-class KFileDialog;
 class KJob;
 
 namespace KNS3 {
@@ -77,6 +77,7 @@ class Image : public QObject
         Q_INVOKABLE void removeSlidePath(const QString &path);
 
         Q_INVOKABLE void getNewWallpaper();
+        Q_INVOKABLE void showFileDialog();
 
         RenderingMode renderingMode() const;
         void setRenderingMode(RenderingMode mode);
@@ -122,7 +123,6 @@ class Image : public QObject
          * Open the current slide in the default image application
          */
         void openSlide();
-        void showFileDialog();
         void startSlideshow();
         void fileDialogFinished();
         void addUrl(const QUrl &url, bool setAsCurrent);
@@ -164,7 +164,7 @@ class Image : public QObject
         QTimer m_timer;
         int m_currentSlide;
         BackgroundListModel *m_model;
-        KFileDialog *m_dialog;
+        QFileDialog *m_dialog;
         QSize m_size;
         int m_width;
         int m_height;

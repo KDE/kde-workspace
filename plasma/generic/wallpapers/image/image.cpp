@@ -35,7 +35,7 @@
 #include <QDebug>
 #include <KDirSelectDialog>
 #include <KDirWatch>
-#include <KFileDialog>
+#include <QFileDialog>
 #include <KRandom>
 #include <KStandardDirs>
 #include <KIO/Job>
@@ -526,7 +526,7 @@ void Image::showFileDialog()
         if(m_wallpaper.indexOf(QDir::homePath()) > -1){
             baseUrl = QUrl(m_wallpaper);
         }
-
+        /*
         m_dialog = new KFileDialog(baseUrl, QString::fromLatin1("*.png *.jpeg *.jpg *.xcf *.svg *.svgz *.bmp"), 0);
         m_dialog->setOperationMode(KFileDialog::Opening);
         m_dialog->setInlinePreviewShown(true);
@@ -534,6 +534,12 @@ void Image::showFileDialog()
 
         connect(m_dialog, SIGNAL(okClicked()), this, SLOT(wallpaperBrowseCompleted()));
         connect(m_dialog, SIGNAL(destroyed(QObject*)), this, SLOT(fileDialogFinished()));
+        */
+        m_dialog = new QFileDialog(0, i18n("Open Image"),
+                                      QDir::homePath()+QStringLiteral("/Pictures"),
+                                      i18n("Image Files (*.png *.jpg *.jpeg *.bmp *.svg *.svgz *.xcf)"));
+        m_dialog->setFileMode(QFileDialog::ExistingFile);
+        connect(m_dialog, &QDialog::accepted, this, &Image::wallpaperBrowseCompleted);
     }
 
     m_dialog->show();
@@ -550,7 +556,8 @@ void Image::wallpaperBrowseCompleted()
 {
     Q_ASSERT(m_model);
 
-    const QFileInfo info(m_dialog->selectedFile());
+    qDebug() << "dialog accepted WP : " << m_dialog->selectedFiles();
+    const QFileInfo info(m_dialog->selectedFiles()[0]); // FIXME
 
     //the full file path, so it isn't broken when dealing with symlinks
     const QString wallpaper = info.canonicalFilePath();
