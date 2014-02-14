@@ -184,6 +184,10 @@ void Image::useSingleImageDefaults()
 QAbstractItemModel* Image::wallpaperModel()
 {
     if (!m_model) {
+        KConfigGroup cfg = KConfigGroup(KSharedConfig::openConfig(QStringLiteral("plasmarc")),
+                                                                  QStringLiteral("Wallpapers"));
+        m_usersWallpapers = cfg.readEntry("usersWallpapers", QStringList());
+
         m_model = new BackgroundListModel(this, this);
         m_model->reload(m_usersWallpapers);
     }
@@ -515,7 +519,7 @@ void Image::getNewWallpaper()
 void Image::newStuffFinished()
 {
     if (m_model && (!m_newStuffDialog || m_newStuffDialog.data()->changedEntries().size() > 0)) {
-        m_model->reload();
+        m_model->reload(m_usersWallpapers);
     }
 }
 
@@ -575,7 +579,13 @@ void Image::wallpaperBrowseCompleted()
     m_model->addBackground(wallpaper);
 
     // save it
+    KConfigGroup cfg = KConfigGroup(KSharedConfig::openConfig(QStringLiteral("plasmarc")),
+                                                              QStringLiteral("Wallpapers"));
+    m_usersWallpapers = cfg.readEntry("usersWallpapers", m_usersWallpapers);
     m_usersWallpapers << wallpaper;
+    cfg.writeEntry("usersWallpapers", m_usersWallpapers);
+    cfg.sync();
+    emit usersWallpapersChanged();
 }
 
 void Image::nextSlide()
@@ -661,11 +671,17 @@ void Image::pathDeleted(const QString &path)
 //FIXME: we have to save the configuration also when the dialog cancel button is clicked.
 void Image::removeWallpaper(QString name)
 {
+    // save it
+    KConfigGroup cfg = KConfigGroup(KSharedConfig::openConfig(QStringLiteral("plasmarc")),
+                                                              QStringLiteral("Wallpapers"));
+    m_usersWallpapers = cfg.readEntry("usersWallpapers", m_usersWallpapers);
     int wallpaperIndex = m_usersWallpapers.indexOf(name);
     if (wallpaperIndex >= 0){
         m_usersWallpapers.removeAt(wallpaperIndex);
         m_model->reload(m_usersWallpapers);
-        //TODO: save the configuration in the right way
+        cfg.writeEntry("usersWallpapers", m_usersWallpapers);
+        cfg.sync();
+        emit usersWallpapersChanged();
         Q_EMIT settingsChanged(true);
     }
 }
