@@ -167,8 +167,11 @@ void BackgroundListModel::addBackground(const QString& path)
             m_dirwatch.addFile(path);
         }
         beginInsertRows(QModelIndex(), 0, 0);
-        Plasma::Package pkg = Plasma::PluginLoader::self()->loadPackage(QString::fromLatin1("Plasma/Wallpaper"));
+        //Plasma::Package pkg = Plasma::PluginLoader::self()->loadPackage(QString::fromLatin1("Plasma/Wallpaper"));
+        Plasma::Package pkg = Plasma::Package(new WallpaperPackage(0, 0));
+
         pkg.setPath(path);
+        qDebug() << "WP Bckground added " << path << pkg.isValid();
         m_packages.prepend(pkg);
         endInsertRows();
     }
@@ -271,7 +274,8 @@ QVariant BackgroundListModel::data(const QModelIndex &index, int role) const
         if (m_previews.contains(b.path())) {
             return m_previews.value(b.path());
         }
-
+//         qDebug() << "WP preferred: " << b.filePath("preferred");
+//         qDebug() << "WP screenshot: " << b.filePath("screenshot");
         QUrl file(QString("file://") + b.filePath("preferred"));
         if (!m_previewJobs.contains(file) && file.isValid()) {
 
@@ -425,7 +429,7 @@ void BackgroundFinder::run()
                 // add this to the directories we should be looking at
                 m_paths.append(filePath);
             } else if (fileSuffixes.contains(wp.suffix().toLower())) {
-                //qDebug() << "WP     adding image file" << wp.filePath();
+                qDebug() << "WP     adding image file" << wp.filePath();
                 papersFound << wp.filePath();
             }
         }
