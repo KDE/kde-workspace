@@ -41,6 +41,7 @@ PlasmaCore.SvgItem
             bottom: fontButtons.top
             margins: 30
         }
+        text: documentHandler.text
         focus: true
         textFormat: Qt.RichText
         wrapMode: TextEdit.Wrap
@@ -52,8 +53,6 @@ PlasmaCore.SvgItem
         cursorPosition: mainTextArea.cursorPosition
         selectionStart: mainTextArea.selectionStart
         selectionEnd: mainTextArea.selectionEnd
-
-        bold: formatBoldButton.checked
     }
 
     Row {
@@ -76,22 +75,30 @@ PlasmaCore.SvgItem
             iconSource: "format-text-bold"
             visible: toggleFormatBarButton.checked
             checkable: true
+            checked: documentHandler.bold
+            onClicked: documentHandler.bold = !documentHandler.bold
 
         }
         PlasmaComponents.ToolButton {
             iconSource: "format-text-italic"
             visible: toggleFormatBarButton.checked
             checkable: true
+            checked: documentHandler.italic
+            onClicked: documentHandler.italic = !documentHandler.italic
         }
         PlasmaComponents.ToolButton {
             iconSource: "format-text-underline"
             visible: toggleFormatBarButton.checked
             checkable: true
+            checked: documentHandler.underline
+            onClicked: documentHandler.underline = !documentHandler.underline
         }
         PlasmaComponents.ToolButton {
             iconSource: "format-text-strikethrough"
             visible: toggleFormatBarButton.checked
             checkable: true
+            checked: documentHandler.strikeOut
+            onClicked: documentHandler.strikeOut = !documentHandler.strikeOut
         }
         PlasmaComponents.ToolButton {
             iconSource: "format-justify-center"
