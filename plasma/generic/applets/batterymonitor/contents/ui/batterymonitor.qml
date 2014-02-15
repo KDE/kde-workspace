@@ -72,19 +72,12 @@ Item {
         id: pmSource
         engine: "powermanagement"
         connectedSources: sources
-        onDataChanged: {
-            updateLogic(true);
-        }
         onSourceAdded: {
-            if (source == "Battery0") {
-                disconnectSource(source);
-                connectSource(source);
-            }
+            disconnectSource(source);
+            connectSource(source);
         }
         onSourceRemoved: {
-            if (source == "Battery0") {
-                disconnectSource(source);
-            }
+            disconnectSource(source);
         }
     }
 
@@ -99,8 +92,7 @@ Item {
             sourceModel: PlasmaCore.DataModel {
                 dataSource: pmSource
                 sourceFilter: "Battery[0-9]+"
-
-                onDataChanged: updateLogic()
+                onDataChanged: updateLogic(false)
             }
         }
 
