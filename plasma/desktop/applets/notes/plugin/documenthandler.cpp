@@ -152,12 +152,16 @@ void DocumentHandler::reset()
     emit boldChanged();
     emit italicChanged();
     emit underlineChanged();
+    emit strikeOutChanged();
     emit fontSizeChanged();
     emit textColorChanged();
 }
 
 QTextCursor DocumentHandler::textCursor() const
 {
+    if (!m_doc) {
+        return QTextCursor();
+    }
     QTextCursor cursor = QTextCursor(m_doc);
     if (m_selectionStart != m_selectionEnd) {
         cursor.setPosition(m_selectionStart);
@@ -229,6 +233,15 @@ bool DocumentHandler::underline() const
     return textCursor().charFormat().fontUnderline();
 }
 
+bool DocumentHandler::strikeOut() const
+{
+    QTextCursor cursor = textCursor();
+    if (cursor.isNull())
+        return false;
+    return textCursor().charFormat().fontStrikeOut();
+}
+
+
 void DocumentHandler::setBold(bool arg)
 {
     QTextCharFormat fmt;
@@ -251,6 +264,14 @@ void DocumentHandler::setUnderline(bool arg)
     fmt.setFontUnderline(arg);
     mergeFormatOnWordOrSelection(fmt);
     emit underlineChanged();
+}
+
+void DocumentHandler::setStrikeOut(bool arg)
+{
+    QTextCharFormat fmt;
+    fmt.setFontStrikeOut(arg);
+    mergeFormatOnWordOrSelection(fmt);
+    emit strikeOutChanged();
 }
 
 int DocumentHandler::fontSize() const

@@ -70,6 +70,7 @@ class DocumentHandler : public QObject
     Q_PROPERTY(bool bold READ bold WRITE setBold NOTIFY boldChanged)
     Q_PROPERTY(bool italic READ italic WRITE setItalic NOTIFY italicChanged)
     Q_PROPERTY(bool underline READ underline WRITE setUnderline NOTIFY underlineChanged)
+    Q_PROPERTY(bool strikeOut READ strikeOut WRITE setStrikeOut NOTIFY strikeOutChanged)
 
     Q_PROPERTY(int fontSize READ fontSize WRITE setFontSize NOTIFY fontSizeChanged)
 
@@ -104,6 +105,7 @@ public:
     bool bold() const;
     bool italic() const;
     bool underline() const;
+    bool strikeOut() const;
     int fontSize() const;
 
     QStringList defaultFontSizes() const;
@@ -116,6 +118,7 @@ public Q_SLOTS:
     void setBold(bool arg);
     void setItalic(bool arg);
     void setUnderline(bool arg);
+    void setStrikeOut(bool arg);
     void setFontSize(int arg);
     void setTextColor(const QColor &arg);
     void setFontFamily(const QString &arg);
@@ -138,6 +141,7 @@ Q_SIGNALS:
     void boldChanged();
     void italicChanged();
     void underlineChanged();
+    void strikeOutChanged();
 
     void fontSizeChanged();
     void defaultFontSizesChanged();
