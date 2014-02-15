@@ -11,3 +11,5 @@ if(KF5Activities_FOUND)
    add_subdirectory(showActivityManager)
 endif()
 endif()
+
+add_subdirectory(notes)

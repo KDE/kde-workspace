@@ -22,6 +22,8 @@ import QtQuick.Layouts 1.1
 import org.kde.plasma.core 2.0 as PlasmaCore
 import org.kde.plasma.components 2.0 as PlasmaComponents
 
+import org.kde.plasma.private.notes 0.1 as Notes
+
 PlasmaCore.SvgItem
 {
     svg: PlasmaCore.Svg {imagePath: "widgets/notes"}
@@ -31,6 +33,7 @@ PlasmaCore.SvgItem
     //deliberately not PlasmaComponents.textEdit
     //as we have custom font selection
     TextEdit {
+        id: mainTextArea
         anchors {
             top: parent.top
             left: parent.left
@@ -39,6 +42,17 @@ PlasmaCore.SvgItem
             margins: 30
         }
         focus: true
+        textFormat: Qt.RichText
+    }
+
+    Notes.DocumentHandler {
+        id: documentHandler
+        target: mainTextArea
+        cursorPosition: mainTextArea.cursorPosition
+        selectionStart: mainTextArea.selectionStart
+        selectionEnd: mainTextArea.selectionEnd
+
+        bold: formatBoldButton.checked
     }
 
     Row {
@@ -57,6 +71,7 @@ PlasmaCore.SvgItem
         }
 
         PlasmaComponents.ToolButton {
+            id: formatBoldButton
             iconSource: "format-text-bold"
             visible: toggleFormatBarButton.checked
             checkable: true
