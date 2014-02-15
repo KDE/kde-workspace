@@ -3,7 +3,7 @@ Name=Notes
 Comment=Notes
 Icon=start-here-kde
 Type=Service
-X-KDE-ServiceTypes=Plasma/Applet,Plasma/PopupApplet
+X-KDE-ServiceTypes=Plasma/Applet
 
 X-Plasma-API=declarativeappletscript
 X-Plasma-MainScript=ui/main.qml
@@ -11,7 +11,7 @@ X-Plasma-MainScript=ui/main.qml
 
 X-KDE-PluginInfo-Author=David Edmundson
 X-KDE-PluginInfo-Email=plasma-devel@kde.org
-X-KDE-PluginInfo-Name=org.kde.plasma.kickoff
+X-KDE-PluginInfo-Name=org.kde.plasma.notes
 X-KDE-PluginInfo-Version=1.0
 X-KDE-PluginInfo-Website=http://userbase.kde.org/Plasma/Notes
 X-KDE-PluginInfo-Category=Application Launchers
