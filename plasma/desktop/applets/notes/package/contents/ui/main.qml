@@ -21,14 +21,17 @@ import QtQuick.Layouts 1.1
 
 import org.kde.plasma.core 2.0 as PlasmaCore
 import org.kde.plasma.components 2.0 as PlasmaComponents
+import org.kde.plasma.plasmoid 2.0
 
 import org.kde.plasma.private.notes 0.1 as Notes
 
 PlasmaCore.SvgItem
 {
     svg: PlasmaCore.Svg {imagePath: "widgets/notes"}
-    width: 400
-    height: 400
+    Layout.minimumWidth: 300
+    Layout.minimumHeight: 300
+
+    Plasmoid.backgroundHints: PlasmaCore.Types.NoBackground
 
     //deliberately not PlasmaComponents.textEdit
     //as we have custom font selection
