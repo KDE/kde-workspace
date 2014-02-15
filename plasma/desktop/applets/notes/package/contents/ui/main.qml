@@ -43,6 +43,7 @@ PlasmaCore.SvgItem
         }
         focus: true
         textFormat: Qt.RichText
+        wrapMode: TextEdit.Wrap
     }
 
     Notes.DocumentHandler {
