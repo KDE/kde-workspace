@@ -50,7 +50,7 @@ add_definitions(-DQT_DISABLE_DEPRECATED_BEFORE=0)
 find_package(KF5 CONFIG REQUIRED
     IdleTime ItemModels WidgetsAddons WindowSystem Codecs Archive CoreAddons Solid ThreadWeaver
     Config Auth JS JsEmbed Wallet DBusAddons Sonnet GlobalAccel
-    I18n GuiAddons Service ConfigWidgets ItemViews Notifications IconThemes Style Completion JobWidgets TextWidgets XmlGui Crash
+    I18n GuiAddons Service ConfigWidgets ItemViews Notifications IconThemes FrameworkIntegration Completion JobWidgets TextWidgets XmlGui Crash
     Bookmarks UnitConversion KIO KCMUtils Parts Kross NotifyConfig PrintUtils Su DocTools NewStuff KHtml Declarative Init Runner)
 
 find_package(KF5Activities NO_MODULE)
