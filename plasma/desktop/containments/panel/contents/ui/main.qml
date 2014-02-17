@@ -166,6 +166,9 @@ function checkLastSpacer() {
     Plasmoid.onFormFactorChanged: {
         containmentSizeSyncTimer.restart()
     }
+    Plasmoid.onImmutableChanged: {
+        containmentSizeSyncTimer.restart()
+    }
 //END connections
 
 //BEGIN components
@@ -260,11 +263,7 @@ function checkLastSpacer() {
     GridLayout {
         id: currentLayout
         property bool isLayoutHorizontal
-        anchors {
-            fill: parent
-            rightMargin: toolBox && isHorizontal? toolBox.width : 0
-            bottomMargin: toolBox && !isHorizontal? toolBox.height : 0
-        }
+
         rows: 1
         columns: 1
         //when horizontal layout top-to-bottom, this way it will obey our limit of one row and actually lay out left to right
@@ -284,8 +283,8 @@ function checkLastSpacer() {
         onTriggered: {
             currentLayout.x = 0
             currentLayout.y = 0
-            currentLayout.width = root.width - (isHorizontal ? toolBox.width : 0)
-            currentLayout.height = root.height - (!isHorizontal ? toolBox.height : 0)
+            currentLayout.width = root.width - (isHorizontal && toolBox.visible ? toolBox.width : 0)
+            currentLayout.height = root.height - (!isHorizontal && toolBox.visible ? toolBox.height : 0)
             currentLayout.isLayoutHorizontal = isHorizontal
         }
     }
