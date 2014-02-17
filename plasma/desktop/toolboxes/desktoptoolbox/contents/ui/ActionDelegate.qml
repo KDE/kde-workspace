@@ -32,15 +32,17 @@ Item {
     height: toolBoxDelegate.iconSize + 14
     width: parent ? parent.width : 200
 
+    visible: modelData.visible
     QtExtras.QIconItem {
         id: iconItem
         height: toolBoxDelegate.iconSize
         width: toolBoxDelegate.iconSize
         anchors { left: parent.left; verticalCenter: parent.verticalCenter; leftMargin: 4 }
     }
+
     PlasmaComponents.Label {
         id: textLabel
-        text:  (label != "") ? label : modelData.text.replace("&", "") // hack to get rid of keyboard accelerator hints
+        text:  modelData.text.replace("&", "") // hack to get rid of keyboard accelerator hints
         //elide: Text.ElideMiddle
         anchors { left: iconItem.right; right: parent.right; leftMargin: 6; verticalCenter: parent.verticalCenter; }
     }
