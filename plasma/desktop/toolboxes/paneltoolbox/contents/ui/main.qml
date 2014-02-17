@@ -28,7 +28,8 @@ Item {
 
     width: toolBoxButton.width
     height: toolBoxButton.height
-    property bool isVertical: Plasmoid.formFactor == 3
+    property bool isVertical: plasmoid.formFactor == 3
+    visible: !plasmoid.immutable
 
     anchors {
         left: undefined
