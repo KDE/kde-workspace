@@ -67,8 +67,8 @@ Item {
         systrayhost: host
     }
     Plasmoid.fullRepresentation: ExpandedRepresentation {
-        Layout.minimumWidth: Layout.minimumHeight * 1.333
-        Layout.minimumHeight: theme.mSize(theme.defaultFont).height * 14
+        Layout.minimumWidth: Layout.minimumHeight * 1.75
+        Layout.minimumHeight: units.gridUnit * 14
         Layout.preferredWidth: Layout.minimumWidth * 1.5
         Layout.preferredHeight: Layout.minimumHeight * 1.5
     }
