@@ -110,6 +110,7 @@ function checkLastSpacer() {
         LayoutManager.root = root;
         LayoutManager.layout = currentLayout;
         LayoutManager.restore();
+        containmentSizeSyncTimer.restart();
     }
 
     onDragEnter: {
@@ -163,12 +164,9 @@ function checkLastSpacer() {
         }
     }
 
-    Plasmoid.onFormFactorChanged: {
-        containmentSizeSyncTimer.restart()
-    }
-    Plasmoid.onImmutableChanged: {
-        containmentSizeSyncTimer.restart()
-    }
+    Plasmoid.onFormFactorChanged: containmentSizeSyncTimer.restart();
+    Plasmoid.onImmutableChanged: containmentSizeSyncTimer.restart();
+    onToolBoxChanged: containmentSizeSyncTimer.restart();
 //END connections
 
 //BEGIN components
@@ -283,8 +281,8 @@ function checkLastSpacer() {
         onTriggered: {
             currentLayout.x = 0
             currentLayout.y = 0
-            currentLayout.width = root.width - (isHorizontal && toolBox.visible ? toolBox.width : 0)
-            currentLayout.height = root.height - (!isHorizontal && toolBox.visible ? toolBox.height : 0)
+            currentLayout.width = root.width - (isHorizontal && toolBox && toolBox.visible ? toolBox.width : 0)
+            currentLayout.height = root.height - (!isHorizontal && toolBox && toolBox.visible ? toolBox.height : 0)
             currentLayout.isLayoutHorizontal = isHorizontal
         }
     }
