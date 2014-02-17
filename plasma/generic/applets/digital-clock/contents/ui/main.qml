@@ -30,8 +30,8 @@ Item {
     Layout.minimumHeight: _minimumHeight
 
     // The "sensible" values
-    property int _minimumWidth: _minimumHeight * 2.2
-    property int _minimumHeight: theme.mSize(theme.defaultFont).height * 14
+    property int _minimumWidth: _minimumHeight * 3
+    property int _minimumHeight: units.gridUnit * 14
     Layout.preferredWidth: _minimumWidth * 1.5
     Layout.preferredHeight: _minimumHeight * 1.5
 
