@@ -177,6 +177,7 @@ Keywords[kk]=Lock;Logout;Sleep;Hibernate;Switch User;
 Keywords[ko]=Lock;Logout;Sleep;Hibernate;Switch User;잠금;로그아웃;대기;대기 모드;최대 절전;최대 절전 모드;사용자 전환
 Keywords[mr]=कुलूप; बाहेर पडा; झोप; हायबरनेट; वापरकर्ता बदला;
 Keywords[nb]=Lås; Logg ut; Hvile; Dvale; Bytt bruker;
+Keywords[nds]=Slott,afsluten,afmellen,slapen,infreren,Bruker wesseln;Brukerwessel
 Keywords[nl]=Vergrendelen;Afmelden;Slapen;Slaapstand naar schijf;Gebruiker wisselen
 Keywords[pa]=ਲਾਕ;ਲਾਗਆਉਟ;ਸਲੀਪ;ਹਾਈਬਰਨੇਟ;ਯੂਜ਼ਰ ਬਦਲੋ;
 Keywords[pl]=Zablokuj;Wyloguj;Uśpij;Hibernuj;Przełącz użytkownika;
