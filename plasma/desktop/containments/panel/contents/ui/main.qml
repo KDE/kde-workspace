@@ -37,6 +37,10 @@ DragDrop.DropArea {
     Layout.maximumWidth: currentLayout.Layout.maximumWidth
     Layout.preferredWidth: currentLayout.Layout.preferredWidth
 
+    Layout.minimumHeight: currentLayout.Layout.minimumHeight
+    Layout.maximumHeight: currentLayout.Layout.maximumHeight
+    Layout.preferredHeight: currentLayout.Layout.preferredHeight
+
     property Item toolBox
 
     property Item dragOverlay
@@ -88,10 +92,19 @@ function checkLastSpacer() {
 
     var expands = false;
 
-    for (var container in currentLayout.children) {
-        var item = currentLayout.children[container];
-        if (item.Layout && item.Layout.fillHeight) {
-            expands = true;
+    if (isHorizontal) {
+        for (var container in currentLayout.children) {
+            var item = currentLayout.children[container];
+            if (item.Layout && item.Layout.fillWidth) {
+                expands = true;
+            }
+        }
+    } else {
+        for (var container in currentLayout.children) {
+            var item = currentLayout.children[container];
+            if (item.Layout && item.Layout.fillHeight) {
+                expands = true;
+            }
         }
     }
     if (!expands) {
