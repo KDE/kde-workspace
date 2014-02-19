@@ -41,7 +41,6 @@ DragDrop.DropArea {
 
     property Item dragOverlay
 
-
     property bool isHorizontal: plasmoid.formFactor != PlasmaCore.Types.Vertical
 //END properties
 
@@ -262,6 +261,24 @@ function checkLastSpacer() {
         id: currentLayout
         property bool isLayoutHorizontal
 
+        Layout.preferredWidth: {
+            var width = 0;
+            for (var i = 0; i < currentLayout.children.length; ++i) {
+                if (currentLayout.children[i].Layout) {
+                    width += currentLayout.children[i].Layout.preferredWidth
+                }
+            }
+            return width;
+        }
+        Layout.preferredHeight: {
+            var height = 0;
+            for (var i = 0; i < currentLayout.children.length; ++i) {
+                if (currentLayout.children[i].Layout) {
+                    height += currentLayout.children[i].Layout.preferredHeight
+                }
+            }
+            return height;
+        }
         rows: 1
         columns: 1
         //when horizontal layout top-to-bottom, this way it will obey our limit of one row and actually lay out left to right

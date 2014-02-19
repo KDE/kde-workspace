@@ -100,33 +100,33 @@ PlasmaCore.FrameSvgItem {
 
     function minimumWidthChanged() {
         if (containment.formFactor === PlasmaCore.Types.Horizontal) {
-            panel.width = Math.max(panel.width, panel.Layout.minimumLength);
+            panel.width = Math.max(panel.width, containment.Layout.minimumWidth);
         }
     }
     function maximumWidthChanged() {
         if (containment.formFactor === PlasmaCore.Types.Horizontal) {
-            panel.width = Math.min(panel.width, panel.Layout.maximumLength);
+            panel.width = Math.min(panel.width, containment.Layout.maximumWidth);
         }
     }
     function preferredWidthChanged() {
         if (containment.formFactor === PlasmaCore.Types.Horizontal) {
-            panel.width = Math.min(panel.maximumLength, Math.max(containment.preferredWidth, panel.Layout.minimumLength));
+            panel.width = Math.min(panel.maximumLength, Math.max(containment.Layout.preferredWidth, panel.minimumLength));
         }
     }
 
     function minimumHeightChanged() {
         if (containment.formFactor === PlasmaCore.Types.Vertical) {
-            panel.height = Math.max(panel.height, panel.Layout.minimumLength);
+            panel.height = Math.max(panel.height, containment.Layout.minimumWidth);
         }
     }
     function maximumHeightChanged() {
         if (containment.formFactor === PlasmaCore.Types.Vertical) {
-            panel.height = Math.min(panel.height, panel.Layout.maximumLength);
+            panel.height = Math.min(panel.height, containment.Layout.maximumWidth);
         }
     }
     function preferredHeightChanged() {
         if (containment.formFactor === PlasmaCore.Types.Vertical) {
-            panel.height = Math.min(panel.maximumLength, Math.max(containment.preferredHeight, panel.Layout.minimumLength));
+            panel.height = Math.min(panel.maximumLength, Math.max(containment.Layout.preferredHeight, panel.minimumLength));
         }
     }
 
