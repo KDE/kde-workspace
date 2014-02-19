@@ -41,8 +41,8 @@ Item {
     Layout.fillHeight:true
     Layout.minimumWidth: tasks.vertical ? 0 : LayoutManager.preferredMinWidth()
     Layout.minimumHeight: !tasks.vertical ? 0 : LayoutManager.preferredMinHeight()
-    property int preferredWidth: taskList.width
-    property int preferredHeight: taskList.height
+    Layout.preferredWidth: taskList.width
+    Layout.preferredHeight: taskList.height
 
     property Item dragSource: null
 
