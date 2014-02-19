@@ -34,6 +34,8 @@ QtExtraComponents.MouseEventListener {
     Layout.minimumHeight: root.vertical ? computeDimension() : computeDimensionHeight()
     Layout.maximumWidth: Layout.minimumWidth
     Layout.maximumHeight: Layout.minimumHeight
+    Layout.preferredWidth: Layout.minimumWidth
+    Layout.preferredHeight: Layout.minimumHeight
 
     Layout.fillWidth: false
     Layout.fillHeight: false
