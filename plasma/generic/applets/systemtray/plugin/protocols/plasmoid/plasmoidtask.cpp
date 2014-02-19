@@ -49,7 +49,7 @@ PlasmoidTask::PlasmoidTask(const QString &packageName, int appletId, Plasma::Con
     cont->addApplet(m_taskItem);
     m_taskItem->init();
 
-    m_taskGraphicsObject = m_taskItem->property("_plasma_graphicObject").value<AppletQuickItem *>();
+    m_taskGraphicsObject = m_taskItem->property("_plasma_graphicObject").value<PlasmaQuick::AppletQuickItem *>();
 
     if (m_taskGraphicsObject) {
         Plasma::Package package = Plasma::PluginLoader::self()->loadPackage("Plasma/Shell");
