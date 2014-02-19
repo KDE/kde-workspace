@@ -42,8 +42,10 @@ Item {
     Layout.minimumWidth: tasks.vertical ? 0 : LayoutManager.preferredMinWidth()
     Layout.minimumHeight: !tasks.vertical ? 0 : LayoutManager.preferredMinHeight()
 
+//BEGIN TODO: this is not precise enough: launchers are smaller than full tasks
     Layout.preferredWidth: tasks.vertical ? units.gridUnit * 10 : Math.min(taskList.columns, taskList.children.length) * units.gridUnit * 10;
     Layout.preferredHeight: tasks.vertical ? Math.min(taskList.rows, taskList.children.length) * units.gridUnit * 2 : units.gridUnit * 2;
+//END TODO
 
     property Item dragSource: null
 
