@@ -24,7 +24,6 @@
 
 #include <QtCore/QEvent>
 
-
 namespace SystemTray
 {
 

@@ -45,6 +45,7 @@ signals:
 protected:
     void showEvent(QShowEvent *event);
     void hideEvent(QHideEvent *event);
+    void resizeEvent(QGraphicsSceneResizeEvent *event);
 
 private slots:
     void setupXEmbedDelegate();
