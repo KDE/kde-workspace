@@ -27,16 +27,15 @@ Item {
 
     Layout.minimumWidth: sizehelper.paintedWidth + (units.smallSpacing * 2)
     Layout.maximumWidth: Layout.minimumWidth
+    Layout.preferredWidth: Layout.minimumWidth
 
     Layout.minimumHeight: sizehelper.paintedHeight + (units.smallSpacing * 2)
     Layout.maximumHeight: Layout.minimumHeight
+    Layout.preferredHeight: Layout.minimumHeight
 
     property int formFactor: plasmoid.formFactor
     property int timePixelSize: theme.defaultFont.pixelSize
     property int timezonePixelSize: theme.smallestFont.pixelSize
-
-    Layout.fillWidth: true
-    Layout.fillHeight: true
 
     property bool constrained: formFactor == PlasmaCore.Types.Vertical || formFactor == PlasmaCore.Types.Horizontal
 
