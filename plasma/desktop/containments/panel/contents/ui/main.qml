@@ -278,7 +278,7 @@ function checkLastSpacer() {
             var width = 0;
             for (var i = 0; i < currentLayout.children.length; ++i) {
                 if (currentLayout.children[i].Layout) {
-                    width += currentLayout.children[i].Layout.preferredWidth
+                    width += Math.max(currentLayout.children[i].Layout.minimumWidth, currentLayout.children[i].Layout.preferredWidth);
                 }
             }
             return width;
@@ -287,7 +287,7 @@ function checkLastSpacer() {
             var height = 0;
             for (var i = 0; i < currentLayout.children.length; ++i) {
                 if (currentLayout.children[i].Layout) {
-                    height += currentLayout.children[i].Layout.preferredHeight
+                    height += Math.max(currentLayout.children[i].Layout.minimumHeight, currentLayout.children[i].Layout.preferredHeight);
                 }
             }
             return height;
