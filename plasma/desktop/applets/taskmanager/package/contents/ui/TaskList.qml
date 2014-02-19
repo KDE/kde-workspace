@@ -24,6 +24,9 @@ Flow {
 
     layoutDirection: Qt.application.layoutDirection
 
+    property int rows: Math.floor(height / children[0].height)
+    property int columns: Math.floor(width / children[0].width)
+
     move: Transition {
         SequentialAnimation {
             PropertyAction { target: taskList; property: "animating"; value: true }
