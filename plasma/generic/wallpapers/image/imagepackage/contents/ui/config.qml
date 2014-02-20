@@ -126,7 +126,7 @@ ColumnLayout {
                 onSecondsIntervalValueChanged: secondsInterval.value = root.secondsIntervalValue
             }
             Row {
-                spacing: units.smallSpacing
+                spacing: units.largeSpacing / 2
                 QtControls.Label {
                     width: formAlignment - units.largeSpacing
                     anchors.verticalCenter: parent.verticalCenter
