@@ -109,8 +109,10 @@ ColumnLayout {
         id: foldersComponent
         QtControls.ScrollView {
             anchors.fill: parent
+            frameVisible: true
             ListView {
                 id: slidePathsView
+                anchors.margins: 4
                 model: imageWallpaper.slidePaths
                 delegate: QtControls.Label {
                     text: modelData
