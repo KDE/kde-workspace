@@ -171,7 +171,7 @@ ColumnLayout {
                     anchors.verticalCenter: parent.verticalCenter
                     width: units.gridUnit * 3
                     decimals: 0
-                    minimumValue: 0
+                    minimumValue: minutesInterval.value == 0 && hoursInterval.value == 0 ? 1 : 0
                     maximumValue: 60
                     onValueChanged: cfg_SlideInterval = hoursInterval.value * 3600 + minutesInterval.value * 60 + secondsInterval.value
                 }
