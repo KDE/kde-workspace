@@ -55,9 +55,7 @@ Image::Image(QObject *parent)
       m_mode(SingleImage),
       m_currentSlide(-1),
       m_model(0),
-      m_dialog(0),
-      m_nextWallpaperAction(0),
-      m_openImageAction(0)
+      m_dialog(0)
 {
     m_wallpaperPackage = Plasma::Package(new WallpaperPackage(this, this));
 
@@ -111,17 +109,8 @@ void Image::setRenderingMode(RenderingMode mode)
             m_slidePaths << KStandardDirs::installPath("wallpaper");
         }
 
-        m_nextWallpaperAction = new QAction(QIcon::fromTheme("user-desktop"), i18n("Next Wallpaper Image"), this);
-        connect(m_nextWallpaperAction, SIGNAL(triggered(bool)), this, SLOT(nextSlide()));
-        m_openImageAction = new QAction(QIcon::fromTheme("document-open"), i18n("Open Wallpaper Image"), this);
-        connect(m_openImageAction, SIGNAL(triggered(bool)), this, SLOT(openSlide()));
         QTimer::singleShot(200, this, SLOT(startSlideshow()));
         updateDirWatch(m_slidePaths);
-        QList<QAction*> actions;
-        actions.push_back(m_nextWallpaperAction);
-        actions.push_back(m_openImageAction);
-        m_actions = actions;
-        updateWallpaperActions();
         updateDirWatch(m_slidePaths);
     }
 
@@ -442,7 +431,6 @@ void Image::setWallpaper(const QString &path)
         m_unseenSlideshowBackgrounds.clear();
         m_currentSlide = m_slideshowBackgrounds.size() - 2;
         nextSlide();
-        updateWallpaperActions();
     }
     //addUsersWallpaper(path);
 }
@@ -481,7 +469,6 @@ void Image::backgroundsFound(const QStringList &paths, const QString &token)
 
     m_slideshowBackgrounds = paths;
     m_unseenSlideshowBackgrounds.clear();
-    updateWallpaperActions();
     // start slideshow
     if (m_slideshowBackgrounds.isEmpty()) {
         // no image has been found, which is quite weird... try again later (this is useful for events which
@@ -491,17 +478,6 @@ void Image::backgroundsFound(const QStringList &paths, const QString &token)
         m_currentSlide = -1;
         nextSlide();
         m_timer.start(m_delay * 1000);
-    }
-}
-
-void Image::updateWallpaperActions()
-{
-    if (m_nextWallpaperAction) {
-        m_nextWallpaperAction->setEnabled(!m_slideshowBackgrounds.isEmpty());
-    }
-
-    if (m_openImageAction) {
-        m_openImageAction->setEnabled(!m_slideshowBackgrounds.isEmpty());
     }
 }
 

@@ -105,6 +105,9 @@ class Image : public QObject
         QStringList slidePaths() const;
         void setSlidePaths(const QStringList &slidePaths);
 
+    public Q_SLOTS:
+        void nextSlide();
+
     Q_SIGNALS:
         void settingsChanged(bool);
         void wallpaperPathChanged();
@@ -120,7 +123,6 @@ class Image : public QObject
         void timeChanged(const QTime& time);
         void showAddSlidePathsDialog();
         void wallpaperBrowseCompleted();
-        void nextSlide();
         /**
          * Open the current slide in the default image application
          */
@@ -142,7 +144,6 @@ class Image : public QObject
 
     protected:
         void setSingleImage();
-        void updateWallpaperActions();
         void useSingleImageDefaults();
 
     private:
@@ -174,10 +175,6 @@ class Image : public QObject
         QDateTime m_previousModified;
         QWeakPointer<KNS3::DownloadDialog> m_newStuffDialog;
         QString m_findToken;
-        QList<QAction *>m_actions;
-
-        QAction* m_nextWallpaperAction;
-        QAction* m_openImageAction;
 };
 
 #endif
