@@ -77,6 +77,7 @@ ColumnLayout {
                 var model = configDialog.wallpaperConfigModel.get(currentIndex)
                 root.currentWallpaper = model.pluginName
                 main.sourceFile = model.source
+                configDialog.currentWallpaper = model.pluginName
                 root.restoreConfig()
             }
         }

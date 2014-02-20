@@ -42,6 +42,7 @@ ColumnLayout {
         imageWallpaper.slidePaths = cfg_SlidePaths
     }
 
+    
     //Rectangle { color: "orange"; x: formAlignment; width: formAlignment; height: 20 }
 
     Row {
@@ -104,28 +105,53 @@ ColumnLayout {
         visible: ~[2,3].indexOf(resizeComboBox.currentIndex)
     }
 
-    //TODO: this should be shown instead of the main one when in slideshow mode
-    /*QtControls.ScrollView {
-        anchors {
-            left: parent.left
-            right: parent.right
-        }
-        height: units.gridUnit * 10
-        ListView {
-            id: slidePathsView
-            model: imageWallpaper.slidePaths
-            delegate: QtControls.Label {
-                text: modelData
-                width: slidePathsView.width
+    Component {
+        id: foldersComponent
+        QtControls.ScrollView {
+            anchors.fill: parent
+            ListView {
+                id: slidePathsView
+                model: imageWallpaper.slidePaths
+                delegate: QtControls.Label {
+                    text: modelData
+                    width: slidePathsView.width
+                }
             }
         }
     }
-    QtControls.Button {
-        text: i18n("Add Folder")
-        onClicked: imageWallpaper.showAddSlidePathsDialog()
-    }*/
 
-    QtControls.ScrollView {
+    Component {
+        id: thumbnailsComponent
+        QtControls.ScrollView {
+            anchors.fill: parent
+
+            frameVisible: true
+            highlightOnFocus: true;
+
+            GridView {
+                id: wallpapersGrid
+                model: imageWallpaper.wallpaperModel
+                currentIndex: -1
+
+                highlight: Rectangle {
+                    radius: 3
+                    color: syspal.highlight
+                }
+                delegate: WallpaperDelegate {}
+                Timer {
+                    id: makeCurrentTimer
+                    interval: 100
+                    repeat: false
+                    property string pendingIndex
+                    onTriggered: {
+                        wallpapersGrid.currentIndex = pendingIndex
+                    }
+                }
+            }
+        }
+    }
+
+    Loader {
         Layout.fillHeight: true;
         anchors {
             left: parent.left
@@ -133,37 +159,23 @@ ColumnLayout {
         }
         height: units.gridUnit * 30
 
-        frameVisible: true
-        highlightOnFocus: true;
-
-        GridView {
-            id: wallpapersGrid
-            model: imageWallpaper.wallpaperModel
-            currentIndex: -1
-
-            highlight: Rectangle {
-                radius: 3
-                color: syspal.highlight
-            }
-            delegate: WallpaperDelegate {}
-            Timer {
-                id: makeCurrentTimer
-                interval: 100
-                repeat: false
-                property string pendingIndex
-                onTriggered: {
-                    wallpapersGrid.currentIndex = pendingIndex
-                }
-            }
-        }
+        sourceComponent: (configDialog.currentWallpaper == "org.kde.image") ? thumbnailsComponent : foldersComponent
     }
+
     RowLayout {
         id: buttonsRow
         anchors {
-            left: parent.left
+            right: parent.right
             //rightMargin: units.largeSpacing/2
         }
         QtControls.Button {
+            visible: (configDialog.currentWallpaper == "org.kde.slideshow")
+            iconName: "list-add"
+            text: i18n("Add Folder")
+            onClicked: imageWallpaper.showAddSlidePathsDialog()
+        }
+        QtControls.Button {
+            visible: (configDialog.currentWallpaper == "org.kde.image")
             iconName: "document-open-folder"
             text: i18n("Open...")
             onClicked: {

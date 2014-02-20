@@ -465,7 +465,7 @@ void Image::backgroundsFound(const QStringList &paths, const QString &token)
     if (token != m_findToken) {
         return;
     }
-
+qWarning()<<"AAAAAAAAAA"<<paths<<token;
     m_findToken.clear();
 
     if(m_scanDirty) {
