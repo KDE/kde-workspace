@@ -115,6 +115,16 @@ ColumnLayout {
                 delegate: QtControls.Label {
                     text: modelData
                     width: slidePathsView.width
+                    height: Math.max(paintedHeight, removeButton.height);
+                    QtControls.ToolButton {
+                        id: removeButton
+                        anchors {
+                            verticalCenter: parent.verticalCenter
+                            right: parent.right
+                        }
+                        iconName: "list-remove"
+                        onClicked: imageWallpaper.removeSlidePath(modelData);
+                    }
                 }
             }
         }
