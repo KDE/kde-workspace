@@ -32,7 +32,7 @@
 #include <Plasma/Applet>
 #include <Plasma/PluginLoader>
 
-#include <plasmaquick/appletquickitem.h>
+#include "appletquickitem.h"
 
 namespace SystemTray
 {
