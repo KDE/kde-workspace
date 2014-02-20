@@ -96,11 +96,12 @@ Rectangle {
     Wallpaper.Image {
         id: imageWallpaper
         //the oneliner of difference between image and slideshow wallpapers
-        renderingMode: (configDialog.currentWallpaper == "org.kde.image") ? Wallpaper.Image.SingleImage : Wallpaper.Image.SlideShow
+        renderingMode: (wallpaper.pluginName == "org.kde.image") ? Wallpaper.Image.SingleImage : Wallpaper.Image.SlideShow
 //         targetSize: "1920x1080"
         width: parent.width
         height: parent.height
         slidePaths: wallpaper.configuration.SlidePaths
+        slideTimer: wallpaper.configuration.SlideInterval
     }
 
     onFillModeChanged: {

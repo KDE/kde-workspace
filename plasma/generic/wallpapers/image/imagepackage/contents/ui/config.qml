@@ -28,7 +28,7 @@ ColumnLayout {
     property string cfg_Image
     property int cfg_FillMode
     property var cfg_SlidePaths: ""
-    property int cfg_SlideInterval
+    property int cfg_SlideInterval: 0
 
     spacing: units.largeSpacing / 2
 
@@ -123,8 +123,15 @@ ColumnLayout {
                 target: root
                 onHoursIntervalValueChanged: hoursInterval.value = root.hoursIntervalValue
                 onMinutesIntervalValueChanged: minutesInterval.value = root.minutesIntervalValue
-                onSecondsIntervalValueChanged: secondsInterval.value = root.secondsIntervalValue
+                onSecondsIntervalValueChanged: {
+                    secondsInterval.value = root.secondsIntervalValue}
             }
+            Component.onCompleted: {
+                hoursInterval.value = root.hoursIntervalValue
+                minutesInterval.value = root.minutesIntervalValue
+                secondsInterval.value = root.secondsIntervalValue
+            }
+            //FIXME: there should be only one spinbox: QtControls spinboxes are still too limited for it tough
             Row {
                 spacing: units.largeSpacing / 2
                 QtControls.Label {

@@ -208,6 +208,11 @@ void Image::setSlideTimer(int time)
 
     m_delay = time;
 
+    if (m_mode == SlideShow) {
+        updateDirWatch(m_slidePaths);
+        startSlideshow();
+    }
+
     emit slideTimerChanged();
 }
 
@@ -248,6 +253,7 @@ void Image::setSlidePaths(const QStringList &slidePaths)
 
     if (m_mode == SlideShow) {
         updateDirWatch(m_slidePaths);
+        startSlideshow();
     }
 
     emit slidePathsChanged();
@@ -443,7 +449,6 @@ void Image::setWallpaper(const QString &path)
 
 void Image::startSlideshow()
 {
-
     if(m_findToken.isEmpty()) {
         // populate background list
         m_timer.stop();
