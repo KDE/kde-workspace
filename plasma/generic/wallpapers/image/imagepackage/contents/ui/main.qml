@@ -41,6 +41,10 @@ Rectangle {
         Qt.openUrlExternally(imageWallpaper.wallpaperPath);
     }
 
+    function action_next() {
+        imageWallpaper.nextSlide();
+    }
+
     //private
     function fadeWallpaper() {
         fadeAnim.running = false
@@ -85,6 +89,9 @@ Rectangle {
     Component.onCompleted: {
         print("WP : configuredImage:  " + configuredImage);
         imageWallpaper.addUrl(configuredImage)
+        if (wallpaper.pluginName == "org.kde.slideshow") {
+            wallpaper.setAction("next", i18n("Next Wallpaper Image"),"user-desktop");
+        }
         wallpaper.setAction("open", i18n("Open Wallpaper Image"),"document-open");
         fadeWallpaper()
     }
