@@ -248,15 +248,6 @@ void Image::setSlidePaths(const QStringList &slidePaths)
     emit slidePathsChanged();
 }
 
-
-void Image::timeChanged(const QTime& time)
-{
-    m_delay = QTime(0, 0, 0).secsTo(time);
-    if (!m_slideshowBackgrounds.isEmpty()) {
-        m_timer.start(m_delay * 1000);
-    }
-}
-
 void Image::showAddSlidePathsDialog()
 {
     QUrl empty;

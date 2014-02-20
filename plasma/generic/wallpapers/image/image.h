@@ -120,7 +120,6 @@ class Image : public QObject
 
     protected Q_SLOTS:
         void removeWallpaper(QString name);
-        void timeChanged(const QTime& time);
         void showAddSlidePathsDialog();
         void wallpaperBrowseCompleted();
         /**
