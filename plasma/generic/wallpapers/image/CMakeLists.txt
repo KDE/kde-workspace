@@ -30,4 +30,7 @@ install(FILES qmldir DESTINATION ${QML_INSTALL_DIR}/org/kde/plasma/wallpapers/im
 
 install(FILES wallpaper.knsrc DESTINATION ${CONFIG_INSTALL_DIR})
 
-plasma_install_package(package org.kde.image plasma/wallpapers wallpaper)
+plasma_install_package(imagepackage org.kde.image plasma/wallpapers wallpaper)
+plasma_install_package(slideshowpackage org.kde.slideshow plasma/wallpapers wallpaper)
+
+install(DIRECTORY imagepackage/contents/ui DESTINATION ${DATA_INSTALL_DIR}/plasma/wallpapers/org.kde.slideshow/contents PATTERN .svn EXCLUDE PATTERN CMakeLists.txt EXCLUDE PATTERN Messages.sh EXCLUDE)
