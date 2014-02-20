@@ -28,6 +28,7 @@ ColumnLayout {
     property string cfg_Image
     property int cfg_FillMode
     property var cfg_SlidePaths: ""
+    property int cfg_SlideInterval
 
     spacing: units.largeSpacing / 2
 
@@ -42,6 +43,15 @@ ColumnLayout {
         imageWallpaper.slidePaths = cfg_SlidePaths
     }
 
+    property int hoursIntervalValue
+    property int minutesIntervalValue
+    property int secondsIntervalValue
+
+    onCfg_SlideIntervalChanged: {
+        hoursIntervalValue = Math.floor(cfg_SlideInterval / 3600)
+        minutesIntervalValue = Math.floor(cfg_SlideInterval % 3600) / 60
+        secondsIntervalValue = cfg_SlideInterval % 3600 % 60
+    }
     
     //Rectangle { color: "orange"; x: formAlignment; width: formAlignment; height: 20 }
 
@@ -107,25 +117,86 @@ ColumnLayout {
 
     Component {
         id: foldersComponent
-        QtControls.ScrollView {
+        ColumnLayout {
             anchors.fill: parent
-            frameVisible: true
-            ListView {
-                id: slidePathsView
-                anchors.margins: 4
-                model: imageWallpaper.slidePaths
-                delegate: QtControls.Label {
-                    text: modelData
-                    width: slidePathsView.width
-                    height: Math.max(paintedHeight, removeButton.height);
-                    QtControls.ToolButton {
-                        id: removeButton
-                        anchors {
-                            verticalCenter: parent.verticalCenter
-                            right: parent.right
+            Connections {
+                target: root
+                onHoursIntervalValueChanged: hoursInterval.value = root.hoursIntervalValue
+                onMinutesIntervalValueChanged: minutesInterval.value = root.minutesIntervalValue
+                onSecondsIntervalValueChanged: secondsInterval.value = root.secondsIntervalValue
+            }
+            Row {
+                spacing: units.smallSpacing
+                QtControls.Label {
+                    width: formAlignment - units.largeSpacing
+                    anchors.verticalCenter: parent.verticalCenter
+                    horizontalAlignment: Text.AlignRight
+                    text: i18n("Change every:")
+                }
+                QtControls.SpinBox {
+                    id: hoursInterval
+                    anchors.verticalCenter: parent.verticalCenter
+                    width: units.gridUnit * 3
+                    decimals: 0
+                    minimumValue: 0
+                    maximumValue: 24
+                    onValueChanged: cfg_SlideInterval = hoursInterval.value * 3600 + minutesInterval.value * 60 + secondsInterval.value
+                }
+                QtControls.Label {
+                    anchors.verticalCenter: parent.verticalCenter
+                    text: i18n("Hours")
+                }
+                QtControls.SpinBox {
+                    id: minutesInterval
+                    anchors.verticalCenter: parent.verticalCenter
+                    width: units.gridUnit * 3
+                    decimals: 0
+                    minimumValue: 0
+                    maximumValue: 60
+                    onValueChanged: cfg_SlideInterval = hoursInterval.value * 3600 + minutesInterval.value * 60 + secondsInterval.value
+                }
+                QtControls.Label {
+                    anchors.verticalCenter: parent.verticalCenter
+                    text: i18n("Minutes")
+                }
+                QtControls.SpinBox {
+                    id: secondsInterval
+                    anchors.verticalCenter: parent.verticalCenter
+                    width: units.gridUnit * 3
+                    decimals: 0
+                    minimumValue: 0
+                    maximumValue: 60
+                    onValueChanged: cfg_SlideInterval = hoursInterval.value * 3600 + minutesInterval.value * 60 + secondsInterval.value
+                }
+                QtControls.Label {
+                    anchors.verticalCenter: parent.verticalCenter
+                    text: i18n("Seconds")
+                }
+            }
+            QtControls.ScrollView {
+                Layout.fillHeight: true;
+                anchors {
+                    left: parent.left
+                    right: parent.right
+                }
+                frameVisible: true
+                ListView {
+                    id: slidePathsView
+                    anchors.margins: 4
+                    model: imageWallpaper.slidePaths
+                    delegate: QtControls.Label {
+                        text: modelData
+                        width: slidePathsView.width
+                        height: Math.max(paintedHeight, removeButton.height);
+                        QtControls.ToolButton {
+                            id: removeButton
+                            anchors {
+                                verticalCenter: parent.verticalCenter
+                                right: parent.right
+                            }
+                            iconName: "list-remove"
+                            onClicked: imageWallpaper.removeSlidePath(modelData);
                         }
-                        iconName: "list-remove"
-                        onClicked: imageWallpaper.removeSlidePath(modelData);
                     }
                 }
             }
