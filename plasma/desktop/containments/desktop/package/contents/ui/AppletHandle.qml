@@ -212,7 +212,7 @@ Item {
         elementId: "close"
         iconSize: root.iconSize
         visible: {
-            var a = plasmoid.action("remove");
+            var a = applet.action("remove");
             return (a && typeof(a) != "undefined") ? a.enabled : false;
         }
         // we don't set action, since we want to catch the button click,
@@ -224,7 +224,7 @@ Item {
             appletHandle.removeApplet();
         }
         Component.onCompleted: {
-            var a = plasmoid.action("remove");
+            var a = applet.action("remove");
             if (a && typeof(a) != "undefined") {
                 a.enabled = true
             }
