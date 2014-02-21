@@ -40,6 +40,9 @@ PlasmaCore.SvgItem {
     //handle type: behave in different ways based on the alignment
     property int alignment: panel.alignment
 
+    property int minimumValue: (dialogRoot.vertical) ? -root.height/2 : -root.width/2
+    property int maximumValue: (dialogRoot.vertical) ? root.parent.height : root.parent.width
+
     function syncPos() {
         if (dialogRoot.vertical) {
             if (alignment == Qt.AlignRight) {
@@ -84,6 +87,10 @@ PlasmaCore.SvgItem {
         drag {
             target: parent
             axis: (dialogRoot.vertical) ? Drag.YAxis : Drag.XAxis
+            minimumX: root.minimumValue
+            minimumY: root.minimumValue
+            maximumX: root.maximumValue
+            maximumY: root.maximumValue
         }
         anchors.fill: parent
         onPositionChanged: {
