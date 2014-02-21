@@ -92,7 +92,7 @@ Item {
             id: contextMenuComponent
             PlasmaCore.Dialog {
                 visualParent: settingsButton
-                location: PlasmaCore.Types.Floating
+                location: plasmoid.location
                 type: PlasmaCore.Dialog.PopupMenu
                 flags: Qt.Popup | Qt.FramelessWindowHint | Qt.WindowDoesNotAcceptFocus
                 mainItem: Column {
