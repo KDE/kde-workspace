@@ -96,6 +96,10 @@ Rectangle {
                     switchAnim.running = true;
                 }
             } else {
+                containment.anchors.left = root.left;
+                containment.anchors.top = root.top;
+                containment.anchors.right = root.right;
+                containment.anchors.bottom = root.bottom;
                 internal.oldContainment = containment;
             }
         }
