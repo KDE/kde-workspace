@@ -213,7 +213,10 @@ Item {
                     }
                     text: i18n("Lock Widgets")
                     iconSource: "document-encrypt"
-                    onClicked: configDialog.action("lock widgets").trigger();
+                    onClicked: {
+                        plasmoid.action("lock widgets").trigger();
+                        configDialog.close();
+                    }
                 }
                 PlasmaComponents.ToolButton {
                     anchors {
@@ -222,7 +225,7 @@ Item {
                     }
                     text: i18n("Remove Panel")
                     iconSource: "window-close"
-                    onClicked: configDialog.action("remove").trigger();
+                    onClicked: plasmoid.action("remove").trigger();
                 }
             }
         }
