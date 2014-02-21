@@ -77,13 +77,22 @@ PlasmaCore.FrameSvgItem {
         }
 
         root.enabledBorders = borders;
+
+        containmentParent.anchors.topMargin = Math.min(root.margins.top, Math.max(1, containmentParent.height - units.iconSizes.smallMedium));
+
+        containmentParent.anchors.bottomMargin = Math.min(root.margins.bottom, Math.max(1, containmentParent.height - units.iconSizes.smallMedium));
+
+        //Base the left/right margins on height as well, to have a good radial simmetry
+        containmentParent.anchors.leftMargin = Math.min(root.margins.left, Math.max(1, containmentParent.height - units.iconSizes.smallMedium));
+
+        containmentParent.anchors.leftMargin = Math.min(root.margins.left, Math.max(1, containmentParent.height - units.iconSizes.smallMedium));
     }
 
     onContainmentChanged: {
         print("New panel Containment: " + containment);
-        containment.parent = root;
+        containment.parent = containmentParent;
         containment.visible = true;
-        containment.anchors.fill = root;
+        containment.anchors.fill = containmentParent;
 
         containment.locationChanged.connect(adjustBorders);
         if (containment.Layout) {
@@ -95,8 +104,8 @@ PlasmaCore.FrameSvgItem {
             containment.Layout.maximumHeightChanged.connect(maximumHeightChanged);
             containment.Layout.preferredHeightChanged.connect(preferredHeightChanged);
         }
+        adjustBorders();
     }
-
 
     function minimumWidthChanged() {
         if (containment.formFactor === PlasmaCore.Types.Horizontal) {
@@ -130,6 +139,16 @@ PlasmaCore.FrameSvgItem {
         }
     }
 
+    Item {
+        id: containmentParent
+        anchors {
+            fill: parent
+            leftMargin: root.margins.left
+            topMargin: root.margins.top
+            rightMargin: root.margins.right
+            bottomMargin: root.margins.bottom
+        }
+    }
 
     Connections {
         target: panel
