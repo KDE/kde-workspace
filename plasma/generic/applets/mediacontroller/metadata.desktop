@@ -71,4 +71,4 @@ X-KDE-PluginInfo-Website=http://plasma.kde.org/
 X-Plasma-API=declarativeappletscript
 X-Plasma-MainScript=ui/main.qml
 X-Plasma-NotificationArea=true
-X-Plasma-DBusActivationService=org.mpris.MediaPlayer2.
+X-Plasma-DBusActivationService=org.mpris.MediaPlayer2.*

@@ -39,6 +39,7 @@
 #include <QDBusConnectionInterface>
 #include <QDBusServiceWatcher>
 #include <QDBusPendingCallWatcher>
+#include <QRegExp>
 
 namespace SystemTray
 {
@@ -239,7 +240,10 @@ void PlasmoidProtocol::serviceNameFetchFinished(QDBusPendingCallWatcher* watcher
 void PlasmoidProtocol::serviceRegistered(const QString &service)
 {
     foreach (const QString &plugin, m_dbusActivatableTasks.keys()) {
-        if (service.startsWith(m_dbusActivatableTasks.value(plugin))) {
+        const QString& pattern = m_dbusActivatableTasks.value(plugin);
+        QRegExp rx(pattern);
+        rx.setPatternSyntax(QRegExp::Wildcard);
+        if (rx.exactMatch(service)) {
             qDebug() << "ST : DBus service " << m_dbusActivatableTasks[plugin] << "appeared. Loading " << plugin;
             newTask(plugin);
         }
@@ -249,7 +253,10 @@ void PlasmoidProtocol::serviceRegistered(const QString &service)
 void PlasmoidProtocol::serviceUnregistered(const QString &service)
 {
     foreach (const QString &plugin, m_dbusActivatableTasks.keys()) {
-        if (service.startsWith(m_dbusActivatableTasks.value(plugin))) {
+        const QString& pattern = m_dbusActivatableTasks.value(plugin);
+        QRegExp rx(pattern);
+        rx.setPatternSyntax(QRegExp::Wildcard);
+        if (rx.exactMatch(service)) {
             qDebug() << "ST : DBus service " << m_dbusActivatableTasks[plugin] << " disappeared. Unloading " << plugin;
             cleanupTask(plugin);
         }
