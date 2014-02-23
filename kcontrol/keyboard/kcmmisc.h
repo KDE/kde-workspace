@@ -24,15 +24,16 @@
 #ifndef __KCMMISC_H__
 #define __KCMMISC_H__
 
-#include <QButtonGroup>
 #include <QString>
 #include <QWidget>
+#include <QButtonGroup>
 
 class Ui_KeyboardConfigWidget;
 
 enum TriState {
 	STATE_ON = 0,  STATE_OFF = 1, STATE_UNCHANGED = 2
 };
+
 
 class TriStateHelper {
 public:
@@ -66,7 +67,7 @@ private Q_SLOTS:
   void delaySpinboxChanged (int value);
   void rateSliderChanged (int value);
   void rateSpinboxChanged (double value);
-  void keyboardRepeatStateChanged();
+  void keyboardRepeatStateChanged(int selection);
 
 Q_SIGNALS:
 	void changed(bool state);
@@ -85,8 +86,6 @@ private:
   enum TriState numlockState;
 
   Ui_KeyboardConfigWidget& ui;
-  QButtonGroup numlockButtons, keyboardRepButtons;
-
 };
 
 #endif
