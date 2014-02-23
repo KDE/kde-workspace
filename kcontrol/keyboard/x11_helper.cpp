@@ -22,6 +22,7 @@
 #include <kdebug.h>
 
 #include <QX11Info>
+#include <QDir>
 
 #include <X11/X.h>
 #include <X11/Xlib.h>
@@ -29,7 +30,8 @@
 #include <X11/XKBlib.h>
 #include <X11/extensions/XKBrules.h>
 #include <fixx11h.h>
-
+#include <QX11Info>
+#include <config-workspace.h>
 
 // more information about the limit https://bugs.freedesktop.org/show_bug.cgi?id=19501
 int X11Helper::MAX_GROUP_COUNT = 4;
@@ -399,6 +401,35 @@ QString LayoutUnit::toString() const
 		return layout;
 
 	return layout + LAYOUT_VARIANT_SEPARATOR_PREFIX+variant+LAYOUT_VARIANT_SEPARATOR_SUFFIX;
+}
+
+QString X11Helper::findXkbDir()
+{
+    QString rulesDir;
+
+    QString xkbParentDir;
+
+    QString base(XLIBDIR);
+    if( base.count('/') >= 3 ) {
+        // .../usr/lib/X11 -> /usr/share/X11/xkb vs .../usr/X11/lib -> /usr/X11/share/X11/xkb
+        QString delta = base.endsWith("X11") ? "/../../share/X11" : "/../share/X11";
+        QDir baseDir(base + delta);
+        if( baseDir.exists() ) {
+            xkbParentDir = baseDir.absolutePath();
+        }
+        else {
+            QDir baseDir(base + "/X11");	// .../usr/X11/lib/X11/xkb (old XFree)
+            if( baseDir.exists() ) {
+                xkbParentDir = baseDir.absolutePath();
+            }
+        }
+    }
+
+    if( xkbParentDir.isEmpty() ) {
+        xkbParentDir = "/usr/share/X11";
+    }
+
+    return xkbParentDir + "/xkb";
 }
 
 const int LayoutUnit::MAX_LABEL_LENGTH = 3;

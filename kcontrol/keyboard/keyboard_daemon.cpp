@@ -45,7 +45,6 @@
 
 
 K_PLUGIN_FACTORY(KeyboardFactory, registerPlugin<KeyboardDaemon>();)
-K_EXPORT_PLUGIN(KeyboardFactory("keyboard", "kxkb"))
 
 KeyboardDaemon::KeyboardDaemon(QObject *parent, const QList<QVariant>&)
 	: KDEDModule(parent),

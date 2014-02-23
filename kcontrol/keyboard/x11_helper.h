@@ -176,6 +176,7 @@ public:
 
 	enum FetchType { ALL, LAYOUTS_ONLY, MODEL_ONLY };
 	static bool getGroupNames(Display* dpy, XkbConfig* xkbConfig, FetchType fetchType);
+    static QString findXkbDir();
 
 private:
 	static unsigned int getGroup();
