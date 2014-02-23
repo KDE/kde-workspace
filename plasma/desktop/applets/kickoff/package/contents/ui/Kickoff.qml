@@ -43,8 +43,8 @@ Item {
 
         property Item currentView: mainStack.currentTab.decrementCurrentIndex ? mainStack.currentTab : mainStack.currentTab.item
 
-        implicitWidth: root.minimumWidth
-        implicitHeight: root.minimumHeight
+//         implicitWidth: root.minimumWidth
+//         implicitHeight: root.minimumHeight
 
         state: "Normal"
         focus: true
@@ -317,10 +317,25 @@ Item {
                     event.accepted = true;
                     break;
                 }
+                case Qt.Key_Backspace: {
+                    var q = searchBar.query;
+                    if (event.modifiers & Qt.ControlModifier) {
+                        searchBar.query = "";
+                    } else { // NoModifier
+                        searchBar.query = searchBar.query.substring(0, searchBar.query.length - 1);
+                    }
+                    searchBar.focus = true;
+                    event.accepted = true;
+                    break;
+                }
+
                 default: { // forward key to searchView
                     if (event.text != "") {
+                        print("new text:" + event.text);
                         searchBar.query += event.text;
                         searchBar.focus = true;
+                    } else {
+                        print("Emtpy text");
                     }
                     event.accepted = true;
                 }
