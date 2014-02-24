@@ -33,8 +33,11 @@
 #include <KStandardDirs>
 #include <KLocalizedString>
 #include <KUrl>
-#include <KRunner/AbstractRunner>
-#include <KRunner/RunnerManager>
+//#include <KRunner/AbstractRunner>
+//#include <KRunner/RunnerManager>
+#include <krunner/abstractrunner.h>
+#include <krunner/runnermanager.h>
+
 
 // Local
 #include "recentapplications.h"
