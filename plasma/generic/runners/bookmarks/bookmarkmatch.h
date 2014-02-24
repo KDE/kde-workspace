@@ -25,7 +25,7 @@
 #include <QString>
 #include <QIcon>
 #include <QList>
-#include <QueryMatch>
+#include <krunner/querymatch.h>
 
 class Favicon;
 class BookmarkMatch

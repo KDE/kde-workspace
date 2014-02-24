@@ -22,7 +22,7 @@
 #define BOOKMARKSRUNNER_H
 
 #include <QMimeData>
-#include <Plasma/AbstractRunner>
+#include <krunner/abstractrunner.h>
 
 
 class KBookmark;
@@ -59,6 +59,5 @@ class BookmarksRunner : public Plasma::AbstractRunner
         void prep();
 };
 
-K_EXPORT_PLASMA_RUNNER(bookmarksrunner, BookmarksRunner)
 
 #endif

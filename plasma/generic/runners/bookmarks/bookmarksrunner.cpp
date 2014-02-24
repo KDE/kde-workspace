@@ -25,6 +25,7 @@
 #include <QStack>
 #include <QDir>
 
+#include <KLocalizedString>
 #include <KMimeType>
 #include <KMimeTypeTrader>
 #include <KToolInvocation>
@@ -34,6 +35,9 @@
 #include "bookmarkmatch.h"
 #include "browserfactory.h"
 #include "bookmarksrunner_defs.h"
+
+K_EXPORT_PLASMA_RUNNER(bookmarksrunner, BookmarksRunner)
+
 
 BookmarksRunner::BookmarksRunner( QObject* parent, const QVariantList &args )
     : Plasma::AbstractRunner(parent, args), m_browser(0), m_browserFactory(new BrowserFactory(this))
@@ -77,7 +81,7 @@ void BookmarksRunner::match(Plasma::RunnerContext &context)
     foreach(BookmarkMatch match, matches) {
         if(!context.isValid())
             return;
-        context.addMatch(term, match.asQueryMatch(this));
+        context.addMatch(match.asQueryMatch(this));
     }
 }
 
@@ -94,7 +98,7 @@ QString BookmarksRunner::findBrowserName()
         }
     }
 
-    //qDebug() << "KRunner::Bookmarks: found executable " << exec << " as default browser";
+    qDebug() << "KRunner::Bookmarks: found executable " << exec << " as default browser";
     return exec;
 
 }

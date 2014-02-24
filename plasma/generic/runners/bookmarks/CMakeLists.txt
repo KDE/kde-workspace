@@ -1,5 +1,18 @@
 ########### next target ###############
-set(EXTERNAL_LIBS KIOCore ${QT_QTSCRIPT_LIBRARY} KF5::Plasma Qt5::Sql)
+#set(EXTERNAL_LIBS KIOCore ${QT_QTSCRIPT_LIBRARY} KF5::Plasma Qt5::Sql)
+
+find_package(Qt5 CONFIG REQUIRED COMPONENTS Sql)
+
+
+set(EXTERNAL_LIBS
+    Qt5::Sql
+    KF5::KIOCore
+    KF5::I18n
+    KF5::Runner
+    KF5::KDE4Support
+)
+
+
 if(QJSON_FOUND)
     add_definitions(-DHAVE_QJSON=1)
     # Some distributions (e.g. Debian or Ubuntu 12.10) seem to install a QJSONConfig.cmake with lower-case variables,
@@ -40,6 +53,6 @@ install(TARGETS krunner_bookmarksrunner DESTINATION ${PLUGIN_INSTALL_DIR} )
 install(FILES plasma-runner-bookmarks.desktop DESTINATION ${SERVICES_INSTALL_DIR})
 
 # Currently tests include only chrome, so no need to get include them if json is not found
-if(QJSON_FOUND)
-    add_subdirectory(tests)
-endif()
+#if(QJSON_FOUND)
+#    add_subdirectory(tests)
+#endif()
