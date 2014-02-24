@@ -28,19 +28,19 @@ import org.kde.plasma.private.kickoff 0.1 as Kickoff
 import org.kde.qtextracomponents 2.0
 
 Item {
-    id: root
+
     Plasmoid.switchWidth: units.gridUnit * 20
     Plasmoid.switchHeight: units.gridUnit * 30
 
-    property string previousState
-    property bool switchTabsOnHover: plasmoid.configuration.switchTabsOnHover
-    property bool showAppsByName: plasmoid.configuration.showAppsByName
-
 
     Plasmoid.fullRepresentation: Item {
+        id: root
         Layout.minimumWidth: units.gridUnit * 25
         Layout.minimumHeight: units.gridUnit * 35
 
+        property string previousState
+        property bool switchTabsOnHover: plasmoid.configuration.switchTabsOnHover
+        property bool showAppsByName: plasmoid.configuration.showAppsByName
         property Item currentView: mainStack.currentTab.decrementCurrentIndex ? mainStack.currentTab : mainStack.currentTab.item
 
 //         implicitWidth: root.minimumWidth
@@ -194,6 +194,7 @@ Item {
             PlasmaExtras.ConditionalLoader {
                 id: searchPage
                 when: root.state == "Search"
+                //when: mainStack.currentTab == searchPage || root.state == "Search"
                 source: Qt.resolvedUrl("SearchView.qml")
             }
         } // mainStack
@@ -331,11 +332,8 @@ Item {
 
                 default: { // forward key to searchView
                     if (event.text != "") {
-                        print("new text:" + event.text);
                         searchBar.query += event.text;
                         searchBar.focus = true;
-                    } else {
-                        print("Emtpy text");
                     }
                     event.accepted = true;
                 }
@@ -369,6 +367,10 @@ Item {
                 }
             }
         ] // states
+
+        onStateChanged: {
+            print("root.state changed to : " + state);
+        }
 
         Component.onCompleted: {
             root.focus = true;
