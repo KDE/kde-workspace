@@ -87,6 +87,7 @@ Item {
         PlasmaCore.Dialog {
             id: contextMenu
             visualParent: settingsButton
+            transientParent: panel
             location: plasmoid.location
             type: PlasmaCore.Dialog.PopupMenu
             flags: Qt.Popup | Qt.FramelessWindowHint | Qt.WindowDoesNotAcceptFocus
