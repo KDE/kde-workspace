@@ -247,10 +247,11 @@ MouseEventListener {
         anchors {
             fill: parent
             leftMargin: taskFrame.margins.left + icon.width + 4
-            topMargin: taskFrame.margins.top
             rightMargin: taskFrame.margins.right
-            bottomMargin: taskFrame.margins.bottom
+            verticalCenter: parent.verticalCenter
         }
+
+        height: Math.max(theme.mSize(theme.defaultFont).height, parent.height - taskFrame.margins.top - taskFrame.margins.bottom)
 
         visible: !model.IsLauncher && (parent.width - anchors.leftMargin - anchors.rightMargin) >= (theme.mSize(theme.defaultFont).width * 3)
 
