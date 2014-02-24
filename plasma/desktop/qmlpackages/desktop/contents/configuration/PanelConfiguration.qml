@@ -87,14 +87,14 @@ PlasmaCore.FrameSvgItem {
             to:  {
                 switch (panel.location) {
                 case PlasmaCore.Types.TopEdge:
-                    return panel.screenGeometry.y
+                    return panel.screenGeometry.y + panel.distance
                 case PlasmaCore.Types.LeftEdge:
-                    return panel.screenGeometry.x
+                    return panel.screenGeometry.x + panel.distance
                 case PlasmaCore.Types.RightEdge:
-                    return panel.screenGeometry.x + panel.screenGeometry.width - panel.width
+                    return panel.screenGeometry.x + panel.screenGeometry.width - panel.width - panel.distance
                 case PlasmaCore.Types.BottomEdge:
                 default:
-                    return panel.screenGeometry.y + panel.screenGeometry.height - panel.height
+                    return panel.screenGeometry.y + panel.screenGeometry.height - panel.height - panel.distance
                 }
             }
             duration: units.shortDuration * 3
@@ -106,14 +106,14 @@ PlasmaCore.FrameSvgItem {
             to: {
                 switch (panel.location) {
                 case PlasmaCore.Types.TopEdge:
-                    return panel.screenGeometry.y + panel.height
+                    return panel.screenGeometry.y + panel.height + panel.distance
                 case PlasmaCore.Types.LeftEdge:
-                    return panel.screenGeometry.x + panel.width
+                    return panel.screenGeometry.x + panel.width + panel.distance
                 case PlasmaCore.Types.RightEdge:
-                    return panel.screenGeometry.x + panel.screenGeometry.width - panel.width - configDialog.width
+                    return panel.screenGeometry.x + panel.screenGeometry.width - panel.width - configDialog.width - panel.distance
                 case PlasmaCore.Types.BottomEdge:
                 default:
-                    return panel.screenGeometry.y + panel.screenGeometry.height - panel.height - configDialog.height
+                    return panel.screenGeometry.y + panel.screenGeometry.height - panel.height - configDialog.height - panel.distance
                 }
             }
             duration: units.shortDuration * 3
