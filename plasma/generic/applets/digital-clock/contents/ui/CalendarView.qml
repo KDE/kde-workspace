@@ -15,6 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import QtQuick 2.0
+import org.kde.plasma.core 2.0 as PlasmaCore
 import org.kde.plasma.calendar 2.0 as PlasmaCalendar
 import org.kde.plasma.components 2.0 as PlasmaComponents
 import org.kde.plasma.extras 2.0 as PlasmaExtras
@@ -238,6 +239,7 @@ Item {
 
         width: units.largeSpacing
         height: width
+        hoverEnabled: true
         anchors {
             top: parent.top
             right: parent.right
@@ -250,12 +252,12 @@ Item {
             plasmoid.hideOnWindowDeactivate = !pin.checked;
         }
 
-        PlasmaComponents.Label {
-            width: paintedWidth
-            height: paintedHeight
+        PlasmaCore.IconItem {
             anchors.centerIn: parent
-            text: "✓"
-            opacity: pin.checked ? 1 : 0.3
+            source: pin.checked ? "window-unpin" : "window-pin"
+            width: units.iconSizes.small / 2
+            height: width
+            active: pin.containsMouse
         }
     }
 }

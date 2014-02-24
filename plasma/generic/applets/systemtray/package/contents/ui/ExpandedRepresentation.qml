@@ -167,6 +167,7 @@ Item {
 
         width: units.largeSpacing
         height: width
+        hoverEnabled: true
         anchors {
             top: parent.top
             right: parent.right
@@ -181,12 +182,12 @@ Item {
             plasmoid.hideOnWindowDeactivate = !pin.checked;
         }
 
-        PlasmaComponents.Label {
-            width: paintedWidth
-            height: paintedHeight
+        PlasmaCore.IconItem {
             anchors.centerIn: parent
-            text: "✓"
-            opacity: pin.checked ? 1 : 0.3
+            source: pin.checked ? "window-unpin" : "window-pin"
+            width: units.iconSizes.small / 2
+            height: width
+            active: pin.containsMouse
         }
     }
 }
