@@ -109,12 +109,13 @@ set_package_properties(EGL PROPERTIES
                        PURPOSE "Required to build KWin with EGL support"
                       )
 
-find_package(Wayland)
-set_package_properties(Wayland PROPERTIES DESCRIPTION "The Wayland Client and Server libraries"
-                       URL "http://wayland.freedesktop.org"
+find_package(Wayland COMPONENTS Client Egl)
+set_package_properties(Wayland PROPERTIES
                        TYPE OPTIONAL
                        PURPOSE "Required for building KWin with Wayland support"
                       )
+add_feature_info("Wayland-Client" Wayland_Client_FOUND "Required for building the Wayland backend in KWin")
+add_feature_info("Wayland-EGL" Wayland_Egl_FOUND "Required for building the Wayland EGL compositing backend in KWin")
 
 find_package(X11)
 if (X11_FOUND)
