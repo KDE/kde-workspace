@@ -21,7 +21,7 @@
 #define PLACESRUNNER_H
 
 
-#include <plasma/abstractrunner.h>
+#include <krunner/abstractrunner.h>
 #include <kfileplacesmodel.h>
 
 class PlacesRunner;
@@ -61,6 +61,5 @@ private:
     PlacesRunnerHelper *m_helper;
 };
 
-K_EXPORT_PLASMA_RUNNER(placesrunner, PlacesRunner)
 
 #endif

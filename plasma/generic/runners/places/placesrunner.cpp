@@ -27,6 +27,9 @@
 #include <KIcon>
 #include <KRun>
 #include <KUrl>
+#include <KLocalizedString>
+
+K_EXPORT_PLASMA_RUNNER(placesrunner, PlacesRunner)
 
 //Q_DECLARE_METATYPE(Plasma::RunnerContext)
 PlacesRunner::PlacesRunner(QObject* parent, const QVariantList &args)
@@ -122,7 +125,7 @@ void PlacesRunnerHelper::match(Plasma::RunnerContext *c)
         }
     }
 
-    context.addMatches(term, matches);
+    context.addMatches(matches);
 }
 
 
