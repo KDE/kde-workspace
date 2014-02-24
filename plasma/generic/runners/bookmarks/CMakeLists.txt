@@ -12,14 +12,7 @@ set(EXTERNAL_LIBS
     KF5::KDE4Support
 )
 
-
-if(QJSON_FOUND)
-    add_definitions(-DHAVE_QJSON=1)
-    # Some distributions (e.g. Debian or Ubuntu 12.10) seem to install a QJSONConfig.cmake with lower-case variables,
-    # which is preferred to our FindQJSON.cmake. Make sure this does not break the build.
-    set(EXTERNAL_LIBS ${EXTERNAL_LIBS} ${QJSON_LIBRARIES} ${qjson_LIBRARIES} )
-    include_directories(${QJSON_INCLUDE_DIR} ${qjson_INCLUDE_DIR})
-endif()
+add_definitions(-DHAVE_QJSON=1)
 
 set(krunner_bookmarksrunner_SRCS
     browserfactory.cpp
@@ -33,13 +26,11 @@ set(krunner_bookmarksrunner_SRCS
     browsers/firefox.cpp
 )
 
-if(QJSON_FOUND)
 set(krunner_bookmarksrunner_SRCS
     ${krunner_bookmarksrunner_SRCS}
     browsers/chromefindprofile.cpp
     browsers/chrome.cpp
 )
-endif()
 
 
 add_library(krunner_bookmarksrunner MODULE ${krunner_bookmarksrunner_SRCS})
@@ -53,6 +44,4 @@ install(TARGETS krunner_bookmarksrunner DESTINATION ${PLUGIN_INSTALL_DIR} )
 install(FILES plasma-runner-bookmarks.desktop DESTINATION ${SERVICES_INSTALL_DIR})
 
 # Currently tests include only chrome, so no need to get include them if json is not found
-#if(QJSON_FOUND)
-#    add_subdirectory(tests)
-#endif()
+#add_subdirectory(tests)

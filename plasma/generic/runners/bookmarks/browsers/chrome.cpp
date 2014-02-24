@@ -22,7 +22,9 @@
 #include "chrome.h"
 #include "faviconfromblob.h"
 #include "browsers/findprofile.h"
-#include <qjson/parser.h>
+
+#include <QJsonDocument>
+#include <QJsonObject>
 #include <QFileInfo>
 #include <QDebug>
 #include "bookmarksrunner_defs.h"
@@ -79,16 +81,21 @@ QList<BookmarkMatch> Chrome::match(const QString &term, bool addEveryThing, Prof
 
 void Chrome::prepare()
 {
-    QJson::Parser parser;
-    bool ok;
     foreach(ProfileBookmarks *profileBookmarks, m_profileBookmarks) {
         Profile profile = profileBookmarks->profile();
         QFile bookmarksFile(profile.path());
-        QVariant result = parser.parse(&bookmarksFile, &ok);
-        if(!ok || !result.toMap().contains("roots")) {
+        if (!bookmarksFile.open(QIODevice::ReadOnly | QIODevice::Text)) {
+            continue;
+        };
+        QJsonDocument jdoc = QJsonDocument::fromJson(bookmarksFile.readAll());
+        if (jdoc.isNull()) {
+            continue;
+        }
+        QVariantMap resultMap = jdoc.object().toVariantMap();
+        if (!resultMap.contains("roots")) {
             return;
         }
-        QVariantMap entries = result.toMap().value("roots").toMap();
+        QVariantMap entries = resultMap.value("roots").toMap();
         foreach(QVariant folder, entries.values()) {
             parseFolder(folder.toMap(), profileBookmarks);
         }

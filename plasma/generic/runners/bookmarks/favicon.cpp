@@ -21,6 +21,6 @@
 #include "favicon.h"
 
 Favicon::Favicon(QObject *parent) :
-    QObject(parent), m_default_icon(KIcon("bookmarks"))
-{
+    QObject(parent), m_default_icon(QIcon::fromTheme("bookmarks"))
+{   
 }

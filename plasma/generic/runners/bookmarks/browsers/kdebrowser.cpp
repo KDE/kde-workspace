@@ -33,7 +33,7 @@ QIcon KDEFavicon::iconFor(const QString &url)  {
     if (iconFile.isEmpty()) {
         return defaultIcon();
     }
-    return KIcon(iconFile);
+    return QIcon::fromTheme(iconFile);
 }
 
 

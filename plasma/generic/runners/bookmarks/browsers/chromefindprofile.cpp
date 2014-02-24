@@ -21,7 +21,8 @@
 
 #include "chromefindprofile.h"
 #include <QDir>
-#include <qjson/parser.h>
+#include <QJsonDocument>
+#include <QJsonObject>
 #include <QVariantMap>
 #include <QDebug>
 #include "bookmarksrunner_defs.h"
@@ -41,16 +42,20 @@ QList<Profile> FindChromeProfile::find()
           .arg(configDirectory);
 
   QList<Profile> profiles;
-  QJson::Parser parser;
-  bool ok;
+
   QFile localStateFile(localStateFileName);
 
-  QVariantMap localState = parser.parse(&localStateFile, &ok).toMap();
-  if(!ok) {
-      //qDebug() << "error opening " << QFileInfo(localStateFile).absoluteFilePath();
+  if (!localStateFile.open(QIODevice::ReadOnly | QIODevice::Text)) {
+      return profiles;
+  }
+  QJsonDocument jdoc = QJsonDocument::fromJson(localStateFile.readAll());
+
+  if(jdoc.isNull()) {
+      qDebug() << "error opening " << QFileInfo(localStateFile).absoluteFilePath();
       return profiles;
   }
 
+  QVariantMap localState = jdoc.object().toVariantMap();
   QVariantMap profilesConfig = localState.value("profile").toMap().value("info_cache").toMap();
 
   foreach(QString profile, profilesConfig.keys()) {
