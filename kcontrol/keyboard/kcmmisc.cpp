@@ -32,6 +32,7 @@
 #include <QCheckBox>
 #include <QWhatsThis>
 #include <QX11Info>
+#include <QDebug>
 
 #include <klocale.h>
 #include <kconfig.h>
@@ -62,6 +63,16 @@ KCMiscKeyboardWidget::KCMiscKeyboardWidget(QWidget *parent)
   ui.rateSlider->setSingleStep(30);
   ui.rateSlider->setPageStep(500);
   ui.rateSlider->setTickInterval(498);
+
+  QList <QAbstractButton*> btns = ui.kbRepButtonGroup->buttons();
+  for(int i = 0; i < btns.size(); i++){
+      ui.kbRepButtonGroup->setId(btns[i], i);
+  }
+
+  btns = ui.numButtonGroup->buttons();
+  for(int i = 0; i < btns.size(); i++){
+      ui.numButtonGroup->setId(btns[i], i);
+  }
 
   connect(ui.kbRepButtonGroup, SIGNAL(buttonClicked(int)), this, SLOT(changed()));
   connect(ui.kbRepButtonGroup, SIGNAL(buttonClicked(int)), this, SLOT(keyboardRepeatStateChanged(int)));
@@ -117,8 +128,13 @@ TriState TriStateHelper::getTriState(const QButtonGroup* group)
 
 void TriStateHelper::setTriState(QButtonGroup* group, TriState state)
 {
-    /*needs to be done*/
+    QAbstractButton* checked = group->button(getInt(state));
+    if(checked){
+        checked->setChecked(true);
+        //qDebug()<<"button: "<<checked->text();
+    }
 }
+
 
 void KCMiscKeyboardWidget::load()
 {
@@ -168,6 +184,7 @@ void KCMiscKeyboardWidget::save()
   keyboardRepeat = TriStateHelper::getTriState(ui.kbRepButtonGroup);
   numlockState = TriStateHelper::getTriState(ui.numButtonGroup);
 
+  //qDebug()<<"kb: "<<keyboardRepeat<<" nmlck: "<<numlockState;
   config.writeEntry("ClickVolume",clickVolume);
   config.writeEntry("KeyboardRepeating", TriStateHelper::getInt(keyboardRepeat));
   config.writeEntry("RepeatRate", ui.rate->value() );
