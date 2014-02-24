@@ -20,9 +20,9 @@
 #ifndef RECENTDOCUMENTS_H
 #define RECENTDOCUMENTS_H
 
-#include <Plasma/AbstractRunner>
+#include <krunner/abstractrunner.h>
 
-#include <KIcon>
+#include <QIcon>
 
 class RecentDocuments : public Plasma::AbstractRunner {
     Q_OBJECT
@@ -41,10 +41,9 @@ class RecentDocuments : public Plasma::AbstractRunner {
         void loadRecentDocuments();
 
     private:
-        KIcon m_icon;
+        QIcon m_icon;
         QStringList m_recentdocuments;
 };
 
-K_EXPORT_PLASMA_RUNNER(recentdocuments, RecentDocuments)
 
 #endif

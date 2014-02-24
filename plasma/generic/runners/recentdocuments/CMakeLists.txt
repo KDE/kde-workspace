@@ -3,7 +3,13 @@ set(krunner_recentdocuments_SRCS
 )
 
 add_library(krunner_recentdocuments MODULE ${krunner_recentdocuments_SRCS})
-target_link_libraries(krunner_recentdocuments KF5::Plasma KIOCore)
+
+target_link_libraries(krunner_recentdocuments
+    KF5::KIOCore
+    KF5::I18n
+    KF5::Runner
+    KF5::KDE4Support
+)
 
 install(TARGETS krunner_recentdocuments DESTINATION ${PLUGIN_INSTALL_DIR} )
 
