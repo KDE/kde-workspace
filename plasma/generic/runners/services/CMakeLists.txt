@@ -3,7 +3,13 @@ set(krunner_services_SRCS
 )
 
 add_library(krunner_services MODULE ${krunner_services_SRCS})
-target_link_libraries(krunner_services KIOCore KF5::Plasma)
+target_link_libraries(krunner_services
+    KF5::KIOCore
+    KF5::I18n
+    #KF5::Plasma
+    KF5::Runner
+    KF5::KDE4Support
+)
 
 install(TARGETS krunner_services DESTINATION ${PLUGIN_INSTALL_DIR} )
 

@@ -207,7 +207,8 @@ void ServiceRunner::match(Plasma::RunnerContext &context)
         }
     }
 
-    context.addMatches(term, matches);
+    //context.addMatches(term, matches);
+    context.addMatches(matches);
 }
 
 void ServiceRunner::run(const Plasma::RunnerContext &context, const Plasma::QueryMatch &match)
@@ -251,6 +252,8 @@ QMimeData * ServiceRunner::mimeDataForMatch(const Plasma::QueryMatch *match)
 
     return 0;
 }
+
+K_EXPORT_PLASMA_RUNNER(services, ServiceRunner)
 
 #include "servicerunner.moc"
 

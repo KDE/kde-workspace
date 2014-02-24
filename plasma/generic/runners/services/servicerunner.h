@@ -22,8 +22,8 @@
 
 #include <KService>
 
-#include <Plasma/AbstractRunner>
-
+//#include <KRunner/AbstractRunner>
+#include <krunner/abstractrunner.h>
 
 /**
  * This class looks for matches in the set of .desktop files installed by
@@ -50,7 +50,6 @@ class ServiceRunner : public Plasma::AbstractRunner
         void setupMatch(const KService::Ptr &service, Plasma::QueryMatch &action);
 };
 
-K_EXPORT_PLASMA_RUNNER(services, ServiceRunner)
 
 #endif
 
