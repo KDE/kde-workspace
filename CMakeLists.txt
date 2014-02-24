@@ -103,6 +103,11 @@ set_package_properties(OpenGLES PROPERTIES DESCRIPTION "The OpenGLES libraries"
                        URL "http://www.khronos.org/opengles"
                        TYPE OPTIONAL
                       )
+find_package(EGL)
+set_package_properties(EGL PROPERTIES
+                       TYPE OPTIONAL
+                       PURPOSE "Required to build KWin with EGL support"
+                      )
 
 find_package(Wayland)
 set_package_properties(Wayland PROPERTIES DESCRIPTION "The Wayland Client and Server libraries"
