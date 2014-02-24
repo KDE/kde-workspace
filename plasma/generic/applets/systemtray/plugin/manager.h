@@ -51,7 +51,7 @@ class Manager : public QObject
     Q_OBJECT
 
 public:
-    Manager();
+    Manager(QObject *parent = 0);
     ~Manager();
 
     /**

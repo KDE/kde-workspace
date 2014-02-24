@@ -73,9 +73,6 @@ bool taskLessThan(const Task *lhs, const Task *rhs)
     return lhs->name() < rhs->name();
 }
 
-Manager *SystemTray::Host::s_manager = 0;
-int SystemTray::Host::s_managerUsage = 0;
-
 class HostPrivate {
 public:
     Host *q;
@@ -98,11 +95,9 @@ Host::Host(QObject* parent) :
     QObject(parent)
 {
     d = new HostPrivate;
-    if (!s_manager) {
-        s_manager = new SystemTray::Manager();
-//        connect(s_manager, &Manager::tasksChanged, this, &Host::tasksChanged);
-    }
-    ++s_managerUsage;
+    m_manager = new SystemTray::Manager(this);
+//        connect(m_manager, &Manager::tasksChanged, this, &Host::tasksChanged);
+
     QTimer::singleShot(10, this, SLOT(init())); // FIXME: remove timer
     //init();
     connect(&d->compressionTimer, &QTimer::timeout, this, &Host::compressionTimeout);
@@ -117,9 +112,9 @@ void Host::init()
 {
 
     initTasks();
-    connect(s_manager, &Manager::taskAdded, this, &Host::taskAdded);
-    connect(s_manager, &Manager::taskRemoved, this, &Host::taskRemoved);
-    connect(s_manager, &Manager::taskStatusChanged, this, &Host::taskStatusChanged);
+    connect(m_manager, &Manager::taskAdded, this, &Host::taskAdded);
+    connect(m_manager, &Manager::taskRemoved, this, &Host::taskRemoved);
+    connect(m_manager, &Manager::taskStatusChanged, this, &Host::taskStatusChanged);
     emit categoriesChanged();
 }
 
@@ -134,8 +129,8 @@ void Host::compressionTimeout()
 
 void Host::initTasks()
 {
-    if (s_manager) {
-        QList<SystemTray::Task*> allTasks = s_manager->tasks();
+    if (m_manager) {
+        QList<SystemTray::Task*> allTasks = m_manager->tasks();
         foreach (SystemTray::Task *task, allTasks) {
             if (d->showTask(task)) {
                 d->shownTasks.append(task);
@@ -160,16 +155,16 @@ void Host::initTasks()
 void Host::setRootItem(QQuickItem* rootItem)
 {
     //qCDebug(SYSTEMTRAY) << "Set root item";
-    if (s_manager && s_manager->rootItem() != rootItem) {
-        s_manager->setRootItem(rootItem);
+    if (m_manager && m_manager->rootItem() != rootItem) {
+        m_manager->setRootItem(rootItem);
         emit rootItemChanged();
     }
 }
 
 QQuickItem* Host::rootItem()
 {
-    if (s_manager) {
-        return s_manager->rootItem();
+    if (m_manager) {
+        return m_manager->rootItem();
     } else {
         return 0;
     }
@@ -239,7 +234,7 @@ void Host::taskStatusChanged(SystemTray::Task *task)
 
 QStringList Host::categories() const
 {
-    QList<SystemTray::Task*> allTasks = s_manager->tasks();
+    QList<SystemTray::Task*> allTasks = m_manager->tasks();
     QStringList cats;
     QList<SystemTray::Task::Category> cnt;
     foreach (SystemTray::Task *task, allTasks) {

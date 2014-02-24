@@ -77,8 +77,7 @@ private Q_SLOTS:
 
 private:
     void initTasks();
-    static SystemTray::Manager *s_manager;
-    static int s_managerUsage;
+    SystemTray::Manager *m_manager;
     HostPrivate* d;
 
 };
