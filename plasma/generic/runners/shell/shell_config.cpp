@@ -26,7 +26,7 @@
 #include <KPluginFactory>
 #include <KPluginLoader>
 
-#include <Plasma/AbstractRunner>
+#include <krunner/abstractrunner.h>
 
 ShellConfig::ShellConfig(const KConfigGroup &config, QWidget* parent)
     : QWidget(parent),

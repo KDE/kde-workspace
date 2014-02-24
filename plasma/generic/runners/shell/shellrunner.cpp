@@ -20,13 +20,14 @@
 
 #include <QWidget>
 #include <QPushButton>
+#include <QIcon>
 
 #include <KAuthorized>
 #include <QDebug>
 #ifdef Q_OS_UNIX
 #include <KDE/SuProcess>
 #endif
-#include <KIcon>
+#include <KGlobal>
 #include <KLocale>
 #include <KRun>
 #include <KShell>
@@ -36,6 +37,8 @@
 #include <Plasma/Theme>
 
 #include "shell_config.h"
+
+K_EXPORT_PLASMA_RUNNER(shell, ShellRunner)
 
 ShellRunner::ShellRunner(QObject *parent, const QVariantList &args)
     : Plasma::AbstractRunner(parent, args),
@@ -69,10 +72,10 @@ void ShellRunner::match(Plasma::RunnerContext &context)
         Plasma::QueryMatch match(this);
         match.setId(term);
         match.setType(Plasma::QueryMatch::ExactMatch);
-        match.setIcon(KIcon("system-run"));
+        match.setIcon(QIcon::fromTheme("system-run"));
         match.setText(i18n("Run %1", term));
         match.setRelevance(0.7);
-        context.addMatch(term, match);
+        context.addMatch(match);
     }
 }
 
@@ -145,7 +148,7 @@ void ShellRunner::createRunOptions(QWidget *parent)
     ShellConfig *configWidget = new ShellConfig(config(), parent);
 
     QPalette pal = configWidget->palette();
-    Plasma::Theme *theme = Plasma::Theme::defaultTheme();
+    Plasma::Theme *theme = new Plasma::Theme(this);
     pal.setColor(QPalette::Normal, QPalette::Window, theme->color(Plasma::Theme::BackgroundColor));
     pal.setColor(QPalette::Normal, QPalette::WindowText, theme->color(Plasma::Theme::TextColor));
     configWidget->setPalette(pal);

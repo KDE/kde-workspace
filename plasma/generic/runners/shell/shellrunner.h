@@ -19,7 +19,7 @@
 #ifndef SHELLRUNNER_H
 #define SHELLRUNNER_H
 
-#include <Plasma/AbstractRunner>
+#include <krunner/abstractrunner.h>
 
 class QWidget;
 
@@ -54,6 +54,5 @@ class ShellRunner : public Plasma::AbstractRunner
         bool m_asOtherUser;
 };
 
-K_EXPORT_PLASMA_RUNNER(shell, ShellRunner)
 
 #endif
