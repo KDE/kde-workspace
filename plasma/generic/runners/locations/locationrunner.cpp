@@ -32,6 +32,8 @@
 
 #include <kservicetypetrader.h>
 
+K_EXPORT_PLASMA_RUNNER(locations, LocationsRunner)
+
 
 LocationsRunner::LocationsRunner(QObject *parent, const QVariantList& args)
     : Plasma::AbstractRunner(parent, args)
@@ -73,7 +75,7 @@ void LocationsRunner::match(Plasma::RunnerContext &context)
         } else {
             match.setId("openfile");
         }
-        context.addMatch(term, match);
+        context.addMatch(match);
     } else if (type == Plasma::RunnerContext::Help) {
         //qDebug() << "Locations matching because of" << type;
         Plasma::QueryMatch match(this);
@@ -83,7 +85,7 @@ void LocationsRunner::match(Plasma::RunnerContext &context)
         match.setRelevance(1);
         match.setType(Plasma::QueryMatch::ExactMatch);
         match.setId("help");
-        context.addMatch(term, match);
+        context.addMatch(match);
     } else if (type == Plasma::RunnerContext::NetworkLocation || type == Plasma::RunnerContext::UnknownType) {
         const bool filtered = KUriFilter::self()->filterUri(term, QStringList() << QLatin1String("kshorturifilter"));
 
@@ -124,7 +126,7 @@ void LocationsRunner::match(Plasma::RunnerContext &context)
             match.setType(Plasma::QueryMatch::ExactMatch);
         }
 
-        context.addMatch(term, match);
+        context.addMatch(match);
     }
 }
 

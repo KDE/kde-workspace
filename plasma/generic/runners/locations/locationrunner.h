@@ -19,7 +19,7 @@
 #ifndef LOCATIONRUNNER_H
 #define LOCATIONRUNNER_H
 
-#include <Plasma/AbstractRunner>
+#include <krunner/abstractrunner.h>
 
 class LocationsRunner : public Plasma::AbstractRunner
 {
@@ -36,6 +36,5 @@ class LocationsRunner : public Plasma::AbstractRunner
         QMimeData * mimeDataForMatch(const Plasma::QueryMatch *match);
 };
 
-K_EXPORT_PLASMA_RUNNER(locations, LocationsRunner)
 
 #endif
