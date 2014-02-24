@@ -24,7 +24,7 @@
 #include <QPixmap>
 #include <QFile>
 #include <QFileInfo>
-#include <KStandardDirs>
+#include <QStandardPaths>
 #include <QPainter>
 #include <QDir>
 #include "bookmarksrunner_defs.h"
@@ -69,7 +69,7 @@ FaviconFromBlob *FaviconFromBlob::chrome(const QString &profileDirectory, QObjec
 {
     QString profileName = QFileInfo(profileDirectory).fileName();
     QString faviconCache = QString("%1/KRunner-Chrome-Favicons-%2.sqlite")
-            .arg(KStandardDirs::locateLocal("cache", ""))
+            .arg(QStandardPaths::writableLocation(QStandardPaths::CacheLocation))
             .arg(profileName);
     FetchSqlite *fetchSqlite = new FetchSqlite(profileDirectory + "/Favicons", faviconCache, parent);
     return new FaviconFromBlob(profileName, new ChromeQuery(), "image_data", fetchSqlite, parent);
@@ -89,7 +89,7 @@ FaviconFromBlob::FaviconFromBlob(const QString &profileName, BuildQuery *buildQu
     : Favicon(parent), m_buildQuery(buildQuery), m_blobcolumn(blobColumn), m_fetchsqlite(fetchSqlite)
 {
     m_profileCacheDirectory = QString("%1/KRunner-Favicons-%2")
-            .arg(KStandardDirs::locateLocal("cache", ""))
+            .arg(QStandardPaths::writableLocation(QStandardPaths::CacheLocation))
             .arg(profileName);
     //qDebug() << "got cache directory: " << m_profileCacheDirectory;
     cleanCacheDirectory();
