@@ -28,7 +28,9 @@ PlasmaCore.Dialog {
     visible: false
 
     type: PlasmaCore.Dialog.PopupMenu
+    flags: Qt.WindowStaysOnTopHint
     hideOnWindowDeactivate: true
+    location: plasmoid.location
 
     mainItem: Item {
         MouseHandler {
