@@ -51,22 +51,14 @@ find_package(KF5 CONFIG REQUIRED
     IdleTime ItemModels WidgetsAddons WindowSystem Codecs Archive CoreAddons Solid ThreadWeaver
     Config Auth JS JsEmbed Wallet DBusAddons Sonnet GlobalAccel
     I18n GuiAddons Service ConfigWidgets ItemViews Notifications IconThemes FrameworkIntegration Completion JobWidgets TextWidgets XmlGui Crash
-    Bookmarks UnitConversion KIO KCMUtils Parts Kross NotifyConfig PrintUtils Su DocTools NewStuff KHtml Declarative Init Runner)
+    Bookmarks UnitConversion KIO KCMUtils Parts Kross NotifyConfig PrintUtils Su DocTools NewStuff KHtml Declarative Init Runner Activities Plasma)
 
-find_package(KF5Activities NO_MODULE)
-find_package(KF5Plasma REQUIRED NO_MODULE)
 find_package(KF5PlasmaQuick REQUIRED NO_MODULE)
 
 find_package(UDev) #PowerDevil upower/udev backend
 
 # needed for set_package_properties macro
 find_package(KF5KDE4Support REQUIRED NO_MODULE)
-
-# find_package(Strigi)
-# set_package_properties(Strigi PROPERTIES DESCRIPTION "Desktop indexing and search support"
-#                        URL "http://strigi.sourceforge.net"
-#                        TYPE REQUIRED
-#                       )
 
 find_package(ZLIB)
 set_package_properties(ZLIB PROPERTIES DESCRIPTION "Support for gzip compressed files and data streams"
