@@ -133,10 +133,7 @@ set_package_properties(X11 PROPERTIES DESCRIPTION "X11 libraries"
 
 if(HAVE_X11)
   find_package(XCB REQUIRED COMPONENTS XCB XFIXES DAMAGE COMPOSITE SHAPE SYNC RENDER RANDR KEYSYMS IMAGE SHM XTEST)
-  set_package_properties(XCB PROPERTIES DESCRIPTION "X protocol C-language Binding"
-                         URL "http://xcb.freedesktop.org"
-                         TYPE REQUIRED
-                        )
+  set_package_properties(XCB PROPERTIES TYPE REQUIRED)
   find_package(XCB COMPONENTS ICCCM)
   add_feature_info("XCB-ICCCM" XCB_ICCCM_FOUND "Required for building test applications for KWin")
 
