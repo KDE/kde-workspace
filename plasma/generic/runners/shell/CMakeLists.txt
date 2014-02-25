@@ -3,7 +3,7 @@ set(krunner_shell_SRCS
     shell_config.cpp
 )
 
-kde4_add_ui_files(krunner_shell_SRCS shellOptions.ui)
+qt5_wrap_ui(krunner_shell_SRCS shellOptions.ui)
 add_library(krunner_shell MODULE ${krunner_shell_SRCS})
 target_link_libraries(krunner_shell
     KF5::KIOCore
