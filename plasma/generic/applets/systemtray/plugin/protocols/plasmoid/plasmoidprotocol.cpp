@@ -29,6 +29,7 @@
 #include <kdeclarative/qmlobject.h>
 #include <KLocalizedString>
 #include <kplugintrader.h>
+#include <kservicetypetrader.h>
 
 #include <QLoggingCategory>
 #include <QQmlContext>
@@ -97,9 +98,9 @@ void PlasmoidProtocol::init()
     qWarning() << "Known plasmoid ids:"<< m_knownPlugins;
 
     //X-Plasma-NotificationArea
-    KPluginInfo::List applets = Plasma::PluginLoader::self()->listAppletInfo(QString());
-    const QString constraint = QString("[X-Plasma-NotificationArea] == 'true'");
-    //KPluginTrader::applyConstraints(applets, constraint);
+    const QString constraint = QString("[X-Plasma-NotificationArea] == true");
+
+    KPluginInfo::List applets = KPluginInfo::fromServices(KServiceTypeTrader::self()->query("Plasma/Applet", constraint));
 
     QStringList ownApplets;
 
@@ -120,9 +121,8 @@ void PlasmoidProtocol::init()
         }
 
         //FIXME: should consider config
-        if (!blacklist.contains(info.pluginName())
-                && service->property("X-Plasma-NotificationArea", QVariant::Bool).toBool()
-                && dbusactivation.isEmpty()) {
+        if (!blacklist.contains(info.pluginName()) &&
+            dbusactivation.isEmpty()) {
             // if we already have a plugin with this exact name in it, then check if it is the
             // same plugin and skip it if it is indeed already listed
             if (sortedApplets.contains(info.name())) {
