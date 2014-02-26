@@ -28,11 +28,11 @@ class KUserProxy : public QObject
 {
     Q_OBJECT
 
-    Q_PROPERTY(QString fullName READ fullName NOTIFY userChanged)
-    Q_PROPERTY(QString loginName READ loginName NOTIFY userChanged)
-    Q_PROPERTY(QString faceIconPath READ faceIconPath NOTIFY userChanged)
-    Q_PROPERTY(QString os READ os NOTIFY userChanged)
-    Q_PROPERTY(QString host READ host NOTIFY userChanged)
+    Q_PROPERTY(QString fullName READ fullName CONSTANT)
+    Q_PROPERTY(QString loginName READ loginName CONSTANT)
+    Q_PROPERTY(QString faceIconPath READ faceIconPath CONSTANT)
+    Q_PROPERTY(QString os READ os CONSTANT)
+    Q_PROPERTY(QString host READ host CONSTANT)
 
 public:
     KUserProxy(QObject *parent = 0);
@@ -43,9 +43,6 @@ public:
     QString faceIconPath() const;
     QString os() const;
     QString host() const;
-
-Q_SIGNALS:
-    void userChanged();
 
 private:
     KUser m_user;
