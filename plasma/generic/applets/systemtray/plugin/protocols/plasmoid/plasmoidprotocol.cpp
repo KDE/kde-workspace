@@ -108,6 +108,7 @@ void PlasmoidProtocol::init()
     blacklist << "notifier";
     //blacklist << "org.kde.plasma.devicenotifier";
     //blacklist << "org.kde.plasma.notifications";
+    //blacklist << "org.kde.networkmanagement";
     blacklist << "org.kde.systrayplasmoidtest";
 
     QMap<QString, KPluginInfo> sortedApplets;

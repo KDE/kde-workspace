@@ -61,7 +61,7 @@ Manager::Manager(QObject *parent)
       d(new Private(this))
 {
     d->rootItem = 0;
-    QTimer::singleShot(50, this, SLOT(init())); // FIXME: remove timer
+    QTimer::singleShot(1000, this, SLOT(init())); // FIXME: remove timer
    // init();
 }
 
