@@ -27,7 +27,7 @@ import org.kde.plasma.private.kickoff 0.1 as Kickoff
 Item {
     id: footer
 
-    height: units.gridUnit * 6
+    height: units.gridUnit * 5
 
     Kickoff.KUser {
         id: kuser
@@ -39,7 +39,7 @@ Item {
         id: faceIcon
         source: kuser.faceIconPath
 
-        width: units.gridUnit * 4
+        width: units.gridUnit * 3
         height: width
 
         anchors {
