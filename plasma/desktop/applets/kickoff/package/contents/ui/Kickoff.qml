@@ -63,6 +63,10 @@ Item {
             id: launcher
         }
 
+        Kickoff.KUser {
+            id: kuser
+        }
+
         PlasmaCore.Svg {
             id: lineSvg
             imagePath: "widgets/line"
@@ -277,6 +281,13 @@ Item {
         Keys.forwardTo: [tabBar.layout]
 
         Keys.onPressed: {
+
+            print("KUser::fullName     " + kuser.fullName);
+            print("KUser::loginName    " + kuser.loginName);
+            print("KUser::faceIconPath " + kuser.faceIconPath);
+            print("KUser::os           " + kuser.os);
+            print("KUser::host         " + kuser.fullName);
+
             if (mainStack.currentTab == applicationsPage) {
                 if (event.key != Qt.Key_Tab) {
                     root.state = "Applications";
