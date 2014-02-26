@@ -19,7 +19,7 @@
  ***************************************************************************/
 
 #include "kuserproxy.h"
-
+#include <QUrl>
 
 KUserProxy::KUserProxy (QObject *parent)
     : QObject(parent)
@@ -42,7 +42,7 @@ QString KUserProxy::loginName() const
 
 QString KUserProxy::faceIconPath() const
 {
-    return m_user.faceIconPath();
+    return QUrl::fromLocalFile(m_user.faceIconPath()).toString();
 }
 
 QString KUserProxy::os() const
