@@ -48,10 +48,10 @@ Item {
             //leftMargin: units.gridUnit
         }
 
-        y: units.gridUnit / 2
+        y: units.gridUnit / 4
         //height: paintedHeight + units.gridUnit / 4
         //opacity: 0.6
-        level: 3
+        level: 4
         text: section
         //horizontalAlignment: Text.AlignHCenter
     }

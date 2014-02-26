@@ -27,7 +27,7 @@ import org.kde.plasma.private.kickoff 0.1 as Kickoff
 Item {
     id: footer
 
-    height: units.gridUnit * 5
+    height: units.gridUnit * 4.5
 
     Kickoff.KUser {
         id: kuser
@@ -75,12 +75,11 @@ Item {
         }
     }
 
-
-    Component.onCompleted: {
-        print("KUser::fullName     " + kuser.fullName);
-        print("KUser::loginName    " + kuser.loginName);
-        print("KUser::faceIconPath " + kuser.faceIconPath);
-        print("KUser::os           " + kuser.os);
-        print("KUser::host         " + kuser.host);
-    }
+//     Component.onCompleted: {
+//         print("KUser::fullName     " + kuser.fullName);
+//         print("KUser::loginName    " + kuser.loginName);
+//         print("KUser::faceIconPath " + kuser.faceIconPath);
+//         print("KUser::os           " + kuser.os);
+//         print("KUser::host         " + kuser.host);
+//     }
 }
