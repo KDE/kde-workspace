@@ -25,7 +25,7 @@ Item {
     id: listItem
 
     width: ListView.view.width
-    height: listItemDelegate.height + listItemDelegate.anchors.margins*2
+    height: listItemDelegate.height // + listItemDelegate.anchors.margins*2
 
     property bool dropEnabled: false
     property bool modelChildren: hasModelChildren
@@ -49,9 +49,10 @@ Item {
             right: parent.right
             top: parent.top
             bottom: parent.bottom
-            margins: 4 //FIXME theme.defaultFont.mSize.width/2
+            //margins: units.gridUnit / 2
         }
-        height: Math.max(elementIcon.height, titleElement.height + subTitleElement.height)
+        //height: Math.max(elementIcon.height + units.gridUnit/2, titleElement.height + subTitleElement.height + units.gridUnit/2)
+        height: units.gridUnit * 3
 
         DragArea {
             anchors.fill: parent
@@ -68,7 +69,7 @@ Item {
                 id: mouseArea
 
                 anchors.fill: parent
-                anchors.margins: -8
+                //anchors.margins: -8
 
                 hoverEnabled: true
                 acceptedButtons: Qt.LeftButton | Qt.RightButton
@@ -103,6 +104,7 @@ Item {
 
             anchors {
                 left: parent.left
+                leftMargin: (units.gridUnit * 3) - units.iconSizes.medium
                 verticalCenter: parent.verticalCenter
             }
             width: units.iconSizes.medium
@@ -117,7 +119,7 @@ Item {
                 top: elementIcon.top
                 left: elementIcon.right
                 right: parent.right
-                leftMargin: 8
+                leftMargin: units.gridUnit
             }
             height: paintedHeight
             // TODO: games should always show the by name!
@@ -134,11 +136,10 @@ Item {
             id: subTitleElement
 
             anchors {
-                left: elementIcon.right
+                left: titleElement.left
                 right: parent.right
                 bottom: parent.bottom
                 top: titleElement.bottom
-                leftMargin: 8
             }
             height: paintedHeight
 
@@ -153,13 +154,15 @@ Item {
             font.pointSize: theme.smallestFont.pointSize
             elide: Text.ElideMiddle
         }
-
+/*
         PlasmaComponents.Highlight {
             id: itemHighlight
-            anchors.fill: parent
-            anchors.margins: -4
+            anchors {
+                fill: parent
+                margins: -(units.gridUnit/2)
+            }
             opacity: mouseArea.containsMouse ? 1 : 0
-            Behavior on opacity { NumberAnimation {} }
-        }
+            Behavior on opacity { NumberAnimation { duration: theme.shortDuration } }
+        }*/
     } // listItemDelegate
 } // listItem
