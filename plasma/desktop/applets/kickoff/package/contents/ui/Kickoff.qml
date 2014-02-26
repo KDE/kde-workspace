@@ -29,19 +29,22 @@ import org.kde.qtextracomponents 2.0
 
 Item {
 
-    Plasmoid.switchWidth: units.gridUnit * 20
+    Plasmoid.switchWidth: units.gridUnit * 26
     Plasmoid.switchHeight: units.gridUnit * 30
 
 
     Plasmoid.fullRepresentation: Item {
         id: root
-        Layout.minimumWidth: units.gridUnit * 25
-        Layout.minimumHeight: units.gridUnit * 35
+        Layout.minimumWidth: units.gridUnit * 26
+        Layout.minimumHeight: units.gridUnit * 30
 
         property string previousState
         property bool switchTabsOnHover: plasmoid.configuration.switchTabsOnHover
         property bool showAppsByName: plasmoid.configuration.showAppsByName
         property Item currentView: mainStack.currentTab.decrementCurrentIndex ? mainStack.currentTab : mainStack.currentTab.item
+
+        property int pad: units.gridUnit
+        property bool debug: false
 
 //         implicitWidth: root.minimumWidth
 //         implicitHeight: root.minimumHeight
@@ -63,10 +66,6 @@ Item {
             id: launcher
         }
 
-        Kickoff.KUser {
-            id: kuser
-        }
-
         PlasmaCore.Svg {
             id: lineSvg
             imagePath: "widgets/line"
@@ -82,37 +81,8 @@ Item {
             onTriggered: pendingButton.clicked()
         }
 
-        SearchBar {
-            id: searchBar
-
-            anchors {
-                top: {
-                    switch (plasmoid.location) {
-                        case PlasmaCore.Types.TopEdge:
-                        case PlasmaCore.Types.LeftEdge:
-                        case PlasmaCore.Types.RightEdge:
-                            return undefined;
-                        default:
-                            return footer.bottom;
-                    }
-                }
-                bottom: {
-                    switch (plasmoid.location) {
-                        case PlasmaCore.Types.TopEdge:
-                        case PlasmaCore.Types.LeftEdge:
-                        case PlasmaCore.Types.RightEdge:
-                            return footer.top;
-                        default:
-                            return undefined;
-                    }
-                }
-                right: parent.right
-                left: parent.left
-            }
-        }
-
-        Footer {
-            id: footer
+        Header {
+            id: header
 
             anchors {
                 top: {
@@ -140,6 +110,67 @@ Item {
             }
         }
 
+        SearchBar {
+            id: searchBar
+            visible: false
+
+            anchors {
+                top: {
+                    switch (plasmoid.location) {
+                        case PlasmaCore.Types.TopEdge:
+                        case PlasmaCore.Types.LeftEdge:
+                        case PlasmaCore.Types.RightEdge:
+                            return undefined;
+                        default:
+                            return header.bottom;
+                    }
+                }
+                bottom: {
+                    switch (plasmoid.location) {
+                        case PlasmaCore.Types.TopEdge:
+                        case PlasmaCore.Types.LeftEdge:
+                        case PlasmaCore.Types.RightEdge:
+                            return header.top;
+                        default:
+                            return undefined;
+                    }
+                }
+                right: parent.right
+                left: parent.left
+            }
+        }
+        /*
+        Footer {
+            id: footer
+            visible: false
+
+            anchors {
+                top: {
+                    switch (plasmoid.location) {
+                        case PlasmaCore.Types.TopEdge:
+                        case PlasmaCore.Types.LeftEdge:
+                        case PlasmaCore.Types.RightEdge:
+                            return undefined;
+                        default:
+                            return parent.top;
+                    }
+                }
+                bottom: {
+                    switch (plasmoid.location) {
+                        case PlasmaCore.Types.TopEdge:
+                        case PlasmaCore.Types.LeftEdge:
+                        case PlasmaCore.Types.RightEdge:
+                            return parent.bottom;
+                        default:
+                            return undefined;
+                    }
+                }
+                left: parent.left
+                right: parent.right
+            }
+        }
+        */
+
         PlasmaComponents.TabGroup {
             id: mainStack
 
@@ -152,7 +183,7 @@ Item {
                     case PlasmaCore.Types.RightEdge:
                         return parent.top;
                     default:
-                        return searchBar.bottom;
+                        return header.bottom;
                     }
                 }
                 bottom: {
@@ -160,7 +191,7 @@ Item {
                         case PlasmaCore.Types.TopEdge:
                         case PlasmaCore.Types.LeftEdge:
                         case PlasmaCore.Types.RightEdge:
-                            return searchBar.top;
+                            return header.top;
                         default:
                             return tabBar.top;
                     }
@@ -233,7 +264,7 @@ Item {
                 right: plasmoid.location == PlasmaCore.Types.RightEdge || plasmoid.location == PlasmaCore.Types.LeftEdge ? undefined : parent.right
             }
             x: plasmoid.location == PlasmaCore.Types.LeftEdge ? height : (plasmoid.location == PlasmaCore.Types.RightEdge ? root.width : 0)
-            width: plasmoid.location == PlasmaCore.Types.LeftEdge || plasmoid.location == PlasmaCore.Types.RightEdge ? root.height - searchBar.height - footer.height : undefined
+            width: plasmoid.location == PlasmaCore.Types.LeftEdge || plasmoid.location == PlasmaCore.Types.RightEdge ? root.height - header.height : undefined
 
             transformOrigin: Item.TopLeft
             rotation: plasmoid.location == PlasmaCore.Types.LeftEdge || plasmoid.location == PlasmaCore.Types.RightEdge ? 90 : 0
@@ -281,12 +312,6 @@ Item {
         Keys.forwardTo: [tabBar.layout]
 
         Keys.onPressed: {
-
-            print("KUser::fullName     " + kuser.fullName);
-            print("KUser::loginName    " + kuser.loginName);
-            print("KUser::faceIconPath " + kuser.faceIconPath);
-            print("KUser::os           " + kuser.os);
-            print("KUser::host         " + kuser.fullName);
 
             if (mainStack.currentTab == applicationsPage) {
                 if (event.key != Qt.Key_Tab) {
