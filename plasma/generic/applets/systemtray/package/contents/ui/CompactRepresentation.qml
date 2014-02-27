@@ -27,7 +27,7 @@ import org.kde.qtextracomponents 2.0 as QtExtraComponents
 import org.kde.private.systemtray 2.0 as SystemTray
 
 
-QtExtraComponents.MouseEventListener {
+Item {
     id: compactRepresentation
 
     Layout.minimumWidth: !root.vertical ? computeDimension() : computeDimensionHeight()
@@ -42,8 +42,6 @@ QtExtraComponents.MouseEventListener {
 
     property QtObject systrayhost: undefined
 
-    onPressed: PlasmaExtras.PressedAnimation { targetItem: arrow }
-    onReleased: PlasmaExtras.ReleasedAnimation { targetItem: arrow }
 
     Timer {
         id: hidePopupTimer
@@ -79,13 +77,6 @@ QtExtraComponents.MouseEventListener {
             plasmoid.expanded = true
         } else {
             hidePopupTimer.start();
-        }
-    }
-
-    MouseArea {
-        anchors.fill: parent
-        onClicked: {
-            plasmoid.expanded = true;
         }
     }
 
