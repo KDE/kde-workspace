@@ -48,9 +48,9 @@ Item {
 
             anchors.fill: parent
 
+            boundsBehavior: Flickable.StopAtBounds
             delegate: KickoffItem {}
             highlight: PlasmaComponents.Highlight {}
-
             model: Kickoff.KRunnerModel{}
 
             Connections {

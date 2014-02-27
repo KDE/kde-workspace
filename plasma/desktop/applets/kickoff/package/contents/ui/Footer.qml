@@ -28,7 +28,7 @@ Item {
 
     PlasmaComponents.Label {
             id: statusLabel
-            text: kickoff.footerText
+            //text: kickoff.footerText // FIXME: where does this come from? Is it still needed?
             anchors {
                 verticalCenter: parent.verticalCenter
                 left: parent.left

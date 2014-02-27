@@ -24,6 +24,7 @@
 #include "leavemodel.h"
 #include "recentlyusedmodel.h"
 #include "systemmodel.h"
+#include "kuserproxy.h"
 #include "urlitemlauncher.h"
 
 #include <QtQml>
@@ -38,6 +39,7 @@ void KickoffPlugin::registerTypes (const char *uri)
     qmlRegisterType<Kickoff::RecentlyUsedModel>(uri, 0, 1, "RecentlyUsedModel");
     qmlRegisterType<Kickoff::SystemModel>(uri, 0, 1, "SystemModel");
     qmlRegisterType<Kickoff::UrlItemLauncher>(uri, 0, 1, "Launcher");
+    qmlRegisterType<KUserProxy>(uri, 0, 1, "KUser");
 }
 
 #include "kickoffplugin.moc"

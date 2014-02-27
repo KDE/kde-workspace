@@ -21,6 +21,7 @@ set(libkickoff_SRCS
     core/recentapplications.cpp
     core/recentlyusedmodel.cpp
     core/systemmodel.cpp
+    core/kuserproxy.cpp
     core/urlitemlauncher.cpp
 )
 
@@ -40,6 +41,7 @@ target_link_libraries(kickoffplugin
                               Qt5::Core
                               Qt5::Qml
                               Qt5::DBus
+                              KF5::CoreAddons
                               KF5::I18n
                               KF5::KIOCore
                               KF5::KIOWidgets

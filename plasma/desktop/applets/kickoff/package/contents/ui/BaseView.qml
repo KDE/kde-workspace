@@ -49,6 +49,8 @@ Item {
 
             interactive: contentHeight > height
             boundsBehavior: Flickable.StopAtBounds
+            currentIndex: -1
+
             delegate: KickoffItem {}
 
             section {

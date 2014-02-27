@@ -19,6 +19,7 @@
 import QtQuick 2.0
 import org.kde.plasma.core 2.0 as PlasmaCore
 import org.kde.plasma.components 2.0 as PlasmaComponents
+import org.kde.plasma.extras 2.0 as PlasmaExtras
 
 
 Item {
@@ -27,26 +28,37 @@ Item {
     width: parent.width
     height: childrenRect.height
 
-    PlasmaCore.SvgItem {
+//     PlasmaCore.SvgItem {
+//         anchors {
+//             left: parent.left
+//             right: parent.right
+//         }
+//         height: lineSvg.elementSize("horizontal-line").height
+//
+//         visible: sectionDelegate.y > 0
+//         svg: lineSvg
+//         elementId: "horizontal-line"
+//     }
+    PlasmaExtras.Heading {
+        id: sectionHeading
         anchors {
+//             bottomMargin: units.gridUnit / 4
             left: parent.left
             right: parent.right
-        }
-        height: lineSvg.elementSize("horizontal-line").height
-
-        visible: sectionDelegate.y > 0
-        svg: lineSvg
-        elementId: "horizontal-line"
-    }
-    PlasmaComponents.Label {
-        anchors {
-            left: parent.left
-            right: parent.right
+            //leftMargin: units.gridUnit
         }
 
-        y: 2
-        opacity: 0.6
+        y: units.gridUnit / 4
+        //height: paintedHeight + units.gridUnit / 4
+        //opacity: 0.6
+        level: 4
         text: section
-        horizontalAlignment: Text.AlignHCenter
+        //horizontalAlignment: Text.AlignHCenter
+    }
+    Item {
+        width: parent.width
+        height: units.gridUnit / 4
+        anchors.left: parent.left
+        anchors.top: sectionHeading.bottom
     }
 } // sectionDelegate
