@@ -66,7 +66,13 @@ Item {
     }
 
     PlasmaComponents.Label {
-        text: i18n("%1 on %2", kuser.os, kuser.host)
+        text: {
+            if (searchBar.query === "") {
+                return i18n("%1 on %2", kuser.os, kuser.host);
+            } else {
+                return i18n("Searching %1...", searchBar.query);
+            }
+        }
         opacity: .4
         anchors {
             left: nameLabel.left
