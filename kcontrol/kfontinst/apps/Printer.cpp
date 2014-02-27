@@ -33,8 +33,8 @@
 #include <QFontDatabase>
 #include <QFontMetrics>
 #include <QWidget>
-#include <QPrinter>
-#include <QPrintDialog>
+#include <QtPrintSupport/QPrinter>
+#include <QtPrintSupport/QPrintDialog>
 #include <QFrame>
 #include <QGridLayout>
 #include <QProgressBar>
@@ -42,7 +42,6 @@
 #include <KDE/KCmdLineArgs>
 #include <k4aboutdata.h>
 #include <KDE/KApplication>
-#include <kdeprintdialog.h>
 
 #if defined(Q_WS_X11) || defined(Q_WS_QWS)
 #include <fontconfig/fontconfig.h>
@@ -370,7 +369,7 @@ void CPrinter::print(const QList<Misc::TFont> &items, int size)
     #endif
                 
     QPrinter     printer;
-    QPrintDialog *dialog = KdePrint::createPrintDialog(&printer, parentWidget());
+    QPrintDialog *dialog = new QPrintDialog(&printer, parentWidget());
 
     if(dialog->exec())
     {
