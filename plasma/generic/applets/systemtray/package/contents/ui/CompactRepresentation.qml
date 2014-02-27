@@ -123,44 +123,42 @@ Item {
     PlasmaCore.ToolTipArea {
         id: tooltip
 
-        width: root.vertical ? root.itemSize + units.smallSpacing*4 : childrenRect.width
-        height: !root.vertical ? root.itemSize + units.smallSpacing*4 : childrenRect.height
+        width: root.vertical ? compactRepresentation.width : units.iconSizes.smallMedium
+        height: !root.vertical ? compactRepresentation.height : units.iconSizes.smallMedium
         anchors {
-            leftMargin: units.smallSpacing
             right: parent.right
+            bottom: parent.bottom
         }
 
         subText: plasmoid.expanded ? i18n("Hide icons") : i18n("Show hidden icons")
 
-        PlasmaCore.SvgItem {
+        MouseArea {
+            anchors.fill: parent
+            onClicked: plasmoid.expanded = !plasmoid.expanded
 
-            id: arrow
+            PlasmaCore.SvgItem {
+                id: arrow
 
-            y: root.itemSize / 4
-            width: Math.floor(root.itemSize / 2)
-            height: width
-
-            svg: PlasmaCore.Svg { imagePath: "widgets/arrows" }
-            elementId: {
-
-                var exp = plasmoid.expanded; // flip for bottom edge and right edge
-
-                if (plasmoid.location == PlasmaCore.Types.BottomEdge) {
-                    return (exp) ? "down-arrow" : "up-arrow"
-                } else if (plasmoid.location == PlasmaCore.Types.TopEdge) {
-                    return (exp) ? "up-arrow" : "down-arrow"
-                } else if (plasmoid.location == PlasmaCore.Types.LeftEdge) {
-                    return (exp) ? "left-arrow" : "right-arrow"
-                } else {
-                    return (exp) ? "right-arrow" : "left-arrow"
-                }
-
-            }
-            MouseArea {
-                width: parent.width + units.smallSpacing
-                height: root.itemSize + units.largeSpacing
                 anchors.centerIn: parent
-                onClicked: plasmoid.expanded = !plasmoid.expanded
+                width: Math.min(parent.width, parent.height)
+                height: width
+
+                svg: PlasmaCore.Svg { imagePath: "widgets/arrows" }
+                elementId: {
+
+                    var exp = plasmoid.expanded; // flip for bottom edge and right edge
+
+                    if (plasmoid.location == PlasmaCore.Types.BottomEdge) {
+                        return (exp) ? "down-arrow" : "up-arrow"
+                    } else if (plasmoid.location == PlasmaCore.Types.TopEdge) {
+                        return (exp) ? "up-arrow" : "down-arrow"
+                    } else if (plasmoid.location == PlasmaCore.Types.LeftEdge) {
+                        return (exp) ? "left-arrow" : "right-arrow"
+                    } else {
+                        return (exp) ? "right-arrow" : "left-arrow"
+                    }
+
+                }
             }
         }
     }
