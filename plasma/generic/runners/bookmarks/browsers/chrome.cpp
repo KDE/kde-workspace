@@ -38,17 +38,22 @@ public:
     inline Profile profile() { return m_profile; }
     void tearDown() { m_profile.favicon()->teardown(); m_bookmarks.clear(); }
     void add(QVariantMap &bookmarkEntry) { m_bookmarks << bookmarkEntry; }
+    void clear() { m_bookmarks.clear(); }
 private:
     Profile m_profile;
     QList<QVariantMap> m_bookmarks;
 };
 
 Chrome::Chrome( FindProfile* findProfile, QObject* parent )
-    : QObject(parent)
+    : QObject(parent),
+    m_watcher(new KDirWatch(this)),
+    m_dirty(false)
 {
     foreach(Profile profile, findProfile->find()) {
         m_profileBookmarks << new ProfileBookmarks(profile);
+        m_watcher->addFile(profile.path());
     }
+    connect(m_watcher, &KDirWatch::created, [=] { m_dirty = true; });
 }
 
 Chrome::~Chrome()
@@ -60,6 +65,9 @@ Chrome::~Chrome()
 
 QList<BookmarkMatch> Chrome::match(const QString &term, bool addEveryThing)
 {
+    if (m_dirty) {
+        prepare();
+    }
     QList<BookmarkMatch> results;
     foreach(ProfileBookmarks *profileBookmarks, m_profileBookmarks) {
         results << match(term, addEveryThing, profileBookmarks);
@@ -81,8 +89,10 @@ QList<BookmarkMatch> Chrome::match(const QString &term, bool addEveryThing, Prof
 
 void Chrome::prepare()
 {
+    m_dirty = false;
     foreach(ProfileBookmarks *profileBookmarks, m_profileBookmarks) {
         Profile profile = profileBookmarks->profile();
+        profileBookmarks->clear();
         QFile bookmarksFile(profile.path());
         if (!bookmarksFile.open(QIODevice::ReadOnly | QIODevice::Text)) {
             continue;

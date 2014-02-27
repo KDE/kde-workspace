@@ -24,9 +24,12 @@
 
 #include "browser.h"
 #include "findprofile.h"
+
 #include <QMap>
 #include <QList>
 #include <QVariantMap>
+
+#include <KDirWatch>
 
 class FaviconFromBlob;
 class ProfileBookmarks;
@@ -44,6 +47,9 @@ private:
     void parseFolder(const QVariantMap &entry, ProfileBookmarks *profile);
     virtual QList<BookmarkMatch> match(const QString &term, bool addEveryThing, ProfileBookmarks *profileBookmarks);
     QList<ProfileBookmarks*> m_profileBookmarks;
+    KDirWatch* m_watcher;
+    bool m_dirty;
+
 };
 
 #endif // CHROME_H
