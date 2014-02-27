@@ -79,8 +79,6 @@ private Q_SLOTS:
     void addTask(SystemTray::Task *task);
     void removeTask(SystemTray::Task *task);
     void slotTaskStatusChanged();
-    void taskAdded(SystemTray::Task *task);
-    void taskRemoved(SystemTray::Task *task);
     void taskStatusChanged(SystemTray::Task *task);
     void compressionTimeout();
 

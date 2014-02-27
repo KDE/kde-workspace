@@ -192,7 +192,14 @@ void Host::addTask(Task *task)
     qCDebug(SYSTEMTRAY) << "ST2" << task->name() << "(" << task->taskId() << ")";
 
     d->tasks.append(task);
-    taskAdded(task);
+    if (d->showTask(task)) {
+        d->shownTasks.append(task);
+        qSort(d->shownTasks.begin(), d->shownTasks.end(), taskLessThan);
+    } else {
+        d->hiddenTasks.append(task);
+        qSort(d->hiddenTasks.begin(), d->hiddenTasks.end(), taskLessThan);
+    }
+    d->compressionTimer.start(TIMEOUT);
     emit tasksChanged();
 }
 
@@ -200,7 +207,13 @@ void Host::removeTask(Task *task)
 {
     d->tasks.removeAll(task);
     disconnect(task, 0, this, 0);
-    taskRemoved(task);
+    if (d->showTask(task)) {
+        d->shownTasks.removeAll(task);
+    } else {
+        d->hiddenTasks.removeAll(task);
+    }
+    // No compression here, as we delete the pointer to the task
+    // object behind the list's back otherwise
     emit tasksChanged();
 }
 
@@ -225,30 +238,6 @@ QQmlListProperty< Task > Host::shownTasks()
 {
     return d->shownTasksDeclarative;
 
-}
-
-void Host::taskAdded(Task* task)
-{
-    if (d->showTask(task)) {
-        d->shownTasks.append(task);
-        qSort(d->shownTasks.begin(), d->shownTasks.end(), taskLessThan);
-    } else {
-        d->hiddenTasks.append(task);
-        qSort(d->hiddenTasks.begin(), d->hiddenTasks.end(), taskLessThan);
-    }
-    d->compressionTimer.start(TIMEOUT);
-}
-
-void Host::taskRemoved(Task* task)
-{
-    if (d->showTask(task)) {
-        d->shownTasks.removeAll(task);
-    } else {
-        d->hiddenTasks.removeAll(task);
-    }
-    // No compression here, as we delete the pointer to the task
-    // object behind the list's back otherwise
-    emit tasksChanged();
 }
 
 bool HostPrivate::showTask(Task *task) {
