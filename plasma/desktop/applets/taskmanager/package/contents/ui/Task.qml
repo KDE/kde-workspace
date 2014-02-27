@@ -245,7 +245,8 @@ MouseEventListener {
         id: label
 
         anchors {
-            fill: parent
+            left: parent.left
+            right: parent.right
             leftMargin: taskFrame.margins.left + icon.width + 4
             rightMargin: taskFrame.margins.right
             verticalCenter: parent.verticalCenter
