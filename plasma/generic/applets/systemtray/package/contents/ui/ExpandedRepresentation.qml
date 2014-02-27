@@ -26,7 +26,7 @@ import org.kde.private.systemtray 2.0 as SystemTray
 
 Item {
 
-    anchors.margins: units.largeSpacing
+    anchors.leftMargin: units.largeSpacing
 
     Connections {
         target: root
@@ -71,7 +71,7 @@ Item {
             bottom: parent.bottom
             left: parent.left
         }
-        spacing: 4
+        spacing: units.smallSpacing
 
         model: host.hiddenTasks
 
@@ -89,6 +89,9 @@ Item {
             rightMargin: units.largeSpacing
             bottom: parent.bottom;
             top: parent.top;
+            //TODO: if this line will make it to the final design, measures have to come from FrameSvg
+            topMargin: -4
+            bottomMargin: -4
         }
         elementId: "vertical-line";
 
