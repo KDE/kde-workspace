@@ -12,8 +12,6 @@ set(EXTERNAL_LIBS
     KF5::KDE4Support
 )
 
-add_definitions(-DHAVE_QJSON=1)
-
 set(krunner_bookmarksrunner_SRCS
     browserfactory.cpp
     bookmarkmatch.cpp

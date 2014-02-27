@@ -98,7 +98,7 @@ QString BookmarksRunner::findBrowserName()
         }
     }
 
-    qDebug() << "KRunner::Bookmarks: found executable " << exec << " as default browser";
+    //qDebug() << "KRunner::Bookmarks: found executable " << exec << " as default browser";
     return exec;
 
 }
