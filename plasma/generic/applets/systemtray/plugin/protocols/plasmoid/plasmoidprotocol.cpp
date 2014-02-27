@@ -22,7 +22,7 @@
 
 #include "debug.h"
 
-#include "../../manager.h"
+#include "../../host.h"
 
 #include <Plasma/PluginLoader>
 #include <Plasma/Containment>
@@ -63,8 +63,8 @@ void PlasmoidProtocol::init()
         return;
     }
 
-    Manager* m = qobject_cast<Manager*>(parent());
-    QQuickItem* rootItem = m->rootItem();
+    Host* h = qobject_cast<Host*>(parent());
+    QQuickItem* rootItem = h->rootItem();
     if (rootItem) {
         m_systrayApplet = rootItem->property("_plasma_applet").value<Plasma::Applet*>();
     }
@@ -169,7 +169,7 @@ void PlasmoidProtocol::newTask(const QString &service)
         return;
     }
 
-    Manager* m = qobject_cast<Manager*>(parent());
+    Host* m = qobject_cast<Host*>(parent());
 
     PlasmoidTask *task = new PlasmoidTask(service, m_knownPlugins.value(service), m_containment, this);
 

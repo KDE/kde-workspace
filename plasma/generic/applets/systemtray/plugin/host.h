@@ -54,6 +54,12 @@ class Host : public QObject
 public:
     Host(QObject* parent = 0);
     virtual ~Host();
+
+    /**
+     * @return a list of all known Task instances
+     **/
+    QList<Task*> tasks() const;
+
     void setRootItem(QQuickItem* rootItem);
     QQuickItem* rootItem();
 
@@ -70,6 +76,9 @@ Q_SIGNALS:
     void rootItemChanged();
 
 private Q_SLOTS:
+    void addTask(SystemTray::Task *task);
+    void removeTask(SystemTray::Task *task);
+    void slotTaskStatusChanged();
     void taskAdded(SystemTray::Task *task);
     void taskRemoved(SystemTray::Task *task);
     void taskStatusChanged(SystemTray::Task *task);
@@ -77,7 +86,6 @@ private Q_SLOTS:
 
 private:
     void initTasks();
-    SystemTray::Manager *m_manager;
     HostPrivate* d;
 
 };

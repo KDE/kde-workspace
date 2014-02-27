@@ -1,7 +1,7 @@
 set(systemtrayplugin_SRCS
     systemtrayplugin.cpp
     host.cpp
-    manager.cpp
+   # manager.cpp
     protocol.cpp
     task.cpp
 

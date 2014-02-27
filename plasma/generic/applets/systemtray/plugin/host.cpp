@@ -20,9 +20,9 @@
 
 
 #include "host.h"
-#include "manager.h"
 #include "task.h"
 #include "debug.h"
+#include "protocol.h"
 
 #include <klocalizedstring.h>
 
@@ -34,6 +34,9 @@
 #include <QTimer>
 #include <QVariant>
 #include <zlib.h>
+
+#include "protocols/plasmoid/plasmoidprotocol.h"
+#include "protocols/dbussystemtray/dbussystemtrayprotocol.h"
 
 #define TIMEOUT 100
 
@@ -75,7 +78,19 @@ bool taskLessThan(const Task *lhs, const Task *rhs)
 
 class HostPrivate {
 public:
+    HostPrivate(Host *host)
+        : q(host),
+          rootItem(0)
+    {
+    }
+    void setupProtocol(Protocol *protocol);
+    bool showTask(Task *task);
+
+
     Host *q;
+
+    QList<Task *> tasks;
+    QQuickItem* rootItem;
 
     // Keep references to the list to avoid full refreshes
     //QList<SystemTray::Task*> tasks;
@@ -87,18 +102,16 @@ public:
 
     QStringList categories;
 
-    bool showTask(Task *task);
     QTimer compressionTimer;
 };
 
 Host::Host(QObject* parent) :
-    QObject(parent)
+    QObject(parent),
+    d(new HostPrivate(this))
 {
-    d = new HostPrivate;
-    m_manager = new SystemTray::Manager(this);
 //        connect(m_manager, &Manager::tasksChanged, this, &Host::tasksChanged);
 
-    QTimer::singleShot(10, this, SLOT(init())); // FIXME: remove timer
+    QTimer::singleShot(2000, this, SLOT(init())); // FIXME: remove timer
     //init();
     connect(&d->compressionTimer, &QTimer::timeout, this, &Host::compressionTimeout);
 }
@@ -110,11 +123,12 @@ Host::~Host()
 
 void Host::init()
 {
-
     initTasks();
-    connect(m_manager, &Manager::taskAdded, this, &Host::taskAdded);
-    connect(m_manager, &Manager::taskRemoved, this, &Host::taskRemoved);
-    connect(m_manager, &Manager::taskStatusChanged, this, &Host::taskStatusChanged);
+
+    d->setupProtocol(new SystemTray::DBusSystemTrayProtocol(this));
+    d->setupProtocol(new SystemTray::PlasmoidProtocol(this));
+
+
     emit categoriesChanged();
 }
 
@@ -129,14 +143,12 @@ void Host::compressionTimeout()
 
 void Host::initTasks()
 {
-    if (m_manager) {
-        QList<SystemTray::Task*> allTasks = m_manager->tasks();
-        foreach (SystemTray::Task *task, allTasks) {
-            if (d->showTask(task)) {
-                d->shownTasks.append(task);
-            } else {
-                d->hiddenTasks.append(task);
-            }
+    QList<SystemTray::Task*> allTasks = tasks();
+    foreach (SystemTray::Task *task, allTasks) {
+        if (d->showTask(task)) {
+            d->shownTasks.append(task);
+        } else {
+            d->hiddenTasks.append(task);
         }
     }
 
@@ -152,21 +164,55 @@ void Host::initTasks()
     d->compressionTimer.start(TIMEOUT);
 }
 
-void Host::setRootItem(QQuickItem* rootItem)
-{
-    //qCDebug(SYSTEMTRAY) << "Set root item";
-    if (m_manager && m_manager->rootItem() != rootItem) {
-        m_manager->setRootItem(rootItem);
-        emit rootItemChanged();
-    }
-}
-
 QQuickItem* Host::rootItem()
 {
-    if (m_manager) {
-        return m_manager->rootItem();
+    return d->rootItem;
+}
+
+void Host::setRootItem(QQuickItem* item)
+{
+    if (d->rootItem == item) {
+        return;
+    }
+
+    d->rootItem = item;
+    emit rootItemChanged();
+}
+
+QList<Task*> Host::tasks() const
+{
+    return d->tasks;
+}
+
+void Host::addTask(Task *task)
+{
+    connect(task, SIGNAL(destroyed(SystemTray::Task*)), this, SLOT(removeTask(SystemTray::Task*)));
+    connect(task, SIGNAL(changedStatus()), this, SLOT(slotTaskStatusChanged()));
+
+    qCDebug(SYSTEMTRAY) << "ST2" << task->name() << "(" << task->taskId() << ")";
+
+    d->tasks.append(task);
+    taskAdded(task);
+    emit tasksChanged();
+}
+
+void Host::removeTask(Task *task)
+{
+    d->tasks.removeAll(task);
+    disconnect(task, 0, this, 0);
+    taskRemoved(task);
+    emit tasksChanged();
+}
+
+void Host::slotTaskStatusChanged()
+{
+    Task* task = qobject_cast<Task*>(sender());
+
+    if (task) {
+        qCDebug(SYSTEMTRAY) << "ST2 emit taskStatusChanged(task);";
+        taskStatusChanged(task);
     } else {
-        return 0;
+        qCDebug(SYSTEMTRAY) << "ST2 changed, but invalid cast";
     }
 }
 
@@ -209,6 +255,12 @@ bool HostPrivate::showTask(Task *task) {
     return task->shown() && task->status() != SystemTray::Task::Passive;
 }
 
+void HostPrivate::setupProtocol(Protocol *protocol)
+{
+    QObject::connect(protocol, SIGNAL(taskCreated(SystemTray::Task*)), q, SLOT(addTask(SystemTray::Task*)));
+    protocol->init();
+}
+
 void Host::taskStatusChanged(SystemTray::Task *task)
 {
     if (task) {
@@ -234,7 +286,7 @@ void Host::taskStatusChanged(SystemTray::Task *task)
 
 QStringList Host::categories() const
 {
-    QList<SystemTray::Task*> allTasks = m_manager->tasks();
+    QList<SystemTray::Task*> allTasks = tasks();
     QStringList cats;
     QList<SystemTray::Task::Category> cnt;
     foreach (SystemTray::Task *task, allTasks) {
