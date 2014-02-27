@@ -174,8 +174,6 @@ Item {
         anchors {
             top: parent.top
             right: parent.right
-            rightMargin: -units.largeSpacing
-            topMargin: -units.largeSpacing
         }
 
         property bool checked: false
