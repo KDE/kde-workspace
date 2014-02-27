@@ -50,6 +50,7 @@ Item {
             interactive: contentHeight > height
             boundsBehavior: Flickable.StopAtBounds
             currentIndex: -1
+            highlight: PlasmaComponents.Highlight {}
 
             delegate: KickoffItem {}
 
