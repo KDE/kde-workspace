@@ -152,7 +152,7 @@ PlasmaCore.Dialog {
                 onLinkActivated: Qt.openUrlExternally(link)
                 anchors {
                     left: appIconItem.right
-                    right: parent.right
+                    right: actionsColumn.left
                     top: titleLabel.bottom
                     bottom: parent.bottom
                 }
@@ -180,12 +180,13 @@ PlasmaCore.Dialog {
                 id: actionsColumn
                 spacing: 6
                 anchors {
+                    top: closeButton.bottom
                     right: parent.right
                     rightMargin: 6
                     verticalCenter: parent.verticalCenter
                 }
                 Repeater {
-                    id :actionsRepeater
+                    id: actionsRepeater
                     model: new Array()
                     PlasmaComponents.Button {
                         text: modelData.text
