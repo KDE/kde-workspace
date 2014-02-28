@@ -192,9 +192,18 @@ void FavoritesModel::add(const QString& url)
 void FavoritesModel::move(int startRow, int destRow)
 {
     // just move the item
-    Private::globalFavoriteList.move(startRow, destRow);
+//     Private::globalFavoriteList.move(startRow, destRow);
 
     foreach (FavoritesModel* model, Private::models) {
+        qDebug() << "Move : " << startRow << destRow << model->rowCount();
+        if (destRow >= model->rowCount()) {
+            destRow = model->rowCount() - 1;
+        }
+        if (startRow >= model->rowCount()) {
+            startRow = model->rowCount() - 1;
+        }
+        qDebug() << "Move : " << startRow << destRow << model->rowCount();
+        Private::globalFavoriteList.move(startRow, destRow);
         model->d->moveFavoriteItem(startRow, destRow);
     }
 
@@ -271,6 +280,7 @@ void FavoritesModel::sortFavoritesDescending()
 bool FavoritesModel::dropMimeData(const QString& text, const QVariantList& urls,
                                   int row, int column)
 {
+    qDebug() << "Dropping into row: " << row << urls;
     // FIXME: pass DropAction by qml
     Qt::DropAction action = Qt::MoveAction;
     if (action == Qt::IgnoreAction) {
@@ -278,6 +288,7 @@ bool FavoritesModel::dropMimeData(const QString& text, const QVariantList& urls,
     }
 
     if (column > 0 || row > numberOfFavorites()) {
+        qDebug() << "Exit " << numberOfFavorites();
         return false;
     }
 
@@ -286,6 +297,7 @@ bool FavoritesModel::dropMimeData(const QString& text, const QVariantList& urls,
         QStandardItem *startItem;
         int startRow = -1;
         int destRow = row;
+        qDebug() << "Moving ..." <<  startRow << destRow;
 
         // look for the favorite that was dragged
         bool conv = false;
@@ -307,11 +319,14 @@ bool FavoritesModel::dropMimeData(const QString& text, const QVariantList& urls,
                     dropped = true;
                 }
             }
+            qDebug() << " now move the item to it's new location " << startRow << destRow;
             return dropped;
         }
 
-        if (destRow < 0)
+        if (destRow < 0) {
+            qDebug() << "Returning here" << startRow << destRow;
             return false;
+        }
 
         // now move the item to it's new location
         FavoritesModel::move(startRow, destRow);
