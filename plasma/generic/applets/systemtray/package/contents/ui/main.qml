@@ -25,7 +25,7 @@ import org.kde.plasma.core 2.0 as PlasmaCore
 // import org.kde.plasma.extras 2.0 as PlasmaExtras
 
 import org.kde.private.systemtray 2.0 as SystemTray
-import "plasmapackage:/code/Layout.js" as LayoutManager
+import "Layout.js" as LayoutManager
 
 Item {
     id: root
