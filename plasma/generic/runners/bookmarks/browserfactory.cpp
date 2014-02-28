@@ -33,7 +33,7 @@ Browser *BrowserFactory::find(const QString& browserName, QObject* parent)
     }
     delete m_previousBrowser;
     m_previousBrowserName = browserName;
-    if (browserName.contains("firefox", Qt::CaseInsensitive)) {
+    if (browserName.contains("firefox", Qt::CaseInsensitive) || browserName.contains("iceweasel", Qt::CaseInsensitive)) {
         m_previousBrowser = new Firefox(parent);
     } else if (browserName.contains("opera", Qt::CaseInsensitive)) {
         m_previousBrowser = new Opera(parent);
