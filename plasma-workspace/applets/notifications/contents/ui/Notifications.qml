@@ -21,6 +21,9 @@ import QtQuick 2.0
 import org.kde.plasma.core 2.0 as PlasmaCore
 import org.kde.plasma.components 2.0 as PlasmaComponents
 
+import org.kde.plasma.private.notifications 1.0
+
+
 Column {
     id: notificationsRoot
     anchors {
@@ -28,8 +31,13 @@ Column {
         right: parent.right
     }
 
-    property QtObject lastNotificationPopup
+    property QtObject notificationPopup
     property alias count: notificationsRepeater.count
+    property var notificationStack
+
+    Component.onCompleted: {
+        notificationStack = new Array()
+    }
 
     function addNotification(source, appIcon, image, appName, summary, body, expireTimeout, urgency, appRealName, configurable, actions) {
         // Do not show duplicated notifications
@@ -70,10 +78,10 @@ Column {
         if (plasmoid.popupShowing) {
             return
         }
-        if (!lastNotificationPopup) {
-            lastNotificationPopup = lastNotificationPopupComponent.createObject(notificationsRoot)
-        }
-        lastNotificationPopup.popup(notification)
+
+        var popup = notificationPopupComponent.createObject();
+        popup.populatePopup(notification);
+        notificationPositioner.positionPopup(popup);
     }
 
     function executeAction(source, id) {
@@ -104,8 +112,8 @@ Column {
     }
 
     Component {
-        id: lastNotificationPopupComponent
-        LastNotificationPopup {
+        id: notificationPopupComponent
+        NotificationPopup {
         }
     }
 
@@ -234,6 +242,11 @@ Column {
                 }
             }
         }
+    }
+
+    NotificationsHelper {
+        id: notificationPositioner
+        plasmoidScreen: plasmoid.screen
     }
 
     Repeater {
