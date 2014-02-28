@@ -40,16 +40,17 @@ namespace SystemTray
 PlasmoidTask::PlasmoidTask(const QString &packageName, int appletId, Plasma::Containment *cont, QObject *parent)
     : Task(parent),
       m_taskId(packageName),
-      m_taskItem(0),
+      m_applet(0),
       m_valid(true)
 {
     qCDebug(SYSTEMTRAY) << "Loading applet: " << packageName << appletId;
 
-    m_taskItem = Plasma::PluginLoader::self()->loadApplet(packageName, appletId);
-    cont->addApplet(m_taskItem);
-    m_taskItem->init();
+    m_applet = Plasma::PluginLoader::self()->loadApplet(packageName, appletId);
+    cont->addApplet(m_applet);
+    //FIXME? This is *maybe* not necessary
+    m_applet->init();
 
-    m_taskGraphicsObject = m_taskItem->property("_plasma_graphicObject").value<PlasmaQuick::AppletQuickItem *>();
+    m_taskGraphicsObject = m_applet->property("_plasma_graphicObject").value<PlasmaQuick::AppletQuickItem *>();
 
     if (m_taskGraphicsObject) {
         Plasma::Package package = Plasma::PluginLoader::self()->loadPackage("Plasma/Shell");
@@ -68,13 +69,12 @@ PlasmoidTask::PlasmoidTask(const QString &packageName, int appletId, Plasma::Con
 
 
 
-    if (!m_taskItem) {
+    if (!m_applet) {
         qCDebug(SYSTEMTRAY) << "Invalid applet taskitem";
         m_valid = false;
         return;
     }
-    connect(m_taskItem, &Plasma::Applet::statusChanged, this, &PlasmoidTask::updateStatus);
-   // connect(m_taskItem, &PlasmoidInterface::defaultRepresentationChanged, this, &PlasmoidTask::taskItemExpandedChanged);
+    connect(m_applet, &Plasma::Applet::statusChanged, this, &PlasmoidTask::updateStatus);
 
     if (pluginInfo().isValid()) {
         setName(pluginInfo().name());
@@ -90,18 +90,18 @@ PlasmoidTask::~PlasmoidTask()
 
 KPluginInfo PlasmoidTask::pluginInfo() const
 {
-    if (!m_taskItem) {
+    if (!m_applet) {
         return KPluginInfo();
     }
-    return m_taskItem->pluginInfo();
+    return m_applet->pluginInfo();
 }
 
 void PlasmoidTask::updateStatus()
 {
-    if (!m_taskItem || !pluginInfo().isValid()) {
+    if (!m_applet || !pluginInfo().isValid()) {
         return;
     }
-    const Plasma::Types::ItemStatus ps = m_taskItem->status();
+    const Plasma::Types::ItemStatus ps = m_applet->status();
     if (ps == Plasma::Types::UnknownStatus) {
         setStatus(Task::UnknownStatus);
     } else if (ps == Plasma::Types::PassiveStatus) {
@@ -137,8 +137,8 @@ void PlasmoidTask::setShortcut(QString text) {
 
 void PlasmoidTask::setLocation(Plasma::Types::Location loc)
 {
-    if (m_taskItem) {
-//        m_taskItem->setLocation(loc);
+    if (m_applet) {
+//        m_applet->setLocation(loc);
     }
 }
 
@@ -153,12 +153,12 @@ QQuickItem* PlasmoidTask::taskItem()
         return m_taskGraphicsObject;
     }
     //FIXME
-    return new QQuickItem();//m_taskItem;
+    return new QQuickItem();//m_applet;
 }
 
 QQuickItem* PlasmoidTask::taskItemExpanded()
 {
-    if (!m_taskItem) {
+    if (!m_applet) {
         return 0;
     }
 
@@ -166,7 +166,7 @@ QQuickItem* PlasmoidTask::taskItemExpanded()
         return m_taskGraphicsObject->property("fullRepresentationItem").value<QQuickItem *>();
     }
     //FIXME
-    return new QQuickItem();//m_taskItem->defaultRepresentation();
+    return new QQuickItem();//m_applet->defaultRepresentation();
 }
 
 QIcon PlasmoidTask::icon() const

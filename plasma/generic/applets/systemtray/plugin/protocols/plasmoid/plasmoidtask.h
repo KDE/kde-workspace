@@ -93,7 +93,7 @@ private Q_SLOTS:
 private:
     void updateStatus();
     QString m_taskId;
-    Plasma::Applet *m_taskItem;
+    Plasma::Applet *m_applet;
 
     PlasmaQuick::AppletQuickItem* m_taskGraphicsObject;
     QQuickItem* m_compactRepresentationItem;
