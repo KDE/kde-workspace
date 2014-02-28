@@ -46,7 +46,7 @@ public:
     /** Remove the item associated with @p url from the user's favorites list. */
     Q_INVOKABLE static void remove(const QString& url);
     /** Returns true if @p url is in the list of the user's favorite URLs. */
-    static void move(int startRow, int destRow);
+    Q_INVOKABLE static void move(int startRow, int destRow);
     static int numberOfFavorites();
     static void sortFavorites(Qt::SortOrder order);
     Q_INVOKABLE static bool isFavorite(const QString& url);
