@@ -150,17 +150,17 @@ uint NotificationsEngine::Notify(const QString &app_name, uint replaces_id,
         appname_str = i18n("Unknown Application");
     }
 
-    if (timeout == -1) {
-        const int AVERAGE_WORD_LENGTH = 6;
-        const int WORD_PER_MINUTE = 250;
-        int count = summary.length() + body.length();
-        timeout = 60000 * count / AVERAGE_WORD_LENGTH / WORD_PER_MINUTE;
+    bool isPersistent = timeout == 0;
 
-        // Add two seconds for the user to notice the notification, and ensure
-        // it last at least five seconds, otherwise all the user see is a
-        // flash
-        timeout = 2000 + qMax(timeout, 3000);
-    }
+    const int AVERAGE_WORD_LENGTH = 6;
+    const int WORD_PER_MINUTE = 250;
+    int count = summary.length() + body.length();
+    timeout = 60000 * count / AVERAGE_WORD_LENGTH / WORD_PER_MINUTE;
+
+    // Add two seconds for the user to notice the notification, and ensure
+    // it last at least five seconds, otherwise all the user see is a
+    // flash
+    timeout = 2000 + qMax(timeout, 3000);
 
     const QString source = QString("notification %1").arg(id);
     if (replaces_id) {
@@ -180,6 +180,7 @@ uint NotificationsEngine::Notify(const QString &app_name, uint replaces_id,
     notificationData.insert("summary", summary);
     notificationData.insert("body", body);
     notificationData.insert("actions", actions);
+    notificationData.insert("isPersistent", isPersistent);
     notificationData.insert("expireTimeout", timeout);
 
     QString appRealName;
@@ -215,7 +216,7 @@ uint NotificationsEngine::Notify(const QString &app_name, uint replaces_id,
 
     setData(source, notificationData);
 
-    if (timeout) {
+    if (!isPersistent) {
         int timerId = startTimer(timeout);
         m_sourceTimers.insert(source, timerId);
         m_timeouts.insert(timerId, source);
