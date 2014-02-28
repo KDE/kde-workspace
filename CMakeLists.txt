@@ -51,7 +51,7 @@ find_package(KF5 CONFIG REQUIRED
     IdleTime ItemModels WidgetsAddons WindowSystem Codecs Archive CoreAddons Solid ThreadWeaver
     Config Auth JS JsEmbed Wallet DBusAddons Sonnet GlobalAccel
     I18n GuiAddons Service ConfigWidgets ItemViews Notifications IconThemes FrameworkIntegration Completion JobWidgets TextWidgets XmlGui Crash
-    Bookmarks UnitConversion KIO KCMUtils Parts Kross NotifyConfig PrintUtils Su DocTools NewStuff KHtml Declarative Init Runner Activities Plasma)
+    Bookmarks UnitConversion KIO KCMUtils Parts Kross NotifyConfig Su DocTools NewStuff KHtml Declarative Init Runner Activities Plasma)
 
 find_package(KF5PlasmaQuick REQUIRED NO_MODULE)
 
