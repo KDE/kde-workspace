@@ -80,51 +80,84 @@ Item {
             id: kickoffListView
 
             anchors.fill: parent
-
+            currentIndex: -1
             interactive: contentHeight > height
             delegate: KickoffItem {}
             highlight: PlasmaComponents.Highlight {}
 
             model: favoritesModel
 
-            section {
-                property: "group"
-                criteria: ViewSection.FullString
-                delegate: SectionDelegate {}
-            }
+//             section {
+//                 property: "group"
+//                 criteria: ViewSection.FullString
+//                 delegate: SectionDelegate {}
+//             }
         }
     }
 
     DropArea {
+
+        property string dragUrl: ""
+        property Item dragItem: null
+        property int startRow: -1
+        property int itemHeight: units.gridUnit * 3
+
+
         anchors.fill: scrollArea
 
         function syncTarget(event) {
-            kickoffListView.currentIndex = kickoffListView.indexAt(event.x, event.y + kickoffListView.contentY)
-
+            kickoffListView.currentIndex = kickoffListView.indexAt(event.x, event.y + kickoffListView.contentY + itemHeight) + 1
             if (kickoffListView.currentIndex === -1) {
-                if (event.y < height/2) {
+                if (event.y < itemHeight/2) {
                     kickoffListView.currentIndex = 0
                 } else {
-                    kickoffListView.currentIndex = kickoffListView.count - 1
+                    //kickoffListView.currentIndex = kickoffListView.count - 1
                 }
             }
-            if (event.y < kickoffListView.currentItem.y + kickoffListView.currentItem.height / 2) {
-                dropTarget.y = kickoffListView.currentItem.y - kickoffListView.contentY
-            } else {
-                dropTarget.y = kickoffListView.currentItem.y + kickoffListView.currentItem.height - kickoffListView.contentY
+            if (kickoffListView.currentItem === null) {
+                //return;
             }
+            if (kickoffListView.currentItem != null && event.y + itemHeight < kickoffListView.currentItem.y) {
+                //dropTarget.y = kickoffListView.currentItem.y - kickoffListView.contentY
+                dropTarget.y = (kickoffListView.currentIndex) * itemHeight - kickoffListView.contentY
+            } else {
+                print("this one" + kickoffListView.count);
+                //dropTarget.y = kickoffListView.currentIndex * itemHeight - kickoffListView.contentY + itemHeight
+                dropTarget.y = (kickoffListView.count ) * itemHeight
+                //dropTarget.y = kickoffListView.currentItem.y + itemHeight*3 - kickoffListView.contentY
+            }
+            var row = dropTarget.y / itemHeight;
+            //var row = Math.round((event.y + kickoffListView.contentY) / itemHeight);
+            print(" hmx: " + startRow + " => " + row + " currentIndex " + kickoffListView.currentIndex + " : " + event.y + " " + kickoffListView.contentY + " " + itemHeight);
+//             print( "CI: " + kickoffListView.currentItem.url)
+//             var row = kickoffListView.currentIndex;
+            //kickoffListView.model.move(startRow, row);
+            //print("dragging into row : " + row + event.y + kickoffListView.contentY  + " " + dropTarget.y);
         }
 
         onDrop: {
-            var row = kickoffListView.currentIndex
-            if (event.y + kickoffListView.contentY < kickoffListView.currentItem.y + kickoffListView.currentItem.height / 2) {
-                --row
-            }
-            kickoffListView.model.dropMimeData(event.mimeData.text, event.mimeData.urls, row, 0);
+            //var row = kickoffListView.currentIndex;
+//             if (event.y + kickoffListView.contentY < kickoffListView.currentItem.y + kickoffListView.currentItem.height) {
+//                 //--row
+//             }
+            //var u = kickoffListView.currentItem.url;
+            //print("Dropping into row : " + row + " " + (event.y + kickoffListView.contentY) + " " + u);
+            //var row = Math.round((event.y + kickoffListView.contentY) / itemHeight);
+            var row = dropTarget.y / itemHeight;
+            print("Dropping into row : " + startRow + " " + row + " " + (event.y + kickoffListView.contentY) + " " + dragUrl);
+            row = Math.max(0, row)
+            //kickoffListView.model.dropMimeData(event.mimeData.text, [u], row, 0);
+            kickoffListView.model.move(startRow,  row);
+            //kickoffListView.currentIndex = -1
+            //kickoffListView.model.dropMimeData(event.mimeData.text, event.mimeData.urls, row, 0);
             dropTarget.visible = false;
         }
         onDragEnter: {
+            print("Drag enter");
+            dragUrl = kickoffListView.currentItem.url;
+            startRow = kickoffListView.currentIndex;
             syncTarget(event);
+            print("Dragging " + dragUrl + " from row " + startRow);
             dropTarget.visible = true;
         }
         onDragMove: syncTarget(event);
