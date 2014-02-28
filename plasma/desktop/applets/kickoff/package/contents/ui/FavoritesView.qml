@@ -87,11 +87,11 @@ Item {
 
             model: favoritesModel
 
-//             section {
-//                 property: "group"
-//                 criteria: ViewSection.FullString
-//                 delegate: SectionDelegate {}
-//             }
+            section {
+                property: "group"
+                criteria: ViewSection.FullString
+                //delegate: SectionDelegate {}
+            }
         }
     }
 
@@ -110,54 +110,30 @@ Item {
             if (kickoffListView.currentIndex === -1) {
                 if (event.y < itemHeight/2) {
                     kickoffListView.currentIndex = 0
-                } else {
-                    //kickoffListView.currentIndex = kickoffListView.count - 1
                 }
             }
-            if (kickoffListView.currentItem === null) {
-                //return;
-            }
             if (kickoffListView.currentItem != null && event.y + itemHeight < kickoffListView.currentItem.y) {
-                //dropTarget.y = kickoffListView.currentItem.y - kickoffListView.contentY
                 dropTarget.y = (kickoffListView.currentIndex) * itemHeight - kickoffListView.contentY
             } else {
-                print("this one" + kickoffListView.count);
-                //dropTarget.y = kickoffListView.currentIndex * itemHeight - kickoffListView.contentY + itemHeight
                 dropTarget.y = (kickoffListView.count ) * itemHeight
-                //dropTarget.y = kickoffListView.currentItem.y + itemHeight*3 - kickoffListView.contentY
             }
-            var row = dropTarget.y / itemHeight;
-            //var row = Math.round((event.y + kickoffListView.contentY) / itemHeight);
-            print(" hmx: " + startRow + " => " + row + " currentIndex " + kickoffListView.currentIndex + " : " + event.y + " " + kickoffListView.contentY + " " + itemHeight);
-//             print( "CI: " + kickoffListView.currentItem.url)
-//             var row = kickoffListView.currentIndex;
-            //kickoffListView.model.move(startRow, row);
-            //print("dragging into row : " + row + event.y + kickoffListView.contentY  + " " + dropTarget.y);
         }
 
         onDrop: {
-            //var row = kickoffListView.currentIndex;
-//             if (event.y + kickoffListView.contentY < kickoffListView.currentItem.y + kickoffListView.currentItem.height) {
-//                 //--row
-//             }
-            //var u = kickoffListView.currentItem.url;
-            //print("Dropping into row : " + row + " " + (event.y + kickoffListView.contentY) + " " + u);
-            //var row = Math.round((event.y + kickoffListView.contentY) / itemHeight);
             var row = dropTarget.y / itemHeight;
             print("Dropping into row : " + startRow + " " + row + " " + (event.y + kickoffListView.contentY) + " " + dragUrl);
             row = Math.max(0, row)
-            //kickoffListView.model.dropMimeData(event.mimeData.text, [u], row, 0);
+            row = Math.round(row)
+            //kickoffListView.model.dropMimeData(event.mimeData.text, [dragUrl], row, 0);
             kickoffListView.model.move(startRow,  row);
-            //kickoffListView.currentIndex = -1
-            //kickoffListView.model.dropMimeData(event.mimeData.text, event.mimeData.urls, row, 0);
             dropTarget.visible = false;
         }
         onDragEnter: {
-            print("Drag enter");
+//             print("Drag enter");
             dragUrl = kickoffListView.currentItem.url;
             startRow = kickoffListView.currentIndex;
             syncTarget(event);
-            print("Dragging " + dragUrl + " from row " + startRow);
+//             print("Dragging " + dragUrl + " from row " + startRow);
             dropTarget.visible = true;
         }
         onDragMove: syncTarget(event);
@@ -170,7 +146,7 @@ Item {
             id: dropTarget
 
             width: parent.width
-            height: 2
+            height: Math.max(2, units.smallSpacing)
 
             visible: false
             color: theme.highlightColor
