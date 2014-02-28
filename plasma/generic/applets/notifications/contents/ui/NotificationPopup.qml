@@ -200,8 +200,8 @@ PlasmaCore.Dialog {
                             }
                         }
                         onClicked: {
-//                             executeAction(source, model.id)
-//                             actionsColumn.visible = false
+                            executeAction(notificationProperties.source, modelData.id)
+                            actionsColumn.visible = false
                         }
                     }
                 }
