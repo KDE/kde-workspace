@@ -39,7 +39,7 @@ Column {
         notificationStack = new Array()
     }
 
-    function addNotification(source, appIcon, image, appName, summary, body, expireTimeout, urgency, appRealName, configurable, actions) {
+    function addNotification(source, appIcon, image, appName, summary, body, isPersistent, expireTimeout, urgency, appRealName, configurable, actions) {
         // Do not show duplicated notifications
         for (var i = 0; i < notificationsModel.count; ++i) {
             if (notificationsModel.get(i).source == source &&
@@ -65,15 +65,18 @@ Column {
                 "appName" : appName,
                 "summary" : summary,
                 "body"    : body,
+                "isPersistent" : isPersistent,
                 "expireTimeout": expireTimeout,
                 "urgency" : urgency,
                 "configurable": configurable,
                 "appRealName": appRealName,
                 "actions" : actions}
 
-        notificationsModel.inserting = true;
-        notificationsModel.insert(0, notification);
-        notificationsModel.inserting = false;
+        if (isPersistent) {
+            notificationsModel.inserting = true;
+            notificationsModel.insert(0, notification);
+            notificationsModel.inserting = false;
+        }
 
         if (plasmoid.popupShowing) {
             return
@@ -192,6 +195,7 @@ Column {
                     _data["appName"],
                     _data["summary"],
                     _data["body"],
+                    _data["isPersistent"],
                     _data["expireTimeout"],
                     _data["urgency"],
                     _data["appRealName"],
