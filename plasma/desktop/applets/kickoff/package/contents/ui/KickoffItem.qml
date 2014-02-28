@@ -30,6 +30,8 @@ Item {
     property bool dropEnabled: false
     property bool modelChildren: hasModelChildren
     property bool appView: false
+    property bool isCurrent: listItem.ListView.view.currentIndex === index;
+    property string url: model["url"]
 
     function activate() {
         if (hasModelChildren) {
@@ -150,7 +152,8 @@ Item {
                     plasmoid.configuration.showAppsByName || subtitle == undefined ? (display.length != 0 ? display : subtitle) : subtitle;
                 }
             }
-            opacity: 0.6
+            opacity: isCurrent ? 0.6 : 0
+            Behavior on opacity { NumberAnimation { duration: units.longDuration /2 } }
             font.pointSize: theme.smallestFont.pointSize
             elide: Text.ElideMiddle
         }
