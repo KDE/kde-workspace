@@ -51,6 +51,7 @@ Item {
 
     property bool debug: plasmoid.configuration.debug
 
+    //a pointer to the Task* that is the current one expanded, that shows full ui
     property QtObject expandedTask: null;
 
 
@@ -86,21 +87,5 @@ Item {
         id: host
         rootItem: plasmoid
     }
-
-// FIXME: Doesn't work, parenting problems and no model available
-//     Timer {
-//         interval: 4000
-//         onTriggered: {
-//             if (expandedLoader.source == "") {
-//                 expandedLoader.setSource("ExpandedRepresentation.qml", { 'anchors.fill': parent, 'root': root });
-//                 //expandedLoader.item.host = host;
-//             }
-//         }
-//     }
-//
-//
-//     Loader {
-//         id: expandedLoader
-//     }
 
 }

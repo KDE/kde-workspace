@@ -40,9 +40,6 @@ QtExtraComponents.MouseEventListener {
     property bool isHiddenItem: false
     property int location: plasmoid.location
 
-    onTaskChanged: {
-        //print("******************* Task changed:" + task.taskId + " " + task.name)
-    }
 
 
     onClicked: {
