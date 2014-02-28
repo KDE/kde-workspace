@@ -72,7 +72,7 @@ PlasmaCore.Dialog {
     mainItem: MouseEventListener {
         id: mainItem
         height: 6 * units.gridUnit
-        width: 18 * units.gridUnit
+        width: 19 * units.gridUnit
 
         state: "controlsHidden"
         hoverEnabled: true
