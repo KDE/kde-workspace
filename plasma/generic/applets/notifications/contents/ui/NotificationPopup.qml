@@ -151,7 +151,9 @@ PlasmaCore.Dialog {
                 onLinkActivated: Qt.openUrlExternally(link)
                 anchors {
                     left: appIconItem.right
+                    right: parent.right
                     top: titleLabel.bottom
+                    bottom: parent.bottom
                 }
             }
 //         }
