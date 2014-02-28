@@ -148,6 +148,7 @@ PlasmaCore.Dialog {
                 wrapMode: Text.Wrap
                 elide: Text.ElideRight
                 maximumLineCount: 4
+                verticalAlignment: Text.AlignTop
                 onLinkActivated: Qt.openUrlExternally(link)
                 anchors {
                     left: appIconItem.right
