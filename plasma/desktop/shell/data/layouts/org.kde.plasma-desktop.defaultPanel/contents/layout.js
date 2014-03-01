@@ -1,5 +1,14 @@
 var panel = new Panel
-if (panelIds.length == 1) {
+var panelScreen = panel.screen
+var numberOfPanelsOnScreen = 0
+
+for (i = 0; i < panelIds.length; ++i) {
+    if (panelById(panelIds[i]).screen == panelScreen) {
+        numberOfPanelsOnScreen += 1
+    }
+}
+
+if (numberOfPanelsOnScreen == 1) {
     // we are the only panel, so set the location for the user
     panel.location = 'bottom'
 }

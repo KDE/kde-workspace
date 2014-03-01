@@ -532,12 +532,13 @@ void DesktopCorona::addPanel(const QString &plugin)
     panel->setScreen(screen);
 
     QList<Plasma::Location> freeEdges = DesktopCorona::freeEdges(screen);
+
     //kDebug() << freeEdges;
     Plasma::Location destination;
-    if (freeEdges.contains(Plasma::TopEdge)) {
-        destination = Plasma::TopEdge;
-    } else if (freeEdges.contains(Plasma::BottomEdge)) {
+    if (freeEdges.contains(Plasma::BottomEdge)) {
         destination = Plasma::BottomEdge;
+    } else if (freeEdges.contains(Plasma::TopEdge)) {
+        destination = Plasma::TopEdge;
     } else if (freeEdges.contains(Plasma::LeftEdge)) {
         destination = Plasma::LeftEdge;
     } else if (freeEdges.contains(Plasma::RightEdge)) {
