@@ -60,7 +60,7 @@ Item {
         var dim = root.vertical ? compactRepresentation.width : compactRepresentation.height
         var rows = Math.floor(dim / root.itemSize);
         var cols = Math.ceil(systrayhost.shownTasks.length / rows);
-        var res = cols * (root.itemSize + units.smallSpacing*4) + units.smallSpacing + arrow.width;
+        var res = cols * (root.itemSize + units.smallSpacing*4) + units.smallSpacing + tooltip.width;
         return res;
     }
 
