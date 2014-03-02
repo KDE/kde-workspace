@@ -29,14 +29,14 @@ import org.kde.qtextracomponents 2.0
 
 Item {
 
-    Plasmoid.switchWidth: units.gridUnit * 26
+    Plasmoid.switchWidth: units.gridUnit * 20
     Plasmoid.switchHeight: units.gridUnit * 30
 
 
     Plasmoid.fullRepresentation: Item {
         id: root
         Layout.minimumWidth: units.gridUnit * 26
-        Layout.minimumHeight: units.gridUnit * 30
+        Layout.minimumHeight: units.gridUnit * 33
 
         property string previousState
         property bool switchTabsOnHover: plasmoid.configuration.switchTabsOnHover
