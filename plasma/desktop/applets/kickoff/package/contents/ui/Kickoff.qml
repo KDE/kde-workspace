@@ -196,10 +196,10 @@ Item {
                             return tabBar.top;
                     }
                 }
-                left: plasmoid.location == PlasmaCore.Types.LeftEdge ? parent.left : parent.left
+                left: plasmoid.location == PlasmaCore.Types.LeftEdge ? tabBar.right : parent.left
                 right: plasmoid.location == PlasmaCore.Types.RightEdge ? tabBar.left : parent.right
-                leftMargin: plasmoid.location == PlasmaCore.Types.LeftEdge ? tabBar.height : units.largeSpacing
-                rightMargin: plasmoid.location == PlasmaCore.Types.RightEdge ? tabBar.height : units.largeSpacing
+                leftMargin: units.largeSpacing
+                rightMargin: units.largeSpacing
             }
 
             //pages
@@ -241,35 +241,78 @@ Item {
         PlasmaComponents.TabBar {
             id: tabBar
 
+            width: {
+                switch (plasmoid.location) {
+                case PlasmaCore.Types.LeftEdge:
+                case PlasmaCore.Types.RightEdge:
+                    return units.gridUnit * 5;
+                default:
+                    return undefined;
+                }
+            }
+
+            height: {
+                switch (plasmoid.location) {
+                case PlasmaCore.Types.LeftEdge:
+                case PlasmaCore.Types.RightEdge:
+                    return undefined;
+                default:
+                    return units.gridUnit * 5;
+                }
+            }
+
             anchors {
                 top: {
                     switch (plasmoid.location) {
-                        case PlasmaCore.Types.TopEdge:
-                            return parent.top;
-                        default:
-                            return undefined;
+                    case PlasmaCore.Types.BottomEdge:
+                        return undefined;
+                    default:
+                        return parent.top;
                     }
                 }
                 bottom: {
                     switch (plasmoid.location) {
                         case PlasmaCore.Types.TopEdge:
+                            return undefined;
                         case PlasmaCore.Types.LeftEdge:
                         case PlasmaCore.Types.RightEdge:
-                            return undefined;
+                            return header.top;
                         default:
                             return parent.bottom;
                     }
                 }
-                left: plasmoid.location == PlasmaCore.Types.RightEdge || plasmoid.location == PlasmaCore.Types.LeftEdge ? undefined : parent.left
-                right: plasmoid.location == PlasmaCore.Types.RightEdge || plasmoid.location == PlasmaCore.Types.LeftEdge ? undefined : parent.right
+                left: {
+                    switch (plasmoid.location) {
+                    case PlasmaCore.Types.RightEdge:
+                        return undefined;
+                    default:
+                        return parent.left;
+                    }
+                }
+                right: {
+                    switch (plasmoid.location) {
+                    case PlasmaCore.Types.LeftEdge:
+                        return undefined;
+                    default:
+                        return parent.right;
+                    }
+                }
             }
-            x: plasmoid.location == PlasmaCore.Types.LeftEdge ? height : (plasmoid.location == PlasmaCore.Types.RightEdge ? root.width : 0)
-            width: plasmoid.location == PlasmaCore.Types.LeftEdge || plasmoid.location == PlasmaCore.Types.RightEdge ? root.height - header.height : undefined
 
-            transformOrigin: Item.TopLeft
-            rotation: plasmoid.location == PlasmaCore.Types.LeftEdge || plasmoid.location == PlasmaCore.Types.RightEdge ? 90 : 0
+            tabPosition: {
+                switch (plasmoid.location) {
+                case PlasmaCore.Types.TopEdge:
+                    return Qt.BottomEdge;
+                case PlasmaCore.Types.LeftEdge:
+                    return Qt.RightEdge;
+                case PlasmaCore.Types.RightEdge:
+                    return Qt.LeftEdge;
+                default:
+                    return Qt.TopEdge;
+                }
+            }
+
             currentTab: bookmarkButton
-
             onCurrentTabChanged: root.forceActiveFocus();
 
             KickoffButton {
@@ -277,35 +320,30 @@ Item {
                 tab: favoritesPage
                 iconSource: "bookmarks"
                 text: i18n("Favorites")
-                rotation: plasmoid.location == PlasmaCore.Types.LeftEdge || plasmoid.location == PlasmaCore.Types.RightEdge ? -90 : 0
             }
             KickoffButton {
                 id: applicationButton
                 tab: applicationsPage
                 iconSource: "applications-other"
                 text: i18n("Applications")
-                rotation: plasmoid.location == PlasmaCore.Types.LeftEdge || plasmoid.location == PlasmaCore.Types.RightEdge ? -90 : 0
             }
             KickoffButton {
                 id: computerButton
                 tab: systemPage
                 iconSource: "computer" // TODO: could also be computer-laptop
                 text: i18n("Computer")
-                rotation: plasmoid.location == PlasmaCore.Types.LeftEdge || plasmoid.location == PlasmaCore.Types.RightEdge ? -90 : 0
             }
             KickoffButton {
                 id: usedButton
                 tab: recentlyUsedPage
                 iconSource: "document-open-recent"
                 text: i18n("Recently Used")
-                rotation: plasmoid.location == PlasmaCore.Types.LeftEdge || plasmoid.location == PlasmaCore.Types.RightEdge ? -90 : 0
             }
             KickoffButton {
                 id: leaveButton
                 tab: leavePage
                 iconSource: "system-shutdown"
                 text: i18n("Leave")
-                rotation: plasmoid.location == PlasmaCore.Types.LeftEdge || plasmoid.location == PlasmaCore.Types.RightEdge ? -90 : 0
             }
         } // tabBar
 
