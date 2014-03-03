@@ -54,10 +54,10 @@ Item {
             model: Kickoff.KRunnerModel{}
 
             Connections {
-                target: searchBar
+                target: header
 
                 onQueryChanged: {
-                    searchView.model.setQuery(searchBar.query)
+                    searchView.model.setQuery(header.query)
                 }
             }
         } // searchView

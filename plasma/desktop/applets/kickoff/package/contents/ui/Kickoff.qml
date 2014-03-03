@@ -354,12 +354,21 @@ Item {
                     event.accepted = true;
                     break;
                 }
+                case Qt.Key_Escape: {
+                    if (header.query == "") {
+                        plasmoid.expanded = false;
+                    } else {
+                        header.query = "";
+                    }
+                    event.accepted = true;
+                    break;
+                }
                 case Qt.Key_Backspace: {
-                    var q = searchBar.query;
+                    var q = header.query;
                     if (event.modifiers & Qt.ControlModifier) {
-                        searchBar.query = "";
+                        header.query = "";
                     } else { // NoModifier
-                        searchBar.query = searchBar.query.substring(0, searchBar.query.length - 1);
+                        header.query = header.query.substring(0, header.query.length - 1);
                     }
                     searchBar.focus = true;
                     event.accepted = true;
@@ -368,7 +377,7 @@ Item {
 
                 default: { // forward key to searchView
                     if (event.text != "") {
-                        searchBar.query += event.text;
+                        header.query += event.text;
                         searchBar.focus = true;
                     }
                     event.accepted = true;
