@@ -47,7 +47,7 @@ Item {
             id: searchView
 
             anchors.fill: parent
-
+            keyNavigationWraps: true
             boundsBehavior: Flickable.StopAtBounds
             delegate: KickoffItem {}
             highlight: PlasmaComponents.Highlight {}
