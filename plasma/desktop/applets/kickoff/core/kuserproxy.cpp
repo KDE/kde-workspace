@@ -18,8 +18,14 @@
  *   51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA .        *
  ***************************************************************************/
 
+#include <unistd.h>
+
 #include "kuserproxy.h"
+#include <QFile>
+#include <QTextStream>
 #include <QUrl>
+
+#include <QDebug>
 
 KUserProxy::KUserProxy (QObject *parent)
     : QObject(parent)
@@ -47,11 +53,37 @@ QString KUserProxy::faceIconPath() const
 
 QString KUserProxy::os() const
 {
-    return "Debian Wheezy"; // FIXME
+    QFile osfile("/etc/os-release");
+    if (osfile.exists()) {
+        if (!osfile.open(QIODevice::ReadOnly | QIODevice::Text)) {
+            return QString();
+        }
+
+        QTextStream in(&osfile);
+        while(!in.atEnd()) {
+            QString line = in.readLine();
+            if (line.startsWith("PRETTY_NAME")) {
+                QStringList fields = line.split("PRETTY_NAME=\"");
+                if (fields.count() == 2) {
+                    osfile.close();
+                    QString pretty = fields.at(1);
+                    pretty.chop(1);
+                    return pretty;
+                }
+            }
+        }
+        osfile.close();
+    }
+    return QString();
 }
 
 QString KUserProxy::host() const
 {
-    return "monet"; // FIXME
+    char hostname[256];
+    hostname[0] = '\0';
+    if (!gethostname(hostname, sizeof(hostname))) {
+        hostname[sizeof(hostname)-1] = '\0';
+    }
+    return QString(hostname);
 }
 
