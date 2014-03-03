@@ -17,11 +17,14 @@
     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 */
 import QtQuick 2.0
+import org.kde.qtextracomponents 2.0 as QtExtras
+
 import org.kde.plasma.core 2.0 as PlasmaCore
 import org.kde.plasma.extras 2.0 as PlasmaExtras
 import org.kde.plasma.components 2.0 as PlasmaComponents
-import org.kde.plasma.private.kickoff 0.1 as Kickoff
 import org.kde.draganddrop 2.0
+
+import org.kde.plasma.private.kickoff 0.1 as Kickoff
 
 
 Item {
@@ -70,33 +73,7 @@ Item {
             }
         }
     }
-
-    PlasmaExtras.ScrollArea {
-        id: scrollArea
-
-        anchors.fill: parent
-
-        ListView {
-            id: kickoffListView
-
-            anchors.fill: parent
-            currentIndex: -1
-            interactive: contentHeight > height
-            delegate: KickoffItem {}
-            highlight: PlasmaComponents.Highlight {}
-
-            model: favoritesModel
-
-            section {
-                property: "group"
-                criteria: ViewSection.FullString
-                //delegate: SectionDelegate {}
-            }
-        }
-    }
-
     DropArea {
-
         property string dragUrl: ""
         property Item dragItem: null
         property int startRow: -1
@@ -152,4 +129,41 @@ Item {
             color: theme.highlightColor
         }
     }
+
+    PlasmaExtras.ScrollArea {
+        id: scrollArea
+
+        anchors.fill: parent
+
+        ListView {
+            id: kickoffListView
+
+            anchors.fill: parent
+            currentIndex: -1
+            keyNavigationWraps: true
+            interactive: contentHeight > height
+            /*
+            delegate: QtExtras.MouseEventListener {
+                hoverEnabled: true
+                onContainsMouseChanged: {
+                    if (containsMouse) {
+                        kickoffListView.currentIndex = index;
+                    }
+                }
+                KickoffItem { id: koitem; anchors.fill: parent; }
+            }
+            */
+            delegate: KickoffItem {}
+            highlight: PlasmaComponents.Highlight {}
+
+            model: favoritesModel
+
+            section {
+                property: "group"
+                criteria: ViewSection.FullString
+                //delegate: SectionDelegate {}
+            }
+        }
+    }
+
 }
