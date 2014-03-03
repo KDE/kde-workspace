@@ -136,6 +136,7 @@ Item {
             property variant newModelIndex
 
             focus: true
+            keyNavigationWraps: true
             boundsBehavior: Flickable.StopAtBounds
             highlight: PlasmaComponents.Highlight {}
 
