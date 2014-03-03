@@ -73,6 +73,7 @@ Item {
 
         level: 2
         text: kuser.fullName
+        elide: Text.ElideRight
         verticalAlignment: Text.AlignTop
         height: paintedHeight
 
@@ -99,9 +100,6 @@ Item {
             right: nameLabel.right
         }
 
-        Rectangle { color: "violet"; opacity: 0.3; anchors.fill: parent; visible: root.debug; }
-
-
         PlasmaComponents.Label {
             id: infoLabel
             anchors {
@@ -109,7 +107,9 @@ Item {
                 right: parent.right
             }
             verticalAlignment: Text.AlignBottom
-            text: i18n("%1 on %2", kuser.os, kuser.host);
+            text: kuser.os != "" ? i18n("%2@%3 (%1)", kuser.os, kuser.loginName, kuser.host) : i18n("%1@%2", kuser.loginName, kuser.host)
+            elide: Text.ElideRight
+
             Behavior on opacity { NumberAnimation { duration:  searchWidget.animationDuration; easing.type: Easing.InOutQuad; } }
             Behavior on y { NumberAnimation { duration: searchWidget.animationDuration; easing.type: Easing.InOutQuad; } }
         }
@@ -199,12 +199,4 @@ Item {
             }
         }
     ] // states
-
-//     Component.onCompleted: {
-//         print("KUser::fullName     " + kuser.fullName);
-//         print("KUser::loginName    " + kuser.loginName);
-//         print("KUser::faceIconPath " + kuser.faceIconPath);
-//         print("KUser::os           " + kuser.os);
-//         print("KUser::host         " + kuser.host);
-//     }
 }
