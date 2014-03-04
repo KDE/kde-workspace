@@ -1,16 +1,28 @@
 var panel = new Panel
 var panelScreen = panel.screen
-var numberOfPanelsOnScreen = 0
+var freeEdges = {"bottom": true, "top": true, "left": true, "right": true}
 
 for (i = 0; i < panelIds.length; ++i) {
-    if (panelById(panelIds[i]).screen == panelScreen) {
-        numberOfPanelsOnScreen += 1
+    var tmpPanel = panelById(panelIds[i])
+    if (tmpPanel.screen == panelScreen) {
+        // Ignore the new panel
+        if (tmpPanel.id != panel.id) {
+            freeEdges[tmpPanel.location] = false;
+        }
     }
 }
 
-if (numberOfPanelsOnScreen == 1) {
-    // we are the only panel, so set the location for the user
-    panel.location = 'bottom'
+if (freeEdges["bottom"] == true) {
+    panel.location = "bottom";
+} else if (freeEdges["top"] == true) {
+    panel.location = "top";
+} else if (freeEdges["left"] == true) {
+    panel.location = "left";
+} else if (freeEdges["right"] == true) {
+    panel.location = "right";
+} else {
+    // There is no free edge, so leave the default value
+    panel.location = "top";
 }
 
 panel.height = screenGeometry(panel.screen).height > 1024 ? 35 : 27
