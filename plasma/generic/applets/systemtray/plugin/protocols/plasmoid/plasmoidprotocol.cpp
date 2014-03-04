@@ -84,7 +84,12 @@ void PlasmoidProtocol::init()
 
     m_containment = new Plasma::Containment(m_systrayApplet, "null", containmentId);
     m_containment->setFormFactor(Plasma::Types::Horizontal);
+    m_containment->setLocation(m_systrayApplet->location());
     m_containment->init();
+
+    connect(m_systrayApplet, &Plasma::Applet::locationChanged, [=]() {
+        m_containment->setLocation(m_systrayApplet->location());
+    });
 
     cg = m_containment->config();
     cg = KConfigGroup(&cg, "Applets");

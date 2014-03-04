@@ -74,7 +74,26 @@ PlasmaCore.ToolTipArea {
         id: expandedItem
         anchors.fill: parent
         imagePath: "widgets/tasks"
-        prefix: "focus"
+        prefix: {
+            var prefix;
+            switch (plasmoid.location) {
+            case PlasmaCore.Types.LeftEdge:
+                prefix = "west-focus";
+                break;
+            case PlasmaCore.Types.TopEdge:
+                prefix = "north-focus";
+                break;
+            case PlasmaCore.Types.RightEdge:
+                prefix = "east-focus";
+                break;
+            default:
+                prefix = "south-focus";
+            }
+            if (!hasElementPrefix(prefix)) {
+                prefix = "focus";
+            }
+            return prefix;
+        }
         opacity: plasmoid.expanded ? 1 : 0
         Behavior on opacity {
             NumberAnimation {
