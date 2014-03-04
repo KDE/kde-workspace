@@ -127,6 +127,7 @@ Item {
 
         anchors {
             top: parent.top
+            topMargin: units.gridUnit
             left: expandedItemContainer.left
             right: parent.right
         }
