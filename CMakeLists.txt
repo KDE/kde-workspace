@@ -1,6 +1,6 @@
 project(KDEBASE_WORKSPACE)
 
-cmake_minimum_required(VERSION 2.8.6 FATAL_ERROR)
+cmake_minimum_required(VERSION 2.8.12 FATAL_ERROR)
 set(QT_MIN_VERSION "5.2.0")
 
 # Used e.g. in KDE4WorkspaceConfig.cmake, Alex
