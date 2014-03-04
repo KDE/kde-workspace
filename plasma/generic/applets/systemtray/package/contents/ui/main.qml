@@ -38,7 +38,8 @@ Item {
 
     Plasmoid.preferredRepresentation: Plasmoid.compactRepresentation
     Plasmoid.onExpandedChanged: {
-        if (!plasmoid.expanded) {
+        if (!plasmoid.expanded && root.expandedTask) {
+            root.expandedTask.expanded = false;
             root.expandedTask = null;
         }
     }
@@ -53,7 +54,6 @@ Item {
 
     //a pointer to the Task* that is the current one expanded, that shows full ui
     property QtObject expandedTask: null;
-
 
     function togglePopup() {
         print("toggle popup => " + !plasmoid.expanded);

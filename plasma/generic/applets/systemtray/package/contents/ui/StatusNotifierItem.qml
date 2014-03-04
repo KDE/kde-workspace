@@ -101,8 +101,8 @@ PlasmaCore.ToolTipArea {
     
     PlasmaCore.IconItem {
         id: itemIcon
-        width: root.itemSize
-        height: root.itemSize
+        width: Math.min(parent.width, parent.height)
+        height: width
         anchors {
             //horizontalCenter: parent.horizontalCenter
             left: parent.left

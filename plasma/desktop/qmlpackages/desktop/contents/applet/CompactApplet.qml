@@ -34,6 +34,7 @@ PlasmaCore.ToolTipArea {
     active: !plasmoid.expanded
     property Item fullRepresentation
     property Item compactRepresentation
+    property Item expandedFeedback: expandedItem
 
     onCompactRepresentationChanged: {
         compactRepresentation.parent = root;
@@ -69,6 +70,19 @@ PlasmaCore.ToolTipArea {
         fullRepresentation.anchors.fill = fullRepresentation.parent;
     }
 
+    PlasmaCore.FrameSvgItem {
+        id: expandedItem
+        anchors.fill: parent
+        imagePath: "widgets/tasks"
+        prefix: "focus"
+        opacity: plasmoid.expanded ? 1 : 0
+        Behavior on opacity {
+            NumberAnimation {
+                duration: theme.shortDuration
+                easing: Easing.InOutQuad
+            }
+        }
+    }
  
     PlasmaCore.Dialog {
         id: popupWindow

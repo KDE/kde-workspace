@@ -42,6 +42,12 @@ Item {
 
     property QtObject systrayhost: undefined
 
+    Connections {
+        target: root
+        onExpandedTaskChanged: {
+            parent.expandedFeedback.visible = (root.expandedTask == null)
+        }
+    }
 
     Timer {
         id: hidePopupTimer
@@ -105,9 +111,9 @@ Item {
         anchors {
             top: parent.top
             bottom: parent.bottom
-            topMargin: !root.vertical ? ((parent.height - root.itemSize) / 2) - units.smallSpacing : units.smallSpacing
+           // topMargin: !root.vertical ? ((parent.height - root.itemSize) / 2) - units.smallSpacing : units.smallSpacing
             left: parent.left
-            leftMargin: root.vertical ? 0 : units.smallSpacing
+            //leftMargin: root.vertical ? 0 : units.smallSpacing
             right: tooltip.left
         }
         cellWidth: !root.vertical ? root.itemSize + units.smallSpacing * 4 : root.itemSize

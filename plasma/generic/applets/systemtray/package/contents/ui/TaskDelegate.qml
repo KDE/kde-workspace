@@ -109,7 +109,7 @@ QtExtraComponents.MouseEventListener {
 
     function updatePlasmoidGeometry() {
         if (taskItem != undefined) {
-            var _size = root.itemSize;
+            var _size = Math.min(taskItemContainer.width, taskItemContainer.height);
             var _m = (taskItemContainer.height - _size) / 2
             taskItem.anchors.verticalCenter = taskItemContainer.verticalCenter;
             taskItem.x = _m;
