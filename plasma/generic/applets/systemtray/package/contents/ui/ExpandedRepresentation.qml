@@ -110,7 +110,8 @@ Item {
 
         anchors {
             top: parent.top
-            leftMargin: -units.largeSpacing
+            topMargin: units.gridUnit
+            leftMargin: -units.gridUnit
             left: expandedItemContainer.left
             right: parent.right
         }
