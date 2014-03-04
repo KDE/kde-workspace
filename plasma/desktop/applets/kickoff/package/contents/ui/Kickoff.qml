@@ -110,67 +110,6 @@ Item {
             }
         }
 
-        SearchBar {
-            id: searchBar
-            visible: false
-
-            anchors {
-                top: {
-                    switch (plasmoid.location) {
-                        case PlasmaCore.Types.TopEdge:
-                        case PlasmaCore.Types.LeftEdge:
-                        case PlasmaCore.Types.RightEdge:
-                            return undefined;
-                        default:
-                            return header.bottom;
-                    }
-                }
-                bottom: {
-                    switch (plasmoid.location) {
-                        case PlasmaCore.Types.TopEdge:
-                        case PlasmaCore.Types.LeftEdge:
-                        case PlasmaCore.Types.RightEdge:
-                            return header.top;
-                        default:
-                            return undefined;
-                    }
-                }
-                right: parent.right
-                left: parent.left
-            }
-        }
-        /*
-        Footer {
-            id: footer
-            visible: false
-
-            anchors {
-                top: {
-                    switch (plasmoid.location) {
-                        case PlasmaCore.Types.TopEdge:
-                        case PlasmaCore.Types.LeftEdge:
-                        case PlasmaCore.Types.RightEdge:
-                            return undefined;
-                        default:
-                            return parent.top;
-                    }
-                }
-                bottom: {
-                    switch (plasmoid.location) {
-                        case PlasmaCore.Types.TopEdge:
-                        case PlasmaCore.Types.LeftEdge:
-                        case PlasmaCore.Types.RightEdge:
-                            return parent.bottom;
-                        default:
-                            return undefined;
-                    }
-                }
-                left: parent.left
-                right: parent.right
-            }
-        }
-        */
-
         PlasmaComponents.TabGroup {
             id: mainStack
 
