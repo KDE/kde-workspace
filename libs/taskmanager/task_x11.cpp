@@ -263,8 +263,7 @@ void Task::publishIconGeometry(QRect rect)
 
 void Task::refreshActivities()
 {
-    unsigned long properties[] = { 0, NET::WM2Activities };
-    NETWinInfo info(QX11Info::connection(), d->win, QX11Info::appRootWindow(), properties, 2);
+    NETWinInfo info(QX11Info::connection(), d->win, QX11Info::appRootWindow(), 0, NET::WM2Activities);
     QString result(info.activities());
     if (result.isEmpty() || result == "00000000-0000-0000-0000-000000000000") {
         d->activities.clear();

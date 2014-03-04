@@ -392,8 +392,7 @@ void Pager::recalculateWindowRects()
         }
 
         //check activity
-        unsigned long properties[] = { 0, NET::WM2Activities };
-        NETWinInfo netInfo(QX11Info::connection(), window, QX11Info::appRootWindow(), properties, 2);
+        NETWinInfo netInfo(QX11Info::connection(), window, QX11Info::appRootWindow(), 0, NET::WM2Activities);
         QString result(netInfo.activities());
         if (!result.isEmpty() && result != "00000000-0000-0000-0000-000000000000") {
             QStringList activities = result.split(',');
