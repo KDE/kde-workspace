@@ -177,6 +177,10 @@ Column {
             connectSource(source);
         }
 
+        onSourceRemoved: {
+            notificationPositioner.closePopup(source);
+        }
+
         onNewData: {
             var _data = data; // Temp copy to avoid lots of context switching
             var actions = new Array()
