@@ -146,6 +146,7 @@ MouseEventListener {
 
             active: !inPopup && plasmoid.configuration.showToolTips
             interactive: true
+            location: plasmoid.location
 
             mainItem: toolTipDelegate
 
