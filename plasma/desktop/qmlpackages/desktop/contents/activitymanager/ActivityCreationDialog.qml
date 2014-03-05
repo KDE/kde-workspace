@@ -26,7 +26,7 @@ import org.kde.activities 0.1 as Activities
 PlasmaComponents.CommonDialog {
     id: root
 
-    property alias activityName: textActivityName.text
+    property alias activityName: activityNameText.text
 
     titleText: i18n("Create a new activity")
     titleIcon: "preferences-activities"
@@ -43,7 +43,7 @@ PlasmaComponents.CommonDialog {
         }
 
         PlasmaComponents.TextField {
-            id: textActivityName
+            id: activityNameText
 
             width: parent.width
 

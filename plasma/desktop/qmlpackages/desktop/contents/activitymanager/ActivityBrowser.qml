@@ -80,9 +80,9 @@ Item {
     }
 
     Item {
-        id: panelBottom
+        id: bottomPanel
 
-        height: buttonNewActivity.height + units.largeSpacing
+        height: newActivityButton.height + units.largeSpacing
 
         anchors {
             bottom: parent.bottom
@@ -91,7 +91,7 @@ Item {
         }
 
         PlasmaComponents.ToolButton {
-            id: buttonNewActivity
+            id: newActivityButton
 
             text: "Create activity..."
             iconSource: "list-add"
@@ -100,17 +100,17 @@ Item {
 
             onClicked: {
                 console.log("New activity");
-                dialogNewActivity.open()
+                newActivityDialog.open()
             }
         }
 
         ActivityCreationDialog {
-            id: dialogNewActivity
+            id: newActivityDialog
 
-            visualParent: buttonNewActivity
+            visualParent: newActivityButton
 
             anchors {
-                bottom: buttonNewActivity.top
+                bottom: newActivityButton.top
             }
 
             onButtonClicked: {
@@ -126,7 +126,7 @@ Item {
     PlasmaExtras.ScrollArea {
         anchors {
             top: heading.bottom
-            bottom: panelBottom.top
+            bottom: bottomPanel.top
             left: parent.left
             right: parent.right
             topMargin: root.spacing

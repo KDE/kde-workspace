@@ -29,17 +29,17 @@ Flickable {
     /*contentWidth: content.width*/
     contentHeight: content.height
 
-    property var model: modelActivities
+    property var model: activitiesModel
     property string filterString: ""
 
     Activities.ActivityModel {
-        id: modelActivities
+        id: activitiesModel
 
         shownStates: "Running,Stopping"
     }
 
     Activities.ActivityModel {
-        id: modelStoppedActivities
+        id: stoppedActivitiesModel
 
         shownStates: "Stopped,Starting"
     }
@@ -51,7 +51,7 @@ Flickable {
         // Running activities
 
         Repeater {
-            model: modelActivities
+            model: activitiesModel
 
             ActivityItem {
 
@@ -68,11 +68,11 @@ Flickable {
                 innerPadding : 2 * units.smallSpacing
 
                 onClicked          : {
-                    modelActivities.setCurrentActivity(model.id, function () {})
+                    activitiesModel.setCurrentActivity(model.id, function () {})
                 }
 
                 onStopClicked      : {
-                    modelActivities.stopActivity(model.id, function () {});
+                    activitiesModel.stopActivity(model.id, function () {});
                 }
 
                 onConfigureClicked : console.log("configure clicked")
@@ -90,13 +90,13 @@ Flickable {
         PlasmaExtras.Heading {
             text: "Stopped activities:"
             level: 3
-            visible: listStoppedActivities.count > 0
+            visible: stoppedActivitiesList.count > 0
         }
 
         Repeater {
-            id: listStoppedActivities
+            id: stoppedActivitiesList
 
-            model: modelStoppedActivities
+            model: stoppedActivitiesModel
 
             delegate: StoppedActivityItem {
                 id: stoppedActivityItem
@@ -111,23 +111,23 @@ Flickable {
                 innerPadding : 2 * units.smallSpacing
 
                 onClicked          : {
-                    modelStoppedActivities.setCurrentActivity(model.id, function () {})
+                    stoppedActivitiesModel.setCurrentActivity(model.id, function () {})
                 }
 
                 onDeleteClicked    : {
-                    dialogDeleteActivity.open()
+                    activityDeletionDialog.open()
                 }
 
                 onConfigureClicked : console.log("configure clicked")
 
                 ActivityDeletionDialog {
-                    id: dialogDeleteActivity
+                    id: activityDeletionDialog
 
                     visualParent: stoppedActivityItem
 
                     onButtonClicked: {
                         if (index == 0) {
-                            modelActivities.removeActivity(model.id, function () {})
+                            activitiesModel.removeActivity(model.id, function () {})
                         }
                     }
                 }
@@ -144,7 +144,7 @@ Flickable {
 
         move: Transition {
             NumberAnimation {
-                id: ani
+                id: animation
                 properties: "y"
                 duration: units.longDuration
             }

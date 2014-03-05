@@ -26,25 +26,25 @@ import org.kde.plasma.extras 2.0 as PlasmaExtras
 Item {
     id: root
 
-    property alias showSearch   : buttonSearch.checked
-    property alias searchString : textSearch.text
+    property alias showSearch   : searchButton.checked
+    property alias searchString : searchText.text
 
     Keys.onPressed: {
         if (event.key == Qt.Key_Escape) {
             if (root.showSearch) {
                 event.accepted = true;
-                buttonSearch.checked = false;
+                searchButton.checked = false;
             }
         }
     }
 
-    onShowSearchChanged: if (showSearch) textSearch.focus = true
+    onShowSearchChanged: if (showSearch) searchText.focus = true
 
     height : heading.height
     width  : parent.width
 
     PlasmaComponents.ToolButton {
-        id: buttonSearch
+        id: searchButton
         iconSource: "edit-find"
 
         checkable: true
@@ -57,7 +57,7 @@ Item {
         }
 
         onCheckedChanged: {
-            if (!checked) textSearch.text = "";
+            if (!checked) searchText.text = "";
         }
     }
 
@@ -67,20 +67,20 @@ Item {
 
         anchors {
             left   : parent.left
-            right  : buttonSearch.left
+            right  : searchButton.left
             bottom : parent.bottom
             top    : parent.top
         }
     }
 
     PlasmaComponents.TextField {
-        id: textSearch
+        id: searchText
 
         focus: true
 
         anchors {
             left   : parent.left
-            right  : buttonSearch.left
+            right  : searchButton.left
             bottom : parent.bottom
             top    : parent.top
         }
@@ -95,12 +95,12 @@ Item {
     states: [
         State {
             name: "normal"
-            PropertyChanges { target: textSearch; opacity: 0 }
+            PropertyChanges { target: searchText; opacity: 0 }
             PropertyChanges { target: heading; opacity: 1 }
         },
         State {
             name: "search"
-            PropertyChanges { target: textSearch; opacity: 1 }
+            PropertyChanges { target: searchText; opacity: 1 }
             PropertyChanges { target: heading; opacity: 0 }
         }
     ]

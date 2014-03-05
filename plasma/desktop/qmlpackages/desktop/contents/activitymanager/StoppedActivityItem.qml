@@ -102,7 +102,7 @@ Item {
         }
 
         ControlButton {
-            id: buttonDelete
+            id: deleteButton
 
             onClicked: root.deleteClicked()
 
@@ -116,7 +116,7 @@ Item {
         }
 
         ControlButton {
-            id: buttonConfig
+            id: configButton
 
             onClicked: root.configureClicked()
 
@@ -132,13 +132,13 @@ Item {
         states: [
             State {
                 name: "plain"
-                PropertyChanges { target: buttonDelete; opacity: 0 }
-                PropertyChanges { target: buttonConfig; opacity: 0 }
+                PropertyChanges { target: deleteButton; opacity: 0 }
+                PropertyChanges { target: configButton; opacity: 0 }
             },
             State {
                 name: "showControls"
-                PropertyChanges { target: buttonDelete; opacity: 1 }
-                PropertyChanges { target: buttonConfig; opacity: 1 }
+                PropertyChanges { target: deleteButton; opacity: 1 }
+                PropertyChanges { target: configButton; opacity: 1 }
             }
         ]
 

@@ -33,8 +33,8 @@ Image {
         id: title
 
 
-        width: textTitle.width + 32
-        height: textTitle.height + 32
+        width: titleText.width + 32
+        height: titleText.height + 32
 
         Rectangle {
             anchors.fill: parent
@@ -44,7 +44,7 @@ Image {
         }
 
         Text {
-            id: textTitle
+            id: titleText
             color: "white"
             text: "Firefox"
             font.pointSize: 24
