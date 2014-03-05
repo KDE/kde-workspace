@@ -241,13 +241,13 @@ Item {
             tabPosition: {
                 switch (plasmoid.location) {
                 case PlasmaCore.Types.TopEdge:
-                    return Qt.BottomEdge;
-                case PlasmaCore.Types.LeftEdge:
-                    return Qt.RightEdge;
-                case PlasmaCore.Types.RightEdge:
-                    return Qt.LeftEdge;
-                default:
                     return Qt.TopEdge;
+                case PlasmaCore.Types.LeftEdge:
+                    return Qt.LeftEdge;
+                case PlasmaCore.Types.RightEdge:
+                    return Qt.RightEdge;
+                default:
+                    return Qt.BottomEdge;
                 }
             }
 
