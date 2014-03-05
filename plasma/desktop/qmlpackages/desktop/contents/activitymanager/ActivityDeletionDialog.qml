@@ -28,6 +28,7 @@ PlasmaComponents.QueryDialog {
     titleIcon: "preferences-activities"
 
     message: i18n("Are you sure you want to delete the activity?")
+    location: PlasmaCore.Types.LeftEdge
 
     buttonTexts: [i18n("Delete activity"), i18n("Dismiss")]
 }

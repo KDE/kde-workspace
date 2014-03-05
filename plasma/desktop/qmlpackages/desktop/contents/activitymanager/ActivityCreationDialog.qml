@@ -20,6 +20,7 @@
 
 import QtQuick 2.2
 import org.kde.plasma.extras 2.0 as PlasmaExtras
+import org.kde.plasma.core 2.0 as PlasmaCore
 import org.kde.plasma.components 2.0 as PlasmaComponents
 import org.kde.activities 0.1 as Activities
 
@@ -30,6 +31,8 @@ PlasmaComponents.CommonDialog {
 
     titleText: i18n("Create a new activity")
     titleIcon: "preferences-activities"
+
+    location: PlasmaCore.Types.LeftEdge
 
     content: Column {
         width: parent.width
