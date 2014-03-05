@@ -54,6 +54,7 @@ Item {
     Image {
         id: faceIcon
         source: kuser.faceIconPath
+        visible: source != ""
 
         width: units.gridUnit * 3
         height: width
@@ -66,6 +67,18 @@ Item {
         }
 
         Rectangle { color: "green"; opacity: 0.3; anchors.fill: parent;  visible: root.debug;  }
+    }
+
+    PlasmaCore.IconItem {
+        source: "user-identity"
+        visible: faceIcon.source == ""
+        width: units.gridUnit * 3
+        height: width
+        anchors {
+            top: faceIcon.top
+            right: faceIcon.right
+            rightMargin: -units.gridUnit/2
+        }
     }
 
     PlasmaExtras.Heading {
