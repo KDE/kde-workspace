@@ -41,8 +41,33 @@ PlasmaComponents.ToolButton {
         }
         onPositionChanged: {
             panel.screen = mouse.screen;
+            var newLocation = panel.location;
+            //If the mouse is in an internal rectangle, do nothing
+            if ((mouse.screenX < panel.screenGeometry.x + panel.screenGeometry.width/3 ||
+                mouse.screenX > panel.screenGeometry.x + panel.screenGeometry.width/3*2) ||
+                (mouse.screenY < panel.screenGeometry.y + panel.screenGeometry.height/3 ||
+                mouse.screenY > panel.screenGeometry.y + panel.screenGeometry.height/3*2))
+            {
+                var screenAspect = panel.screenGeometry.height / panel.screenGeometry.width;
 
-            switch (panel.location) {
+                if (mouse.screenY < panel.screenGeometry.y+(mouse.screenX-panel.screenGeometry.x)*screenAspect) {
+                    if (mouse.screenY < panel.screenGeometry.y + panel.screenGeometry.height-(mouse.screenX-panel.screenGeometry.x)*screenAspect) {
+                        newLocation = PlasmaCore.Types.TopEdge;
+                    } else {
+                        newLocation = PlasmaCore.Types.RightEdge;
+                    }
+
+                } else {
+                    if (mouse.screenY < panel.screenGeometry.y + panel.screenGeometry.height-(mouse.screenX-panel.screenGeometry.x)*screenAspect) {
+                        newLocation = PlasmaCore.Types.LeftEdge;
+                    } else {
+                        newLocation = PlasmaCore.Types.BottomEdge;
+                    }
+                }
+            }
+            panel.location = newLocation
+
+            switch (newLocation) {
             case PlasmaCore.Types.TopEdge:
                 var y = Math.max(mouse.screenY - mapToItem(dialogRoot, 0, startMouseY).y, panel.height);
                 configDialog.y = y;
@@ -67,37 +92,6 @@ PlasmaComponents.ToolButton {
 
             lastX = mouse.screenX
             lastY = mouse.screenY
-
-            //If the mouse is in an internal rectangle, do nothing
-            if ((mouse.screenX > panel.screenGeometry.x + panel.screenGeometry.width/3 &&
-                 mouse.screenX < panel.screenGeometry.x + panel.screenGeometry.width/3*2) &&
-                (mouse.screenY > panel.screenGeometry.y + panel.screenGeometry.height/3 &&
-                 mouse.screenY < panel.screenGeometry.y + panel.screenGeometry.height/3*2)) {
-                return;
-            }
-
-            var screenAspect = panel.screenGeometry.height / panel.screenGeometry.width
-            var newLocation = panel.location
-
-            if (mouse.screenY < panel.screenGeometry.y+(mouse.screenX-panel.screenGeometry.x)*screenAspect) {
-                if (mouse.screenY < panel.screenGeometry.y + panel.screenGeometry.height-(mouse.screenX-panel.screenGeometry.x)*screenAspect) {
-                    newLocation = PlasmaCore.Types.TopEdge;
-                } else {
-                    newLocation = PlasmaCore.Types.RightEdge;
-                }
-
-            } else {
-                if (mouse.screenY < panel.screenGeometry.y + panel.screenGeometry.height-(mouse.screenX-panel.screenGeometry.x)*screenAspect) {
-                    newLocation = PlasmaCore.Types.LeftEdge;
-                } else {
-                    newLocation = PlasmaCore.Types.BottomEdge;
-                }
-            }
-
-            if (panel.location != newLocation) {
-                print("New Location: " + newLocation);
-            }
-            panel.location = newLocation
         }
         onReleased: {
             panel.distance = 0
