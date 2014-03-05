@@ -112,9 +112,9 @@ QtExtraComponents.MouseEventListener {
             var _size = Math.min(taskItemContainer.width, taskItemContainer.height);
             var _m = (taskItemContainer.height - _size) / 2
             taskItem.anchors.verticalCenter = taskItemContainer.verticalCenter;
-            taskItem.x = _m;
+            taskItem.x = 0;
             taskItem.height = _size;
-            taskItem.width = _size;
+            taskItem.width = isHiddenItem ? _size * 1.5 : _size;
         }
     }
 

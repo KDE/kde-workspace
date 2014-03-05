@@ -30,7 +30,7 @@ import org.kde.private.systemtray 2.0 as SystemTray
 PlasmaCore.ToolTipArea {
     id: root_item
 
-    location: isHiddenItem ? PlasmaCore.Types.LeftEdge : PlasmaCore.Types.Floating
+    location: isHiddenItem ? PlasmaCore.Types.LeftEdge : plasmoid.location
     property int blink_interval: 1000 // interval of blinking (if status of task is NeedsAttention)
     property variant task: null // task that provides information for item
 
@@ -101,12 +101,10 @@ PlasmaCore.ToolTipArea {
     
     PlasmaCore.IconItem {
         id: itemIcon
-        width: Math.min(parent.width, parent.height)
-        height: width
+        width: isHiddenItem ? height * 1.5 : height;
+        height: Math.min(parent.width, parent.height)
         anchors {
-            //horizontalCenter: parent.horizontalCenter
             left: parent.left
-            leftMargin: (parent.height - height) / 2
             verticalCenter: parent.verticalCenter
         }
         source: iconName != "" ? iconName : (typeof(icon) != "undefined" ? icon : "")

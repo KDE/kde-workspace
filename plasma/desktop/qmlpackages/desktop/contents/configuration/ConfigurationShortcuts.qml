@@ -17,16 +17,17 @@
  */
 
 import QtQuick 2.0
-import org.kde.plasma.components 2.0 as PlasmaComponents
-
+import org.kde.kquickcontrols 2.0
 
 Item {
-    id: iconsPage
     width: childrenRect.width
     height: childrenRect.height
 
-    PlasmaComponents.Button {
-        iconSource: "settings"
-        text: i18n("None")
+    KeySequenceItem {
+        id: button
+        keySequence: plasmoid.globalShortcut
+        onKeySequenceChanged: {
+            plasmoid.globalShortcut = button.keySequence
+        }
     }
 }

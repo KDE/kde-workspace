@@ -37,7 +37,7 @@ PlasmaCore.ToolTipArea {
     PlasmaCore.FrameSvgItem {
         id: expandedItem
         anchors.fill: parent
-        imagePath: "widgets/tasks"
+        imagePath: "widgets/tabbar"
         prefix: {
             var prefix;
             var location;
@@ -50,20 +50,19 @@ PlasmaCore.ToolTipArea {
 
             switch (location) {
             case PlasmaCore.Types.LeftEdge:
-                prefix = "west-focus";
+                prefix = "west-active-tab";
                 break;
             case PlasmaCore.Types.TopEdge:
-                prefix = "north-focus";
+                prefix = "north-active-tab";
                 break;
             case PlasmaCore.Types.RightEdge:
-                prefix = "east-focus";
+                prefix = "east-active-tab";
                 break;
             default:
-                prefix = "south-focus";
+                prefix = "south-active-tab";
             }
-
             if (!hasElementPrefix(prefix)) {
-                prefix = "focus";
+                prefix = "active-tab";
             }
             return prefix;
         }

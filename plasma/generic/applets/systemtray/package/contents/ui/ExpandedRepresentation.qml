@@ -26,8 +26,6 @@ import org.kde.private.systemtray 2.0 as SystemTray
 
 Item {
 
-    anchors.leftMargin: units.largeSpacing
-
     Connections {
         target: root
         onExpandedTaskChanged: {
@@ -85,8 +83,8 @@ Item {
         visible: root.expandedTask != null
 
         anchors {
-            right: expandedItemContainer.left;
-            rightMargin: units.largeSpacing
+            left: parent.left
+            leftMargin: root.baseSize * 3 - 1
             bottom: parent.bottom;
             top: parent.top;
             //TODO: if this line will make it to the final design, measures have to come from FrameSvg
@@ -139,7 +137,7 @@ Item {
         animate: false
         anchors {
             left: parent.left
-            leftMargin: (root.baseSize + units.largeSpacing * 3)
+            leftMargin: root.baseSize * 3 + units.largeSpacing
             top: snHeading.bottom
             topMargin: units.largeSpacing / 2
             bottom: parent.bottom

@@ -32,6 +32,11 @@ TaskJob::~TaskJob()
 void TaskJob::start()
 {
     TaskManager::AbstractGroupableItem* item = m_groupManager->rootGroup()->getMemberById(parameters().value("Id").toInt());
+
+    if (!item) {
+        return;
+    }
+
     TaskManager::TaskItem* taskItem = static_cast<TaskManager::TaskItem*>(item);
 
     // only a subset of task operations are exported

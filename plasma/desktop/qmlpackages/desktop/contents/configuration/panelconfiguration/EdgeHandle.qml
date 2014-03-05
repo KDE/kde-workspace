@@ -42,64 +42,60 @@ PlasmaComponents.ToolButton {
         onPositionChanged: {
             panel.screen = mouse.screen;
 
-            switch (panel.location) {
+            var newLocation = panel.location;
+            //If the mouse is in an internal rectangle, do nothing
+            if ((mouse.screenX < panel.screenGeometry.x + panel.screenGeometry.width/3 ||
+                mouse.screenX > panel.screenGeometry.x + panel.screenGeometry.width/3*2) ||
+                (mouse.screenY < panel.screenGeometry.y + panel.screenGeometry.height/3 ||
+                mouse.screenY > panel.screenGeometry.y + panel.screenGeometry.height/3*2))
+            {
+                var screenAspect = panel.screenGeometry.height / panel.screenGeometry.width;
+
+                if (mouse.screenY < panel.screenGeometry.y+(mouse.screenX-panel.screenGeometry.x)*screenAspect) {
+                    if (mouse.screenY < panel.screenGeometry.y + panel.screenGeometry.height-(mouse.screenX-panel.screenGeometry.x)*screenAspect) {
+                        newLocation = PlasmaCore.Types.TopEdge;
+                    } else {
+                        newLocation = PlasmaCore.Types.RightEdge;
+                    }
+
+                } else {
+                    if (mouse.screenY < panel.screenGeometry.y + panel.screenGeometry.height-(mouse.screenX-panel.screenGeometry.x)*screenAspect) {
+                        newLocation = PlasmaCore.Types.LeftEdge;
+                    } else {
+                        newLocation = PlasmaCore.Types.BottomEdge;
+                    }
+                }
+            }
+            panel.location = newLocation
+
+            switch (newLocation) {
             case PlasmaCore.Types.TopEdge:
                 var y = Math.max(mouse.screenY - mapToItem(dialogRoot, 0, startMouseY).y, panel.height);
                 configDialog.y = y;
-                panel.y = y - panel.height;
+                panel.distance = Math.max(y - panel.height - panel.screen.geometry.y, 0);
                 break
             case PlasmaCore.Types.LeftEdge:
                 var x = Math.max(mouse.screenX - mapToItem(dialogRoot, startMouseX, 0).x, panel.width);
                 configDialog.x = x;
-                panel.x = configDialog.x - panel.width;
+                panel.distance = Math.max(x - panel.width - panel.screen.geometry.x, 0);
                 break;
             case PlasmaCore.Types.RightEdge:
-                var x = Math.min(mouse.screenX - mapToItem(dialogRoot, startMouseX, 0).x, mouse.screen.size.width - panel.width - configDialog.width);
+                var x = Math.min(mouse.screenX - mapToItem(dialogRoot, startMouseX, 0).x, mouse.screen.geometry.x + mouse.screen.size.width - panel.width - configDialog.width);
                 configDialog.x = x;
-                panel.x = configDialog.x + configDialog.width;
+                panel.distance = Math.max(mouse.screen.size.width - (x - mouse.screen.geometry.x) - panel.width - configDialog.width, 0);
                 break;
             case PlasmaCore.Types.BottomEdge:
             default:
-                var y = Math.min(mouse.screenY - mapToItem(dialogRoot, 0, startMouseY).y, mouse.screen.size.height - panel.height - configDialog.height);
+                var y = Math.min(mouse.screenY - mapToItem(dialogRoot, 0, startMouseY).y, mouse.screen.geometry.y + mouse.screen.size.height - panel.height - configDialog.height);
                 configDialog.y = y;
-                panel.y = y + configDialog.height;
+                panel.distance = Math.max(mouse.screen.size.height - (y - mouse.screen.geometry.y) - panel.height - configDialog.height, 0);
             }
 
             lastX = mouse.screenX
             lastY = mouse.screenY
-
-            //If the mouse is in an internal rectangle, do nothing
-            if ((mouse.screenX > panel.screenGeometry.x + panel.screenGeometry.width/3 &&
-                 mouse.screenX < panel.screenGeometry.x + panel.screenGeometry.width/3*2) &&
-                (mouse.screenY > panel.screenGeometry.y + panel.screenGeometry.height/3 &&
-                 mouse.screenY < panel.screenGeometry.y + panel.screenGeometry.height/3*2)) {
-                return;
-            }
-
-            var screenAspect = panel.screenGeometry.height / panel.screenGeometry.width
-            var newLocation = panel.location
-
-            if (mouse.screenY < panel.screenGeometry.y+(mouse.screenX-panel.screenGeometry.x)*screenAspect) {
-                if (mouse.screenY < panel.screenGeometry.y + panel.screenGeometry.height-(mouse.screenX-panel.screenGeometry.x)*screenAspect) {
-                    newLocation = PlasmaCore.Types.TopEdge;
-                } else {
-                    newLocation = PlasmaCore.Types.RightEdge;
-                }
-
-            } else {
-                if (mouse.screenY < panel.screenGeometry.y + panel.screenGeometry.height-(mouse.screenX-panel.screenGeometry.x)*screenAspect) {
-                    newLocation = PlasmaCore.Types.LeftEdge;
-                } else {
-                    newLocation = PlasmaCore.Types.BottomEdge;
-                }
-            }
-
-            if (panel.location != newLocation) {
-                print("New Location: " + newLocation);
-            }
-            panel.location = newLocation
         }
         onReleased: {
+            panel.distance = 0
             panelResetAnimation.running = true
         }
     }

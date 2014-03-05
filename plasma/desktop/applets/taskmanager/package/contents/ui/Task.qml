@@ -135,7 +135,7 @@ MouseEventListener {
         anchors.fill: parent
 
         imagePath: "widgets/tasks"
-        prefix: "normal"
+        prefix: TaskTools.taskPrefix("normal")
 
         PlasmaCore.ToolTipArea {
             id: toolTip
@@ -146,6 +146,7 @@ MouseEventListener {
 
             active: !inPopup && plasmoid.configuration.showToolTips
             interactive: true
+            location: plasmoid.location
 
             mainItem: toolTipDelegate
 
@@ -279,7 +280,7 @@ MouseEventListener {
 
             PropertyChanges {
                 target: frame
-                prefix: "hover"
+                prefix: TaskTools.taskPrefix("hover");
             }
         },
         State {
@@ -288,7 +289,7 @@ MouseEventListener {
 
             PropertyChanges {
                 target: frame
-                prefix: "attention"
+                prefix: TaskTools.taskPrefix("attention");
             }
         },
         State {
@@ -297,7 +298,7 @@ MouseEventListener {
 
             PropertyChanges {
                 target: frame
-                prefix: "minimized"
+                prefix: TaskTools.taskPrefix("minimized");
             }
         },
         State {
@@ -306,7 +307,7 @@ MouseEventListener {
 
             PropertyChanges {
                 target: frame
-                prefix: "focus"
+                prefix: TaskTools.taskPrefix("focus");
             }
         }
     ]

@@ -93,3 +93,26 @@ function publishIconGeometries(taskItems) {
         }
     }
 }
+
+function taskPrefix(prefix) {
+
+    var effectivePrefix;
+    switch (plasmoid.location) {
+    case PlasmaCore.Types.LeftEdge:
+        effectivePrefix = "west-" + prefix;
+        break;
+    case PlasmaCore.Types.TopEdge:
+        effectivePrefix = "north-" + prefix;
+        break;
+    case PlasmaCore.Types.RightEdge:
+        effectivePrefix = "east-" + prefix;
+        break;
+    default:
+        effectivePrefix = "south-" + prefix;
+    }
+    if (!frame.hasElementPrefix(effectivePrefix)) {
+        return prefix;
+    }
+    return effectivePrefix;
+
+}
