@@ -101,12 +101,10 @@ PlasmaCore.ToolTipArea {
     
     PlasmaCore.IconItem {
         id: itemIcon
-        width: Math.min(parent.width, parent.height)
-        height: width
+        width: isHiddenItem ? height * 1.5 : height;
+        height: Math.min(parent.width, parent.height)
         anchors {
-            //horizontalCenter: parent.horizontalCenter
             left: parent.left
-            leftMargin: (parent.height - height) / 2
             verticalCenter: parent.verticalCenter
         }
         source: iconName != "" ? iconName : (typeof(icon) != "undefined" ? icon : "")
