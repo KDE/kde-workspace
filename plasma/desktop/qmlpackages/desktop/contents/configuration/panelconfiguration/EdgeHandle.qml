@@ -46,23 +46,23 @@ PlasmaComponents.ToolButton {
             case PlasmaCore.Types.TopEdge:
                 var y = Math.max(mouse.screenY - mapToItem(dialogRoot, 0, startMouseY).y, panel.height);
                 configDialog.y = y;
-                panel.y = y - panel.height;
+                panel.distance = Math.max(y - panel.height - panel.screen.geometry.y, 0);
                 break
             case PlasmaCore.Types.LeftEdge:
                 var x = Math.max(mouse.screenX - mapToItem(dialogRoot, startMouseX, 0).x, panel.width);
                 configDialog.x = x;
-                panel.x = configDialog.x - panel.width;
+                panel.distance = Math.max(x - panel.width - panel.screen.geometry.x, 0);
                 break;
             case PlasmaCore.Types.RightEdge:
                 var x = Math.min(mouse.screenX - mapToItem(dialogRoot, startMouseX, 0).x, mouse.screen.size.width - panel.width - configDialog.width);
                 configDialog.x = x;
-                panel.x = configDialog.x + configDialog.width;
+                panel.distance = Math.max(panel.screen.size.width - panel.width - x - configDialog.width, 0);
                 break;
             case PlasmaCore.Types.BottomEdge:
             default:
                 var y = Math.min(mouse.screenY - mapToItem(dialogRoot, 0, startMouseY).y, mouse.screen.size.height - panel.height - configDialog.height);
                 configDialog.y = y;
-                panel.y = y + configDialog.height;
+                panel.distance = Math.max(panel.screen.size.height - panel.height - y - configDialog.height, 0);
             }
 
             lastX = mouse.screenX
@@ -100,6 +100,7 @@ PlasmaComponents.ToolButton {
             panel.location = newLocation
         }
         onReleased: {
+            panel.distance = 0
             panelResetAnimation.running = true
         }
     }
