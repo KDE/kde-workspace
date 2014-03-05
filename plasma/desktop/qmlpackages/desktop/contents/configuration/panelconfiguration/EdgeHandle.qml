@@ -41,6 +41,7 @@ PlasmaComponents.ToolButton {
         }
         onPositionChanged: {
             panel.screen = mouse.screen;
+
             var newLocation = panel.location;
             //If the mouse is in an internal rectangle, do nothing
             if ((mouse.screenX < panel.screenGeometry.x + panel.screenGeometry.width/3 ||
@@ -79,15 +80,15 @@ PlasmaComponents.ToolButton {
                 panel.distance = Math.max(x - panel.width - panel.screen.geometry.x, 0);
                 break;
             case PlasmaCore.Types.RightEdge:
-                var x = Math.min(mouse.screenX - mapToItem(dialogRoot, startMouseX, 0).x, mouse.screen.size.width - panel.width - configDialog.width);
+                var x = Math.min(mouse.screenX - mapToItem(dialogRoot, startMouseX, 0).x, mouse.screen.geometry.x + mouse.screen.size.width - panel.width - configDialog.width);
                 configDialog.x = x;
-                panel.distance = Math.max(panel.screen.size.width - panel.width - x - configDialog.width, 0);
+                panel.distance = Math.max(mouse.screen.size.width - (x - mouse.screen.geometry.x) - panel.width - configDialog.width, 0);
                 break;
             case PlasmaCore.Types.BottomEdge:
             default:
-                var y = Math.min(mouse.screenY - mapToItem(dialogRoot, 0, startMouseY).y, mouse.screen.size.height - panel.height - configDialog.height);
+                var y = Math.min(mouse.screenY - mapToItem(dialogRoot, 0, startMouseY).y, mouse.screen.geometry.y + mouse.screen.size.height - panel.height - configDialog.height);
                 configDialog.y = y;
-                panel.distance = Math.max(panel.screen.size.height - panel.height - y - configDialog.height, 0);
+                panel.distance = Math.max(mouse.screen.size.height - (y - mouse.screen.geometry.y) - panel.height - configDialog.height, 0);
             }
 
             lastX = mouse.screenX
