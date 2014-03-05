@@ -83,7 +83,7 @@ PlasmaCore.FrameSvgItem {
         id: panelResetAnimation
         NumberAnimation {
             target: panel
-            properties: (panel.location == 5 || panel.location == 6) ? "x" : "y"
+            properties: (panel.location == PlasmaCore.Types.LeftEdge || panel.location == PlasmaCore.Types.RightEdge) ? "x" : "y"
             to:  {
                 switch (panel.location) {
                 case PlasmaCore.Types.TopEdge:
@@ -102,7 +102,7 @@ PlasmaCore.FrameSvgItem {
 
         NumberAnimation {
             target: configDialog
-            properties: (panel.location == 5 || panel.location == 6) ? "x" : "y"
+            properties: (panel.location == PlasmaCore.Types.LeftEdge || panel.location == PlasmaCore.Types.RightEdge) ? "x" : "y"
             to: {
                 switch (panel.location) {
                 case PlasmaCore.Types.TopEdge:
