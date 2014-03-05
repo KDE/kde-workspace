@@ -73,6 +73,25 @@ ksplashrc KSplash Engine KSplashQML
 kcmfonts General forceFontDPI 0
 kdeglobals Locale Language '' # trigger requesting languages from KLocale
 EOF
+
+# Write a default kdeglobals file to set up the font
+kdeglobalsfile=$configDir/kdeglobals
+test -f $kdeglobalsfile || {
+cat >$kdeglobalsfile <<EOF
+[General]
+XftAntialias=true
+XftHintStyle=hintmedium
+XftSubPixel=none
+desktopFont=Oxygen,12,-1,5,50,0,0,0,0,0
+fixed=Oxygen Mono,11,-1,5,50,0,0,0,0,0
+font=Oxygen,12,-1,5,50,0,0,0,0,0
+menuFont=Oxygen,11,-1,5,50,0,0,0,0,0
+smallestReadableFont=Oxygen,10,-1,5,50,0,0,0,0,0
+taskbarFont=Oxygen,11,-1,5,50,0,0,0,0,0
+toolBarFont=Oxygen,10,-1,5,50,0,0,0,0,0
+EOF
+}
+
 kstartupconfig5
 returncode=$?
 if test $returncode -ne 0; then
