@@ -73,27 +73,27 @@ PlasmaCore.ToolTipArea {
     PlasmaCore.FrameSvgItem {
         id: expandedItem
         anchors.fill: parent
-        imagePath: "widgets/tasks"
+        imagePath: "widgets/tabbar"
         prefix: {
             var prefix;
             switch (plasmoid.location) {
-            case PlasmaCore.Types.LeftEdge:
-                prefix = "west-focus";
-                break;
-            case PlasmaCore.Types.TopEdge:
-                prefix = "north-focus";
-                break;
-            case PlasmaCore.Types.RightEdge:
-                prefix = "east-focus";
-                break;
-            default:
-                prefix = "south-focus";
+                case PlasmaCore.Types.LeftEdge:
+                    prefix = "west-active-tab";
+                    break;
+                case PlasmaCore.Types.TopEdge:
+                    prefix = "north-active-tab";
+                    break;
+                case PlasmaCore.Types.RightEdge:
+                    prefix = "east-active-tab";
+                    break;
+                default:
+                    prefix = "south-active-tab";
+                }
+                if (!hasElementPrefix(prefix)) {
+                    prefix = "active-tab";
+                }
+                return prefix;
             }
-            if (!hasElementPrefix(prefix)) {
-                prefix = "focus";
-            }
-            return prefix;
-        }
         opacity: plasmoid.expanded ? 1 : 0
         Behavior on opacity {
             NumberAnimation {
