@@ -85,7 +85,7 @@ Item {
         }
         width: Math.max(paintedWidth, timeLabel.paintedWidth)
         text: Qt.formatTime(dataSource.data["Local"]["Time"], main.timeFormat);
-        wrapMode: main.vertical ? Text.WordWrap : Text.NoWrap
+        wrapMode: plasmoid.formFactor != PlasmaCore.Types.Horizontal ? Text.WordWrap : Text.NoWrap
         horizontalAlignment: Text.AlignHCenter
         verticalAlignment: Text.AlignVCenter
         anchors {
@@ -111,7 +111,7 @@ Item {
         id: sizehelper
         font.weight: timeLabel.font.weight
         font.italic: timeLabel.font.italic
-        wrapMode: main.vertical ? Text.Wrap : Text.NoWrap
+        wrapMode: plasmoid.formFactor != PlasmaCore.Types.Horizontal ? Text.WordWrap : Text.NoWrap
         visible: false
         anchors {
             verticalCenter: parent.verticalCenter
