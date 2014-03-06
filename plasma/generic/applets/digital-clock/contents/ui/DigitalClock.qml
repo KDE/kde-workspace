@@ -63,7 +63,7 @@ Item {
 
     Components.Label  {
         id: time
-        font.bold: plasmoid.configuration.boldText
+        font.weight: plasmoid.configuration.boldText ? Font.Bold : Font.Normal
         font.italic: plasmoid.configuration.italicText
         font.pixelSize: Math.min(main.width/6, main.height)
         width: Math.max(paintedWidth, time.paintedWidth)
