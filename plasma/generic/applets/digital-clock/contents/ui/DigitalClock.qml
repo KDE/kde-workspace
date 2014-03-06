@@ -112,7 +112,7 @@ Item {
         id: sizehelper
         font.weight: time.font.weight
         font.italic: time.font.italic
-        wrapMode: Text.Wrap
+        wrapMode: main.vertical ? Text.Wrap : Text.NoWrap
         visible: false
         anchors {
             verticalCenter: parent.verticalCenter
