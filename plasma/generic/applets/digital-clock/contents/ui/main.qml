@@ -26,24 +26,11 @@ import org.kde.plasma.extras 2.0 as PlasmaExtras
 Item {
     id: main
 
-    Layout.minimumWidth: _minimumWidth
-    Layout.minimumHeight: _minimumHeight
-
-    // The "sensible" values
-    property int _minimumWidth: _minimumHeight * 3
-    property int _minimumHeight: units.gridUnit * 14
-    Layout.preferredWidth: _minimumWidth
-    Layout.preferredHeight: _minimumHeight * 1.5
-
-    
-    property int formFactor: plasmoid.formFactor
-
-    property alias calendarLoader: calendarLoader
-
     property string dateFormatString: setDateFormatString()
 
     Plasmoid.preferredRepresentation: Plasmoid.compactRepresentation
     Plasmoid.compactRepresentation: DigitalClock { }
+    Plasmoid.fullRepresentation: CalendarView { }
 
     Plasmoid.toolTipMainText: Qt.formatDate(dataSource.data["Local"]["Date"],"dddd")
     Plasmoid.toolTipSubText:  Qt.formatDate(dataSource.data["Local"]["Date"], dateFormatString)
@@ -53,51 +40,6 @@ Item {
         engine: "time"
         connectedSources: ["Local"]
         interval: plasmoid.configuration.showSeconds ? 1000 : 30000
-    }
-
-
-    Loader {
-        id: calendarLoader
-        anchors.fill: parent
-        opacity: (calendarLoader.status == Loader.Ready) ? 1 : 0
-        Behavior on opacity { NumberAnimation { duration: units.longDuration } }
-
-        onStatusChanged: {
-            if (status == Loader.Error) {
-                print("Error loading CalenderView.qml: " + sourceComponent.errorString())
-            }
-        }
-    }
-
-    PlasmaExtras.Heading {
-        id: loadingItem
-        ////text: Qt.formatDate(new Date());
-//         text: "Loading Calendar ..."
-        text: Qt.formatDate( dataSource.data["Local"]["Date"],"dddd, MMM d" )
-        anchors {
-            left: parent.left
-            top: parent.top
-            right: parent.right
-        }
-        opacity: (calendarLoader.status == Loader.Ready) ? 0 : 0.7
-        Behavior on opacity { NumberAnimation { duration: units.longDuration } }
-    }
-
-    PlasmaComponents.Label {
-        anchors {
-            right: parent.right
-            bottom: parent.bottom
-        }
-        text: Qt.formatDateTime(new Date(), "yyyy")
-        font.pixelSize: parent.height / 6
-        opacity: loadingItem.opacity
-    }
-
-    onFormFactorChanged: {
-        if(main.formFactor == PlasmaCore.Types.Planar || main.formFactor == PlasmaCore.Types.MediaCenter ) {
-            minimumWidth=main.width/3.5
-            minimumHeight=main.height/3.5
-        }
     }
 
     function setDateFormatString() {

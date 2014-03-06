@@ -96,15 +96,6 @@ Item {
                 plasmoid.expanded = !plasmoid.expanded;
                 calTimer.start();
             }
-            Timer {
-                id: calTimer
-                interval: 100
-                onTriggered: {
-                    if (calendarLoader.source == "") {
-                        calendarLoader.source = "CalendarView.qml"
-                    }
-                }
-            }
         }
     }
 

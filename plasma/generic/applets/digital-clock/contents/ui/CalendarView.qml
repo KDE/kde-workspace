@@ -15,6 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import QtQuick 2.0
+import QtQuick.Layouts 1.1
 import org.kde.plasma.core 2.0 as PlasmaCore
 import org.kde.plasma.calendar 2.0 as PlasmaCalendar
 import org.kde.plasma.components 2.0 as PlasmaComponents
@@ -22,6 +23,15 @@ import org.kde.plasma.extras 2.0 as PlasmaExtras
 
 Item {
     id: calendar
+
+    Layout.minimumWidth: _minimumWidth
+    Layout.minimumHeight: _minimumHeight
+
+    // The "sensible" values
+    property int _minimumWidth: _minimumHeight * 3
+    property int _minimumHeight: units.gridUnit * 14
+    Layout.preferredWidth: _minimumWidth
+    Layout.preferredHeight: _minimumHeight * 1.5
 
     property int avWidth: (parent.width - (3 * units.largeSpacing)) / 2
     property int avHeight: parent.height - (2 * units.largeSpacing)
