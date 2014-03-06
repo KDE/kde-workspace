@@ -39,11 +39,13 @@ Item {
 
     property alias calendarLoader: calendarLoader
 
+    property string dateFormatString: setDateFormatString()
+
     Plasmoid.preferredRepresentation: Plasmoid.compactRepresentation
     Plasmoid.compactRepresentation: DigitalClock { }
 
     Plasmoid.toolTipMainText: Qt.formatDate(dataSource.data["Local"]["Date"],"dddd")
-    Plasmoid.toolTipSubText: Qt.formatDate(dataSource.data["Local"]["Date"],"MMM d yyyy")
+    Plasmoid.toolTipSubText:  Qt.formatDate(dataSource.data["Local"]["Date"], dateFormatString)
 
     PlasmaCore.DataSource {
         id: dataSource
@@ -99,5 +101,15 @@ Item {
                 minimumHeight=main.height/3.5
             }
         }
+    }
+
+    function setDateFormatString() {
+        // remove "dddd" from the locale format string
+        // /all/ locales in LongFormat have "dddd" either
+        // at the beginning or at the end. so we just
+        // remove it + the delimiter and space
+        var format = Qt.locale().dateFormat(Locale.LongFormat);
+        format = format.replace(/(^dddd.?\s)|(,?\sdddd$)/, "");
+        main.dateFormatString = format;
     }
 }
