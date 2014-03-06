@@ -32,9 +32,10 @@ Item {
     // The "sensible" values
     property int _minimumWidth: _minimumHeight * 3
     property int _minimumHeight: units.gridUnit * 14
-    Layout.preferredWidth: _minimumWidth * 1.5
+    Layout.preferredWidth: _minimumWidth
     Layout.preferredHeight: _minimumHeight * 1.5
 
+    
     property int formFactor: plasmoid.formFactor
 
     property alias calendarLoader: calendarLoader
