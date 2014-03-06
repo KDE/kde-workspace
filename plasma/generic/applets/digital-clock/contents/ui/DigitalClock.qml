@@ -99,8 +99,6 @@ Item {
 
     Components.Label {
         id: sizehelper
-        //text: time.text
-        text: Qt.locale().timeFormat(Locale.ShortFormat).length * "M"
         visible: false
     }
 
