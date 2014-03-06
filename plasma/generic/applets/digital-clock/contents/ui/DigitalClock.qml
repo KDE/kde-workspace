@@ -70,9 +70,11 @@ Item {
 
     Components.Label  {
         id: time
-        font.weight: plasmoid.configuration.boldText ? Font.Bold : Font.Normal
-        font.italic: plasmoid.configuration.italicText
-        font.pixelSize: Math.min(main.width/6, main.height)
+        font {
+            weight: plasmoid.configuration.boldText ? Font.Bold : Font.Normal
+            italic: plasmoid.configuration.italicText
+            pixelSize: Math.min(main.width/6, main.height)
+        }
         width: Math.max(paintedWidth, time.paintedWidth)
         // We need to adjust the timeformat a bit, see more at timeFormatCorrection(..) comments
         text: Qt.formatTime(dataSource.data["Local"]["Time"], main.timeFormat);
