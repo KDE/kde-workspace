@@ -26,8 +26,6 @@ import org.kde.plasma.configuration 2.0
 Rectangle {
     id: root
 
-    property int _m: theme.defaultFont.pointSize
-
 //BEGIN properties
     color: syspal.window
     width: units.gridUnit * 40
