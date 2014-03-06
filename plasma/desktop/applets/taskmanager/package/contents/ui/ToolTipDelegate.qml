@@ -19,6 +19,7 @@
 */
 
 import QtQuick 2.0
+import QtQuick.Layouts 1.1
 import org.kde.plasma.core 2.0 as PlasmaCore
 import org.kde.plasma.components 2.0 as PlasmaComponents
 import org.kde.plasma.extras 2.0 as PlasmaExtras
@@ -32,6 +33,10 @@ Column {
     property int preferredTextWidth: theme.mSize(theme.defaultFont).width * 40
     property int _s: units.largeSpacing / 2
 
+    Layout.minimumWidth: childrenRect.width + _s
+    Layout.minimumHeight: childrenRect.height + units.largeSpacing
+    Layout.maximumWidth: childrenRect.width + _s
+    Layout.maximumHeight: childrenRect.height + units.largeSpacing
     width: childrenRect.width + _s
     height: childrenRect.height + units.largeSpacing
     spacing: units.largeSpacing
