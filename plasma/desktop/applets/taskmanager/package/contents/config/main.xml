@@ -34,7 +34,7 @@
       <default>false</default>
     </entry>
     <entry name="showToolTips" type="Bool">
-      <default>false</default>
+      <default>true</default>
     </entry>
     <entry name="highlightWindows" type="Bool">
       <default>false</default>
