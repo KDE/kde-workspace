@@ -69,12 +69,13 @@ Item {
         width: Math.max(paintedWidth, time.paintedWidth)
         // We need to adjust the timeformat a bit, see more at timeFormatCorrection(..) comments
         text: Qt.formatTime(dataSource.data["Local"]["Time"], main.timeFormat);
-        //horizontalAlignment: Text.AlignHCenter
+        horizontalAlignment: Text.AlignRight
         verticalAlignment: Text.AlignVCenter
         anchors {
             verticalCenter: parent.verticalCenter
-            left: parent.left
+            right: parent.right
             leftMargin: units.smallSpacing
+            rightMargin: units.smallSpacing
         }
 
         MouseArea {
