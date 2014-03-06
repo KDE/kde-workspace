@@ -112,7 +112,15 @@ Item {
         id: sizehelper
         font.weight: time.font.weight
         font.italic: time.font.italic
+        wrapMode: Text.Wrap
         visible: false
+        anchors {
+            verticalCenter: parent.verticalCenter
+            left: parent.left
+            right: parent.right
+            leftMargin: units.smallSpacing
+            rightMargin: units.smallSpacing
+        }
     }
 
     function updateSize() {
