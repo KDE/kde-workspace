@@ -161,6 +161,27 @@ Item {
             timeFormatString = timeFormatString.replace(/.ss?/i, "");
         }
 
+        // We set the text of the sizehelper to a fixed-size string,
+        // only depending on the length of the time format, but not on
+        // the actually rendered time. This makes the width of the plasmoid
+        // not change when the time changes, which can lead to relayouts of
+        // the whole panel, and jumpiness.
+        //
+        // Also do this before appending the timezone part there
+        // so we can simply add the full timezone length without
+        // needing to subtract 1 for the "t"
+
+        var stLength = timeFormatString.length;
+        if (main.showTimezone) {
+            stLength += Qt.formatTime(dataSource.data["Local"]["Time"], "t").length;
+        }
+
+        var st = new Array(stLength).join("A");
+
+        if (sizehelper.text != st) {
+            sizehelper.text = st;
+        }
+
         //FIXME: this always appends the timezone part at the end, it should probably be
         //       Locale-driven, however QLocale does not provide any hint about where to
         //       put it
@@ -168,15 +189,6 @@ Item {
             timeFormatString = timeFormatString + " t";
         }
 
-        // We set the text of the sizehelper to a fixed-size string,
-        // only depending on the length of the time format, but not on
-        // the actually rendered time. This makes the width of the plasmoid
-        // not change when the time changes, which can lead to relayouts of
-        // the whole panel, and jumpiness.
-        var st = new Array( timeFormatString.length ).join( "A" );
-        if (sizehelper.text != st) {
-            sizehelper.text = st;
-        }
 
         main.timeFormat = timeFormatString;
     }
