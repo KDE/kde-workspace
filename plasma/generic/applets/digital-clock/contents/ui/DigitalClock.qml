@@ -26,13 +26,13 @@ import org.kde.plasma.components 2.0 as Components
 Item {
     id: main
 
-    Layout.minimumWidth: sizehelper.paintedWidth + (units.smallSpacing * 2)
-    Layout.maximumWidth: Layout.minimumWidth
-    Layout.preferredWidth: Layout.minimumWidth
+    Layout.minimumWidth: vertical ? 0 : sizehelper.paintedWidth + (units.smallSpacing * 2)
+    Layout.maximumWidth: vertical ? Infinity : Layout.minimumWidth
+    Layout.preferredWidth: vertical ? undefined : Layout.minimumWidth
 
-    Layout.minimumHeight: sizehelper.paintedHeight + (units.smallSpacing * 2)
-    Layout.maximumHeight: Layout.minimumHeight
-    Layout.preferredHeight: Layout.minimumHeight
+    Layout.minimumHeight: vertical ? sizehelper.paintedHeight + (units.smallSpacing * 2) : 0
+    Layout.maximumHeight: vertical ? Layout.minimumHeight : Infinity
+    Layout.preferredHeight: vertical ? Layout.minimumHeight : theme.mSize(theme.defaultFont).height * 2
 
     property int formFactor: plasmoid.formFactor
     property int timePixelSize: theme.defaultFont.pixelSize
@@ -65,20 +65,28 @@ Item {
     Timer {
         id: geotimer
         interval: 4 // just to compress resize events of width and height; below 60fps
-        onTriggered: updateSize()
+        onTriggered: {
+            if (main.vertical) {
+                sizehelper.font.pixelSize = Math.min(main.width/5, theme.mSize(theme.defaultFont).height * 2);
+            } else if (plasmoid.formFactor == PlasmaCore.Types.Horizontal) {
+                sizehelper.font.pixelSize = main.height;
+            } else {
+                sizehelper.font.pixelSize = Math.min(main.width/5, main.height);
+            }
+        }
     }
 
     Components.Label  {
-        id: time
+        id: timeLabel
         font {
             weight: plasmoid.configuration.boldText ? Font.Bold : Font.Normal
             italic: plasmoid.configuration.italicText
-            pixelSize: Math.min(main.width/6, main.height)
+            pixelSize: sizehelper.font.pixelSize
         }
-        width: Math.max(paintedWidth, time.paintedWidth)
+        width: Math.max(paintedWidth, timeLabel.paintedWidth)
         text: Qt.formatTime(dataSource.data["Local"]["Time"], main.timeFormat);
         wrapMode: main.vertical ? Text.WordWrap : Text.NoWrap
-        horizontalAlignment: main.vertical ? Text.AlignHCenter : Text.AlignRight
+        horizontalAlignment: Text.AlignHCenter
         verticalAlignment: Text.AlignVCenter
         anchors {
             verticalCenter: parent.verticalCenter
@@ -101,8 +109,8 @@ Item {
 
     Components.Label {
         id: sizehelper
-        font.weight: time.font.weight
-        font.italic: time.font.italic
+        font.weight: timeLabel.font.weight
+        font.italic: timeLabel.font.italic
         wrapMode: main.vertical ? Text.Wrap : Text.NoWrap
         visible: false
         anchors {
@@ -112,42 +120,6 @@ Item {
             leftMargin: units.smallSpacing
             rightMargin: units.smallSpacing
         }
-    }
-
-    function updateSize() {
-        // Start at minimum size, and increase the hidden label
-        // size until we fit into the plasmoid with a bit of margin
-        // It would be nice if we had proper font metrics in QML.
-        var maxSize = theme.smallestFont.pixelSize;
-        var threshold = theme.mSize(theme.defaultFont).height / 2;
-        var stop = false;
-
-        while (!stop) {
-            maxSize = maxSize + 1;
-            sizehelper.font.pixelSize = maxSize;
-            var pw = sizehelper.paintedWidth;
-
-            if (!constrained) { // free floating cases
-                if (maxSize + threshold >= main.height) {
-                    stop = true;
-                } else if (pw + threshold >= main.width) {
-                    stop = true;
-                }
-            } else { // panel situations
-                if (main.vertical) {
-                    if (pw + threshold >= main.width) {
-                        stop = true;
-                    }
-                } else {
-                    if (maxSize + threshold >= main.height) {
-                        stop = true;
-                    }
-                }
-            }
-        }
-        time.font.pixelSize = maxSize;
-        sizehelper.font.timePixelSize = maxSize;
-
     }
 
     // Qt's QLocale does not offer any modular time creating like Klocale did
@@ -171,39 +143,11 @@ Item {
             timeFormatString = timeFormatString.replace(/.ss?/i, "");
         }
 
-        // We set the text of the sizehelper to a fixed-size string,
-        // only depending on the length of the time format, but not on
-        // the actually rendered time. This makes the width of the plasmoid
-        // not change when the time changes, which can lead to relayouts of
-        // the whole panel, and jumpiness.
-        //
-        // Also do this before appending the timezone part there
-        // so we can simply add the full timezone length without
-        // needing to subtract 1 for the "t"
-
-        var stLength = timeFormatString.length;
-
-        // Some locales have format like "h:mm", ie. without the leading zero.
-        // That means that we reserve enough splace for say "9:31" but not enough
-        // for "10:31". So if we have just single "h" in the format, we add 1
-        // to compensate for the missing leading zero
-        if (timeFormatString.search(/hh/i) == -1) {
-            stLength++;
-        }
-
+        var st = Qt.formatTime(new Date(2000, 0, 1, 10, 0, 0), timeFormatString);
         if (main.showTimezone) {
-            stLength += Qt.formatTime(dataSource.data["Local"]["Time"], "t").length;
+            st += Qt.formatTime(dataSource.data["Local"]["Time"], " t");
         }
 
-        // If we're showing seconds, we have ":" twice in there. The colon char is
-        // very slim, yet we add one "A" for each, which makes it too wide if seconds
-        // are shown. So, if we're showing seconds, make it one "A" less as two colons
-        // can fit the "A" width no problems
-        if (main.showSeconds) {
-            stLength--;
-        }
-
-        var st = new Array(stLength).join("A");
 
         if (sizehelper.text != st) {
             sizehelper.text = st;
