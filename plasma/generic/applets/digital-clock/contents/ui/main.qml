@@ -92,14 +92,10 @@ Item {
         opacity: loadingItem.opacity
     }
 
-    Connections {
-        target: plasmoid
-        onFormFactorChanged: {
-            main.formFactor = plasmoid.formFactor
-            if(main.formFactor==Planar || main.formFactor == MediaCenter ) {
-                minimumWidth=main.width/3.5
-                minimumHeight=main.height/3.5
-            }
+    onFormFactorChanged: {
+        if(main.formFactor == PlasmaCore.Types.Planar || main.formFactor == PlasmaCore.Types.MediaCenter ) {
+            minimumWidth=main.width/3.5
+            minimumHeight=main.height/3.5
         }
     }
 
