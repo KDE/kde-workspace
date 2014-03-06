@@ -35,30 +35,33 @@ Item {
     focus: true
 
     Keys.onPressed: {
-        if (event.key == Qt.Key_Escape) {
-            if (heading.showSearch)
-                heading.showSearch = false;
-            else
-                root.closeRequested();
+        if (newActivityDialog.visible) {
+            event.accepted = false;
+        } else {
+            if (event.key == Qt.Key_Escape) {
+                if (heading.showSearch)
+                    heading.showSearch = false;
+                else
+                    root.closeRequested();
 
-        } else if (event.key == Qt.Key_Up) {
-            console.log("UP KEY");
+            } else if (event.key == Qt.Key_Up) {
+                console.log("UP KEY");
 
-        } else if (event.key == Qt.Key_Down) {
-            console.log("DOWN KEY");
+            } else if (event.key == Qt.Key_Down) {
+                console.log("DOWN KEY");
 
-        } else if (event.key == Qt.Key_Return || event.key == Qt.Key_Enter) {
-            console.log("ENTER KEY");
+            } else if (event.key == Qt.Key_Return || event.key == Qt.Key_Enter) {
+                console.log("ENTER KEY");
 
-        } else if (event.key == Qt.Key_Tab) {
-            console.log("TAB KEY");
+            } else if (event.key == Qt.Key_Tab) {
+                console.log("TAB KEY");
 
-        } else  {
-            console.log("OTHER KEY");
-            heading.showSearch = true;
+            } else  {
+                console.log("OTHER KEY");
+                heading.showSearch = true;
 
+            }
         }
-
     }
 
     // Rectangle {
@@ -76,6 +79,22 @@ Item {
             right: parent.right
 
             topMargin: units.largeSpacing
+        }
+    }
+
+    PlasmaExtras.ScrollArea {
+        anchors {
+            top: heading.bottom
+            bottom: bottomPanel.top
+            left: parent.left
+            right: parent.right
+            topMargin: root.spacing
+        }
+
+        flickableItem: ActivityList {
+            id: activityList
+
+            filterString: heading.searchString.toLowerCase()
         }
     }
 
@@ -99,43 +118,23 @@ Item {
             width: parent.width
 
             onClicked: {
-                console.log("New activity");
-                newActivityDialog.open()
+                newActivityDialog.visible = true;
             }
+
+            visible: !newActivityDialog.visible
         }
 
         ActivityCreationDialog {
             id: newActivityDialog
 
-            visualParent: newActivityButton
+            z: 100
+            visible: false
 
-            anchors {
-                bottom: newActivityButton.top
-            }
+            anchors.bottom: newActivityButton.bottom
+            anchors.left:   newActivityButton.left
+            anchors.right:  newActivityButton.right
 
-            onButtonClicked: {
-                if (index == 0) {
-                    console.log("Create activity: " + activityName)
-                    activityList.model.addActivity(activityName, function () {})
-                }
-            }
-
-        }
-    }
-
-    PlasmaExtras.ScrollArea {
-        anchors {
-            top: heading.bottom
-            bottom: bottomPanel.top
-            left: parent.left
-            right: parent.right
-            topMargin: root.spacing
-        }
-
-        flickableItem: ActivityList {
-            id: activityList
-
-            filterString: heading.searchString.toLowerCase()
+            onAccepted: activityList.model.addActivity(activityName, function () {})
         }
     }
 }

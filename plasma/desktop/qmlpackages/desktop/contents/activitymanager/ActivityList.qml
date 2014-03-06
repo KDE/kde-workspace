@@ -115,7 +115,7 @@ Flickable {
                 }
 
                 onDeleteClicked    : {
-                    activityDeletionDialog.open()
+                    activityDeletionDialog.visible = true
                 }
 
                 onConfigureClicked : console.log("configure clicked")
@@ -123,12 +123,12 @@ Flickable {
                 ActivityDeletionDialog {
                     id: activityDeletionDialog
 
-                    visualParent: stoppedActivityItem
+                    anchors.centerIn: parent
+                    width: parent.width
+                    visible: false
 
-                    onButtonClicked: {
-                        if (index == 0) {
-                            activitiesModel.removeActivity(model.id, function () {})
-                        }
+                    onAccepted: {
+                        activitiesModel.removeActivity(model.id, function () {})
                     }
                 }
             }

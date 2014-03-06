@@ -20,15 +20,67 @@
 
 import QtQuick 2.2
 import org.kde.plasma.extras 2.0 as PlasmaExtras
+import org.kde.plasma.core 2.0 as PlasmaCore
 import org.kde.plasma.components 2.0 as PlasmaComponents
-import org.kde.activities 0.1 as Activities
 
-PlasmaComponents.QueryDialog {
-    titleText: i18n("Confirm deletion")
-    titleIcon: "preferences-activities"
+PlasmaCore.FrameSvgItem {
+    id: root
 
-    message: i18n("Are you sure you want to delete the activity?")
-    location: PlasmaCore.Types.LeftEdge
+    imagePath: "widgets/extender-background"
 
-    buttonTexts: [i18n("Delete activity"), i18n("Dismiss")]
+    signal accepted()
+    signal canceled()
+
+    // titleText: i18n("Confirm deletion")
+    // titleIcon: "preferences-activities"
+
+    // location: PlasmaCore.Types.LeftEdge
+
+    // buttonTexts: [i18n("Delete activity"), i18n("Dismiss")]
+    height: content.height + margins.top + margins.bottom
+    Column {
+        id: content
+
+        anchors {
+            left: parent.left
+            right: parent.right
+
+            topMargin: root.margins.top
+            leftMargin: root.margins.left
+            bottomMargin: root.margins.bottom
+            rightMargin: root.margins.right
+        }
+
+        PlasmaComponents.Label {
+            text: i18n("Are you sure you want to delete the activity?")
+            width: parent.width
+        }
+
+        Item {
+            height: units.largeSpacing
+            width: parent.width
+        }
+
+        PlasmaComponents.ButtonRow {
+            exclusive: false
+
+            PlasmaComponents.Button {
+                text: i18n("Delete")
+                iconSource: "list-remove"
+                onClicked: {
+                    root.visible = false;
+                    root.accepted();
+                }
+            }
+            PlasmaComponents.Button {
+                text: i18n("Cancel")
+                onClicked: {
+                    root.visible = false;
+                    root.canceled();
+                }
+            }
+
+        }
+
+    }
 }

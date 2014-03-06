@@ -24,18 +24,35 @@ import org.kde.plasma.core 2.0 as PlasmaCore
 import org.kde.plasma.components 2.0 as PlasmaComponents
 import org.kde.activities 0.1 as Activities
 
-PlasmaComponents.CommonDialog {
+PlasmaCore.FrameSvgItem {
     id: root
+
+    signal accepted()
+    signal canceled()
+
+    imagePath: "widgets/extender-background"
 
     property alias activityName: activityNameText.text
 
-    titleText: i18n("Create a new activity")
-    titleIcon: "preferences-activities"
+    // titleText: i18n("Create a new activity")
+    // titleIcon: "preferences-activities"
 
-    location: PlasmaCore.Types.LeftEdge
+    // location: PlasmaCore.Types.LeftEdge
 
-    content: Column {
-        width: parent.width
+    height: content.height + margins.top + margins.bottom
+
+    Column {
+        id: content
+
+        anchors {
+            left: parent.left
+            right: parent.right
+
+            topMargin: root.margins.top
+            leftMargin: root.margins.left
+            bottomMargin: root.margins.bottom
+            rightMargin: root.margins.right
+        }
 
         PlasmaComponents.Label {
             text: i18n("Activity name:")
@@ -48,13 +65,39 @@ PlasmaComponents.CommonDialog {
         PlasmaComponents.TextField {
             id: activityNameText
 
-            width: parent.width
+            width:  parent.width
 
-            text: "Test Activity"
+            // text: ""
+        }
+
+        Item {
+            height: units.largeSpacing
+            width: parent.width
+        }
+
+        PlasmaComponents.ButtonRow {
+            exclusive: false
+
+            PlasmaComponents.Button {
+                text: i18n("Create")
+                iconSource: "list-add"
+                onClicked: {
+                    root.visible = false;
+                    root.accepted();
+                }
+            }
+            PlasmaComponents.Button {
+                text: i18n("Cancel")
+                iconSource: "dialog-close"
+                onClicked: {
+                    root.visible = false;
+                    root.canceled();
+                }
+            }
 
         }
 
     }
 
-    buttonTexts: [i18n("Create"), i18n("Dismiss")]
+    // buttonTexts: [i18n("Create"), i18n("Dismiss")]
 }
