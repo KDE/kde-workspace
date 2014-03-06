@@ -30,7 +30,7 @@ PlasmaCore.FrameSvgItem {
     signal accepted()
     signal canceled()
 
-    imagePath: "widgets/extender-background"
+    imagePath: "dialogs/background"
 
     property alias activityName: activityNameText.text
 

@@ -26,7 +26,7 @@ import org.kde.plasma.components 2.0 as PlasmaComponents
 PlasmaCore.FrameSvgItem {
     id: root
 
-    imagePath: "widgets/extender-background"
+    imagePath: "dialogs/background"
 
     signal accepted()
     signal canceled()
@@ -74,6 +74,7 @@ PlasmaCore.FrameSvgItem {
             }
             PlasmaComponents.Button {
                 text: i18n("Cancel")
+                iconSource: "dialog-close"
                 onClicked: {
                     root.visible = false;
                     root.canceled();
