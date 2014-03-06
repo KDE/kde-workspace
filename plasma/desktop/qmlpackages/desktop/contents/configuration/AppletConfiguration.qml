@@ -88,9 +88,11 @@ Rectangle {
 
     ColumnLayout {
         id: mainColumn
-        anchors.fill: parent
-        anchors.leftMargin: units.largeSpacing / 2
-        anchors.topMargin: units.largeSpacing / 2
+        anchors {
+            fill: parent
+            margins: 4 //margins are hardcoded in QStyle we should match that here
+            //plasma style is irrelevant here
+        }
         property int implicitWidth: Math.max(contentRow.implicitWidth, buttonsRow.implicitWidth) + 8
         property int implicitHeight: contentRow.implicitHeight + buttonsRow.implicitHeight + 8
 
