@@ -32,7 +32,7 @@ Item {
     signal stopClicked
 
     width  : 200
-    height : 112
+    height : width * 3 / 4
 
     // Background until we get something real
     PlasmaCore.FrameSvgItem {

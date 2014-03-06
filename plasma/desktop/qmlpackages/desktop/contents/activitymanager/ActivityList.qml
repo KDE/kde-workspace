@@ -47,6 +47,7 @@ Flickable {
     Column {
         id: content
 
+        width: parent.width
 
         // Running activities
 
@@ -55,8 +56,7 @@ Flickable {
 
             ActivityItem {
 
-                width:  200
-                height: 112
+                width:  parent.width
 
                 visible      : (root.filterString == "") ||
                                (title.toLowerCase().indexOf(root.filterString) != -1)
@@ -101,7 +101,7 @@ Flickable {
             delegate: StoppedActivityItem {
                 id: stoppedActivityItem
 
-                width:  200
+                width:  parent.width
 
                 visible      : (root.filterString == "") ||
                                (title.toLowerCase().indexOf(root.filterString) != -1)
