@@ -69,12 +69,6 @@ Item {
                     id: showTimezone
                     text: i18n("Show time zone")
                 }
-
-                QtControls.ComboBox {
-                    id: timeFormat
-                    //model: [i18n("..."), i18n("..."), i18n("...")]
-                    // FIXME: write to cfg_timeFormat
-                }
             }
         }
     }
