@@ -228,10 +228,7 @@ Rectangle {
         }
         RowLayout {
             id: buttonsRow
-            anchors {
-                right: parent.right
-                rightMargin: spacing
-            }
+            Layout.alignment: Qt.AlignVCenter | Qt.AlignRight
             QtControls.Button {
                 iconName: "dialog-ok"
                 text: i18n("Ok")
