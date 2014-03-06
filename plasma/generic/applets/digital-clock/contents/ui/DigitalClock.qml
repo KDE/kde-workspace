@@ -171,8 +171,25 @@ Item {
         // needing to subtract 1 for the "t"
 
         var stLength = timeFormatString.length;
+
+        // Some locales have format like "h:mm", ie. without the leading zero.
+        // That means that we reserve enough splace for say "9:31" but not enough
+        // for "10:31". So if we have just single "h" in the format, we add 1
+        // to compensate for the missing leading zero
+        if (timeFormatString.search(/hh/i) == -1) {
+            stLength++;
+        }
+
         if (main.showTimezone) {
             stLength += Qt.formatTime(dataSource.data["Local"]["Time"], "t").length;
+        }
+
+        // If we're showing seconds, we have ":" twice in there. The colon char is
+        // very slim, yet we add one "A" for each, which makes it too wide if seconds
+        // are shown. So, if we're showing seconds, make it one "A" less as two colons
+        // can fit the "A" width no problems
+        if (main.showSeconds) {
+            stLength--;
         }
 
         var st = new Array(stLength).join("A");
