@@ -100,6 +100,8 @@ Item {
 
     Components.Label {
         id: sizehelper
+        font.weight: time.font.weight
+        font.italic: time.font.italic
         visible: false
     }
 
