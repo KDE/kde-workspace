@@ -124,6 +124,7 @@ void PlasmoidProtocol::init()
         if (!dbusactivation.isEmpty()) {
             qCDebug(SYSTEMTRAY) << "ST Found DBus-able Applet: " << info.pluginName() << dbusactivation;
             m_dbusActivatableTasks[info.pluginName()] = dbusactivation;
+            continue;
         }
 
         //FIXME: should consider config
