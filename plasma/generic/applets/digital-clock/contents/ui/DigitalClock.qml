@@ -77,7 +77,7 @@ Item {
         }
         width: Math.max(paintedWidth, time.paintedWidth)
         text: Qt.formatTime(dataSource.data["Local"]["Time"], main.timeFormat);
-        wrapMode: Text.WordWrap
+        wrapMode: main.vertical ? Text.WordWrap : Text.NoWrap
         horizontalAlignment: main.vertical ? Text.AlignHCenter : Text.AlignRight
         verticalAlignment: Text.AlignVCenter
         anchors {
