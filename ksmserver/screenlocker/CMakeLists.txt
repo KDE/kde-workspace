@@ -41,3 +41,6 @@ target_link_libraries(screenlocker_static kworkspace
 set_target_properties(screenlocker_static PROPERTIES COMPILE_FLAGS "-fPIC")
 
 install(FILES kscreenlocker.notifyrc  DESTINATION ${DATA_INSTALL_DIR}/ksmserver/ RENAME ksmserver.notifyrc)
+install(FILES ${screensaver_dbusXML}
+        DESTINATION ${DBUS_INTERFACES_INSTALL_DIR}
+        RENAME kf5_org.freedesktop.ScreenSaver.xml)
