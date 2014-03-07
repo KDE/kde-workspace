@@ -26,8 +26,8 @@ import org.kde.plasma.plasmoid 2.0
 Item {
     id: main
 
-    width: toolBoxButton.width
-    height: toolBoxButton.height
+    width: isVertical ? units.iconSizes.medium : units.iconSizes.smallMedium + units.smallSpacing * 2
+    height: isVertical ? units.iconSizes.smallMedium + units.smallSpacing * 2 : units.iconSizes.medium
     property bool isVertical: plasmoid.formFactor == 3
     visible: !plasmoid.immutable
 
@@ -42,37 +42,53 @@ Item {
 
     PlasmaCore.Svg {
         id: toolBoxSvg
-        imagePath: "widgets/toolbox"
+        imagePath: "widgets/line"
     }
 
     PlasmaCore.SvgItem {
         id: toolBoxButton
         svg: toolBoxSvg
-        width: naturalSize.width
-        height: naturalSize.height
-        elementId: {
+        width: {
             if (isVertical) {
-                return "panel-south"
+                parent.width
             } else {
-                return "panel-east"
+                naturalSize.width
             }
         }
-        MouseArea {
-            id: mouseArea
+        height: {
+            if (isVertical) {
+                naturalSize.height
+            } else {
+                parent.height
+            }
+        }
+        elementId: {
+            if (isVertical) {
+                return "horizontal-line"
+            } else {
+                return "vertical-line"
+            }
+        }
+    }
+
+    MouseArea {
+        id: mouseArea
+        anchors {
+            fill: parent
+            topMargin: isVertical ? 5 : 0
+            leftMargin: isVertical ? 0 : 5
+        }
+        hoverEnabled: true
+        onClicked: {
+            main.Plasmoid.action("configure").trigger()
+        }
+        PlasmaCore.IconItem {
             anchors {
                 fill: parent
-                topMargin: isVertical ? 5 : 0
-                leftMargin: isVertical ? 0 : 5
+                margins: units.smallSpacing
             }
-            hoverEnabled: true
-            onClicked: {
-                main.Plasmoid.action("configure").trigger()
-            }
-            PlasmaCore.IconItem {
-                anchors.fill: parent
-                source: "plasma"
-                enabled: mouseArea.containsMouse || main.Plasmoid.userConfiguring
-            }
+            source: "plasma"
+            enabled: mouseArea.containsMouse || main.Plasmoid.userConfiguring
         }
     }
 }
