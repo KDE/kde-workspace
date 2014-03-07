@@ -38,9 +38,9 @@ Item {
     signal preferredWidthChanged
     signal preferredHeightChanged
 
-    property int iconSize: 16
+    property int iconSize: units.iconSizes.small
     property variant availScreenRect: Plasmoid.availableScreenRegion(plasmoid.screen)[0]
-    property int iconWidth: 22
+    property int iconWidth: units.iconSizes.smallMedium
     property int iconHeight: iconWidth
 
     onWidthChanged: {
