@@ -434,8 +434,15 @@ void KSMServer::runUserAutostart()
                  ( file[0] != QLatin1Char( '%' ) || !file.endsWith( QLatin1Char( '%' ) ) ) &&
                  ( file[0] != QLatin1Char( '#' ) || !file.endsWith( QLatin1Char( '#' ) ) ) )
             {
-                QUrl url( dir.absolutePath() + QLatin1Char( '/' ) + file );
-                (void) new KRun( url, 0, true );
+                QUrl url = QUrl::fromLocalFile( dir.absolutePath() + QLatin1Char( '/' ) + file );
+                //KRun is synchronous so if we use it here it will produce a deadlock.
+                //So isntead we use kioclient for now.
+                //(void) new KRun( url, 0, true );
+                QProcess::startDetached(QStringLiteral("kioclient"),
+                    QStringList()
+                    << QStringLiteral("exec")
+                    << url.path()
+                );
             }
         }
     } else {
