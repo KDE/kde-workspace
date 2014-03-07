@@ -138,7 +138,7 @@ Item {
 
     Row {
         id: buttonLayout
-        x: !buttonMouse.dragging && (toolBoxButton.state == "topleft" || toolBoxButton.state == "bottomleft") ? backgroundFrame.margins.left : 0
+        x: !buttonMouse.dragging && isCorner ? units.smallSpacing*2 : 0
 
         Behavior on x {
             NumberAnimation {
