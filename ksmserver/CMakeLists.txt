@@ -68,7 +68,6 @@ target_link_libraries(kdeinit_ksmserver
     KF5::GlobalAccel
     KF5::KIOCore
     KF5::KIOWidgets
-    KF5::Notifications
     ${X11_LIBRARIES}
     ${X11_Xrender_LIB}
     KF5::Solid

@@ -63,7 +63,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <KConfigGroup>
 #include <KGlobal>
 #include <KLocale>
-#include <KNotification>
+// #include <KNotification>
 #include <KStandardDirs>
 #include <KTemporaryFile>
 #include <kworkspace/kdisplaymanager.h>
@@ -388,9 +388,9 @@ void KSMServer::cancelShutdown( KSMClient* c )
         Solid::PowerManagement::stopSuppressingSleep(inhibitCookie);
         kDebug( 1218 ) << "Client " << c->program() << " (" << c->clientId() << ") canceled shutdown.";
         KSMShutdownFeedback::logoutCanceled(); // make the screen become normal again
-        KNotification::event( QStringLiteral( "cancellogout" ),
-                              i18n( "Logout canceled by '%1'", c->program()),
-                              QPixmap() , 0l , KNotification::DefaultEvent  );
+//         KNotification::event( QStringLiteral( "cancellogout" ),
+//                               i18n( "Logout canceled by '%1'", c->program()),
+//                               QPixmap() , 0l , KNotification::DefaultEvent  );
         foreach( KSMClient* c, clients ) {
             SmsShutdownCancelled( c->connection() );
             if( c->saveYourselfDone ) {
@@ -474,19 +474,8 @@ void KSMServer::completeShutdownOrCheckpoint()
         discardSession();
 
     if ( state == Shutdown ) {
-        KNotification *n = KNotification::event( QStringLiteral( "exitkde" ),
-                                                 QString(), QPixmap(), 0l,
-                                                 KNotification::DefaultEvent ); // KDE says good bye
-        connect(n, SIGNAL(closed()) , this, SLOT(logoutSoundFinished()) );
-        // https://bugs.kde.org/show_bug.cgi?id=228005
-        // if sound is not working for some reason (e.g. no phonon
-        // backends are installed) the closed() signal never happens
-        // and logoutSoundFinished() never gets called. Add this timer to make
-        // sure the shutdown procedure continues even if sound system is broken.
-        QTimer::singleShot(5000, this, SLOT(logoutSoundTimeout()));
-        kDebug( 1218 ) << "Starting logout event";
-	state = WaitingForKNotify;
         createLogoutEffectWidget();
+        startKilling();
 
     } else if ( state == Checkpoint ) {
         foreach( KSMClient* c, clients ) {
@@ -497,15 +486,6 @@ void KSMServer::completeShutdownOrCheckpoint()
         startKillingSubSession();
     }
 
-}
-
-void KSMServer::logoutSoundTimeout()
-{
-    if (state != WaitingForKNotify) {
-        return;
-    }
-    kDebug( 1218 ) << "logout sound timeout";
-    logoutSoundFinished();
 }
 
 void KSMServer::startKilling()
@@ -584,14 +564,6 @@ void KSMServer::completeKillingWM()
 void KSMServer::killingCompleted()
 {
     kapp->quit();
-}
-
-void KSMServer::logoutSoundFinished(  )
-{
-    if( state != WaitingForKNotify )
-        return;
-    kDebug( 1218 ) << "Logout event finished";
-    startKilling();
 }
 
 void KSMServer::timeoutQuit()
