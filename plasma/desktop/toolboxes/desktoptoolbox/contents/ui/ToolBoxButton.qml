@@ -203,12 +203,14 @@ Item {
             toolBoxItem.showing = !toolBoxItem.showing;
         }
         onReleased: {
-            dragging = false;
             main.Plasmoid.configuration.ToolBoxButtonState = toolBoxButton.state;
             main.Plasmoid.configuration.ToolBoxButtonX = toolBoxButton.x;
             main.Plasmoid.configuration.ToolBoxButtonY = toolBoxButton.y;
             print("Saved coordinates for ToolBox in config: " + toolBoxButton.x + ", " +toolBoxButton.x);
-            main.placeToolBox();
+            if (dragging) {
+                main.placeToolBox();
+            }
+            dragging = false;
         }
         onCanceled: dragging = false;
     }
