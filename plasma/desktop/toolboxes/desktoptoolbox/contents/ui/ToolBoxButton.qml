@@ -27,8 +27,8 @@ Item {
     id: toolBoxButton
 
     property string text: main.Plasmoid.activityName
-    property string cornerElement: "desktop-northeast"
-    property bool isCorner: ((state == "topleft") || (state == "topright") ||
+    property bool isCorner: !buttonMouse.dragging &&
+                            ((state == "topleft") || (state == "topright") ||
                              (state == "bottomright") || (state == "bottomleft"))
     property bool isHorizontal: (state != "left" && state != "right")
 
@@ -67,7 +67,7 @@ Item {
         enabled: visible
     }
 
-    width: isCorner ? toolBoxIcon.width : buttonLayout.width
+    width: buttonLayout.width
     height: buttonLayout.height
 
     //x and y default to 0, so top left would be correct
@@ -115,52 +115,38 @@ Item {
                 toolBoxButton.state = "bottom";
             }
         }
-    }
 
-    PlasmaCore.SvgItem {
-        id: cornerSvg
-        svg: toolBoxSvg
-        elementId: cornerElement
-        x: -width/2 + toolBoxIcon.width/2;
-        y: x;
-        width: toolBoxIcon.width * 5;
-        height: width
-        visible: isCorner
-        Connections {
-            target: toolBoxButton
-            onStateChanged: {
-                var s = toolBoxButton.state;
-                var corner = ""
-                if (s == "topleft") {
-                    corner = "desktop-northwest";
-                } else if (s == "topright") {
-                    corner = "desktop-northeast";
-                } else if (s == "bottomright") {
-                    corner = "desktop-southeast";
-                } else if (s == "bottomleft") {
-                    corner = "desktop-southwest";
-                }
-                toolBoxButton.cornerElement = corner;
-            }
+        if (!buttonMouse.pressed) {
+            main.placeToolBox(toolBoxButton.state);
         }
-        Behavior on opacity { NumberAnimation { duration: units.shortDuration * 3; easing.type: Easing.InOutExpo; } }
     }
 
     PlasmaCore.FrameSvgItem {
-        imagePath: "widgets/toolbox"
-        anchors {
-            fill: buttonLayout
-            leftMargin: -margins.left
-            topMargin: -margins.top
-            rightMargin: -margins.right
-            bottomMargin: -margins.bottom
+        id: backgroundFrame
+        imagePath: isCorner ? "widgets/translucentbackground" : "widgets/background"
+        x: -margins.left
+        y: -margins.top
+        width: (isCorner ? buttonLayout.height : buttonLayout.width) + margins.left + margins.right
+        height: buttonLayout.height + margins.top + margins.bottom
+        Behavior on width {
+            NumberAnimation {
+                duration: units.longDuration;
+                easing.type: Easing.InOutQuad;
+            }
         }
-
-        visible: !isCorner
     }
 
     Row {
         id: buttonLayout
+        x: !buttonMouse.dragging && (toolBoxButton.state == "topleft" || toolBoxButton.state == "bottomleft") ? backgroundFrame.margins.left : 0
+
+        Behavior on x {
+            NumberAnimation {
+                duration: units.longDuration;
+                easing.type: Easing.InOutQuad;
+            }
+        }
+
         PlasmaCore.IconItem {
             id: toolBoxIcon
             anchors.verticalCenter: parent.verticalCenter
@@ -183,6 +169,9 @@ Item {
         id: buttonMouse
 
         property QtObject container: main
+        property int pressedX
+        property int pressedY
+        property bool dragging: false
 
         anchors {
             fill: parent
@@ -199,17 +188,29 @@ Item {
 
         hoverEnabled: true
 
+        onPressed: {
+            pressedX = toolBoxButton.x
+            pressedY = toolBoxButton.y
+        }
+        onPositionChanged: {
+            if (pressed && (Math.abs(toolBoxButton.x - pressedX) > iconSize ||
+                Math.abs(toolBoxButton.y - pressedY) > iconSize)) {
+                dragging = true;
+            }
+        }
         onClicked: {
             print ("click state now: " + toolBoxItem.state);
             toolBoxItem.showing = !toolBoxItem.showing;
         }
         onReleased: {
+            dragging = false;
             main.Plasmoid.configuration.ToolBoxButtonState = toolBoxButton.state;
             main.Plasmoid.configuration.ToolBoxButtonX = toolBoxButton.x;
             main.Plasmoid.configuration.ToolBoxButtonY = toolBoxButton.y;
             print("Saved coordinates for ToolBox in config: " + toolBoxButton.x + ", " +toolBoxButton.x);
             main.placeToolBox();
         }
+        onCanceled: dragging = false;
     }
 
     states: [

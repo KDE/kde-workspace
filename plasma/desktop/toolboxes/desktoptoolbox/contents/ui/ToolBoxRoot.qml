@@ -70,7 +70,7 @@ Item {
         id: toolBoxButton
         visible: false
         Component.onCompleted: {
-            placeToolBox();
+            placeToolBox(plasmoid.configuration.ToolBoxButtonState);
             toolBoxButton.visible = true
         }
     }
@@ -81,7 +81,7 @@ Item {
         repeat: false
         running: false
         onTriggered: {
-            placeToolBox();
+            placeToolBox(plasmoid.configuration.ToolBoxButtonState);
         }
     }
 
@@ -117,8 +117,7 @@ Item {
         }
     }
 
-    function placeToolBox() {
-        var ts = Plasmoid.configuration.ToolBoxButtonState
+    function placeToolBox(ts) {
         var tx = Plasmoid.configuration.ToolBoxButtonX
         var ty = Plasmoid.configuration.ToolBoxButtonY
 
@@ -140,7 +139,7 @@ Item {
             ty = 0;
             break;
         case "topright":
-            tx = main.width - toolBoxButton.width;
+            tx = main.width - toolBoxButton.height;
             ty = 0;
             break;
         case "bottomleft":
@@ -149,11 +148,11 @@ Item {
             break;
         case "bottomright":
         default:
-            tx = main.width - toolBoxButton.width;
+            tx = main.width - toolBoxButton.height;
             ty = main.height - toolBoxButton.height;
             break;
         }
-        print("XXXY Setting toolbox to: " + tx + "x" + ty + " screen: " + main.width+ "x" + main.height+"");
+        //print("XXXY Setting toolbox to: " + ts + " " + tx + "x" + ty + " screen: " + main.width+ "x" + main.height+"");
         toolBoxButton.x = tx;
         toolBoxButton.y = ty;
 
