@@ -134,7 +134,11 @@ Item {
             anchors.left:   newActivityButton.left
             anchors.right:  newActivityButton.right
 
-            onAccepted: activityList.model.addActivity(activityName, function () {})
+            onAccepted: {
+                activityList.model.addActivity(activityName, function (id) {
+                    activityList.model.setActivityIcon(id, newActivityDialog.activityIconSource, function() {});
+                })
+            }
         }
     }
 }

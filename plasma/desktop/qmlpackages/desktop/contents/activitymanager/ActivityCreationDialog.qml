@@ -22,6 +22,7 @@ import QtQuick 2.2
 import org.kde.plasma.extras 2.0 as PlasmaExtras
 import org.kde.plasma.core 2.0 as PlasmaCore
 import org.kde.plasma.components 2.0 as PlasmaComponents
+import org.kde.plasma.platformcomponents 2.0 as PlasmaPlatformComponents
 import org.kde.activities 0.1 as Activities
 
 PlasmaCore.FrameSvgItem {
@@ -33,71 +34,120 @@ PlasmaCore.FrameSvgItem {
     imagePath: "dialogs/background"
 
     property alias activityName: activityNameText.text
+    property alias activityIconSource: activityIconButton.iconSource
+
+    property alias acceptButtonText: acceptButton.text
+    property alias cancelButtonText: cancelButton.text
 
     // titleText: i18n("Create a new activity")
     // titleIcon: "preferences-activities"
 
     // location: PlasmaCore.Types.LeftEdge
 
-    height: content.height + margins.top + margins.bottom
+    height: content.height + margins.top + margins.bottom + dialogButtons.height
 
-    Column {
+    Item {
         id: content
 
         anchors {
-            left: parent.left
-            right: parent.right
+            left  : parent.left
+            right : parent.right
+            top   : parent.top
 
-            topMargin: root.margins.top
-            leftMargin: root.margins.left
-            bottomMargin: root.margins.bottom
-            rightMargin: root.margins.right
+            topMargin    : root.margins.top
+            leftMargin   : root.margins.left
+            bottomMargin : root.margins.bottom
+            rightMargin  : root.margins.right
         }
 
-        PlasmaComponents.Label {
-            text: i18n("Activity name:")
+        PlasmaComponents.Button {
+            id: activityIconButton
 
-            elide: Text.ElideRight
-
-            width: parent.width
-        }
-
-        PlasmaComponents.TextField {
-            id: activityNameText
-
-            width:  parent.width
-
-            // text: ""
-        }
-
-        Item {
-            height: units.largeSpacing
-            width: parent.width
-        }
-
-        PlasmaComponents.ButtonRow {
-            exclusive: false
-
-            PlasmaComponents.Button {
-                text: i18n("Create")
-                iconSource: "list-add"
-                onClicked: {
-                    root.visible = false;
-                    root.accepted();
-                }
+            anchors {
+                left: parent.left
+                top: parent.top
             }
-            PlasmaComponents.Button {
-                text: i18n("Cancel")
-                iconSource: "dialog-close"
-                onClicked: {
-                    root.visible = false;
-                    root.canceled();
+
+            PlasmaPlatformComponents.IconDialog {
+                id: iconDialog
+            }
+
+            onClicked: {
+                var newIcon = iconDialog.openDialog()
+                if (newIcon != "") {
+                   activityIconButton.iconSource = newIcon;
                 }
             }
 
         }
 
+        height: activityNamePanel.height
+
+        Column {
+            id: activityNamePanel
+            anchors {
+                left:  activityIconButton.right
+                top:   parent.top
+                right: parent.right
+
+                leftMargin: units.largeSpacing
+            }
+
+            PlasmaComponents.Label {
+                text: i18n("Activity name:")
+
+                elide: Text.ElideRight
+
+                width: parent.width
+            }
+
+            PlasmaComponents.TextField {
+                id: activityNameText
+
+                width:  parent.width
+
+                // text: ""
+            }
+
+            Item {
+                height: units.largeSpacing
+                width: parent.width
+            }
+        }
     }
 
-    // buttonTexts: [i18n("Create"), i18n("Dismiss")]
+    PlasmaComponents.ButtonRow {
+        id: dialogButtons
+
+        anchors {
+            right:  parent.right
+            bottom: parent.bottom
+            rightMargin:  root.margins.right
+            bottomMargin: root.margins.bottom
+        }
+
+        exclusive: false
+
+        PlasmaComponents.Button {
+            id: acceptButton
+
+            text: i18n("Create")
+            iconSource: "list-add"
+            onClicked: {
+                root.visible = false;
+                root.accepted();
+            }
+        }
+
+        PlasmaComponents.Button {
+            id: cancelButton
+
+            text: i18n("Cancel")
+            iconSource: "dialog-close"
+            onClicked: {
+                root.visible = false;
+                root.canceled();
+            }
+        }
+    }
 }

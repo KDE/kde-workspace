@@ -75,7 +75,31 @@ Flickable {
                     activitiesModel.stopActivity(model.id, function () {});
                 }
 
-                onConfigureClicked : console.log("configure clicked")
+                onConfigureClicked : {
+                    activityConfigurationDialog.activityName = title
+                    activityConfigurationDialog.activityIconSource = icon
+                    activityConfigurationDialog.visible = true
+                }
+
+                ActivityCreationDialog {
+                    id: activityConfigurationDialog
+                    z: 10
+
+                    acceptButtonText: i18n("Apply")
+
+                    anchors.centerIn: parent
+                    width: parent.width
+                    visible: false
+
+                    onAccepted: {
+                        activitiesModel.setActivityName(model.id,
+                            activityConfigurationDialog.activityName,
+                            function () {});
+                        activitiesModel.setActivityIcon(model.id,
+                            activityConfigurationDialog.activityIconSource,
+                            function () {});
+                    }
+                }
             }
         }
 
@@ -118,10 +142,15 @@ Flickable {
                     activityDeletionDialog.visible = true
                 }
 
-                onConfigureClicked : console.log("configure clicked")
+                onConfigureClicked : {
+                    activityConfigurationDialog.activityName = title
+                    activityConfigurationDialog.activityIconSource = icon
+                    activityConfigurationDialog.visible = true
+                }
 
                 ActivityDeletionDialog {
                     id: activityDeletionDialog
+                    z: 10000
 
                     anchors.centerIn: parent
                     width: parent.width
@@ -129,6 +158,26 @@ Flickable {
 
                     onAccepted: {
                         activitiesModel.removeActivity(model.id, function () {})
+                    }
+                }
+
+                ActivityCreationDialog {
+                    id: activityConfigurationDialog
+                    z: 10000
+
+                    acceptButtonText: i18n("Apply")
+
+                    anchors.centerIn: parent
+                    width: parent.width
+                    visible: false
+
+                    onAccepted: {
+                        activitiesModel.setActivityName(model.id,
+                            activityConfigurationDialog.activityName,
+                            function () {});
+                        activitiesModel.setActivityIcon(model.id,
+                            activityConfigurationDialog.activityIconSource,
+                            function () {});
                     }
                 }
             }
