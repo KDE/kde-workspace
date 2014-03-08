@@ -41,10 +41,29 @@ PlasmaCore.FrameSvgItem {
 
     property string activityId: ""
 
-    function open(verticalPosition) {
-        y = verticalPosition - activityDeletionDialog.height / 2
-        visible = true;
+    MouseArea {
+        anchors.fill: parent
+        hoverEnabled: true
     }
+
+    function open(verticalPosition)
+    {
+        y = verticalPosition - height / 2;
+        opacity = 1;
+    }
+
+    function close()
+    {
+        opacity = 0;
+    }
+
+    opacity: 0
+    visible: false
+    Behavior on opacity { PropertyAnimation { duration: units.shortDuration } }
+    Behavior on y { PropertyAnimation {
+            duration: root.visible ? units.shortDuration : 0
+    } }
+    onOpacityChanged: visible = (opacity > 0)
 
     PlasmaCore.FrameSvgItem {
         id: shadowFrame
@@ -62,8 +81,6 @@ PlasmaCore.FrameSvgItem {
             rightMargin  : -margins.right
             bottomMargin : -margins.bottom
         }
-
-        Component.onCompleted: shadowFrame.visible = backgroundSvg.hasElement("shadow-top")
     }
 
     height: content.height + margins.top + margins.bottom + dialogButtons.height
@@ -160,7 +177,7 @@ PlasmaCore.FrameSvgItem {
             text: i18n("Create")
             iconSource: "list-add"
             onClicked: {
-                root.visible = false;
+                root.close();
                 root.accepted();
             }
         }
@@ -171,7 +188,7 @@ PlasmaCore.FrameSvgItem {
             text: i18n("Cancel")
             iconSource: "dialog-close"
             onClicked: {
-                root.visible = false;
+                root.close();
                 root.canceled();
             }
         }

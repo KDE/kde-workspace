@@ -95,6 +95,9 @@ Item {
             id: activityList
 
             filterString: heading.searchString.toLowerCase()
+
+            onShowingDialogChanged:
+                if (showingDialog) newActivityDialog.close()
         }
     }
 
@@ -118,17 +121,17 @@ Item {
             width: parent.width
 
             onClicked: {
-                newActivityDialog.visible = true;
+                activityList.closeDialogs();
+                newActivityDialog.open(newActivityDialog.height / 2);
             }
 
-            visible: !newActivityDialog.visible
+            opacity: 1 - newActivityDialog.opacity
         }
 
         ActivityCreationDialog {
             id: newActivityDialog
 
             z: 100
-            visible: false
 
             anchors.bottom: newActivityButton.bottom
             anchors.left:   newActivityButton.left

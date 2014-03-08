@@ -26,17 +26,42 @@ import org.kde.plasma.components 2.0 as PlasmaComponents
 PlasmaCore.FrameSvgItem {
     id: root
 
+    signal accepted()
+    signal canceled()
+
     imagePath: "dialogs/background"
 
     property string activityId: ""
 
-    signal accepted()
-    signal canceled()
 
-    function open(verticalPosition) {
-        y = verticalPosition - activityDeletionDialog.height / 2
-        visible = true;
+
+
+
+
+
+    MouseArea {
+        anchors.fill: parent
+        hoverEnabled: true
     }
+
+    function open(verticalPosition)
+    {
+        y = verticalPosition - height / 2;
+        opacity = 1;
+    }
+
+    function close()
+    {
+        opacity = 0;
+    }
+
+    opacity: 0
+    visible: false
+    Behavior on opacity { PropertyAnimation { duration: units.shortDuration } }
+    Behavior on y { PropertyAnimation {
+            duration: root.visible ? units.shortDuration : 0
+    } }
+    onOpacityChanged: visible = (opacity > 0)
 
     PlasmaCore.FrameSvgItem {
         id: shadowFrame
@@ -54,8 +79,6 @@ PlasmaCore.FrameSvgItem {
             rightMargin  : -margins.right
             bottomMargin : -margins.bottom
         }
-
-        Component.onCompleted: shadowFrame.visible = backgroundSvg.hasElement("shadow-top")
     }
 
     height: content.height + margins.top + margins.bottom
@@ -89,7 +112,7 @@ PlasmaCore.FrameSvgItem {
                 text: i18n("Delete")
                 iconSource: "list-remove"
                 onClicked: {
-                    root.visible = false;
+                    root.close();
                     root.accepted();
                 }
             }
@@ -97,7 +120,7 @@ PlasmaCore.FrameSvgItem {
                 text: i18n("Cancel")
                 iconSource: "dialog-close"
                 onClicked: {
-                    root.visible = false;
+                    root.close();
                     root.canceled();
                 }
             }

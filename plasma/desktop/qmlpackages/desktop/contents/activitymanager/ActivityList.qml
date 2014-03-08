@@ -33,6 +33,12 @@ Flickable {
     property string filterString: ""
     property bool   showingDialog: activityDeletionDialog.visible || activityConfigurationDialog.visible
 
+    function closeDialogs()
+    {
+        activityDeletionDialog.close();
+        activityConfigurationDialog.close();
+    }
+
     Activities.ActivityModel {
         id: activitiesModel
 
@@ -50,7 +56,6 @@ Flickable {
         z: 10
 
         width: parent.width
-        visible: false
 
         onAccepted: {
             activitiesModel.removeActivity(activityDeletionDialog.activityId, function () {})
@@ -64,7 +69,6 @@ Flickable {
         acceptButtonText: i18n("Apply")
 
         width: parent.width
-        visible: false
 
         onAccepted: {
             var id = activityConfigurationDialog.activityId
@@ -109,16 +113,13 @@ Flickable {
                 }
 
                 onConfigureClicked : {
-                    var selfLocation = mapToItem(root, width / 2, height / 2);
-
-                    activityConfigurationDialog.activityId = model.id
-
-                    activityConfigurationDialog.y = selfLocation.y -
-                        activityConfigurationDialog.height / 2
-
+                    activityConfigurationDialog.activityId = model.id;
                     activityConfigurationDialog.activityName = title;
                     activityConfigurationDialog.activityIconSource = icon;
-                    activityConfigurationDialog.visible = true;
+
+                    var selfLocation = mapToItem(root, width / 2, height / 2);
+                    activityConfigurationDialog.open(selfLocation.y);
+                    activityDeletionDialog.close();
                 }
             }
         }
@@ -163,6 +164,7 @@ Flickable {
 
                     var selfLocation = mapToItem(root, width / 2, height / 2);
                     activityDeletionDialog.open(selfLocation.y);
+                    activityConfigurationDialog.close();
                 }
 
                 onConfigureClicked : {
@@ -171,7 +173,8 @@ Flickable {
                     activityConfigurationDialog.activityIconSource = icon;
 
                     var selfLocation = mapToItem(root, width / 2, height / 2);
-                    activityConfigurationDialog.open(selfLocation.y)
+                    activityConfigurationDialog.open(selfLocation.y);
+                    activityDeletionDialog.close();
                 }
             }
         }
