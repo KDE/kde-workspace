@@ -41,10 +41,25 @@ PlasmaCore.FrameSvgItem {
 
     property string activityId: ""
 
-    // titleText: i18n("Create a new activity")
-    // titleIcon: "preferences-activities"
+    PlasmaCore.FrameSvgItem {
+        id: shadowFrame
 
-    // location: PlasmaCore.Types.LeftEdge
+        imagePath: "dialogs/background"
+        prefix: "shadow"
+
+        z: -1
+
+        anchors {
+            fill: parent
+
+            leftMargin   : -margins.left
+            topMargin    : -margins.top
+            rightMargin  : -margins.right
+            bottomMargin : -margins.bottom
+        }
+
+        Component.onCompleted: shadowFrame.visible = backgroundSvg.hasElement("shadow-top")
+    }
 
     height: content.height + margins.top + margins.bottom + dialogButtons.height
 
@@ -69,6 +84,9 @@ PlasmaCore.FrameSvgItem {
                 left: parent.left
                 top: parent.top
             }
+
+            width: height
+            height: activityNameLabel.height + activityNameText.height
 
             PlasmaPlatformComponents.IconDialog {
                 id: iconDialog
@@ -96,6 +114,7 @@ PlasmaCore.FrameSvgItem {
             }
 
             PlasmaComponents.Label {
+                id: activityNameLabel
                 text: i18n("Activity name:")
 
                 elide: Text.ElideRight

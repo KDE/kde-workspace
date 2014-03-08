@@ -44,26 +44,38 @@ Flickable {
         shownStates: "Stopped,Starting"
     }
 
-        ActivityCreationDialog {
-            id: activityConfigurationDialog
-            z: 10
+    ActivityDeletionDialog {
+        id: activityDeletionDialog
+        z: 10
 
-            acceptButtonText: i18n("Apply")
+        width: parent.width
+        visible: false
 
-            //anchors.centerIn: parent
-            width: parent.width
-            visible: false
-
-            onAccepted: {
-                var id = activityConfigurationDialog.activityId
-                activitiesModel.setActivityName(id,
-                    activityConfigurationDialog.activityName,
-                    function () {});
-                activitiesModel.setActivityIcon(id,
-                    activityConfigurationDialog.activityIconSource,
-                    function () {});
-            }
+        onAccepted: {
+            activitiesModel.removeActivity(activityDeletionDialog.activityId, function () {})
         }
+    }
+
+    ActivityCreationDialog {
+        id: activityConfigurationDialog
+        z: 10
+
+        acceptButtonText: i18n("Apply")
+
+        //anchors.centerIn: parent
+        width: parent.width
+        visible: false
+
+        onAccepted: {
+            var id = activityConfigurationDialog.activityId
+            activitiesModel.setActivityName(id,
+                activityConfigurationDialog.activityName,
+                function () {});
+            activitiesModel.setActivityIcon(id,
+                activityConfigurationDialog.activityIconSource,
+                function () {});
+        }
+    }
 
     Column {
         id: content
@@ -147,8 +159,14 @@ Flickable {
                 }
 
                 onDeleteClicked    : {
+                    var selfLocation = mapToItem(root, width / 2, height / 2);
+
                     activityDeletionDialog.activityId = model.id
-                    activityDeletionDialog.visible = true
+
+                    activityDeletionDialog.y = selfLocation.y -
+                        activityDeletionDialog.height / 2
+
+                    activityDeletionDialog.visible = true;
                 }
 
                 onConfigureClicked : {
@@ -159,19 +177,6 @@ Flickable {
                     activityConfigurationDialog.activityName = title;
                     activityConfigurationDialog.activityIconSource = icon;
                     activityConfigurationDialog.visible = true;
-                }
-
-                ActivityDeletionDialog {
-                    id: activityDeletionDialog
-                    z: 10000
-
-                    anchors.centerIn: parent
-                    width: parent.width
-                    visible: false
-
-                    onAccepted: {
-                        activitiesModel.removeActivity(activityDeletionDialog.activityId, function () {})
-                    }
                 }
             }
         }

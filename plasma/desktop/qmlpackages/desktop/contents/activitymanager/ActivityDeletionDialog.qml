@@ -33,12 +33,26 @@ PlasmaCore.FrameSvgItem {
     signal accepted()
     signal canceled()
 
-    // titleText: i18n("Confirm deletion")
-    // titleIcon: "preferences-activities"
+    PlasmaCore.FrameSvgItem {
+        id: shadowFrame
 
-    // location: PlasmaCore.Types.LeftEdge
+        imagePath: "dialogs/background"
+        prefix: "shadow"
 
-    // buttonTexts: [i18n("Delete activity"), i18n("Dismiss")]
+        z: -1
+
+        anchors {
+            fill: parent
+
+            leftMargin   : -margins.left
+            topMargin    : -margins.top
+            rightMargin  : -margins.right
+            bottomMargin : -margins.bottom
+        }
+
+        Component.onCompleted: shadowFrame.visible = backgroundSvg.hasElement("shadow-top")
+    }
+
     height: content.height + margins.top + margins.bottom
     Column {
         id: content
