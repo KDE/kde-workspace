@@ -39,6 +39,8 @@ PlasmaCore.FrameSvgItem {
     property alias acceptButtonText: acceptButton.text
     property alias cancelButtonText: cancelButton.text
 
+    property string activityId: ""
+
     // titleText: i18n("Create a new activity")
     // titleIcon: "preferences-activities"
 

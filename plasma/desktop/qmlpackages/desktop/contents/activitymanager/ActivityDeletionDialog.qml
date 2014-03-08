@@ -28,6 +28,8 @@ PlasmaCore.FrameSvgItem {
 
     imagePath: "dialogs/background"
 
+    property string activityId: ""
+
     signal accepted()
     signal canceled()
 
