@@ -29,8 +29,9 @@ Flickable {
     /*contentWidth: content.width*/
     contentHeight: content.height
 
-    property var model: activitiesModel
+    property var    model: activitiesModel
     property string filterString: ""
+    property bool   showingDialog: activityDeletionDialog.visible || activityConfigurationDialog.visible
 
     Activities.ActivityModel {
         id: activitiesModel
@@ -62,7 +63,6 @@ Flickable {
 
         acceptButtonText: i18n("Apply")
 
-        //anchors.centerIn: parent
         width: parent.width
         visible: false
 
@@ -159,24 +159,19 @@ Flickable {
                 }
 
                 onDeleteClicked    : {
+                    activityDeletionDialog.activityId = model.id;
+
                     var selfLocation = mapToItem(root, width / 2, height / 2);
-
-                    activityDeletionDialog.activityId = model.id
-
-                    activityDeletionDialog.y = selfLocation.y -
-                        activityDeletionDialog.height / 2
-
-                    activityDeletionDialog.visible = true;
+                    activityDeletionDialog.open(selfLocation.y);
                 }
 
                 onConfigureClicked : {
-                    var selfLocation = mapToItem(root, width / 2, height / 2);
-                    activityConfigurationDialog.y = selfLocation.y -
-                        activityConfigurationDialog.height / 2
-
+                    activityConfigurationDialog.activityId = model.id;
                     activityConfigurationDialog.activityName = title;
                     activityConfigurationDialog.activityIconSource = icon;
-                    activityConfigurationDialog.visible = true;
+
+                    var selfLocation = mapToItem(root, width / 2, height / 2);
+                    activityConfigurationDialog.open(selfLocation.y)
                 }
             }
         }

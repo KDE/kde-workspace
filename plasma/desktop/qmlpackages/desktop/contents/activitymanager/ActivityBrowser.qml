@@ -35,7 +35,7 @@ Item {
     focus: true
 
     Keys.onPressed: {
-        if (newActivityDialog.visible) {
+        if (newActivityDialog.visible || activityList.showingDialog) {
             event.accepted = false;
         } else {
             if (event.key == Qt.Key_Escape) {

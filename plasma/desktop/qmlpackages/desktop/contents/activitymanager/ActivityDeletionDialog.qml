@@ -33,6 +33,11 @@ PlasmaCore.FrameSvgItem {
     signal accepted()
     signal canceled()
 
+    function open(verticalPosition) {
+        y = verticalPosition - activityDeletionDialog.height / 2
+        visible = true;
+    }
+
     PlasmaCore.FrameSvgItem {
         id: shadowFrame
 

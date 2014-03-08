@@ -41,6 +41,11 @@ PlasmaCore.FrameSvgItem {
 
     property string activityId: ""
 
+    function open(verticalPosition) {
+        y = verticalPosition - activityDeletionDialog.height / 2
+        visible = true;
+    }
+
     PlasmaCore.FrameSvgItem {
         id: shadowFrame
 
