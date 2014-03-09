@@ -105,7 +105,7 @@ WindowList TaskGroup::directMemberwinIds() const
 {
     WindowList ids;
     foreach (AbstractGroupableItem * groupable, d->members) {
-        if (!groupable->itemType() == GroupItemType) {
+        if (groupable->itemType() != GroupItemType) {
             ids += groupable->winIds();
         }
     }
