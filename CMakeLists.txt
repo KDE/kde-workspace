@@ -55,8 +55,6 @@ find_package(KF5 CONFIG REQUIRED
 
 find_package(KF5PlasmaQuick REQUIRED NO_MODULE)
 
-find_package(UDev) #PowerDevil upower/udev backend
-
 # needed for set_package_properties macro
 find_package(KF5KDE4Support REQUIRED NO_MODULE)
 
