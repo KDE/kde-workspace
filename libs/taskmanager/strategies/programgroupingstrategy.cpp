@@ -158,7 +158,7 @@ void ProgramGroupingStrategy::untoggleGroupingOn(TaskGroup *group, const QString
     }
 
     foreach (AbstractGroupableItem * item, group->members()) {
-        if (!item->itemType() == GroupItemType && name == static_cast<TaskItem *>(item)->task()->classClass())  {
+        if (item->itemType() != GroupItemType && name == static_cast<TaskItem *>(item)->task()->classClass())  {
             if (group->parentGroup()) {
                 group->parentGroup()->add(item);
             }

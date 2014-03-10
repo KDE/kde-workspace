@@ -46,7 +46,7 @@
 #include <KDE/KLocale>
 #include <KDE/KMessageBox>
 #include <KDE/KPluginLoader>
-#include <kdeversion.h>
+#include <config-workspace.h>
 
 K_PLUGIN_FACTORY( KCMHotkeysFactory, registerPlugin<KCMHotkeys>(); )
 
@@ -97,7 +97,7 @@ KCMHotkeys::KCMHotkeys( QWidget *parent, const QVariantList & /* args */ )
         "khotkeys",
         QString(),
         i18n("KDE Hotkeys Configuration Module"),
-        KDE_VERSION_STRING,
+        WORKSPACE_VERSION_STRING,
         QString(),
         KAboutData::License_GPL,
         i18n("Copyright 2008 (c) Michael Jansen")

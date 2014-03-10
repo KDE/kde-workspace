@@ -22,7 +22,7 @@
 #include <kdebug.h>
 #include <KLocale>
 #include <KGlobal>
-#include <kdeversion.h>
+#include <config-workspace.h>
 
 #include "krunnerapp.h"
 #ifdef Q_WS_X11
@@ -46,7 +46,7 @@ KDE_EXPORT int kdemain(int argc, char* argv[])
 #endif
 
     KAboutData aboutData( "krunner", 0, ki18n( "Run Command Interface" ),
-                          KDE_VERSION_STRING, ki18n(description), KAboutData::License_GPL,
+                          WORKSPACE_VERSION_STRING, ki18n(description), KAboutData::License_GPL,
                           ki18n("(c) 2006, Aaron Seigo") );
     aboutData.addAuthor( ki18n("Aaron J. Seigo"),
                          ki18n( "Author and maintainer" ),

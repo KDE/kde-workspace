@@ -1562,7 +1562,7 @@ QMap<QString, QString> EnvCanadaIon::visibility(const QString& source) const
 {
     QMap<QString, QString> visibilityInfo;
 
-    if (!m_weatherData[source].visibility == 0) {
+    if (m_weatherData[source].visibility != 0) {
         visibilityInfo.insert("visibility", QString::number(m_weatherData[source].visibility, 'f', 1));
         visibilityInfo.insert("visibilityUnit", QString::number(KUnitConversion::Kilometer));
     } else {

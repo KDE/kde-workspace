@@ -132,7 +132,7 @@ QIcon FaviconFromBlob::iconFor(const QString &url)
         QMap<QString,QVariant> bindVariables;
         bindVariables.insert("url", url);
         QList<QVariantMap> faviconFound = m_fetchsqlite->query(m_buildQuery, bindVariables);
-        if(!faviconFound.size()>0) return defaultIcon();
+        if(faviconFound.isEmpty()) return defaultIcon();
 
         QByteArray iconData = faviconFound.first().value(m_blobcolumn).toByteArray();
         //qDebug() << "Favicon found: " << iconData.size() << " bytes";
