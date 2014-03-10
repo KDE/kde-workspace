@@ -67,7 +67,7 @@ Item {
         interval: 4 // just to compress resize events of width and height; below 60fps
         onTriggered: {
             if (main.vertical) {
-                sizehelper.font.pixelSize = Math.min(main.width/5, theme.mSize(theme.defaultFont).height * 2);
+                sizehelper.font.pixelSize = Math.max(theme.mSize(theme.smallestFont).height, Math.min(main.width/5, theme.mSize(theme.defaultFont).height * 2));
             } else if (plasmoid.formFactor == PlasmaCore.Types.Horizontal) {
                 sizehelper.font.pixelSize = main.height;
             } else {
