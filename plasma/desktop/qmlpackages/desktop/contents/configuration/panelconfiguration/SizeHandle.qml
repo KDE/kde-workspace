@@ -23,8 +23,7 @@ import org.kde.plasma.core 2.0 as PlasmaCore
 import org.kde.plasma.configuration 2.0
 import org.kde.qtextracomponents 2.0 as QtExtras
 
-PlasmaComponents.ToolButton {
-    flat: false
+PlasmaComponents.Button {
     text: panel.location == PlasmaCore.Types.LeftEdge || panel.location == PlasmaCore.Types.RightEdge ? i18n("Width") : i18n("Height")
     QtExtras.MouseEventListener {
         anchors.fill: parent

@@ -23,8 +23,7 @@ import org.kde.plasma.core 2.0 as PlasmaCore
 import org.kde.plasma.configuration 2.0
 import org.kde.qtextracomponents 2.0 as QtExtras
 
-PlasmaComponents.ToolButton {
-    flat: false
+PlasmaComponents.Button {
     text: i18n("Screen Edge")
 
     QtExtras.MouseEventListener {
