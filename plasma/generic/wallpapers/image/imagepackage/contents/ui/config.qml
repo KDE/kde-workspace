@@ -224,6 +224,8 @@ ColumnLayout {
                 currentIndex: -1
 
                 anchors.margins: 4
+                boundsBehavior: Flickable.StopAtBounds
+
                 highlight: Rectangle {
                     radius: 3
                     color: syspal.highlight
