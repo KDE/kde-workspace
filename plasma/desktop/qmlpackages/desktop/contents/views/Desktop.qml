@@ -59,6 +59,15 @@ Rectangle {
         location: PlasmaCore.Types.LeftEdge
         type: PlasmaCore.Dialog.Dock
         flags: Qt.Window|Qt.WindowStaysOnTopHint|Qt.X11BypassWindowManagerHint
+        hideOnWindowDeactivate: true
+
+        onVisibleChanged: {
+            if (!visible) {
+                sidePanelStack.state = "closed";
+            } else {
+                sidePanel.requestActivate();
+            }
+        }
 
         mainItem: Loader {
             id: sidePanelStack
