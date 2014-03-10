@@ -26,7 +26,7 @@ import org.kde.plasma.configuration 2.0
 Item {
     id: root
     state: parent.state
-    implicitWidth: row.width + 20
+    implicitWidth: Math.max(row.width, buttonsLayout.width) + 20
     implicitHeight: row.height + 20
     GridLayout {
         id: row
@@ -55,6 +55,7 @@ Item {
         PlasmaComponents.Button {
             text: i18n("Add Widgets...")
             iconSource: "list-add"
+            Layout.preferredWidth: panel.formFactor == PlasmaCore.Types.Vertical ? Math.max(implicitWidth, parent.width) : implicitWidth
             onClicked: {
                 configDialog.showAddWidgetDialog();
             }
@@ -72,6 +73,7 @@ Item {
             id: settingsButton
             iconSource: "configure"
             text: i18n("More Settings...")
+            Layout.preferredWidth: panel.formFactor == PlasmaCore.Types.Vertical ? Math.max(implicitWidth, parent.width) : implicitWidth
             onClicked: {
                 contextMenu.visible = !contextMenu.visible;
             }
