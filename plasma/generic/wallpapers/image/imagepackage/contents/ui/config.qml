@@ -223,6 +223,7 @@ ColumnLayout {
                 model: imageWallpaper.wallpaperModel
                 currentIndex: -1
 
+                anchors.margins: 4
                 highlight: Rectangle {
                     radius: 3
                     color: syspal.highlight
