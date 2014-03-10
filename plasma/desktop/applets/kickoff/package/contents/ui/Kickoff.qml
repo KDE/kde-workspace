@@ -203,10 +203,11 @@ Item {
             anchors {
                 top: {
                     switch (plasmoid.location) {
-                    case PlasmaCore.Types.BottomEdge:
-                        return undefined;
-                    default:
+                    case PlasmaCore.Types.LeftEdge:
+                    case PlasmaCore.Types.RightEdge:
                         return parent.top;
+                    default:
+                        return undefined;
                     }
                 }
                 bottom: {
