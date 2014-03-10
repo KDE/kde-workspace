@@ -25,7 +25,7 @@ import org.kde.qtextracomponents 2.0 as QtExtras
 
 PlasmaComponents.ToolButton {
     flat: false
-    text: i18n("Height")
+    text: panel.location == PlasmaCore.Types.LeftEdge || panel.location == PlasmaCore.Types.RightEdge ? i18n("Width") : i18n("Height")
     QtExtras.MouseEventListener {
         anchors.fill: parent
         property int startMouseX
@@ -36,23 +36,19 @@ PlasmaComponents.ToolButton {
         }
         onPositionChanged: {
             switch (panel.location) {
-            //TopEdge
-            case 3:
+            case PlasmaCore.Types.TopEdge:
                 configDialog.y = mouse.screenY - mapToItem(dialogRoot, 0, startMouseY).y
                 panel.thickness = configDialog.y - panel.y
                 break;
-            //LeftEdge
-            case 5:
+            case PlasmaCore.Types.LeftEdge:
                 configDialog.x = mouse.screenX - mapToItem(dialogRoot, startMouseX, 0).x
                 panel.thickness = configDialog.x - panel.x
                 break;
-            //RightEdge
-            case 6:
+            case PlasmaCore.Types.RightEdge:
                 configDialog.x = mouse.screenX - mapToItem(dialogRoot, startMouseX, 0).x
                 panel.thickness = (panel.x + panel.width) - (configDialog.x + configDialog.width)
                 break;
-            //BottomEdge
-            case 4:
+            case PlasmaCore.Types.BottomEdge:
             default:
                 configDialog.y = mouse.screenY - mapToItem(dialogRoot, 0, startMouseY).y
                 panel.thickness = (panel.y + panel.height) - (configDialog.y + configDialog.height)
