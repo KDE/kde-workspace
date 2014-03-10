@@ -62,7 +62,7 @@ kf5_add_kdeinit_executable( ksmserver ${ksmserver_KDEINIT_SRCS})
 
 target_link_libraries(kdeinit_ksmserver
     ${SCREEN_LOCKER}
-    kworkspace
+    PW::KWorkspace
     KF5::KDE4Support
     KF5::XmlGui
     KF5::GlobalAccel

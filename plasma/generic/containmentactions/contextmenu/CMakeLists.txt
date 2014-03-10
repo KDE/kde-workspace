@@ -20,8 +20,8 @@ target_link_libraries(plasma_containmentactions_contextmenu
                       KF5::I18n
                       KF5::Plasma
                       KF5::XmlGui
-		      KF5::KIOCore
-                      kworkspace)
+                      KF5::KIOCore
+                      PW::KWorkspace)
 
 install(TARGETS plasma_containmentactions_contextmenu DESTINATION ${PLUGIN_INSTALL_DIR})
 install(FILES plasma-containmentactions-contextmenu.desktop DESTINATION ${SERVICES_INSTALL_DIR})

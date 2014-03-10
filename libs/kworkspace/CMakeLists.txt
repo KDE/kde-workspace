@@ -19,8 +19,8 @@ set_source_files_properties(${kwin_xml} PROPERTIES INCLUDE "interface_util.h")
 qt5_add_dbus_interface( kworkspace_LIB_SRCS ${kwin_xml} kwin_interface )
 
 
-add_library(kworkspace SHARED ${kworkspace_LIB_SRCS})
-
+add_library(kworkspace ${kworkspace_LIB_SRCS})
+add_library(PW::KWorkspace ALIAS kworkspace)
 set_target_properties(kworkspace PROPERTIES
                              VERSION 5.0.0
                              SOVERSION 5
@@ -28,6 +28,8 @@ set_target_properties(kworkspace PROPERTIES
 
 # kdeui is needed for KWindowInfo
 target_link_libraries(kworkspace Qt5::DBus Qt5::Core KF5::I18n KF5::WindowSystem Xau KF5::Plasma)
+target_include_directories(kworkspace PUBLIC "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>"
+                                      INTERFACE "$<INSTALL_INTERFACE:${INCLUDE_INSTALL_DIR}/kworkspace>" )
 
 if(HAVE_X11)
     set_target_properties(kworkspace PROPERTIES COMPILE_FLAGS -DHAVE_X11)

@@ -9,7 +9,7 @@ qt5_generate_dbus_interface(kded.h org.kde.khotkeys.xml )
 add_library(kded_khotkeys MODULE ${kded_khotkeys_PART_SRCS})
 target_link_libraries(kded_khotkeys
     khotkeysprivate
-    kworkspace
+    PW::KWorkspace
     KF5::DBusAddons
     KF5::KDE4Support)
 

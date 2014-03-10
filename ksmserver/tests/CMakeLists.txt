@@ -12,7 +12,7 @@ add_executable(testsh ${testsh_SRCS})
 
 target_link_libraries(testsh
      ${SCREEN_LOCKER}
-    kworkspace
+    PW::KWorkspace
     KF5::KDE4Support
     KF5::XmlGui
     KF5::GlobalAccel

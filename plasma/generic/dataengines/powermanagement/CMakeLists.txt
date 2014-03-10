@@ -17,7 +17,7 @@ target_link_libraries(plasma_engine_powermanagement
     KF5::I18n
     KF5::Service
     Qt5::DBus
-    kworkspace
+    PW::KWorkspace
 )
 
 kservice_desktop_to_json(plasma_engine_powermanagement plasma-dataengine-powermanagement.desktop)

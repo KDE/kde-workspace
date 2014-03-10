@@ -6,7 +6,7 @@ set(screensaver_xml ${KDEBASE_WORKSPACE_SOURCE_DIR}/ksmserver/screenlocker/dbus/
 qt5_add_dbus_interface(krunner_sessions_SRCS ${screensaver_xml} screensaver_interface)
 
 add_library(krunner_sessions MODULE ${krunner_sessions_SRCS})
-target_link_libraries(krunner_sessions KIOCore KF5::Plasma kworkspace)
+target_link_libraries(krunner_sessions KIOCore KF5::Plasma PW::KWorkspace)
 
 install(TARGETS krunner_sessions DESTINATION ${PLUGIN_INSTALL_DIR} )
 

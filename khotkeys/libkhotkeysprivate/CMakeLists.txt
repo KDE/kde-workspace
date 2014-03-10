@@ -71,7 +71,7 @@ set(khotkeysprivate_SRCS
 
 add_library(khotkeysprivate SHARED ${khotkeysprivate_SRCS})
 target_link_libraries(khotkeysprivate
-    kworkspace
+    PW::KWorkspace
     Qt5::X11Extras
     KF5::GlobalAccel
     KF5::I18n

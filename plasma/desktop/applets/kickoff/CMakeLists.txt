@@ -50,6 +50,6 @@ target_link_libraries(kickoffplugin
                               KF5::Solid
                               KF5::Service
                               KF5::KDE4Support
-                              kworkspace)
+                              PW::KWorkspace)
 install(TARGETS kickoffplugin DESTINATION ${QML_INSTALL_DIR}/org/kde/plasma/private/kickoff)
 
