@@ -26,6 +26,7 @@
 #include <QtCore/QString>
 #include <QtCore/QList>
 #include <QtCore/QByteArray>
+#include <config-workspace.h>
 
 struct KWORKSPACE_EXPORT SessEnt {
     QString display, from, user, session;
@@ -37,7 +38,7 @@ typedef QList<SessEnt> SessList;
 
 class KWORKSPACE_EXPORT KDisplayManager {
 
-#ifdef HAVE_X11
+#if HAVE_X11
 
 public:
     KDisplayManager();
@@ -91,7 +92,7 @@ public:
 #endif // HAVE_X11
 
 private:
-#ifdef HAVE_X11
+#if HAVE_X11
     class Private;
     Private * const d;
 #endif // HAVE_X11

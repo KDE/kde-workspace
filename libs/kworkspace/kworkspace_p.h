@@ -23,7 +23,7 @@
 
 #include "kworkspace.h"
 
-#ifdef HAVE_X11
+#if HAVE_X11
 #include <X11/SM/SMlib.h>
 #endif
 
@@ -44,7 +44,7 @@ class KRequestShutdownHelper
     private Q_SLOTS:
         void processData();
     private:
-#ifdef HAVE_X11
+#if HAVE_X11
         SmcConn connection() const { return conn; }
         SmcConn conn;
 #endif

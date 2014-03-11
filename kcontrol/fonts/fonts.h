@@ -115,7 +115,7 @@ private:
     QPushButton *aaSettingsButton;
     FontAASettings *aaSettings;
 #endif
-#ifdef HAVE_X11
+#if HAVE_X11
     int dpi_original;
     QCheckBox *checkboxForceDpi;
     QSpinBox* spinboxDpi;

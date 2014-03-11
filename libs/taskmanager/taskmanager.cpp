@@ -36,6 +36,8 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <KDirWatch>
 #include <NETWinInfo>
 
+#include <config-workspace.h>
+
 #if HAVE_X11
 #include <QX11Info>
 #endif

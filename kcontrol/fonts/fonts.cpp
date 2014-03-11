@@ -50,11 +50,11 @@
 #endif
 #endif
 
-#ifdef HAVE_X11
+#if HAVE_X11
 #include <X11/Xlib.h>
 #endif
 
-#ifdef HAVE_X11
+#if HAVE_X11
 // X11 headers
 #undef Bool
 #undef Unsorted
@@ -636,7 +636,7 @@ KFonts::KFonts(QWidget *parent, const QVariantList &args)
    lay->addWidget( aaSettingsButton, 0, 2 );
    connect(cbAA, SIGNAL(activated(int)), SLOT(slotUseAntiAliasing()));
 #endif
-#ifdef HAVE_X11
+#if HAVE_X11
    checkboxForceDpi = new QCheckBox( i18n( "Force fonts DPI:" ), this );
    lay->addWidget( checkboxForceDpi, 1, 0 );
    spinboxDpi = new QSpinBox( this );
@@ -694,7 +694,7 @@ void KFonts::defaults()
   cbAA->setCurrentIndex( useAA );
   aaSettings->defaults();
 #endif
-#ifdef HAVE_X11
+#if HAVE_X11
   checkboxForceDpi->setChecked( false );
   spinboxDpi->setValue( 96 );
 #endif
@@ -716,7 +716,7 @@ void KFonts::load()
 
   KConfig _cfgfonts( "kcmfonts" );
   KConfigGroup cfgfonts(&_cfgfonts, "General");
-#ifdef HAVE_X11
+#if HAVE_X11
   int dpicfg = cfgfonts.readEntry( "forceFontDPI", 0 );
   if (dpicfg <= 0) {
     checkboxForceDpi->setChecked(false);
@@ -751,7 +751,7 @@ void KFonts::save()
 
   KConfig _cfgfonts( "kcmfonts" );
   KConfigGroup cfgfonts(&_cfgfonts, "General");
-#ifdef HAVE_X11
+#if HAVE_X11
   int dpi = ( checkboxForceDpi->isChecked() ? spinboxDpi->value() : 0 );
   cfgfonts.writeEntry( "forceFontDPI", dpi );
 #endif
@@ -759,7 +759,7 @@ void KFonts::save()
   cfgfonts.writeEntry( "dontChangeAASettings", cbAA->currentIndex() == AASystem );
 #endif
   cfgfonts.sync();
-#ifdef HAVE_X11
+#if HAVE_X11
   // if the setting is reset in the module, remove the dpi value,
   // otherwise don't explicitly remove it and leave any possible system-wide value
   if( dpi == 0 && dpi_original != 0 ) {
@@ -796,7 +796,7 @@ void KFonts::save()
     dpi_original = dpi;
   }
 #else
-#ifdef HAVE_X11
+#if HAVE_X11
   if(dpi != dpi_original) {
     KMessageBox::information(this,
       i18n(

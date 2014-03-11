@@ -67,7 +67,7 @@ KWindowListMenu::~KWindowListMenu()
 
 static bool standaloneDialog( const KWindowInfo* info, const QList<KWindowInfo*>& list )
 {
-#ifdef HAVE_X11
+#if HAVE_X11
   WId group = info->groupLeader();
 
   if ( group == 0 )

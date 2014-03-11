@@ -29,7 +29,7 @@
 #include <ksmserver_interface.h>
 #include <QSocketNotifier>
 
-#ifdef HAVE_X11
+#if HAVE_X11
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
 #include <X11/Xatom.h>
@@ -37,7 +37,7 @@
 #include <fixx11h.h>
 #endif
 
-#ifdef HAVE_X11
+#if HAVE_X11
 #define DISPLAY "DISPLAY"
 #elif defined(Q_WS_QWS)
 #define DISPLAY "QWS_DISPLAY"
@@ -56,7 +56,7 @@
 
 namespace KWorkSpace
 {
-#ifdef HAVE_X11
+#if HAVE_X11
 static void save_yourself_callback( SmcConn conn_P, SmPointer, int, Bool , int, Bool )
     {
     SmcSaveYourselfDone( conn_P, True );
@@ -68,7 +68,7 @@ static void dummy_callback( SmcConn, SmPointer )
 #endif
 KRequestShutdownHelper::KRequestShutdownHelper()
     {
-#ifdef HAVE_X11
+#if HAVE_X11
     SmcCallbacks calls;
     calls.save_yourself.callback = save_yourself_callback;
     calls.die.callback = dummy_callback;
@@ -128,7 +128,7 @@ KRequestShutdownHelper::KRequestShutdownHelper()
 
 KRequestShutdownHelper::~KRequestShutdownHelper()
     {
-#ifdef HAVE_X11
+#if HAVE_X11
     if( conn != NULL )
         {
         delete notifier;
@@ -139,7 +139,7 @@ KRequestShutdownHelper::~KRequestShutdownHelper()
 
 void KRequestShutdownHelper::processData()
     {
-#ifdef HAVE_X11
+#if HAVE_X11
     if( conn != NULL )
         IceProcessMessages( SmcGetIceConnection( conn ), 0, 0 );
 #endif    
@@ -147,7 +147,7 @@ void KRequestShutdownHelper::processData()
 
 bool KRequestShutdownHelper::requestShutdown( ShutdownConfirm confirm )
     {
-#ifdef HAVE_X11
+#if HAVE_X11
     if( conn == NULL )
         return false;
     SmcRequestSaveYourself( conn, SmSaveBoth, True, SmInteractStyleAny,
@@ -157,7 +157,7 @@ bool KRequestShutdownHelper::requestShutdown( ShutdownConfirm confirm )
 #endif    
     return true;
     }
-#ifdef HAVE_X11
+#if HAVE_X11
 static KRequestShutdownHelper* helper = NULL;
 
 static void cleanup_sm()
@@ -168,7 +168,7 @@ static void cleanup_sm()
 
 void requestShutDown(ShutdownConfirm confirm, ShutdownType sdtype, ShutdownMode sdmode)
 {
-#ifdef HAVE_X11
+#if HAVE_X11
     /*  use ksmserver's dcop interface if necessary  */
     if ( confirm == ShutdownConfirmYes ||
          sdtype != ShutdownTypeDefault ||
@@ -192,7 +192,7 @@ bool canShutDown( ShutdownConfirm confirm,
                   ShutdownType sdtype,
                   ShutdownMode sdmode )
 {
-#ifdef HAVE_X11
+#if HAVE_X11
     if ( confirm == ShutdownConfirmYes ||
          sdtype != ShutdownTypeDefault ||
          sdmode != ShutdownModeDefault )
@@ -214,7 +214,7 @@ bool canShutDown( ShutdownConfirm confirm,
 static QTime smModificationTime;
 void propagateSessionManager()
 {
-#ifdef HAVE_X11
+#if HAVE_X11
     QByteArray fName = QFile::encodeName(QStandardPaths::writableLocation(QStandardPaths::RuntimeLocation)+"/KSMserver");
     QString display = QString::fromLocal8Bit( ::getenv(DISPLAY) );
     // strip the screen number from the display

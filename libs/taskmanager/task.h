@@ -37,6 +37,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include <taskmanager/taskmanager.h>
 #include <taskmanager/taskmanager_export.h>
+#include <config-workspace.h>
 
 class NETWinInfo;
 
@@ -278,7 +279,7 @@ public:
     //* @internal
     ::TaskManager::TaskChanges refresh(WindowProperties dirty);
     //* @internal
-#ifdef HAVE_X11
+#if HAVE_X11
     void addTransient(WId w, const KWindowInfo &info);
 #endif
     //* @internal

@@ -47,7 +47,7 @@
 #include <KLocalizedString>
 
 #include "krdb.h"
-#ifdef HAVE_X11
+#if HAVE_X11
 #include <X11/Xlib.h>
 #include <QX11Info>
 #endif
@@ -558,7 +558,7 @@ void runRdb( uint flags )
 
     delete settings;
     QApplication::flush();
-#ifdef HAVE_X11
+#if HAVE_X11
     if (qApp->platformName() == QStringLiteral("xcb")) {
         // We let KIPC take care of ourselves, as we are in a KDE app with
         // QApp::setDesktopSettingsAware(false);

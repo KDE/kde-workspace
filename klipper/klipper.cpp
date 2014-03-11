@@ -58,7 +58,7 @@
 #include <prison/QRCodeBarcode>
 #endif
 
-#ifdef HAVE_X11
+#if HAVE_X11
 #include <QX11Info>
 #include <X11/Xlib.h>
 #include <X11/Xatom.h>
@@ -601,7 +601,7 @@ const int MAX_CLIPBOARD_CHANGES = 10; // max changes per second
 
 bool Klipper::blockFetchingNewData()
 {
-#ifdef HAVE_X11
+#if HAVE_X11
 // Hacks for #85198 and #80302.
 // #85198 - block fetching new clipboard contents if Shift is pressed and mouse is not,
 //   this may mean the user is doing selection using the keyboard, in which case

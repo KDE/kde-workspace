@@ -19,7 +19,7 @@
 
 #include "kdisplaymanager.h"
 
-#ifdef HAVE_X11
+#if HAVE_X11
 
 #include <kuser.h>
 

@@ -108,12 +108,7 @@ add_feature_info("Wayland-Client" Wayland_Client_FOUND "Required for building th
 add_feature_info("Wayland-EGL" Wayland_Egl_FOUND "Required for building the Wayland EGL compositing backend in KWin")
 
 find_package(X11)
-if (X11_FOUND)
-   set (HAVE_X11 1)
-else ()
-   set (HAVE_X11 0)
-endif ()
-add_definitions(-DHAVE_X11=${HAVE_X11})
+set (HAVE_X11 ${X11_FOUND})
 
 set_package_properties(X11 PROPERTIES DESCRIPTION "X11 libraries"
                         URL "http://www.x.org"
