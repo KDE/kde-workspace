@@ -21,6 +21,7 @@
 
 #include "ksystraycmd.h"
 #include "ksystraycmd.moc"
+#include <X11/Xlib.h>
 #include <QX11Info>
 
 
@@ -216,7 +217,7 @@ void KSysTrayCmd::quitClient()
   if ( win ) {
     // Before sending the close request we have to show the window
     XMapWindow( QX11Info::display(), win );
-    NETRootInfo ri( QX11Info::display(), NET::CloseWindow );
+    NETRootInfo ri( QX11Info::connection(), NET::CloseWindow );
     ri.closeWindowRequest( win );
     win=0;
     noquit = false;
@@ -265,7 +266,7 @@ void KSysTrayCmd::execContextMenu( const QPoint &pos )
       }
       else if ( quitOnHide && ( hasRunningClient() ) && isVisible )
       {
-        NETRootInfo ri( QX11Info::display(), NET::CloseWindow );
+        NETRootInfo ri( QX11Info::connection(), NET::CloseWindow );
         ri.closeWindowRequest( win );
         isVisible=false;
       }
@@ -285,7 +286,7 @@ void KSysTrayCmd::checkExistingWindows()
   }
 }
 
-const int SUPPORTED_WINDOW_TYPES_MASK = NET::NormalMask | NET::DesktopMask | NET::DockMask
+const NET::WindowTypes SUPPORTED_WINDOW_TYPES_MASK = NET::NormalMask | NET::DesktopMask | NET::DockMask
     | NET::ToolbarMask | NET::MenuMask | NET::DialogMask | NET::OverrideMask | NET::TopMenuMask
     | NET::UtilityMask | NET::SplashMask;
 
@@ -341,7 +342,7 @@ void KSysTrayCmd::mousePressEvent( QSystemTrayIcon::ActivationReason reason )
   }
   else if ( quitOnHide && ( hasRunningClient() ) && isVisible )
   {
-    NETRootInfo ri( QX11Info::display(), NET::CloseWindow );
+    NETRootInfo ri( QX11Info::connection(), NET::CloseWindow );
     ri.closeWindowRequest( win );
     isVisible=false;
   }

@@ -1,7 +1,7 @@
 #include <fcntl.h>
 
 #include <kapplication.h>
-#include <kaboutdata.h>
+#include <k4aboutdata.h>
 #include <kcmdlineargs.h>
 #include <kdebug.h>
 #include <klocale.h>
@@ -23,10 +23,10 @@ const int XFocusIn = FocusIn;
 
 int main( int argc, char *argv[] )
 {
-  KAboutData aboutData( "ksystraycmd", 0, ki18n( "KSysTrayCmd" ),
+  K4AboutData aboutData( "ksystraycmd", 0, ki18n( "KSysTrayCmd" ),
 			"0.1",
 			ki18n( "Allows any application to be kept in the system tray" ),
-			KAboutData::License_GPL,
+			K4AboutData::License_GPL,
 			ki18n("(C) 2001-2002 Richard Moore (rich@kde.org)") );
   aboutData.addAuthor( ki18n("Richard Moore"), KLocalizedString(), "rich@kde.org" );
 
