@@ -43,7 +43,7 @@
 
 static inline KAboutData aboutData()
 {
-    return KAboutData("kwrited", 0, ki18n("kwrited"), WORKSPACE_VERSION_STRING);
+    return KAboutData("kwrited", 0, i18n("kwrited"), WORKSPACE_VERSION_STRING);
 }
 
 #if defined(BUILD_AS_EXECUTABLE)
@@ -71,7 +71,7 @@ int main(int argc, char **argv)
     signal(SIGINT, sigterm_handler);
     signal(SIGHUP, sigterm_handler);
 
-    KComponentData kcompdata(aboutData());
+    KComponentData kcompdata(aboutData().componentName().toLatin1());
     QCoreApplication a(argc, argv);
     KWrited w;
     return a.exec();
