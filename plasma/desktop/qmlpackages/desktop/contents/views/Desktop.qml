@@ -69,10 +69,17 @@ Rectangle {
             }
         }
 
+        onVisibleChanged: {
+            if (visible) {
+                // get the current available screen geometry and subtract the dialog's frame margins
+                sidePanelStack.height = containment ? containment.availableScreenRect(containment.screen).height - sidePanel.margins.top - sidePanel.margins.bottom : 1000;
+            }
+        }
+
         mainItem: Loader {
             id: sidePanelStack
             asynchronous: true
-            height: containment ? containment.availableScreenRegion(containment.screen)[0].height : 1080
+            height: 1000 //start with some arbitrary height, will be changed from onVisibleChanged
             width: item ? item.width: 0
             onLoaded: {
                 if (sidePanelStack.item) {
