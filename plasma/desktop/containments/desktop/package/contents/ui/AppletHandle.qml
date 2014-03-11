@@ -38,6 +38,10 @@ Item {
 
     signal removeApplet
 
+    transform: Translate {
+        x: handleMerged ? 0 : controlsOpacity * appletHandle.width
+    }
+
     function updateHeight() {
         var mini = appletHandle.minimumHeight + margins.top + margins.bottom;
         if (height > mini) {
@@ -59,9 +63,11 @@ Item {
         z: plasmoidBackground.z - 10
 
         anchors {
-            verticalCenter: appletHandle.verticalCenter
-            left: appletHandle.right
-            leftMargin: handleMerged ? ((1-controlsOpacity) * appletItem.handleWidth) * -1 - appletItem.handleWidth * 2 + 2 : ((1-controlsOpacity) * appletItem.handleWidth) * -1 - appletItem.handleWidth
+            fill: parent
+            leftMargin: -margins.left
+            topMargin: -margins.top
+            rightMargin: -margins.right
+            bottomMargin: -margins.bottom
         }
         smooth: true
         imagePath: (backgroundHints == "NoBackground" || !handleMerged) ? "widgets/background" : ""
