@@ -69,7 +69,7 @@ Item {
         model: widgetExplorer.widgetsMenuActions
         onClicked: model.trigger()
     }
-
+    /*
     PlasmaCore.Dialog {
         id: tooltipDialog
         property Item appletDelegate
@@ -110,6 +110,7 @@ Item {
         repeat: false
         onTriggered: tooltipDialog.visible = false
     }
+    */
 
     Loader {
         id: topBar
@@ -125,7 +126,6 @@ Item {
             leftMargin: 4
         }
     }
-
     Component {
         id: verticalTopBarComponent
 

@@ -46,7 +46,7 @@ PlasmaCore.FrameSvgItem {
     DragArea {
         anchors.fill: parent
         supportedActions: Qt.MoveAction | Qt.LinkAction
-        onDragStarted: tooltipDialog.visible = false
+        //onDragStarted: tooltipDialog.visible = false
         delegateImage: decoration
         mimeData {
             source: parent
@@ -54,13 +54,13 @@ PlasmaCore.FrameSvgItem {
         Component.onCompleted: mimeData.setData("text/x-plasmoidservicename", pluginName)
 
         QIconItem {
-                id: iconWidget
-                anchors.verticalCenter: parent.verticalCenter
-                x: y
-                width: units.iconSizes.huge
-                height: width
-                icon: background.icon
-            }
+            id: iconWidget
+            anchors.verticalCenter: parent.verticalCenter
+            x: y
+            width: units.iconSizes.huge
+            height: width
+            icon: background.icon
+        }
         ColumnLayout {
             anchors {
                 top: parent.top
@@ -109,8 +109,8 @@ PlasmaCore.FrameSvgItem {
             anchors.fill: parent
             hoverEnabled: true
             onDoubleClicked: widgetExplorer.addApplet(pluginName)
-            onEntered: tooltipDialog.appletDelegate = background
-            onExited: tooltipDialog.appletDelegate = null
+            //onEntered: tooltipDialog.appletDelegate = background
+            //onExited: tooltipDialog.appletDelegate = null
         }
     }
 }
