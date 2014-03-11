@@ -27,10 +27,10 @@ import org.kde.qtextracomponents 2.0 as QtExtraComponents
 import org.kde.private.systemtray 2.0 as SystemTray
 
 
-PlasmaCore.ToolTipArea {
+Item {
     id: root_item
 
-    location: isHiddenItem ? PlasmaCore.Types.LeftEdge : plasmoid.location
+    property int location: isHiddenItem ? PlasmaCore.Types.LeftEdge : plasmoid.location
     property int blink_interval: 1000 // interval of blinking (if status of task is NeedsAttention)
     property variant task: null // task that provides information for item
 
@@ -45,9 +45,9 @@ PlasmaCore.ToolTipArea {
     property int      __status:            __has_task ? status : SystemTray.Task.UnknownStatus
 
 
-    mainText: __has_task ? tooltipTitle : ""
-    subText:  __has_task ? tooltipText : ""
-    icon:    __has_task ? tooltipIcon : ""
+    property variant icon:    __has_task ? tooltipIcon : ""
+    property string toolTipMainText: __has_task ? tooltipTitle : ""
+    property string toolTipSubText:  __has_task ? tooltipText : ""
 
     // Public functions ================================================================================================
     function click(buttons) {

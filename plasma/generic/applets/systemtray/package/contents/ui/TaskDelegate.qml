@@ -118,9 +118,16 @@ QtExtraComponents.MouseEventListener {
         }
     }
 
-    Loader {
-        id: sniLoader
+    PlasmaCore.ToolTipArea {
         anchors.fill: parent
+        icon: taskItem ? taskItem.icon : sniLoader.item.icon
+        mainText: taskItem ? taskItem.toolTipMainText : sniLoader.item.toolTipMainText
+        subText: taskItem ? taskItem.toolTipSubText : sniLoader.item.toolTipSubText
+        location: taskItem ? taskItemContainer.location : sniLoader.item.location
+        Loader {
+            id: sniLoader
+            anchors.fill: parent
+        }
     }
 
     Component.onCompleted: {

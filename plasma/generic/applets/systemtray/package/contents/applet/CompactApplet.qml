@@ -21,15 +21,11 @@ import QtQuick.Window 2.0
 import org.kde.plasma.core 2.0 as PlasmaCore
 import org.kde.plasma.components 2.0 as PlasmaComponents
 
-PlasmaCore.ToolTipArea {
+Item {
     id: root
     objectName: "org.kde.desktop-CompactApplet"
     anchors.fill: parent
 
-    icon: plasmoid.icon
-    mainText: plasmoid.toolTipMainText
-    subText: plasmoid.toolTipSubText
-    location: root.parent.parent.location
     property Item fullRepresentation
     property Item compactRepresentation
     property Item expandedFeedback: expandedItem
