@@ -109,12 +109,12 @@ public:
     static QList<QString> defaultFavorites()
     {
         QList<QString> applications;
-        applications << "konqbrowser" << "KMail2" << "systemsettings" << "dolphin";
+        applications << "konqbrowser" << "KMail2" << "kdesystemsettings" << "dolphin" << "konsole" << "kate" << "kwrite" << "kinfocenter";
 
         QList<QString> desktopFiles;
 
         foreach (const QString& application, applications) {
-            KService::Ptr service = KService::serviceByStorageId("kde4-" + application + ".desktop");
+            KService::Ptr service = KService::serviceByStorageId(application + ".desktop");
             if (service) {
                 desktopFiles << service->entryPath();
             }
