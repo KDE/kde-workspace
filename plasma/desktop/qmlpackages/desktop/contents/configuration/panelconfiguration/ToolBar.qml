@@ -228,7 +228,10 @@ Item {
                     }
                     text: i18n("Remove Panel")
                     iconSource: "window-close"
-                    onClicked: plasmoid.action("remove").trigger();
+                    onClicked: {
+                        contextMenu.visible = false;
+                        plasmoid.action("remove").trigger();
+                    }
                 }
             }
         }
