@@ -32,6 +32,8 @@ SlidingPopupsEffect::SlidingPopupsEffect()
     mSlideLength = QFontMetrics(qApp->font()).height() * 8;
 
     mAtom = effects->announceSupportProperty("_KDE_SLIDE", this);
+    mReadyAtom = effects->announceSupportProperty("_KDE_WINDOW_PENDING", this);
+
     connect(effects, SIGNAL(windowAdded(KWin::EffectWindow*)), this, SLOT(slotWindowAdded(KWin::EffectWindow*)));
     connect(effects, SIGNAL(windowClosed(KWin::EffectWindow*)), this, SLOT(slotWindowClosed(KWin::EffectWindow*)));
     connect(effects, SIGNAL(windowDeleted(KWin::EffectWindow*)), this, SLOT(slotWindowDeleted(KWin::EffectWindow*)));
@@ -74,6 +76,10 @@ void SlidingPopupsEffect::prePaintScreen(ScreenPrePaintData& data, int time)
 
 void SlidingPopupsEffect::prePaintWindow(EffectWindow* w, WindowPrePaintData& data, int time)
 {
+    if (mPending.contains(w)) {
+        return;
+    }
+
     qreal progress = 1.0;
     bool appearing = false;
     if (mAppearingWindows.contains(w)) {
@@ -176,6 +182,10 @@ void SlidingPopupsEffect::prePaintWindow(EffectWindow* w, WindowPrePaintData& da
 
 void SlidingPopupsEffect::paintWindow(EffectWindow* w, int mask, QRegion region, WindowPaintData& data)
 {
+    if (mPending.contains(w)) {
+        return;
+    }
+
     bool animating = false;
     bool appearing = false;
 
@@ -259,6 +269,8 @@ void SlidingPopupsEffect::postPaintWindow(EffectWindow* w)
 void SlidingPopupsEffect::slotWindowAdded(EffectWindow *w)
 {
     slotPropertyNotify(w, mAtom);
+    slotPropertyNotify(w, mReadyAtom);
+
     if (w->isOnCurrentDesktop() && mWindowsData.contains(w)) {
         if (!w->data(WindowForceBackgroundContrastRole).isValid() && w->hasAlpha()) {
             w->setData(WindowForceBackgroundContrastRole, QVariant(true));
@@ -302,87 +314,101 @@ void SlidingPopupsEffect::slotWindowDeleted(EffectWindow* w)
     delete mAppearingWindows.take(w);
     delete mDisappearingWindows.take(w);
     mWindowsData.remove(w);
+    mPending.removeOne(w);
     effects->addRepaint(w->geometry());
 }
 
 void SlidingPopupsEffect::slotPropertyNotify(EffectWindow* w, long a)
 {
-    if (!w || a != mAtom)
-        return;
-
-    QByteArray data = w->readProperty(mAtom, mAtom, 32);
-
-    if (data.length() < 1) {
-        // Property was removed, thus also remove the effect for window
-        w->setData(WindowClosedGrabRole, QVariant());
-        delete mAppearingWindows.take(w);
-        delete mDisappearingWindows.take(w);
-        mWindowsData.remove(w);
+    if (!w) {
         return;
     }
 
-    auto* d = reinterpret_cast< uint32_t* >(data.data());
-    Data animData;
-    animData.start = d[ 0 ];
-    animData.from = (Position)d[ 1 ];
-    //custom duration
-    if (data.length() >= (int)(sizeof(uint32_t) * 3)) {
-        animData.fadeInDuration = d[2];
-        if (data.length() >= (int)(sizeof(uint32_t) * 4))
-            //custom fadein
-            animData.fadeOutDuration = d[3];
-        else
-            //custom fadeout
-            animData.fadeOutDuration = d[2];
+    if (a == mReadyAtom) {
+        QByteArray data = w->readProperty(mReadyAtom, mReadyAtom, 32);
+        qDebug() << "!!!!! " << data;
+        if (data.length() < 1) {
+            qDebug() << "!!!!!!!!!!!! REMOVING WINDOW FROM PENDING QUEUE";
+            mPending.removeOne(w);
+        } else {
+            qDebug() << "!!!!!!!!!!!! ADDING WINDOW TO PENDING QUEUE";
+            mPending.append(w);
+        }
+    } else if (a == mAtom) {
+        QByteArray data = w->readProperty(mAtom, mAtom, 32);
 
-        //do we want an actual slide?
-        if (data.length() >= (int)(sizeof(uint32_t) * 5))
-            animData.slideLength = d[5];
-        else
-            animData.slideLength = 0;
-    } else {
-        animData.fadeInDuration = animationTime(mFadeInTime);
-        animData.fadeOutDuration = animationTime(mFadeOutTime);
-    }
-    const QRect screenRect = effects->clientArea(FullScreenArea, w->screen(), effects->currentDesktop());
-    if (animData.start == -1) {
+        if (data.length() < 1) {
+            // Property was removed, thus also remove the effect for window
+            w->setData(WindowClosedGrabRole, QVariant());
+            delete mAppearingWindows.take(w);
+            delete mDisappearingWindows.take(w);
+            mWindowsData.remove(w);
+            return;
+        }
+
+        auto* d = reinterpret_cast< uint32_t* >(data.data());
+        Data animData;
+        animData.start = d[ 0 ];
+        animData.from = (Position)d[ 1 ];
+        //custom duration
+        if (data.length() >= (int)(sizeof(uint32_t) * 3)) {
+            animData.fadeInDuration = d[2];
+            if (data.length() >= (int)(sizeof(uint32_t) * 4))
+                //custom fadein
+                animData.fadeOutDuration = d[3];
+            else
+                //custom fadeout
+                animData.fadeOutDuration = d[2];
+
+            //do we want an actual slide?
+            if (data.length() >= (int)(sizeof(uint32_t) * 5))
+                animData.slideLength = d[5];
+            else
+                animData.slideLength = 0;
+        } else {
+            animData.fadeInDuration = animationTime(mFadeInTime);
+            animData.fadeOutDuration = animationTime(mFadeOutTime);
+        }
+        const QRect screenRect = effects->clientArea(FullScreenArea, w->screen(), effects->currentDesktop());
+        if (animData.start == -1) {
+            switch (animData.from) {
+            case West:
+                animData.start = qMax(w->x() - screenRect.x(), 0);
+                break;
+            case North:
+                animData.start = qMax(w->y() - screenRect.y(), 0);
+                break;
+            case East:
+                animData.start = qMax(screenRect.x() + screenRect.width() - (w->x() + w->width()), 0);
+                break;
+            case South:
+            default:
+                animData.start = qMax(screenRect.y() + screenRect.height() - (w->y() + w->height()), 0);
+                break;
+            }
+        }
+        // sanitize
+        int difference = 0;
         switch (animData.from) {
         case West:
-            animData.start = qMax(w->x() - screenRect.x(), 0);
+            difference = w->x() - screenRect.x();
             break;
         case North:
-            animData.start = qMax(w->y() - screenRect.y(), 0);
+            difference = w->y() - screenRect.y();
             break;
         case East:
-            animData.start = qMax(screenRect.x() + screenRect.width() - (w->x() + w->width()), 0);
+            difference = w->x() + w->width() - (screenRect.x() + screenRect.width());
             break;
         case South:
         default:
-            animData.start = qMax(screenRect.y() + screenRect.height() - (w->y() + w->height()), 0);
+            difference = w->y() + w->height() - (screenRect.y() + screenRect.height());
             break;
         }
+        animData.start = qMax<int>(animData.start, difference);
+        mWindowsData[ w ] = animData;
+        // Grab the window, so other windowClosed effects will ignore it
+        w->setData(WindowClosedGrabRole, QVariant::fromValue(static_cast<void*>(this)));
     }
-    // sanitize
-    int difference = 0;
-    switch (animData.from) {
-    case West:
-        difference = w->x() - screenRect.x();
-        break;
-    case North:
-        difference = w->y() - screenRect.y();
-        break;
-    case East:
-        difference = w->x() + w->width() - (screenRect.x() + screenRect.width());
-        break;
-    case South:
-    default:
-        difference = w->y() + w->height() - (screenRect.y() + screenRect.height());
-        break;
-    }
-    animData.start = qMax<int>(animData.start, difference);
-    mWindowsData[ w ] = animData;
-    // Grab the window, so other windowClosed effects will ignore it
-    w->setData(WindowClosedGrabRole, QVariant::fromValue(static_cast<void*>(this)));
 }
 
 bool SlidingPopupsEffect::isActive() const

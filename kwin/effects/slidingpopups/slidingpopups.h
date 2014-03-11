@@ -74,10 +74,12 @@ private:
         int slideLength;
     };
     long mAtom;
+    long mReadyAtom;
 
     // This list is only for appearing windows: we remember that we've enabled the
     // WindowBackgroundContrastForcedRole flag, so we can remove it later.
     // It doesn't matter for disappearing windows, they'll be deleted anyway.
+    QList< const EffectWindow*> mPending;
     QList< const EffectWindow* > m_backgroundContrastForced;
     QHash< const EffectWindow*, QTimeLine* > mAppearingWindows;
     QHash< const EffectWindow*, QTimeLine* > mDisappearingWindows;
