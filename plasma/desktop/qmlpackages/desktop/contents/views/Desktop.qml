@@ -66,11 +66,6 @@ Rectangle {
                 sidePanelStack.state = "closed";
             } else {
                 sidePanel.requestActivate();
-            }
-        }
-
-        onVisibleChanged: {
-            if (visible) {
                 // get the current available screen geometry and subtract the dialog's frame margins
                 sidePanelStack.height = containment ? containment.availableScreenRect(containment.screen).height - sidePanel.margins.top - sidePanel.margins.bottom : 1000;
             }
