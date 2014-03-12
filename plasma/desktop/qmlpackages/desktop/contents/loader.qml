@@ -33,6 +33,9 @@ QtObject {
     property bool loaded   : false
 
     default property var children
+    /* This seems to crash not being able to address Solid.Device, which seems to be 
+       a problem with latest Qt 5.3. Pleas re-enable only after consultation with 
+      plasma-devel@kde.org */
     /*
     Solid.Devices {
         id: keyboards
