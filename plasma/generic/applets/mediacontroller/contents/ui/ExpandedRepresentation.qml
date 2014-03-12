@@ -104,7 +104,7 @@ ColumnLayout {
         onValueChanged: {
             if (pressed) {
                 var service = mpris2Source.serviceForSource(mpris2Source.last);
-                var operation = service.operationDescription("Seek");
+                var operation = service.operationDescription("SetPosition");
                 operation.microseconds = value
                 service.startOperationCall(operation);
             }
