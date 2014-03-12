@@ -25,7 +25,6 @@
 #include <QPushButton>
 #include <QComboBox>
 #include <QDebug>
-
 #include <KLocale>
 
 

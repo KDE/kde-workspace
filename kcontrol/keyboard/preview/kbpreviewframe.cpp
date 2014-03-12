@@ -99,7 +99,8 @@ void KbPreviewFrame::drawKeySymbols(QPainter &painter, QPoint temp[], const GSha
                 QColor txtColor = txt[0] == -1 ? unknownSymbolColor : color[level];
 
                 painter.setPen(txtColor);
-                painter.drawText(temp[cordinate[level]].x()+xOffset[level], temp[cordinate[level]].y()+yOffset[level], szx, szy, Qt::AlignTop, txt);
+
+                painter.drawText(temp[cordinate[level]].x()+xOffset[level]*scaleFactor/2.5, temp[cordinate[level]].y()+yOffset[level]*scaleFactor/2.5, szx, szy, Qt::AlignTop, txt);
 
                 QString currentSymbol = key.getSymbol(keyLevel[l_id][level]);
                 currentSymbol = currentSymbol.size() < 3 ? currentSymbol.append("\t") : currentSymbol;
@@ -129,11 +130,12 @@ void KbPreviewFrame::drawKeySymbols(QPainter &painter, QPoint temp[], const GSha
         if( name.contains(fkKey) ){
             QString tempName = name;
             tempName.remove("K");
-            painter.drawText(temp[0].x()+s.size(0)-10, temp[0].y()+3*s.size(1)/2, tempName);
+            painter.drawText(temp[0].x()+s.size(0)-10, temp[0].y()+3*scaleFactor*s.size(1)/5, tempName);
         }
-        else
-            painter.drawText(temp[0].x()+s.size(0)-10, temp[0].y()+3*s.size(1)/2, name);
-
+        else{
+            painter.setFont(kbfont);
+            painter.drawText(temp[0].x()+s.size(0)-10, temp[0].y()+3*scaleFactor*s.size(1)/5, name);
+        }
         tip = name;
 
         for(int i = 0 ; i < 4; i++){
@@ -331,12 +333,18 @@ void KbPreviewFrame::generateKeyboardLayout(const QString& layout, const QString
 {
     geometry = grammar::parseGeometry(model);
     int endx = geometry.getWidth(), endy = geometry.getHeight();
-    int screenWidth = QApplication::desktop()->screenGeometry().width();
+
+    QDesktopWidget* desktopWidget = qApp->desktop();
+    QRect screenGeometry = desktopWidget->screenGeometry();
+    int screenWidth = screenGeometry.width();
+    //int screenHeight = screenGeometry.height();
+    //int screenWidth = QApplication::desktop()->screenGeometry().width();
 
     scaleFactor = 2.5;
-
-    while (scaleFactor*endx > screenWidth)
+    qDebug()<<scaleFactor;
+    while (scaleFactor*endx + screenWidth/20 > screenWidth)
         scaleFactor -= 0.2;
+    qDebug()<<scaleFactor;
 
     setFixedSize(scaleFactor*endx+60, scaleFactor*endy+60);
     qDebug()<<screenWidth<<":"<<scaleFactor<<scaleFactor*endx+60<<scaleFactor*endy+60;
