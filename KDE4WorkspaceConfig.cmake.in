@@ -44,8 +44,7 @@ set(KDE4WORKSPACE_TARGET_PREFIX @KDE4WORKSPACE_TARGET_PREFIX@)
 # Make sure to load the exported targets only once
 # For the rest of this script it doesn't matter that much
 if(NOT TARGET @KDE4WORKSPACE_TARGET_PREFIX@plasmaclock)
-   get_filename_component(_currentDir "${CMAKE_CURRENT_LIST_FILE}" PATH)
-   include("${_currentDir}/KDE4WorkspaceLibraryTargets.cmake")
+   include("${CMAKE_CURRENT_LIST_DIR}/KDE4WorkspaceLibraryTargets.cmake")
 endif(NOT TARGET @KDE4WORKSPACE_TARGET_PREFIX@plasmaclock)
 
 macro(_KDE4WORKSPACE_Set_Lib_Vars _prefix _lib)
