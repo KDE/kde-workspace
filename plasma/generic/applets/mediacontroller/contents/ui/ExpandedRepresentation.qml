@@ -33,6 +33,16 @@ ColumnLayout {
 
     property int controlSize: Math.min(height, width) / 4
 
+    property int position: mpris2Source.data[mpris2Source.last].Position
+
+    onPositionChanged: {
+        // don't set the position while the slider is pressed
+        // which means the user is still holding it down
+        if (!seekSlider.pressed) {
+            seekSlider.value = position;
+        }
+    }
+
     //anchors.margins: units.largeSpacing
     //Rectangle { color: "orange"; anchors.fill: parent }
 
@@ -83,9 +93,10 @@ ColumnLayout {
     }
 
     PlasmaComponents.Slider {
+        id: seekSlider
         z: 999
         maximumValue: mpris2Source.data[mpris2Source.last].Metadata["mpris:length"]
-        value: mpris2Source.data[mpris2Source.last].Position
+        value: 0;
         anchors {
             left: parent.left
             right: parent.right
@@ -96,6 +107,17 @@ ColumnLayout {
                 var operation = service.operationDescription("Seek");
                 operation.microseconds = value
                 service.startOperationCall(operation);
+            }
+        }
+
+        Timer {
+            id: seekTimer
+            interval: 1000
+            repeat: true
+            running: root.state == "playing"
+            onTriggered: {
+                // add one second; value in microseconds
+                seekSlider.value += 1000000;
             }
         }
     }
