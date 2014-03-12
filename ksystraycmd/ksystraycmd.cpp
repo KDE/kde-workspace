@@ -278,8 +278,7 @@ void KSysTrayCmd::execContextMenu( const QPoint &pos )
 void KSysTrayCmd::checkExistingWindows()
 {
   kDebug() << "checkExistingWindows()";
-  QList<WId>::ConstIterator it;
-  for ( it = KWindowSystem::windows().begin(); it != KWindowSystem::windows().end(); ++it ) {
+  for (auto it = KWindowSystem::windows().constBegin(); it != KWindowSystem::windows().constEnd(); ++it ) {
     windowAdded( *it );
     if ( win )
       break;
