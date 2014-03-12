@@ -264,8 +264,8 @@ endif()
 ecm_optional_add_subdirectory(freespacenotifier)
 #
 # data
-# ecm_optional_add_subdirectory(doc)
-#
+ecm_optional_add_subdirectory(doc)
+
 if (NOT WIN32)
    ecm_optional_add_subdirectory(kinfocenter)
 #       macro_optional_add_subdirectory(ktouchpadenabler)
