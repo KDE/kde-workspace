@@ -33,10 +33,11 @@ QtObject {
     property bool loaded   : false
 
     default property var children
-
+    /*
     Solid.Devices {
         id: keyboards
         query: "IS Keyboard"
     }
+    */
 }
 
