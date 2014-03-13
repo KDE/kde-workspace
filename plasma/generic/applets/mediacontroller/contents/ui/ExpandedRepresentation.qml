@@ -58,7 +58,7 @@ ColumnLayout {
             source: mpris2Source.data[mpris2Source.last].Metadata["mpris:artUrl"]
             Layout.preferredHeight: Math.min(expandedRepresentation.height/2, sourceSize.height)
             Layout.preferredWidth: Layout.preferredHeight
-            visible: status == Image.Ready
+            visible: status == Image.Ready && root.state != "off" && !root.noPlayer
         }
         Column {
             Layout.fillWidth: true
@@ -96,7 +96,8 @@ ColumnLayout {
         id: seekSlider
         z: 999
         maximumValue: mpris2Source.data[mpris2Source.last].Metadata["mpris:length"]
-        value: 0;
+        value: 0
+        visible: root.state != "off" && !root.noPlayer
         anchors {
             left: parent.left
             right: parent.right
