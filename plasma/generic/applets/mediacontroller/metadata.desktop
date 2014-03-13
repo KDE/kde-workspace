@@ -2,6 +2,7 @@
 Name=Media Player
 Name[ca]=Reproductor multimèdia
 Name[cs]=Přehrávač médií
+Name[da]=Medieafspiller
 Name[de]=Medienwiedergabe
 Name[el]=Αναπαραγωγέας πολυμέσων
 Name[es]=Reproductor multimedia
@@ -33,6 +34,7 @@ Name[zh_CN]=媒体播放器
 Name[zh_TW]=媒體播放器
 Comment=Media Player Controls
 Comment[ca]=Controls del reproductor multimèdia
+Comment[da]=Kontroller til medieafspiller
 Comment[de]=Steuerung der Medienwiedergabe
 Comment[el]=Χειριστήρια αναπαραγωγέα πολυμέσων
 Comment[es]=Controles del reproductor multimedia
