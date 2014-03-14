@@ -58,7 +58,7 @@ ColumnLayout {
             source: mpris2Source.data[mpris2Source.last].Metadata["mpris:artUrl"]
             Layout.preferredHeight: Math.min(expandedRepresentation.height/2, sourceSize.height)
             Layout.preferredWidth: Layout.preferredHeight
-            visible: status == Image.Ready && root.state != "off" && !root.noPlayer
+            visible: status == Image.Ready && root.state != "off" && !root.noPlayer && mpris2Source.data[mpris2Source.last].Metadata["mpris:artUrl"] != undefined
         }
         Column {
             Layout.fillWidth: true
