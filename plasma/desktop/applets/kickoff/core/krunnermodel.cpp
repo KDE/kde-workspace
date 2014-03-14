@@ -63,7 +63,9 @@ Plasma::RunnerManager * runnerManager() {
             << "services"
             << "bookmarks"
             << "recentdocuments"
-            << "locations";
+            << "locations"
+            << "baloosearch";
+
         _runnerManager->setAllowedRunners(allowed);
 
         conf.sync();
