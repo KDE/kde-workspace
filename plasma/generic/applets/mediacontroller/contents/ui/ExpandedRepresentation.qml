@@ -97,7 +97,8 @@ ColumnLayout {
         z: 999
         maximumValue: mpris2Source.data[mpris2Source.last].Metadata["mpris:length"]
         value: 0
-        visible: root.state != "off" && !root.noPlayer
+        // if there's no "mpris:length" in teh metadata, we cannot seek, so hide it in that case
+        visible: root.state != "off" && !root.noPlayer && mpris2Source.data[mpris2Source.last].Metadata["mpris:length"] != undefined
         anchors {
             left: parent.left
             right: parent.right
