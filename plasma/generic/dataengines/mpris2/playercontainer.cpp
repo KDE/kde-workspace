@@ -230,20 +230,7 @@ void PlayerContainer::copyProperty(const QString& propName, const QVariant& _val
         } else if (propName == QLatin1String("PlaybackStatus")) {
 
             if (data().contains("Position") && data().contains("PlaybackStatus")) {
-                recalculatePosition();
-
-                if (data().value("PlaybackStatus").toString() == QLatin1String("Playing")
-                        && value.toString() == QLatin1String("Paused")) {
-                    // Every time something that affects the predicted position changes
-                    // (Rate or PlaybackStatus), we get a hundred milliseconds or so
-                    // out, due to the time it takes for a D-Bus message to be delivered
-                    // and processed.
-                    //
-                    // To try to prevent these errors from accumulating, we re-fetch
-                    // the position when we enter paused mode; when paused, the position
-                    // does not change, so we'll be about as accurate as we can be.
-                    updatePosition();
-                }
+                updatePosition();
             }
 
             // update the effective rate
