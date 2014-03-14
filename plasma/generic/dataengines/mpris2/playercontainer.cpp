@@ -214,6 +214,12 @@ void PlayerContainer::copyProperty(const QString& propName, const QVariant& _val
                 }
             }
 
+            if (value.toMap().value("mpris:length").toLongLong() <= 0) {
+                QMap<QString, QVariant> metadataMap = value.toMap();
+                metadataMap.remove("mpris:length");
+                value = QVariant(metadataMap);
+            }
+
         } else if (propName == QLatin1String("Rate") &&
                 data().value("PlaybackStatus").toString() == QLatin1String("Playing")) {
 
