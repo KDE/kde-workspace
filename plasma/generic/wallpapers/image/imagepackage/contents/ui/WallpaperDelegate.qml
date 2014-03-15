@@ -28,7 +28,9 @@ MouseArea {
 
     property bool selected: (wallpapersGrid.currentIndex == index)
 
-    onSelectedChanged: cfg_Image = model.path
+    onSelectedChanged: {
+        cfg_Image = model.path
+    }
 
     Column {
         anchors {
@@ -37,12 +39,34 @@ MouseArea {
             verticalCenter: parent.verticalCenter
         }
         QPixmapItem {
+            id: walliePreview
             anchors.horizontalCenter: parent.horizontalCenter
             height: wallpaperDelegate.height + 1
             width: wallpaperDelegate.width + 1
             smooth: true
             pixmap: model.screenshot
-            fillMode: QPixmapItem.PreserveAspectCrop
+            fillMode: {
+                if (cfg_FillMode == Image.Stretch) {
+                    return QPixmapItem.Stretch;
+                } else if (cfg_FillMode == Image.PreserveAspectFit) {
+                    return QPixmapItem.PreserveAspectFit;
+                } else if (cfg_FillMode == Image.PreserveAspectCrop) {
+                    return QPixmapItem.PreserveAspectCrop;
+                } else if (cfg_FillMode == Image.Tile) {
+                    return QPixmapItem.Tile;
+                } else if (cfg_FillMode == Image.TileVertically) {
+                    return QPixmapItem.TileVertically;
+                } else if (cfg_FillMode == Image.TileHorizontally) {
+                    return QPixmapItem.TileHorizontally;
+                }
+                return QPixmapItem.Pad;
+            }
+
+            Rectangle {
+                anchors.fill: parent
+                color: cfg_Color
+                z: parent.z - 1
+            }
 
             Rectangle {
                 opacity: selected ? 1.0 : 0
@@ -62,6 +86,7 @@ MouseArea {
 
     onClicked: {
         wallpapersGrid.currentIndex = index
+        cfg_Image = model.path
     }
 
     Component.onCompleted: {
