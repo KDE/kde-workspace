@@ -204,8 +204,6 @@ set_package_properties(USB PROPERTIES DESCRIPTION "User level access to USB devi
                        PURPOSE "Provides Logitech mouse support in KControl."
 		       )
 
-find_package(LibBSD)
-
 
 include(ConfigureChecks.cmake)
 if(NOT WIN32)
@@ -256,11 +254,7 @@ ecm_optional_add_subdirectory(klipper)
 ecm_optional_add_subdirectory(kmenuedit)
 #    macro_optional_add_subdirectory(krunner)
 #    macro_optional_add_subdirectory(solid)
-if(LIBBSD_FOUND)
-    ecm_optional_add_subdirectory(kstartupconfig)
-else()
-    message(STATUS "LibBSD was not found, kstartupconfig will not be built")
-endif()
+ecm_optional_add_subdirectory(kstartupconfig)
 ecm_optional_add_subdirectory(freespacenotifier)
 #
 # data

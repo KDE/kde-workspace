@@ -63,8 +63,6 @@ Otherwise kdostartupconfig is launched to create or update all the necessary fil
 
 */
 
-#include <config-workspace.h>
-
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <sys/wait.h>
@@ -72,39 +70,34 @@ Otherwise kdostartupconfig is launched to create or update all the necessary fil
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
-
-#include <bsd/string.h>
+#include <string>
 
 int main()
-    {
+{
     time_t config_time;
     FILE* config;
     FILE* keys;
     struct stat st;
-    char kdehome[ 1024 ];
-    char filename[ 1024 ];
+    std::string kdehome;
+    std::string filename;
 
-    if( getenv( "XDG_CONFIG_HOME" )) {
-        strlcpy( kdehome, getenv( "XDG_CONFIG_HOME" ), 1024 );
+    if (getenv( "XDG_CONFIG_HOME" )) {
+        kdehome = getenv("XDG_CONFIG_HOME");
     } else {
-        strcpy( kdehome, "~/.config");
+        kdehome = "~/.config";
     }
-
-    strlcpy( filename, kdehome, 1024 );
-    strlcat( filename, "/share/config/startupconfig", 1024 );
-    if( access( filename, R_OK ) != 0 )
+    filename = kdehome + "/share/config/startupconfig";
+    if (access(filename.c_str(), R_OK) != 0)
         goto doit;
-    strlcpy( filename, kdehome, 1024 );
-    strlcat( filename, "/share/config/startupconfigfiles", 1024 );
-    if( stat( filename, &st ) != 0 )
+    filename = kdehome + "/share/config/startupconfigfiles";
+    if (stat(filename.c_str(), &st) != 0)
         goto doit;
     config_time = st.st_mtime;
-    config = fopen( filename, "r" );
+    config = fopen(filename.c_str(), "r");
     if( config == NULL )
         goto doit;
-    strlcpy( filename, kdehome, 1024 );
-    strlcat( filename, "/share/config/startupconfigkeys", 1024 );
-    keys = fopen( filename, "r" );
+    filename = kdehome + "/share/config/startupconfigkeys";
+    keys = fopen(filename.c_str(), "r");
     if( keys == NULL )
         return 2;
     for(;;)

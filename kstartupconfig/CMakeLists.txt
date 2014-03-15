@@ -1,14 +1,8 @@
 ########### kstartupconfig ###############
 
-set(kstartupconfig_SRCS kstartupconfig.c )
+set(kstartupconfig_SRCS kstartupconfig.cpp )
 
 add_executable(kstartupconfig5 ${kstartupconfig_SRCS})
-
-if(WIN32)
-target_link_libraries(kstartupconfig5 ${KDEWIN_LIBRARIES} )
-else()
-target_link_libraries(kstartupconfig5 Qt5::Core KF5::KDE4Support ${LIBBSD_LIBRARIES})
-endif()
 
 install(TARGETS kstartupconfig5 ${INSTALL_TARGETS_DEFAULT_ARGS} )
 
