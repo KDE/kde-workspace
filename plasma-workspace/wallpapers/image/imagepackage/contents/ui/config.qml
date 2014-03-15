@@ -223,7 +223,7 @@ ColumnLayout {
                 model: imageWallpaper.wallpaperModel
                 currentIndex: -1
 
-                cellWidth: wallpapersGrid.width / 4
+                cellWidth: wallpapersGrid.width / 3
                 cellHeight: cellWidth / units.displayAspectRatio
 
                 anchors.margins: 4
