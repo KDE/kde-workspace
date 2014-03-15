@@ -117,6 +117,7 @@ class Image : public QObject
         void slidePathsChanged();
         void resizeMethodChanged();
         void sizeChanged(QSize s);
+        void customWallpaperPicked();
 
     protected Q_SLOTS:
         void removeWallpaper(QString name);
