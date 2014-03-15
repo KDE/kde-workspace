@@ -37,7 +37,7 @@ MouseArea {
         QPixmapItem {
             anchors.horizontalCenter: parent.horizontalCenter
             height: wallpaperDelegate.height + 1
-            width: height
+            width: wallpaperDelegate.width + 1
             smooth: true
             pixmap: model.screenshot
             fillMode: QPixmapItem.PreserveAspectCrop

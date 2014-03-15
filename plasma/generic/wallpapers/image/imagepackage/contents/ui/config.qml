@@ -223,6 +223,9 @@ ColumnLayout {
                 model: imageWallpaper.wallpaperModel
                 currentIndex: -1
 
+                cellHeight: units.gridUnit * 6
+                cellWidth: cellHeight * units.displayAspectRatio
+
                 anchors.margins: 4
                 boundsBehavior: Flickable.StopAtBounds
 
