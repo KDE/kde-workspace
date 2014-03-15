@@ -28,6 +28,8 @@ MouseArea {
 
     property bool selected: (wallpapersGrid.currentIndex == index)
 
+    onSelectedChanged: cfg_Image = model.path
+
     Column {
         anchors {
             left: parent.left
@@ -57,11 +59,11 @@ MouseArea {
             }
         }
     }
+
     onClicked: {
-        print("WP wallie selected: " + model.path);
-        cfg_Image = model.path
         wallpapersGrid.currentIndex = index
     }
+
     Component.onCompleted: {
         if (cfg_Image == model.path) {
             makeCurrentTimer.pendingIndex = model.index

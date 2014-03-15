@@ -243,6 +243,11 @@ ColumnLayout {
                         wallpapersGrid.currentIndex = pendingIndex
                     }
                 }
+
+                Connections {
+                    target: imageWallpaper
+                    onCustomWallpaperPicked: wallpapersGrid.currentIndex = 0
+                }
             }
         }
     }
@@ -262,7 +267,6 @@ ColumnLayout {
         id: buttonsRow
         anchors {
             right: parent.right
-            //rightMargin: units.largeSpacing/2
         }
         QtControls.Button {
             visible: (configDialog.currentWallpaper == "org.kde.slideshow")
@@ -274,18 +278,12 @@ ColumnLayout {
             visible: (configDialog.currentWallpaper == "org.kde.image")
             iconName: "document-open-folder"
             text: i18n("Open...")
-            onClicked: {
-                print("Open file.");
-                imageWallpaper.showFileDialog();
-            }
+            onClicked: imageWallpaper.showFileDialog();
         }
         QtControls.Button {
             iconName: "bookmarks"
             text: i18n("Download Wallpapers")
-            onClicked: {
-                print("Get new Wallpapers.");
-                imageWallpaper.getNewWallpaper();
-            }
+            onClicked: imageWallpaper.getNewWallpaper();
         }
     }
 }
