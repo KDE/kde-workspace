@@ -269,7 +269,6 @@ if(NOT WIN32)
    ecm_optional_add_subdirectory(kcminit)
    ecm_optional_add_subdirectory(khotkeys)
    ecm_optional_add_subdirectory(kwrited)
-   ecm_optional_add_subdirectory(ksystraycmd)
    ecm_optional_add_subdirectory(appmenu)
 endif()
 
