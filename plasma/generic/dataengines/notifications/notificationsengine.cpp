@@ -258,8 +258,6 @@ uint NotificationsEngine::Notify(const QString &app_name, uint replaces_id,
 
     setData(source, notificationData);
 
-    m_activeNotifications.insert(source, app_name + summary);
-
     if (!isPersistent) {
         int timerId = startTimer(timeout);
         m_sourceTimers.insert(source, timerId);
