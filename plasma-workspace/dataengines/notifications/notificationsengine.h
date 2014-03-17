@@ -76,6 +76,8 @@ private:
     QHash<int, QString> m_timeouts; // timerIDs -> sources
     QHash<QString, int> m_sourceTimers; // sources -> timerIDs
 
+    QHash<QString, QString> m_activeNotifications;
+
     friend class NotificationAction;
 };
 

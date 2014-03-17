@@ -53,39 +53,39 @@ PlasmaCore.Dialog {
 
     function setCustomPosition(pos, writeConfig)
     {
-        var popupPos = lastNotificationPopup.popupPosition(notificationIcon, Qt.AlignCenter)
-        var finalPos
-
-        //custom
-        if ((pos.x >= 0 || pos.y >= 0) &&
-            (Math.abs(popupPos.x - pos.x) > 40 ||
-            Math.abs(popupPos.y - pos.y) > 40)) {
-            finalPos = pos
-            if (writeConfig) {
-                notificationsApplet.Plasmoid.configuration.CustomPosition = pos
-                lastNotificationPopup.savedPos = pos
-                lastNotificationPopup.customPosition = true
-            }
-        } else {
-            finalPos = popupPos
-            if (writeConfig) {
-                notificationsApplet.Plasmoid.configuration.CustomPosition = QPoint(-1,-1)
-                lastNotificationPopup.savedPos = QPoint(-1,-1)
-                lastNotificationPopup.customPosition = false
-            }
-        }
-        lastNotificationPopup.x = finalPos.x
-        lastNotificationPopup.y = finalPos.y
+//         var popupPos = lastNotificationPopup.position //popupPosition(notificationIcon, Qt.size(lastNotificationPopup.width, lastNotificationPopup.height), Qt.AlignCenter)
+//         var finalPos
+//
+//         //custom
+//         if ((pos.x >= 0 || pos.y >= 0) &&
+//             (Math.abs(popupPos.x - pos.x) > 40 ||
+//             Math.abs(popupPos.y - pos.y) > 40)) {
+//             finalPos = pos
+//             if (writeConfig) {
+//                 notificationsApplet.Plasmoid.configuration.CustomPosition = pos
+//                 lastNotificationPopup.savedPos = pos
+//                 lastNotificationPopup.customPosition = true
+//             }
+//         } else {
+//             finalPos = popupPos
+//             if (writeConfig) {
+//                 notificationsApplet.Plasmoid.configuration.CustomPosition = QPoint(-1,-1)
+//                 lastNotificationPopup.savedPos = QPoint(-1,-1)
+//                 lastNotificationPopup.customPosition = false
+//             }
+//         }
+        lastNotificationPopup.x = 0 //finalPos.x
+        lastNotificationPopup.y = 0 //finalPos.y
     }
 
     location: customPosition ? Floating : plasmoid.location
     flags: Qt.WindowStaysOnTopHint
     Component.onCompleted: {
-        setAttribute(Qt.WA_X11NetWmWindowTypeDock, true)
+        lastNotificationPopup.type = PlasmaCore.Dialog.Dock
 
-        lastNotificationPopup.savedPos = notificationsApplet.Plasmoid.configuration.CustomPosition
-        setCustomPosition(lastNotificationPopup.savedPos, true)
-        plasmoid.popupEvent.connect(lastNotificationPopup.popupEvent)
+//         lastNotificationPopup.savedPos = notificationsApplet.Plasmoid.configuration.CustomPosition
+//         setCustomPosition(lastNotificationPopup.savedPos, true)
+//         Plasmoid.popupEvent.connect(lastNotificationPopup.popupEvent)
     }
 
     function popupEvent(popupShowing)
@@ -157,7 +157,7 @@ PlasmaCore.Dialog {
 
         Timer {
             id: lastNotificationTimer
-            interval: 4000
+            interval: 400000
             repeat: false
             running: false
             onTriggered: lastNotificationPopup.visible = false
@@ -212,7 +212,7 @@ PlasmaCore.Dialog {
                 QImageItem {
                     id: imageItem
                     anchors.fill: appIconItem
-                    image: model.image
+//                     image: model.image
                     smooth: true
                     visible: nativeWidth > 0
                 }
