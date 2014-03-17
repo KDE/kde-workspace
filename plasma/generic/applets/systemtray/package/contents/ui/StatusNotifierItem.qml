@@ -136,7 +136,7 @@ Item {
 
                 anchors.fill: parent
 
-                //property QtObject action: __has_task ? plasmoid.createShortcutAction(objectName + "-" + plasmoid.id) : null // FIXME
+                property QtObject action: null; //FIXME: __has_task ? plasmoid.createShortcutAction(objectName + "-" + plasmoid.id) : null
 
                 visible: false
                 active: mouse_area.containsMouse
@@ -158,8 +158,10 @@ Item {
 
                 Component.onDestruction: {
                     var act = icon_widget.action
-                    icon_widget.action = null
-                    plasmoid.destroyShortcutAction(act)
+                    if (act != null) {
+                        icon_widget.action = null
+                        plasmoid.destroyShortcutAction(act)
+                    }
                 }
             }
 
