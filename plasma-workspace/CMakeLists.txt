@@ -9,6 +9,7 @@ add_subdirectory(klipper)
 add_subdirectory(ksmserver)
 add_subdirectory(ksplash)
 add_subdirectory(statusnotifierwatcher)
+add_subdirectory(startkde)
 
 add_subdirectory(containmentactions)
 add_subdirectory(runners)

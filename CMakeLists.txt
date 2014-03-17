@@ -213,15 +213,8 @@ set_package_properties(USB PROPERTIES DESCRIPTION "User level access to USB devi
 
 
 include(ConfigureChecks.cmake)
-if(NOT WIN32)
-  configure_file(config-unix.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/config-unix.h )
-  configure_file(config-X11.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/config-X11.h )
-  if(NOT CMAKE_INSTALL_PREFIX STREQUAL "/usr")
-    set(EXPORT_XCURSOR_PATH "XCURSOR_PATH=${CMAKE_INSTALL_PREFIX}/share/icons:$XCURSOR_PATH\":~/.icons:/usr/share/icons:/usr/share/pixmaps:/usr/X11R6/lib/X11/icons\"; export XCURSOR_PATH")
-  endif()
-  configure_file(startkde.cmake ${CMAKE_CURRENT_BINARY_DIR}/startkde  @ONLY)
-endif()
-configure_file(config-workspace.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/config-workspace.h )
+configure_file(config-unix.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/config-unix.h )
+configure_file(config-X11.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/config-X11.h )
 
 add_definitions(${QT_DEFINITIONS} ${KDE4_DEFINITIONS} -DHAVE_CONFIG_H=1)
 add_definitions(-DQT_USE_FAST_CONCATENATION -DQT_USE_FAST_OPERATOR_PLUS)
@@ -261,7 +254,6 @@ ecm_optional_add_subdirectory(kcontrol)
 ecm_optional_add_subdirectory(kmenuedit)
 #    macro_optional_add_subdirectory(krunner)
 #    macro_optional_add_subdirectory(solid)
-ecm_optional_add_subdirectory(kstartupconfig)
 
 #
 # data
@@ -272,7 +264,6 @@ if (NOT WIN32)
 endif ()
 
 if(NOT WIN32)
-   ecm_optional_add_subdirectory(kcminit)
    ecm_optional_add_subdirectory(khotkeys)
    ecm_optional_add_subdirectory(kwrited)
 endif()
