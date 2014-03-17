@@ -282,7 +282,6 @@ if(NOT WIN32)
     ecm_optional_add_subdirectory(cursors)
 endif()
 #
-ecm_optional_add_subdirectory(plasma)
 ecm_optional_add_subdirectory(kstyles)
 #
 # ########### install files ###############
