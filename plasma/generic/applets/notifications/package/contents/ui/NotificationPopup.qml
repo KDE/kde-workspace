@@ -114,8 +114,9 @@ PlasmaCore.Dialog {
             anchors {
                 left: appIconItem.right
                 right: closeButton.left
-                rightMargin: units.smallSpacing //settingsButton.visible ? settingsButton.width + closeButton.width : closeButton.width
                 top: parent.top
+                rightMargin: units.smallSpacing //settingsButton.visible ? settingsButton.width + closeButton.width : closeButton.width
+                leftMargin: units.largeSpacing
                 topMargin: units.smallSpacing
             }
             onLinkActivated: Qt.openUrlExternally(link)
@@ -155,6 +156,7 @@ PlasmaCore.Dialog {
                     right: actionsColumn.left
                     top: titleLabel.bottom
                     bottom: parent.bottom
+                    leftMargin: units.largeSpacing
                 }
             }
 //         }
@@ -170,9 +172,9 @@ PlasmaCore.Dialog {
                     top: parent.top
                 }
                 onClicked: {
-                    notificationPopup.visible = false
+                    closeNotification(notificationProperties.source)
+                    notificationPopup.close()//.visible = false
                     //FIXME
-//                     closeNotification(notificationsModel.get((notificationsView.count-1)-notificationsView.currentIndex).source)
                 }
             }
 
@@ -212,7 +214,8 @@ PlasmaCore.Dialog {
             repeat: false
             running: false
             onTriggered: {
-                notificationPopup.visible = false
+                closeNotification(notificationProperties.source)
+                notificationPopup.close()
             }
         }
 

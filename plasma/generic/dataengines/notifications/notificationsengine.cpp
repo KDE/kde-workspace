@@ -143,9 +143,49 @@ uint NotificationsEngine::Notify(const QString &app_name, uint replaces_id,
                                  const QString &app_icon, const QString &summary, const QString &body,
                                  const QStringList &actions, const QVariantMap &hints, int timeout)
 {
-    qDebug() << " New Notification: " << summary << body;
+    uint partOf = 0;
+
+    if (m_activeNotifications.values().contains(app_name + summary)) {
+        // cut off the "notification " from the source name
+        partOf = m_activeNotifications.key(app_name + summary).mid(13).toUInt();
+
+    }
+
+    qDebug() << "Currrent active notifications:" << m_activeNotifications;
+    qDebug() << "Guessing partOf as:" << partOf;
+    qDebug() << " New Notification: " << summary << body << timeout << "& Part of:" << partOf;
+    QString _body;
+
+    if (partOf > 0) {
+        const QString source = QString("notification %1").arg(partOf);
+        Plasma::DataContainer *container = containerForSource(source);
+        if (container) {
+            // remove the timers for the first notification
+            // they need to be restarted with the second notification
+            // being appended
+            int timerId = m_sourceTimers.value(source);
+            killTimer(timerId);
+            m_sourceTimers.remove(source);
+            m_timeouts.remove(timerId);
+
+            // append the body text
+            _body = container->data()["body"].toString();
+            _body.append("\n").append(body);
+
+            // remove the old notification and replace it with the new one
+            // TODO: maybe just update the current notification?
+            removeSource(source);
+            m_activeNotifications.remove(source);
+        }
+    }
+
     uint id = 0;
-    id = replaces_id ? replaces_id : m_nextId++;
+    if (replaces_id > 0) {
+        id = replaces_id;
+    } else {
+        id = m_nextId++;
+    }
+//     id = replaces_id ? replaces_id : m_nextId++;
 
     QString appname_str = app_name;
     if (appname_str.isEmpty()) {
@@ -180,7 +220,7 @@ uint NotificationsEngine::Notify(const QString &app_name, uint replaces_id,
     notificationData.insert("appName", appname_str);
     notificationData.insert("appIcon", app_icon);
     notificationData.insert("summary", summary);
-    notificationData.insert("body", body);
+    notificationData.insert("body", partOf == 0 ? body : _body);
     notificationData.insert("actions", actions);
     notificationData.insert("isPersistent", isPersistent);
     notificationData.insert("expireTimeout", timeout);
@@ -218,6 +258,8 @@ uint NotificationsEngine::Notify(const QString &app_name, uint replaces_id,
 
     setData(source, notificationData);
 
+    m_activeNotifications.insert(source, app_name + summary);
+
     if (!isPersistent) {
         int timerId = startTimer(timeout);
         m_sourceTimers.insert(source, timerId);
@@ -235,6 +277,7 @@ void NotificationsEngine::timerEvent(QTimerEvent *event)
         m_sourceTimers.remove(source);
         m_timeouts.remove(event->timerId());
         removeSource(source);
+        m_activeNotifications.remove(source);
         emit NotificationClosed(source.split(" ").last().toInt(), 1);
         return;
     }
@@ -250,7 +293,9 @@ void NotificationsEngine::CloseNotification(uint id)
 
 void NotificationsEngine::userClosedNotification(uint id)
 {
-    removeSource(QString("notification %1").arg(id));
+    const QString source = QString("notification %1").arg(id);
+    m_activeNotifications.remove(source);
+    removeSource(source);
     emit NotificationClosed(id, 2);
 }
 

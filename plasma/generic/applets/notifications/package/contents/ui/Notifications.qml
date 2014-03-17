@@ -109,6 +109,7 @@ Column {
     }
 
     function closeNotification(source) {
+        print("--------------------------------------closing");
         var service = notificationsSource.serviceForSource(source)
         var op = service.operationDescription("userClosed")
         service.startOperationCall(op)
