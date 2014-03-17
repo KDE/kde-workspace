@@ -28,11 +28,11 @@ set(libkickoff_SRCS
 qt5_add_dbus_adaptor(libkickoff_SRCS core/org.kde.kickoff.xml core/applicationmodel.h Kickoff::ApplicationModel)
 qt5_add_dbus_adaptor(libkickoff_SRCS core/org.kde.kickoff.recent.xml core/recentlyusedmodel.h Kickoff::RecentlyUsedModel)
 
-set(screensaver_xml ${KDEBASE_WORKSPACE_SOURCE_DIR}/ksmserver/screenlocker/dbus/org.freedesktop.ScreenSaver.xml)
+set(screensaver_xml ${KDEBASE_WORKSPACE_SOURCE_DIR}/plasma-workspace/ksmserver/screenlocker/dbus/org.freedesktop.ScreenSaver.xml)
 qt5_add_dbus_interface(libkickoff_SRCS ${screensaver_xml} screensaver_interface)
 set(krunner_xml ${KDEBASE_WORKSPACE_SOURCE_DIR}/krunner/dbus/org.kde.krunner.App.xml)
 qt5_add_dbus_interface(libkickoff_SRCS ${krunner_xml} krunner_interface)
-set(ksmserver_xml ${KDEBASE_WORKSPACE_SOURCE_DIR}/ksmserver/org.kde.KSMServerInterface.xml)
+set(ksmserver_xml ${KDEBASE_WORKSPACE_SOURCE_DIR}/plasma-workspace/ksmserver/org.kde.KSMServerInterface.xml)
 qt5_add_dbus_interface(libkickoff_SRCS ${ksmserver_xml} ksmserver_interface)
 
 install(FILES core/qmldir DESTINATION ${QML_INSTALL_DIR}/org/kde/plasma/private/kickoff)

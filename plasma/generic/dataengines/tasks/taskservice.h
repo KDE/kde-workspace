@@ -23,8 +23,8 @@
 #include <Plasma/Service>
 #include <Plasma/ServiceJob>
 
-#include <taskmanager/tasksmodel.h>
-#include <taskmanager/groupmanager.h>
+#include <tasksmodel.h>
+#include <groupmanager.h>
 /**
  * Task Service
  */

@@ -18,9 +18,9 @@
  ***************************************************************************/
 
 
-#include <taskmanager/strategies/activitysortingstrategy.h>
-#include <taskmanager/taskitem.h>
-#include <taskmanager/taskgroup.h>
+#include <strategies/activitysortingstrategy.h>
+#include <taskitem.h>
+#include <taskgroup.h>
 
 namespace TaskManager
 {

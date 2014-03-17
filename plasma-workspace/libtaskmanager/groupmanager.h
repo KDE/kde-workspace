@@ -28,10 +28,10 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include <KConfigGroup>
 
-#include <taskmanager/abstractgroupableitem.h>
-#include <taskmanager/task.h>
-#include <taskmanager/taskitem.h>
-#include <taskmanager/taskmanager_export.h>
+#include <abstractgroupableitem.h>
+#include <task.h>
+#include <taskitem.h>
+#include <taskmanager_export.h>
 #include "launcheritem.h"
 
 class KConfigDialog;

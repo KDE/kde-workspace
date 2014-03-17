@@ -24,10 +24,10 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #ifndef TASKITEM_H
 #define TASKITEM_H
 
-#include <taskmanager/abstractgroupableitem.h>
-#include <taskmanager/startup.h>
-#include <taskmanager/task.h>
-#include <taskmanager/taskmanager_export.h>
+#include <abstractgroupableitem.h>
+#include <startup.h>
+#include <task.h>
+#include <taskmanager_export.h>
 
 #include <QtGui/QIcon>
 

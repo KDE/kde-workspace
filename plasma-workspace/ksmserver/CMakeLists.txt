@@ -40,7 +40,7 @@ if (HAVE_MMMX)
    SET_SOURCE_FILES_PROPERTIES(fadeeffect.cpp PROPERTIES COMPILE_FLAGS -mmmx)
 endif (HAVE_MMMX)
 
-set(kcminit_adaptor ${CMAKE_CURRENT_SOURCE_DIR}/../kcminit/main.h)
+set(kcminit_adaptor ${CMAKE_SOURCE_DIR}/kcminit/main.h)
 set(kcminit_xml ${CMAKE_CURRENT_BINARY_DIR}/org.kde.KCMinit.xml)
 
 qt5_generate_dbus_interface( ${kcminit_adaptor} ${kcminit_xml} )

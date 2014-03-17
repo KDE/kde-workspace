@@ -35,8 +35,8 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <KSharedPtr>
 #include <KWindowSystem>
 
-#include <taskmanager/taskmanager.h>
-#include <taskmanager/taskmanager_export.h>
+#include <taskmanager.h>
+#include <taskmanager_export.h>
 #include <config-workspace.h>
 
 class NETWinInfo;

@@ -16,8 +16,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-#include <taskmanager/tasksmodel.h>
-#include <taskmanager/groupmanager.h>
+#include <tasksmodel.h>
+#include <groupmanager.h>
 
 #include "taskservice.h"
 

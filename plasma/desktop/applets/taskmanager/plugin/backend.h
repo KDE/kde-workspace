@@ -22,8 +22,8 @@
 
 #include <QObject>
 
-#include <taskmanager/groupmanager.h>
-#include <taskmanager/tasksmodel.h>
+#include <groupmanager.h>
+#include <tasksmodel.h>
 
 class QQuickItem;
 

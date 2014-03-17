@@ -5,8 +5,7 @@ add_definitions(-DKDE_DEFAULT_DEBUG_AREA=1207)
 include(PkgConfigGetVar)
 
 include_directories(${KDEBASE_WORKSPACE_SOURCE_DIR}/libs/ksysguard
-                    ${KDEBASE_WORKSPACE_SOURCE_DIR}/libs/ksysguard/processcore
-                    ${KDEBASE_WORKSPACE_SOURCE_DIR}/libs/plasmagenericshell)
+                    ${KDEBASE_WORKSPACE_SOURCE_DIR}/libs/ksysguard/processcore)
 
 set(krunner_KCFG_SRCS kcfg/krunnersettings.kcfgc kcfg/klaunchsettings.kcfgc)
 set(krunner_dbusAppXML dbus/org.kde.krunner.App.xml)

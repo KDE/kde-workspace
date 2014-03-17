@@ -24,9 +24,9 @@
 #include <Plasma/Service>
 
 // libtaskmanager
-#include <taskmanager/taskmanager.h>
-#include <taskmanager/tasksmodel.h>
-#include <taskmanager/groupmanager.h>
+#include <taskmanager.h>
+#include <tasksmodel.h>
+#include <groupmanager.h>
 
 namespace TaskManager
 {

@@ -8,7 +8,7 @@ remove_definitions(-DQT_NO_CAST_FROM_BYTEARRAY)
 remove_definitions(-DQT_NO_CAST_TO_ASCII)
 
 
-set(ksmserver_xml  ${KDEBASE_WORKSPACE_SOURCE_DIR}/ksmserver/org.kde.KSMServerInterface.xml)
+set(ksmserver_xml  ${KDEBASE_WORKSPACE_SOURCE_DIR}/plasma-workspace/ksmserver/org.kde.KSMServerInterface.xml)
 qt5_add_dbus_interface( kworkspace_LIB_SRCS ${ksmserver_xml} ksmserver_interface )
 
 set(kwin_xml  ${KDEBASE_WORKSPACE_SOURCE_DIR}/kwin/org.kde.KWin.xml)

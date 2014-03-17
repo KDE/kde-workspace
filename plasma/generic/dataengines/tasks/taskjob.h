@@ -23,10 +23,10 @@
 #include <Plasma/ServiceJob>
 
 //taskmanger
-#include <taskmanager/groupmanager.h>
-#include <taskmanager/taskactions.h>
-#include <taskmanager/taskgroup.h>
-#include <taskmanager/tasksmodel.h>
+#include <groupmanager.h>
+#include <taskactions.h>
+#include <taskgroup.h>
+#include <tasksmodel.h>
 
 /**
  * Task Job

@@ -35,7 +35,7 @@ else()
 endif()
 
 add_library(taskmanager SHARED ${taskmanager_LIB_SRCS})
-
+target_include_directories(taskmanager PRIVATE "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>")
 target_link_libraries(taskmanager
     processcore
     KF5::ConfigCore

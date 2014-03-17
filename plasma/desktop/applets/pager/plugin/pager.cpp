@@ -47,7 +47,7 @@
 
 #include <kactivities/consumer.h>
 
-#include <taskmanager/task.h>
+#include <task.h>
 
 const int FAST_UPDATE_DELAY = 100;
 const int UPDATE_DELAY = 500;

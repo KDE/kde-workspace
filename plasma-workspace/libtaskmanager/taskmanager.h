@@ -60,9 +60,9 @@ Q_DECLARE_FLAGS(TaskChanges, TaskChange)
 } // namespace TaskManager
 
 // Own
-#include <taskmanager/startup.h>
-#include <taskmanager/task.h>
-#include <taskmanager/taskmanager_export.h>
+#include <startup.h>
+#include <task.h>
+#include <taskmanager_export.h>
 
 namespace TaskManager
 {

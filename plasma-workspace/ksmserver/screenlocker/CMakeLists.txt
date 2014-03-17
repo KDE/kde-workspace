@@ -10,7 +10,7 @@ include(PkgConfigGetVar)
 
 set(screensaver_dbusXML dbus/org.freedesktop.ScreenSaver.xml)
 set(kscreensaver_dbusXML dbus/org.kde.screensaver.xml)
-set(ksmserver_xml  ${KDEBASE_WORKSPACE_SOURCE_DIR}/ksmserver/org.kde.KSMServerInterface.xml)
+set(ksmserver_xml  ${KDEBASE_WORKSPACE_SOURCE_DIR}/plasma-workspace/ksmserver/org.kde.KSMServerInterface.xml)
 set(powerdevilpolicyagent_xml ${SOLID_DBUS_INTERFACES_DIR}/kf5_org.kde.Solid.PowerManagement.PolicyAgent.xml)
 
 set(ksld_SRCS

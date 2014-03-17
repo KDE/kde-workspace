@@ -21,32 +21,27 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 ******************************************************************/
 
-#ifndef DESKTOPSORTINGSTRATEGY_H
-#define DESKTOPSORTINGSTRATEGY_H
+#ifndef ALPHASORTINGSTRATEGY_H
+#define ALPHASORTINGSTRATEGY_H
 
 #include <QtCore/QObject>
 
-#include <taskmanager/abstractsortingstrategy.h>
+#include <abstractsortingstrategy.h>
 
 namespace TaskManager
 {
 
-/** Sorts the tasks by desktop*/
-class DesktopSortingStrategy : public AbstractSortingStrategy
+/** Sorts the tasks alphabetically by programname found in Task::classClass()*/
+class AlphaSortingStrategy : public AbstractSortingStrategy
 {
     Q_OBJECT
 public:
-    DesktopSortingStrategy(QObject *parent);
-protected Q_SLOTS:
-    /** Handles a new item*/
-    virtual void handleItem(AbstractGroupableItem *);
+    AlphaSortingStrategy(QObject *parent);
+
 private:
     /** Sorts list of items according to strategy*/
     void sortItems(ItemList&);
-    static bool lessThan(const AbstractGroupableItem *left, const AbstractGroupableItem *right);
-    static bool lessThanSeperateLaunchers(const AbstractGroupableItem *left, const AbstractGroupableItem *right);
 };
-
 
 } // TaskManager namespace
 #endif

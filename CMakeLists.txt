@@ -240,14 +240,15 @@ add_subdirectory(libs)
 #
 # system settings (kcontrol replacement)
 ecm_optional_add_subdirectory( systemsettings )
+
+add_subdirectory(plasma-workspace)
+add_subdirectory(plasma-desktop)
+
 #
 # # core apps
 if(NOT WIN32)
    ecm_optional_add_subdirectory( kcheckpass )
    ecm_optional_add_subdirectory( kwin )
-   ecm_optional_add_subdirectory( ksmserver )
-
-   ecm_optional_add_subdirectory( ksplash )
    ecm_optional_add_subdirectory( powerdevil )
    if(Qt5WebKitWidgets_FOUND)
         if (NOT CMAKE_SYSTEM_NAME MATCHES Darwin)
@@ -257,28 +258,23 @@ if(NOT WIN32)
 endif()
 #
 ecm_optional_add_subdirectory(kcontrol)
-ecm_optional_add_subdirectory(klipper)
 ecm_optional_add_subdirectory(kmenuedit)
 #    macro_optional_add_subdirectory(krunner)
 #    macro_optional_add_subdirectory(solid)
 ecm_optional_add_subdirectory(kstartupconfig)
-ecm_optional_add_subdirectory(freespacenotifier)
+
 #
 # data
 ecm_optional_add_subdirectory(doc)
 
 if (NOT WIN32)
    ecm_optional_add_subdirectory(kinfocenter)
-#       macro_optional_add_subdirectory(ktouchpadenabler)
 endif ()
 
 if(NOT WIN32)
    ecm_optional_add_subdirectory(kcminit)
    ecm_optional_add_subdirectory(khotkeys)
    ecm_optional_add_subdirectory(kwrited)
-   if(dbusmenu-qt5_FOUND)
-       ecm_optional_add_subdirectory(appmenu)
-   endif()
 endif()
 
 if(NOT WIN32)
@@ -287,7 +283,6 @@ if(NOT WIN32)
 endif()
 #
 ecm_optional_add_subdirectory(plasma)
-ecm_optional_add_subdirectory(statusnotifierwatcher)
 ecm_optional_add_subdirectory(kstyles)
 #
 # ########### install files ###############

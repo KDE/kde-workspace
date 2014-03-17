@@ -20,7 +20,7 @@
 #ifndef ACTIVITYSORTINGSTRATEGY_H
 #define ACTIVITYSORTINGSTRATEGY_H
 
-#include <taskmanager/abstractsortingstrategy.h>
+#include <abstractsortingstrategy.h>
 
 #include <QtCore/QHash>
 
