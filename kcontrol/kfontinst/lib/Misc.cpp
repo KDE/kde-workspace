@@ -32,7 +32,7 @@
 #include <QtCore/QTextStream>
 #include <QtCore/QProcess>
 #include <QtCore/QTemporaryFile>
-#include <KDE/KStandardDirs>
+#include <KStandardDirs>
 #include <kde_file.h>
 #include <unistd.h>
 #include <ctype.h>

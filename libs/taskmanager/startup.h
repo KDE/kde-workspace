@@ -30,8 +30,8 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <QtGui/QIcon>
 
 // KDE
-#include <KDE/KSharedPtr>
-#include <KDE/KStartupInfo>
+#include <KSharedPtr>
+#include <KStartupInfo>
 
 #include <taskmanager/taskmanager.h>
 #include <taskmanager/taskmanager_export.h>

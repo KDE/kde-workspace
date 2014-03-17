@@ -18,7 +18,7 @@
 
 #include "command_url_action_widget.h"
 
-#include <KDE/KLineEdit>
+#include <KLineEdit>
 
 
 CommandUrlActionWidget::CommandUrlActionWidget(

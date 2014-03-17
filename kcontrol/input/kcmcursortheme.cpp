@@ -18,9 +18,9 @@
 
 #include "kcmcursortheme.h"
 
-#include <KDE/KAboutData>
-#include <KDE/KPluginFactory>
-#include <KDE/KLocalizedString>
+#include <KAboutData>
+#include <KPluginFactory>
+#include <KLocalizedString>
 
 K_PLUGIN_FACTORY(CursorThemeConfigFactory,
     registerPlugin<CursorThemeConfig>();

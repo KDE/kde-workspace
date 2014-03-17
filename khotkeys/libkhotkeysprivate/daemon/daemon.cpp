@@ -24,8 +24,8 @@
 
 #include <QtDBus/QtDBus>
 
-#include <KDE/KConfigGroup>
-#include <KDE/KConfig>
+#include <KConfigGroup>
+#include <KConfig>
 #include "KDE/KDebug"
 #include "KDE/KLocale"
 

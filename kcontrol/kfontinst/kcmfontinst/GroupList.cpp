@@ -23,14 +23,14 @@
 
 #include "GroupList.h"
 #include "FontList.h"
-#include <KDE/KGlobal>
-#include <KDE/KStandardDirs>
-#include <KDE/KLocale>
-#include <KDE/KMimeType>
-#include <KDE/KIconLoader>
+#include <KGlobal>
+#include <KStandardDirs>
+#include <KLocale>
+#include <KMimeType>
+#include <KIconLoader>
 #include <kde_file.h>
-#include <KDE/KMessageBox>
-#include <KDE/KSaveFile>
+#include <KMessageBox>
+#include <KSaveFile>
 #include <QFont>
 #include <QFontDatabase>
 #include <QDropEvent>

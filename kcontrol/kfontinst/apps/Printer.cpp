@@ -39,9 +39,9 @@
 #include <QGridLayout>
 #include <QProgressBar>
 #include <QCloseEvent>
-#include <KDE/KCmdLineArgs>
+#include <KCmdLineArgs>
 #include <k4aboutdata.h>
-#include <KDE/KApplication>
+#include <KApplication>
 
 #if defined(Q_WS_X11) || defined(Q_WS_QWS)
 #include <fontconfig/fontconfig.h>

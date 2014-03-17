@@ -32,9 +32,9 @@
 #include "CharTip.h"
 #include "FontPreview.h"
 #include "UnicodeCategories.h"
-#include <KDE/KLocale>
-#include <KDE/KApplication>
-#include <KDE/KGlobalSettings>
+#include <KLocale>
+#include <KApplication>
+#include <KGlobalSettings>
 #include <QLabel>
 #include <QToolTip>
 #include <QPainter>

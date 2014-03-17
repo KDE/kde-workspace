@@ -20,11 +20,11 @@
 #include "actions.h"
 #include "action_data/action_data.h"
 
-#include <KDE/KConfigGroup>
-#include <KDE/KDebug>
-#include <KDE/KMessageBox>
-#include <KDE/KUrl>
-#include <KDE/KRun>
+#include <KConfigGroup>
+#include <KDebug>
+#include <KMessageBox>
+#include <KUrl>
+#include <KRun>
 
 namespace KHotKeys {
 

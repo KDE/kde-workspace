@@ -19,9 +19,9 @@
 
 #include "actions.h"
 
-#include <KDE/KConfigGroup>
-#include <KDE/KDebug>
-#include <KDE/KProcess>
+#include <KConfigGroup>
+#include <KDebug>
+#include <KProcess>
 
 namespace KHotKeys {
 

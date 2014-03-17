@@ -23,7 +23,7 @@
 #include "conditions/conditions.h"
 #include "conditions/conditions_list.h"
 
-#include <KDE/KConfigGroup>
+#include <KConfigGroup>
 
 
 namespace KHotKeys {

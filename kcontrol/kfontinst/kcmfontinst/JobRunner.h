@@ -24,8 +24,8 @@
 #ifndef __JOB_RUNNER_H__
 #define __JOB_RUNNER_H__
 
-#include <KDE/KUrl>
-#include <KDE/KDialog>
+#include <KUrl>
+#include <KDialog>
 #include "FontInstInterface.h"
 
 class QLabel;

@@ -22,7 +22,7 @@
 #include <QtCore/QObject>
 #include <QtCore/QTimer>
 
-#include <KDE/Plasma/DataEngine>
+#include <Plasma/DataEngine>
 
 #include "geolocation_export.h"
 

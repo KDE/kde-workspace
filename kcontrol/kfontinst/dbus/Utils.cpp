@@ -24,7 +24,7 @@
 #include <QtCore/QFile>
 #include <QtCore/QByteArray>
 #include <QtCore/QTextStream>
-#include <KDE/KShell>
+#include <KShell>
 #include <fontconfig/fontconfig.h>
 #include "Utils.h"
 #include "FontInst.h"

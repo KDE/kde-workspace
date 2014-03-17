@@ -24,7 +24,7 @@
  * Boston, MA 02110-1301, USA.
  */
 
-#include <KDE/ThumbCreator>
+#include <ThumbCreator>
 
 #include "FcEngine.h"
 

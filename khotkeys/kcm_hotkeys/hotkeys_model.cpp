@@ -27,9 +27,9 @@
 
 #include <QMimeData>
 
-#include <KDE/KDebug>
-#include <KDE/KLocale>
-#include <KDE/KIcon>
+#include <KDebug>
+#include <KLocale>
+#include <KIcon>
 
 
 static KHotKeys::ActionDataBase *findElement(

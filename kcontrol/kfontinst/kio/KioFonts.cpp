@@ -23,13 +23,13 @@
 
 #include <QFile>
 #include <QCoreApplication>
-#include <KDE/KComponentData>
-#include <KDE/KDebug>
-#include <KDE/KMimeType>
-#include <KDE/KStandardDirs>
-#include <KDE/KTemporaryFile>
-#include <KDE/KTempDir>
-#include <KDE/KZip>
+#include <KComponentData>
+#include <KDebug>
+#include <KMimeType>
+#include <KStandardDirs>
+#include <KTemporaryFile>
+#include <KTempDir>
+#include <KZip>
 #include <kde_file.h>
 #include <unistd.h>
 #include <pwd.h>

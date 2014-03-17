@@ -14,7 +14,7 @@
 #define KHOTKEYS_VERSION "2.1"
 #define KHOTKEYS_CONFIG_FILE "khotkeysrc"
 
-#include <KDE/KLocalizedString>
+#include <KLocalizedString>
 #include <kdemacros.h>
 
 #include <QtCore/QPointer>

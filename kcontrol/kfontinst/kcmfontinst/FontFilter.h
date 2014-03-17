@@ -24,7 +24,7 @@
  * Boston, MA 02110-1301, USA.
  */
 
-#include <KDE/KLineEdit>
+#include <KLineEdit>
 #include <QPixmap>
 #include <QFontDatabase>
 

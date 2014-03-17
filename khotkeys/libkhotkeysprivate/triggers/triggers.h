@@ -24,7 +24,7 @@
 #include <QtCore/QMap>
 #include <QtCore/QUuid>
 
-#include <KDE/KShortcut>
+#include <KShortcut>
 
 #include <kdemacros.h>
 #include "khotkeysglobal.h"

@@ -27,10 +27,10 @@
 #include "GroupList.h"
 #include "JobRunner.h"
 #include <QtCore/QSet>
-#include <KDE/KCModule>
-#include <KDE/KUrl>
-#include <KDE/KConfig>
-#include <KDE/KIO/Job>
+#include <KCModule>
+#include <KUrl>
+#include <KConfig>
+#include <KIO/Job>
 
 class KPushButton;
 class KProgressDialog;

@@ -27,7 +27,7 @@
 #include "triggers/window_trigger_widget.h"
 #include "triggers/gesture_trigger_widget.h"
 
-#include <KDE/KDebug>
+#include <KDebug>
 
 
 SimpleActionDataWidget::SimpleActionDataWidget( QWidget *parent )

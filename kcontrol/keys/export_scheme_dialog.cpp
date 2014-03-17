@@ -19,7 +19,7 @@
 
 #include "export_scheme_dialog.h"
 
-#include <KDE/KDebug>
+#include <KDebug>
 
 #include <QCheckBox>
 

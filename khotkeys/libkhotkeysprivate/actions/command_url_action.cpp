@@ -20,13 +20,13 @@
 #include "actions/actions.h"
 #include "action_data/action_data.h"
 
-#include <KDE/KAuthorized>
-#include <KDE/KConfigGroup>
-#include <KDE/KDebug>
-#include <KDE/KRun>
-#include <KDE/KService>
-#include <KDE/KUriFilter>
-#include <KDE/KUrl>
+#include <KAuthorized>
+#include <KConfigGroup>
+#include <KDebug>
+#include <KRun>
+#include <KService>
+#include <KUriFilter>
+#include <KUrl>
 #include <kworkspace/kworkspace.h>
 
 

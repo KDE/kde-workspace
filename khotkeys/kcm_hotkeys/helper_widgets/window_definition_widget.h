@@ -22,7 +22,7 @@
 
 #include "qwindowdefs.h"
 #include <QWidget>
-#include <KDE/KDialog>
+#include <KDialog>
 
 
 namespace Ui {

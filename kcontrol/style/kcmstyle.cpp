@@ -63,8 +63,8 @@
 #include <QStyle>
 #include <QtDBus/QtDBus>
 
-#include <KDE/KGlobal>
-#include <KDE/KGlobalSettings>
+#include <KGlobal>
+#include <KGlobalSettings>
 
 #if defined(Q_OS_UNIX) && !defined(Q_OS_MAC)
 #include <QX11Info>

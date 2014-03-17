@@ -24,10 +24,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "kscreensaveradaptor.h"
 #include "powerdevilpolicyagent.h"
 // KDE
-#include <KDE/KDebug>
-#include <KDE/KIdleTime>
-#include <KDE/KProcess>
-#include <KDE/KRandom>
+#include <KDebug>
+#include <KIdleTime>
+#include <KProcess>
+#include <KRandom>
 // Qt
 #include <QtDBus/QDBusConnection>
 #include <QtDBus/QDBusInterface>

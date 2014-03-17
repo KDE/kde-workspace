@@ -25,7 +25,7 @@
 #include <QFrame>
 #include <QLabel>
 #include <QGridLayout>
-#include <KDE/KLocalizedString>
+#include <KLocalizedString>
 
 namespace KFI
 {

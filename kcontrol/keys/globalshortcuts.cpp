@@ -21,9 +21,9 @@
 
 #include "kglobalshortcutseditor.h"
 
-#include <KDE/KLocalizedString>
-#include <KDE/KMessageBox>
-#include <KDE/KPluginFactory>
+#include <KLocalizedString>
+#include <KMessageBox>
+#include <KPluginFactory>
 
 
 #include <QLayout>

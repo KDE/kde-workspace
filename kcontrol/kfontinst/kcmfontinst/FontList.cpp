@@ -22,16 +22,16 @@
  */
 
 #include "FontList.h"
-#include <KDE/KGlobal>
-#include <KDE/KStandardDirs>
-#include <KDE/KLocale>
-#include <KDE/KMimeType>
-#include <KDE/KMenu>
-#include <KDE/KIcon>
-#include <KDE/KIconLoader>
+#include <KGlobal>
+#include <KStandardDirs>
+#include <KLocale>
+#include <KMimeType>
+#include <KMenu>
+#include <KIcon>
+#include <KIconLoader>
 #include <kde_file.h>
-#include <KDE/KMessageBox>
-#include <KDE/KColorScheme>
+#include <KMessageBox>
+#include <KColorScheme>
 #include <QProcess>
 #include <QFont>
 #include <QMap>

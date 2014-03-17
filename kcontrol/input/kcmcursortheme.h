@@ -19,7 +19,7 @@
 #ifndef KCMCURSORTHEME_H
 #define KCMCURSORTHEME_H
 
-#include <KDE/KCModule>
+#include <KCModule>
 #include "themepage.h"
 
 class CursorThemeConfig : public KCModule

@@ -26,12 +26,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 // workspace
 #include <kworkspace/kworkspace.h>
 // KDE
-#include <KDE/KAuthorized>
-#include <KDE/KCrash>
-#include <KDE/KDebug>
-#include <KDE/KStandardDirs>
-#include <KDE/KUser>
-#include <KDE/KWindowSystem>
+#include <KAuthorized>
+#include <KCrash>
+#include <KDebug>
+#include <KStandardDirs>
+#include <KUser>
+#include <KWindowSystem>
 #include <Solid/PowerManagement>
 #include <kdeclarative/kdeclarative.h>
 //Plasma

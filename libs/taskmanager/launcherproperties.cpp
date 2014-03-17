@@ -22,11 +22,11 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ******************************************************************/
 
 #include "launcherproperties.h"
-#include <KDE/KOpenWithDialog>
-#include <KDE/KDesktopFile>
-#include <KDE/KLocale>
-#include <KDE/KWindowInfo>
-#include <KDE/KWindowSystem>
+#include <KOpenWithDialog>
+#include <KDesktopFile>
+#include <KLocale>
+#include <KWindowInfo>
+#include <KWindowSystem>
 #include <KLocalizedString>
 
 #include <QtGui/QMouseEvent>

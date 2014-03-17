@@ -14,7 +14,7 @@
 
 #include <kdebug.h>
 #include <kstandarddirs.h>
-#include <KDE/KGlobal>
+#include <KGlobal>
 
 #include "input.h"
 #include "windows_handler.h"

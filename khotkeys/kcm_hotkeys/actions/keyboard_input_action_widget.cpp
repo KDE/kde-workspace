@@ -18,7 +18,7 @@
 
 #include "keyboard_input_action_widget.h"
 
-#include <KDE/KDebug>
+#include <KDebug>
 
 KeyboardInputActionWidget::KeyboardInputActionWidget(
         KHotKeys::KeyboardInputAction *action,

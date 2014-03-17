@@ -27,15 +27,15 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 // workspace
 #include <kdisplaymanager.h>
 // KDE
-#include <KDE/KActionCollection>
-#include <KDE/KAuthorized>
-#include <KDE/KCrash>
-#include <KDE/KDebug>
-#include <KDE/KIdleTime>
-#include <KDE/KLocalizedString>
-// #include <KDE/KNotification>
-#include <KDE/KProcess>
-#include <KDE/KStandardDirs>
+#include <KActionCollection>
+#include <KAuthorized>
+#include <KCrash>
+#include <KDebug>
+#include <KIdleTime>
+#include <KLocalizedString>
+// #include <KNotification>
+#include <KProcess>
+#include <KStandardDirs>
 #include <KGlobalAccel>
 // Qt
 #include <QAction>

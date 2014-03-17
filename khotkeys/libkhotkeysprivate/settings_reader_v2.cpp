@@ -33,10 +33,10 @@
 
 #include "settings.h"
 
-#include <KDE/KConfig>
-#include <KDE/KConfigBase>
-#include <KDE/KConfigGroup>
-#include <KDE/KDebug>
+#include <KConfig>
+#include <KConfigBase>
+#include <KConfigGroup>
+#include <KDebug>
 
 
 SettingsReaderV2::SettingsReaderV2(

@@ -44,8 +44,8 @@
 
 #include <QFile>
 
-#include <KDE/KConfigGroup>
-#include <KDE/KDebug>
+#include <KConfigGroup>
+#include <KDebug>
 #include <kstandarddirs.h>
 
 namespace KHotKeys {

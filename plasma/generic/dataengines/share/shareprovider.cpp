@@ -23,8 +23,8 @@
 #include <krandom.h>
 #include <QDebug>
 #include <QTemporaryFile>
-#include <KDE/KIO/MimetypeJob>
-#include <KDE/KIO/FileJob>
+#include <KIO/MimetypeJob>
+#include <KIO/FileJob>
 #include <kjsembed/kjsembed.h>
 #include <kjsembed/variant_binding.h>
 #include <QImage>

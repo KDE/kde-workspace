@@ -24,8 +24,8 @@
 #include <QtCore/QString>
 #include <QtGui/qwindowdefs.h>
 
-#include <KDE/KConfig>      // Needed because of some Qt Status redefinitions
-#include <KDE/KConfigGroup>      // Needed because of some Qt Status redefinitions
+#include <KConfig>      // Needed because of some Qt Status redefinitions
+#include <KConfigGroup>      // Needed because of some Qt Status redefinitions
 #include <config-kwindowsystem.h> // Needed for HAVE_X11
 #include <config-workspace.h>
 

@@ -23,8 +23,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 // workspace
 #include <kdisplaymanager.h>
 // KDE
-#include <KDE/KAuthorized>
-#include <KDE/KLocalizedString>
+#include <KAuthorized>
+#include <KLocalizedString>
 
 namespace ScreenLocker
 {

@@ -24,7 +24,7 @@
 #include <QtDBus/QDBusConnection>
 #include <QtCore/QTimer>
 #include <kauth.h>
-#include <KDE/KDebug>
+#include <KDebug>
 #include <kio/global.h>
 #include <kde_file.h>
 #include <fontconfig/fontconfig.h>

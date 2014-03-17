@@ -21,7 +21,7 @@
  * Boston, MA 02110-1301, USA.
  */
 
-#include <KDE/KGlobal>
+#include <KGlobal>
 #include <QtGui/QFontDatabase>
 #include <fontconfig/fontconfig.h>
 #include "WritingSystems.h"

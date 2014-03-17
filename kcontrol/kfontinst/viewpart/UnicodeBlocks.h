@@ -7,7 +7,7 @@
 #define __UNICODE_BLOCKS_H__
 
 #include <QtCore/qglobal.h>
-#include <KDE/KLocalizedString>
+#include <KLocalizedString>
 
 struct TUnicodeBlock
 {

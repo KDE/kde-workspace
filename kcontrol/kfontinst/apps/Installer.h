@@ -25,7 +25,7 @@
  */
 
 #include <QtCore/QSet>
-#include <KDE/KUrl>
+#include <KUrl>
 
 class QWidget;
 class KTempDir;

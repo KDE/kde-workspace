@@ -24,8 +24,8 @@
  * Boston, MA 02110-1301, USA.
  */
 
-#include <KDE/KParts/ReadOnlyPart>
-#include <KDE/KParts/MainWindow>
+#include <KParts/ReadOnlyPart>
+#include <KParts/MainWindow>
 
 class QAction;
 class KUrl;

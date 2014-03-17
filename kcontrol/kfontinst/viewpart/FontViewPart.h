@@ -24,10 +24,10 @@
  * Boston, MA 02110-1301, USA.
  */
 
-#include <KDE/KParts/ReadOnlyPart>
-#include <KDE/KParts/BrowserExtension>
-#include <KDE/KSharedConfig>
-#include <KDE/KUrl>
+#include <KParts/ReadOnlyPart>
+#include <KParts/BrowserExtension>
+#include <KSharedConfig>
+#include <KUrl>
 #include <QFrame>
 #include <QMap>
 #include "KfiConstants.h"

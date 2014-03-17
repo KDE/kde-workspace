@@ -21,7 +21,7 @@
 
 #include "action_data/action_data_base.h"
 
-#include <KDE/KDebug>
+#include <KDebug>
 
 namespace KHotKeys {
 

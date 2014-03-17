@@ -20,7 +20,7 @@
 #define SHORTCUTACTIONS_H
 
 
-#include <KDE/KActionCollection>
+#include <KActionCollection>
 
 #include <X11/X.h>
 #include <fixx11h.h>

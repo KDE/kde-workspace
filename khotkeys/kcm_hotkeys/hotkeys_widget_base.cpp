@@ -21,7 +21,7 @@
 
 #include "action_data/action_data_group.h"
 
-#include <KDE/KDebug>
+#include <KDebug>
 
 
 HotkeysWidgetBase::HotkeysWidgetBase( QWidget *parent )

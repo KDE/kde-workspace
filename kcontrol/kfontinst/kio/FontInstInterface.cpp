@@ -24,7 +24,7 @@
 #include "FontInstInterface.h"
 #include "FontinstIface.h"
 #include "FontInst.h"
-#include <KDE/KDebug>
+#include <KDebug>
 #include <kio/global.h>
 #include <QtDBus/QDBusServiceWatcher>
 #include "config-fontinst.h"

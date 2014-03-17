@@ -23,8 +23,8 @@
 #include "action_data/action_data.h"
 #include "khotkeysglobal.h"
 
-#include <KDE/KConfigGroup>
-#include <KDE/KDebug>
+#include <KConfigGroup>
+#include <KDebug>
 
 namespace KHotKeys {
 

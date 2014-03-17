@@ -21,9 +21,9 @@
  * Boston, MA 02110-1301, USA.
  */
 
-#include <KDE/KZip>
-#include <KDE/KTempDir>
-#include <KDE/KStandardDirs>
+#include <KZip>
+#include <KTempDir>
+#include <KStandardDirs>
 #include "FontsPackage.h"
 #include "KfiConstants.h"
 #include "Misc.h"

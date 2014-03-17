@@ -19,8 +19,8 @@
 
 #include "menuentry_action_widget.h"
 
-#include <KDE/KDebug>
-#include <KDE/KOpenWithDialog>
+#include <KDebug>
+#include <KOpenWithDialog>
 
 
 

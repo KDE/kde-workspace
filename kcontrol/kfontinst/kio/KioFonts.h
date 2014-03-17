@@ -24,7 +24,7 @@
  * Boston, MA 02110-1301, USA.
  */
 
-#include <KDE/KIO/SlaveBase>
+#include <KIO/SlaveBase>
 #include <QtDBus/QtDBus>
 #include <sys/types.h>
 

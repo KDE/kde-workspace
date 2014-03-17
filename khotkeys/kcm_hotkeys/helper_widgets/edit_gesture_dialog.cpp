@@ -18,7 +18,7 @@
 
 #include "edit_gesture_dialog.h"
 
-#include <KDE/KLocalizedString>
+#include <KLocalizedString>
 
 #include <QLabel>
 #include <QLayout>

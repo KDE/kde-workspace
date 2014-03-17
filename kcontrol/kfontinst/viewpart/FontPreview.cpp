@@ -24,8 +24,8 @@
 #include "FontPreview.h"
 #include "FcEngine.h"
 #include "CharTip.h"
-#include <KDE/KApplication>
-#include <KDE/KLocale>
+#include <KApplication>
+#include <KLocale>
 #include <QtGui/QPainter>
 #include <QtGui/QPaintEvent>
 #include <QtGui/QMouseEvent>

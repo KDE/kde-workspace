@@ -32,9 +32,9 @@
 #include "windows_helper/window_selection_list.h"
 
 
-#include <KDE/KConfig>
-#include <KDE/KConfigGroup>
-#include <KDE/KDebug>
+#include <KConfig>
+#include <KConfigGroup>
+#include <KDebug>
 
 namespace KHotKeys {
 

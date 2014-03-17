@@ -22,7 +22,7 @@
 
 #include <QObject>
 #include <kio/global.h>
-#include <KDE/KIO/Job>
+#include <KIO/Job>
 #include <QUrl>
 #include <KLocalizedString>
 

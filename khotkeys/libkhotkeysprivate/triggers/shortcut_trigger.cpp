@@ -21,8 +21,8 @@
 #include "action_data/action_data.h"
 #include "windows_handler.h"
 
-#include <KDE/KConfigGroup>
-#include <KDE/KDebug>
+#include <KConfigGroup>
+#include <KDebug>
 #include <KGlobalAccel>
 
 #include <QAction>

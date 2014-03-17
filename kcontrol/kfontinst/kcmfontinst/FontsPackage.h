@@ -27,7 +27,7 @@
 class KTempDir;
 
 #include <QtCore/QSet>
-#include <KDE/KUrl>
+#include <KUrl>
 
 namespace KFI
 {

@@ -24,7 +24,7 @@
 #ifndef __PRINTER_H__
 #define __PRINTER_H__
 
-#include <KDE/KDialog>
+#include <KDialog>
 #include <QtCore/QThread>
 #include <QtCore/QList>
 #include <QtGui/QFont>

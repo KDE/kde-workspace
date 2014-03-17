@@ -19,7 +19,7 @@
 
 #include "triggers.h"
 
-#include <KDE/KConfigGroup>
+#include <KConfigGroup>
 
 namespace KHotKeys {
 

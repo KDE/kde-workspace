@@ -30,8 +30,8 @@
 #include <QtGui/QIcon>
 #include <QLoggingCategory>
 
-#include <KDE/KJob>
-#include <KDE/KIconLoader>
+#include <KJob>
+#include <KIconLoader>
 
 #include <Plasma/ServiceJob>
 #include <Plasma/Applet>

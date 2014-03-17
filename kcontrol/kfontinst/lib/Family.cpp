@@ -23,7 +23,7 @@
 
 #include <QtCore/QTextStream>
 #include <QtXml/QDomElement>
-#include <KDE/KDebug>
+#include <KDebug>
 #include "Family.h"
 #include "Misc.h"
 #include "XmlStrings.h"

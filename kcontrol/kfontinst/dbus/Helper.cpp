@@ -26,7 +26,7 @@
 #include "FontInst.h"
 #include "Misc.h"
 #include "Utils.h"
-#include <KDE/KDebug>
+#include <KDebug>
 #include <QtXml/QDomDocument>
 #include <QtCore/QTextCodec>
 #include <kio/global.h>

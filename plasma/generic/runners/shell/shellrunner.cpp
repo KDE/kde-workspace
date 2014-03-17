@@ -25,7 +25,7 @@
 #include <KAuthorized>
 #include <QDebug>
 #ifdef Q_OS_UNIX
-#include <KDE/SuProcess>
+#include <SuProcess>
 #endif
 #include <KGlobal>
 #include <KLocale>

@@ -23,9 +23,9 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include "launcherconfig.h"
 #include "launcherproperties.h"
-#include <KDE/KConfigDialog>
-#include <KDE/KConfigGroup>
-#include <KDE/KMessageBox>
+#include <KConfigDialog>
+#include <KConfigGroup>
+#include <KMessageBox>
 #include <KLocalizedString>
 
 #include <QtWidgets/QWhatsThis>

@@ -23,8 +23,8 @@
 #include "conditions/existing_window_condition.h"
 #include "conditions/conditions_visitor.h"
 
-#include <KDE/KConfigGroup>
-#include <KDE/KDebug>
+#include <KConfigGroup>
+#include <KDebug>
 
 namespace KHotKeys {
 

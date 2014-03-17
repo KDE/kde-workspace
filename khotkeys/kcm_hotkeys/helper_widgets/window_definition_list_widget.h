@@ -23,7 +23,7 @@
 
 #include "ui_window_definition_list_widget.h"
 #include "windows_helper/window_selection_list.h"
-#include <KDE/KDialog>
+#include <KDialog>
 
 
 

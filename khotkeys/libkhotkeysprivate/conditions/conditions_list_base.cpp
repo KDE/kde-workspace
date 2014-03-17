@@ -20,8 +20,8 @@
 #include "conditions/conditions_list_base.h"
 #include "conditions/conditions_visitor.h"
 
-#include <KDE/KConfig>
-#include <KDE/KConfigGroup>
+#include <KConfig>
+#include <KConfigGroup>
 
 namespace KHotKeys {
 

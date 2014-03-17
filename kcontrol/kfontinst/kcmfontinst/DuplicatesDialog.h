@@ -27,7 +27,7 @@
 #include <QPixmap>
 #include <QThread>
 #include <QTreeWidget>
-#include <KDE/KDialog>
+#include <KDialog>
 #include "Misc.h"
 #include "JobRunner.h"
 

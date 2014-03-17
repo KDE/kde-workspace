@@ -18,8 +18,8 @@
 
 #include "dbus_action_widget.h"
 
-#include <KDE/KMessageBox>
-#include <KDE/KRun>
+#include <KMessageBox>
+#include <KRun>
 
 DbusActionWidget::DbusActionWidget(
     KHotKeys::DBusAction *action,

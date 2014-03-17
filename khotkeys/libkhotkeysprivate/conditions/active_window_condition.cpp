@@ -23,9 +23,9 @@
 #include "windows_handler.h"
 #include "khotkeysglobal.h"
 
-#include <KDE/KConfig>
-#include <KDE/KConfigGroup>
-#include <KDE/KDebug>
+#include <KConfig>
+#include <KConfigGroup>
+#include <KDebug>
 
 namespace KHotKeys {
 

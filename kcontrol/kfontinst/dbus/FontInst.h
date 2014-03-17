@@ -28,7 +28,7 @@
 #include <QtCore/QStringList>
 #include <QtCore/QSet>
 #include <QtDBus/QtDBus>
-#include <KDE/KJob>
+#include <KJob>
 #include "Family.h"
 #include "Folder.h"
 #include "FontinstIface.h"

@@ -33,7 +33,7 @@
 
 #include <QtCore/QStack>
 
-#include <KDE/KDebug>
+#include <KDebug>
 
 class BuildTree : public KHotKeys::ConditionsVisitor
     {

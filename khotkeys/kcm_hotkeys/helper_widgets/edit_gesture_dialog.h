@@ -22,7 +22,7 @@
 #include "triggers/gestures.h"
 
 
-#include <KDE/KDialog>
+#include <KDialog>
 
 /**
  * @author Michael Jansen <kde@michael-jansen.biz>

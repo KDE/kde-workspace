@@ -18,7 +18,7 @@
 
 #include "virtualdesktopssource.h"
 
-#include <KDE/KWindowSystem>
+#include <KWindowSystem>
 
 VirtualDesktopsSource::VirtualDesktopsSource() : Plasma::DataContainer()
 {

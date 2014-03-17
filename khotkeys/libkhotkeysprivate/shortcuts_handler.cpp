@@ -30,9 +30,9 @@
 #include <QX11Info>
 #include <fixx11h.h>
 
-#include <KDE/KDebug>
-#include <KDE/KGlobalAccel>
-#include <KDE/KShortcut>
+#include <KDebug>
+#include <KGlobalAccel>
+#include <KShortcut>
 
 #include <QAction>
 #include <QtCore/QUuid>

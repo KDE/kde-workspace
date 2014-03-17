@@ -24,7 +24,7 @@
  * Boston, MA 02110-1301, USA.
  */
 
-#include <KDE/KSelectAction>
+#include <KSelectAction>
 #include "FcEngine.h"
 
 namespace KFI

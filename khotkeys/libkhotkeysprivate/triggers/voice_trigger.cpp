@@ -22,8 +22,8 @@
 #include "voices.h"
 #include "windows.h"
 
-#include <KDE/KConfigGroup>
-#include <KDE/KDebug>
+#include <KConfigGroup>
+#include <KDebug>
 
 namespace KHotKeys {
 

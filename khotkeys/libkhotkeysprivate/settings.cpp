@@ -24,11 +24,11 @@
 #include "settings_writer.h"
 #include "windows_helper/window_selection_list.h"
 
-#include <KDE/KConfig>
-#include <KDE/KDebug>
-#include <KDE/KGlobal>
-#include <KDE/KMessageBox>
-#include <KDE/KStandardDirs>
+#include <KConfig>
+#include <KDebug>
+#include <KGlobal>
+#include <KMessageBox>
+#include <KStandardDirs>
 
 #include <QApplication>
 

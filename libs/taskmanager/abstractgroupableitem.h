@@ -28,7 +28,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <QtCore/QUrl>
 #include <QtGui/QIcon>
 
-#include <KDE/KWindowSystem>
+#include <KWindowSystem>
 
 #include "taskmanager.h"
 #include "taskmanager_export.h"

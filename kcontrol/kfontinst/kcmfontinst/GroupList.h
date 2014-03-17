@@ -24,10 +24,10 @@
  * Boston, MA 02110-1301, USA.
  */
 
-#include <KDE/KUrl>
-#include <KDE/KFileItem>
-#include <KDE/KIO/Job>
-#include <KDE/KDirLister>
+#include <KUrl>
+#include <KFileItem>
+#include <KIO/Job>
+#include <KDirLister>
 #include <QList>
 #include <QTreeView>
 #include <QAbstractItemModel>

@@ -32,9 +32,9 @@
 #include <QtGui/QGraphicsProxyWidget>
 #include <QtCore/QCoreApplication>
 
-#include <KDE/KDebug>
-#include <KDE/KIconLoader>
-#include <KDE/KLineEdit>
+#include <KDebug>
+#include <KIconLoader>
+#include <KLineEdit>
 
 #include <Plasma/AbstractRunner>
 #include <Plasma/RunnerManager>

@@ -41,11 +41,11 @@
 
 #include <QtDBus/QtDBus>
 
-#include <KDE/KAboutData>
-#include <KDE/KDebug>
-#include <KDE/KLocale>
-#include <KDE/KMessageBox>
-#include <KDE/KPluginLoader>
+#include <KAboutData>
+#include <KDebug>
+#include <KLocale>
+#include <KMessageBox>
+#include <KPluginLoader>
 #include <config-workspace.h>
 
 K_PLUGIN_FACTORY( KCMHotkeysFactory, registerPlugin<KCMHotkeys>(); )

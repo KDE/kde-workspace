@@ -24,9 +24,9 @@
  * Boston, MA 02110-1301, USA.
  */
 
-#include <KDE/KUrl>
-#include <KDE/KFileItem>
-#include <KDE/KIO/Job>
+#include <KUrl>
+#include <KFileItem>
+#include <KIO/Job>
 #include <QList>
 #include <QSet>
 #include <QHash>
