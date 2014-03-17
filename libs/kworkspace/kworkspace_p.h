@@ -20,7 +20,7 @@
 #ifndef KWORKSPACE_P_H
 #define KWORKSPACE_P_H
 
-
+#include <QObject>
 #include "kworkspace.h"
 
 #if HAVE_X11

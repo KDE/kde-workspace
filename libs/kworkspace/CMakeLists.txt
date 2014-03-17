@@ -1,6 +1,5 @@
 
 set(kworkspace_LIB_SRCS kdisplaymanager.cpp
-                        kwindowlistmenu.cpp
                         kworkspace.cpp
    )
 
@@ -40,7 +39,6 @@ endif()
 install(TARGETS kworkspace EXPORT kdeworkspaceLibraryTargets ${INSTALL_TARGETS_DEFAULT_ARGS} )
 
 install( FILES kdisplaymanager.h
-               kwindowlistmenu.h
                kworkspace.h
                kworkspace_export.h
          DESTINATION ${INCLUDE_INSTALL_DIR}/kworkspace COMPONENT Devel )
