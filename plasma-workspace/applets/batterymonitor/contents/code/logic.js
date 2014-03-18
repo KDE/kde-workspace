@@ -63,9 +63,7 @@ function plasmoidStatus() {
     }
 
     if (batteries.cumulativePluggedin) {
-        if (batteries.cumulativePercent <= 10) {
-            status = "NeedsAttentionStatus";
-        } else if (!batteries.allCharged) {
+        if (!batteries.allCharged) {
             status = "ActiveStatus";
         }
     } else if (batteries.count > 0) { // in case your mouse gets low
