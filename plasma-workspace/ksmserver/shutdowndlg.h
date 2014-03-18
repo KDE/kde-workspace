@@ -43,34 +43,6 @@ namespace Plasma
     class FrameSvg;
 }
 
-// The (singleton) widget that makes the desktop gray.
-class KSMShutdownFeedback : public QWidget
-{
-    Q_OBJECT
-
-public:
-    static void start();
-    static void stop();
-    static void logoutCanceled();
-
-protected:
-    ~KSMShutdownFeedback() {}
-
-    virtual void paintEvent( QPaintEvent* );
-
-private Q_SLOTS:
-    void slotPaintEffect();
-    void slotPaintEffectInitialized();
-
-private:
-    static KSMShutdownFeedback * s_pSelf;
-    KSMShutdownFeedback();
-    int m_currentY;
-    QPixmap m_pixmap;
-    LogoutEffect *effect;
-    bool initialized;
-};
-
 class QQuickView;
 
 // The confirmation dialog

@@ -21,7 +21,6 @@ main(int argc, char *argv[])
 
     KApplication a;
     KIconLoader::global()->addAppDir(QStringLiteral("ksmserver"));
-    KSMShutdownFeedback::start();
 
     QString sdtypeOption = args->getOption("type").toLower();
 
@@ -42,6 +41,4 @@ main(int argc, char *argv[])
     QString bopt;
     (void)KSMShutdownDlg::confirmShutdown( true, true, sdtype, bopt, QStringLiteral("default") );
 /*   (void)KSMShutdownDlg::confirmShutdown( false, false, sdtype, bopt ); */
-
-    KSMShutdownFeedback::stop();
 }

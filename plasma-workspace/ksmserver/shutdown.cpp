@@ -154,14 +154,8 @@ void KSMServer::shutdown( KWorkSpace::ShutdownConfirm confirm,
     QString bopt;
     if ( !logoutConfirmed ) {
         KApplication::kApplication()->updateUserTimestamp();
-        KSMShutdownFeedback::start(); // make the screen gray
         QString theme = cg.readEntry( "theme", "default" );
         logoutConfirmed = KSMShutdownDlg::confirmShutdown( maysd, choose, sdtype, bopt, theme);
-        // ###### We can't make the screen remain gray while talking to the apps,
-        // because this prevents interaction ("do you want to save", etc.)
-        // TODO: turn the feedback widget into a list of apps to be closed,
-        // with an indicator of the current status for each.
-        KSMShutdownFeedback::stop(); // make the screen become normal again
     }
 
     if ( logoutConfirmed ) {
@@ -226,8 +220,6 @@ void KSMServer::shutdown( KWorkSpace::ShutdownConfirm confirm,
         }
         if ( clients.isEmpty() )
             completeShutdownOrCheckpoint();
-    } else {
-        KSMShutdownFeedback::logoutCanceled(); // make the screen become normal again
     }
     dialogActive = false;
 }
@@ -387,7 +379,6 @@ void KSMServer::cancelShutdown( KSMClient* c )
     } else {
         Solid::PowerManagement::stopSuppressingSleep(inhibitCookie);
         kDebug( 1218 ) << "Client " << c->program() << " (" << c->clientId() << ") canceled shutdown.";
-        KSMShutdownFeedback::logoutCanceled(); // make the screen become normal again
 //         KNotification::event( QStringLiteral( "cancellogout" ),
 //                               i18n( "Logout canceled by '%1'", c->program()),
 //                               QPixmap() , 0l , KNotification::DefaultEvent  );
