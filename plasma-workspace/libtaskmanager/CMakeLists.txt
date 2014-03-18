@@ -34,7 +34,8 @@ else()
     set(taskmanager_LIB_SRCS ${taskmanager_LIB_SRCS} task_x11.cpp)
 endif()
 
-add_library(taskmanager SHARED ${taskmanager_LIB_SRCS})
+add_library(taskmanager ${taskmanager_LIB_SRCS})
+generate_export_header(taskmanager)
 target_include_directories(taskmanager PRIVATE "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>")
 target_link_libraries(taskmanager
     processcore
@@ -75,7 +76,7 @@ install(FILES
    taskgroup.h
    taskitem.h
    taskmanager.h
-   taskmanager_export.h
+   ${CMAKE_CURRENT_BINARY_DIR}/taskmanager_export.h
    DESTINATION ${INCLUDE_INSTALL_DIR}/taskmanager COMPONENT Devel
    )
 

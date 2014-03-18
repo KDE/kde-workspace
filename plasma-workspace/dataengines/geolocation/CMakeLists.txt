@@ -11,7 +11,7 @@ set_target_properties(plasma-geolocation-interface PROPERTIES
 )
 install(TARGETS plasma-geolocation-interface ${INSTALL_TARGETS_DEFAULT_ARGS})
 
-install(FILES geolocationprovider.h geolocation_export.h
+install(FILES geolocationprovider.h ${CMAKE_CURRENT_BINARY_DIR}/geolocation_export.h
         DESTINATION ${INCLUDE_INSTALL_DIR}/plasma/geolocation
         COMPONENT Devel)
 
@@ -20,8 +20,9 @@ install(FILES geolocationprovider.h geolocation_export.h
 #        COMPONENT Devel)
 # -------------------------------------------------------------------------------------------------
 
-set(plasma_dataengine_geolocation_SRCS geolocation.cpp)
-add_library(plasma_engine_geolocation MODULE ${plasma_dataengine_geolocation_SRCS})
+
+add_library(plasma_engine_geolocation MODULE geolocation.cpp)
+generate_export_header(plasma_engine_geolocation EXPORT_FILE_NAME "geolocation_export.h" BASE_NAME "GEOLOCATION")
 target_link_libraries(plasma_engine_geolocation
     plasma-geolocation-interface
     KF5::Plasma
