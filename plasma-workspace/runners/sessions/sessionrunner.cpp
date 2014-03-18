@@ -24,7 +24,7 @@
 #include <KLocale>
 #include <KMessageBox>
 
-#include "kworkspace/kworkspace.h"
+#include "kworkspace.h"
 
 #include "screensaver_interface.h"
 

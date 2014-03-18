@@ -1,5 +1,7 @@
 project(plasma-containmentactions-contextmenu)
 
+include_directories(${plasma-workspace_SOURCE_DIR}/libkworkspace)
+
 set(contextmenu_SRCS
     menu.cpp
 )

@@ -19,7 +19,7 @@
 #ifndef SESSIONRUNNER_H
 #define SESSIONRUNNER_H
 
-#include <kworkspace/kdisplaymanager.h>
+#include <kdisplaymanager.h>
 #include <Plasma/AbstractRunner>
 
 

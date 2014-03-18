@@ -38,7 +38,7 @@
 
 #include <QtCore/QStringBuilder> // % operator for QString
 
-#include "kworkspace/kdisplaymanager.h"
+#include "kdisplaymanager.h"
 
 #include <Plasma/AbstractRunner>
 #include <Plasma/FrameSvg>

@@ -24,7 +24,7 @@
 #include <KAuthorized>
 
 // kde-workspace/libs
-#include <kworkspace/kworkspace.h>
+#include <kworkspace.h>
 
 #include <krunner_interface.h>
 

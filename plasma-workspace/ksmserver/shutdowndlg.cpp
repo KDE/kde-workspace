@@ -57,7 +57,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <X11/Xutil.h>
 #include <X11/Xatom.h>
 
-#include <kworkspace/kdisplaymanager.h>
+#include <kdisplaymanager.h>
 
 #include <config-workspace.h>
 

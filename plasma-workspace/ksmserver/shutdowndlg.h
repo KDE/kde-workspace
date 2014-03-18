@@ -29,7 +29,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include <QDialog>
 #include <QPushButton>
-#include <kworkspace/kworkspace.h>
+#include <kworkspace.h>
 
 class QMenu;
 class QTimer;

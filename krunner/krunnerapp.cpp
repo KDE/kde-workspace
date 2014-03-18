@@ -36,7 +36,7 @@
 #include <Plasma/RunnerManager>
 #include <Plasma/AbstractRunner>
 
-#include "kworkspace/kdisplaymanager.h"
+#include "kdisplaymanager.h"
 
 #include "appadaptor.h"
 #include "ksystemactivitydialog.h"

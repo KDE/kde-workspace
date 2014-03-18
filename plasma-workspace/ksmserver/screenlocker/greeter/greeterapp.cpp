@@ -24,7 +24,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "screensaverwindow.h"
 
 // workspace
-#include <kworkspace/kworkspace.h>
+#include <kworkspace.h>
 // KDE
 #include <KAuthorized>
 #include <KCrash>

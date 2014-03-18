@@ -27,7 +27,7 @@
 #include <KService>
 #include <KUriFilter>
 #include <KUrl>
-#include <kworkspace/kworkspace.h>
+#include <kworkspace.h>
 
 
 namespace KHotKeys {

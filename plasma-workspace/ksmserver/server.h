@@ -45,7 +45,7 @@ extern "C" {
 #include <QObject>
 
 #include <kapplication.h>
-#include <kworkspace/kworkspace.h>
+#include <kworkspace.h>
 #include <kmessagebox.h>
 #include <QTimer>
 #include <QTime>

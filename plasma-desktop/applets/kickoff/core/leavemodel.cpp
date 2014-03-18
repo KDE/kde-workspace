@@ -30,8 +30,8 @@
 #include <QDebug>
 #include <KIcon>
 #include <Solid/PowerManagement>
-#include <kworkspace/kworkspace.h>
-#include <kworkspace/kdisplaymanager.h>
+#include <kworkspace.h>
+#include <kdisplaymanager.h>
 
 // Local
 #include "models.h"

@@ -28,7 +28,7 @@
 #include <kconfig.h>
 #include <kconfiggroup.h>
 #include <klineedit.h>
-#include <kworkspace/kworkspace.h>
+#include <kworkspace.h>
 #include <kstandarddirs.h>
 #include <qregexp.h>
 #include <kdesktopfile.h>

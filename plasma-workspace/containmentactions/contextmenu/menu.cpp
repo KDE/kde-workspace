@@ -33,7 +33,7 @@
 #include <Plasma/Containment>
 #include <Plasma/Corona>
 
-#include "kworkspace/kworkspace.h"
+#include "kworkspace.h"
 #include "krunner_interface.h"
 #include "screensaver_interface.h"
 

@@ -3,7 +3,7 @@
 #include <k4aboutdata.h>
 #include <kapplication.h>
 #include <kiconloader.h>
-#include <kworkspace/kworkspace.h>
+#include <kworkspace.h>
 #include <Plasma/Theme>
 int
 main(int argc, char *argv[])
