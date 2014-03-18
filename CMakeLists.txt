@@ -274,10 +274,6 @@ endif()
 #
 ecm_optional_add_subdirectory(kstyles)
 #
-# ########### install files ###############
-if(NOT WIN32)
-  install(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/startkde DESTINATION ${BIN_INSTALL_DIR})
-endif()
 
 feature_summary(WHAT ALL INCLUDE_QUIET_PACKAGES FATAL_ON_MISSING_REQUIRED_PACKAGES)
 
