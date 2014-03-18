@@ -32,7 +32,7 @@ class ActionDataBase;
 /**
  * @author Michael Jansen <kde@michael-jansen.biz>
  */
-class KDE_EXPORT Condition_list
+class Q_DECL_EXPORT Condition_list
     : public Condition_list_base
     {
     typedef Condition_list_base base;

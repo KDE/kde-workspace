@@ -135,7 +135,7 @@ public:
     float recordSnow;
 };
 
-class KDE_EXPORT EnvCanadaIon : public IonInterface, public Plasma::DataEngineConsumer
+class Q_DECL_EXPORT EnvCanadaIon : public IonInterface, public Plasma::DataEngineConsumer
 {
     Q_OBJECT
 

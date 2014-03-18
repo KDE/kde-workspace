@@ -298,7 +298,7 @@ protected:
     WidgetList widgetList;
 };
 
-struct KDE_EXPORT KGreeterPluginInfo {
+struct Q_DECL_EXPORT KGreeterPluginInfo {
     /**
      * Human readable name of this plugin (should be a little more
      * informative than just the libary name). Must be I18N_NOOP()ed.

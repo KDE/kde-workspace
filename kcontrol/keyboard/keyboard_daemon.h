@@ -36,7 +36,7 @@ class KeyboardConfig;
 class KAction;
 class Rules;
 
-class KDE_EXPORT KeyboardDaemon : public KDEDModule
+class Q_DECL_EXPORT KeyboardDaemon : public KDEDModule
 {
     Q_OBJECT
     Q_CLASSINFO("D-Bus Interface", "org.kde.KeyboardLayouts")

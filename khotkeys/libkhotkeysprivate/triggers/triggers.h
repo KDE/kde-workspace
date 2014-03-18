@@ -49,7 +49,7 @@ public:
     };
 
 
-class KDE_EXPORT Trigger
+class Q_DECL_EXPORT Trigger
     {
     Q_DISABLE_COPY( Trigger )
 
@@ -101,7 +101,7 @@ class KDE_EXPORT Trigger
 Q_DECLARE_OPERATORS_FOR_FLAGS(Trigger::TriggerTypes)
 
 
-class KDE_EXPORT Trigger_list
+class Q_DECL_EXPORT Trigger_list
     : public QList< Trigger* >
     {
     Q_DISABLE_COPY( Trigger_list )
@@ -144,7 +144,7 @@ public:
     };
 
 
-class KDE_EXPORT ShortcutTrigger
+class Q_DECL_EXPORT ShortcutTrigger
     : public QObject, public Trigger
     {
     Q_OBJECT
@@ -227,7 +227,7 @@ public:
     };
 
 
-class KDE_EXPORT WindowTrigger : public QObject, public Trigger
+class Q_DECL_EXPORT WindowTrigger : public QObject, public Trigger
     {
     Q_OBJECT
 
@@ -316,7 +316,7 @@ public:
     virtual void visit(GestureTrigger&) = 0;
     };
 
-class KDE_EXPORT GestureTrigger
+class Q_DECL_EXPORT GestureTrigger
     : public QObject, public Trigger
     {
     Q_OBJECT
@@ -359,7 +359,7 @@ class KDE_EXPORT GestureTrigger
 
 // FIXME: SOUND
 #if 0
-class KDE_EXPORT Voice_trigger
+class Q_DECL_EXPORT Voice_trigger
     : public QObject, public Trigger
     {
     Q_OBJECT

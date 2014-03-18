@@ -23,7 +23,7 @@ class Trigger;
 
 
 // TODO : code documentation
-class KDE_EXPORT ActionData
+class Q_DECL_EXPORT ActionData
     : public ActionDataBase
     {
 

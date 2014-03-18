@@ -19,7 +19,7 @@
 namespace KHotKeys {
 
 
-class KDE_EXPORT SimpleActionData : public ActionData
+class Q_DECL_EXPORT SimpleActionData : public ActionData
     {
     typedef ActionData base;
 
@@ -61,7 +61,7 @@ protected:
  * A template adding convenience methods to SimpleActionData.
  */
 template< typename T, typename A >
-class KDE_EXPORT SimpleActionDataHelper
+class Q_DECL_EXPORT SimpleActionDataHelper
     : public SimpleActionData
     {
         typedef SimpleActionData base;

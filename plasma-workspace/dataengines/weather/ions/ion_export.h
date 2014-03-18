@@ -20,13 +20,13 @@
 #ifndef ION_EXPORT_H
 #define ION_EXPORT_H
 
-/* needed for KDE_EXPORT and KDE_IMPORT macros */
+/* needed for Q_DECL_EXPORT and KDE_IMPORT macros */
 #include <kdemacros.h>
 
 #ifndef ION_EXPORT
 # if defined(MAKE_WEATHER_ION_LIB)
 /* We are building this library */
-#  define ION_EXPORT KDE_EXPORT
+#  define ION_EXPORT Q_DECL_EXPORT
 # else
 /* We are using this library */
 #  define ION_EXPORT KDE_IMPORT

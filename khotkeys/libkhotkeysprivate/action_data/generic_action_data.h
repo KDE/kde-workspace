@@ -18,7 +18,7 @@ namespace KHotKeys {
 
 class ActionDataGroup;
 
-class KDE_EXPORT Generic_action_data
+class Q_DECL_EXPORT Generic_action_data
     : public ActionData
     {
     typedef ActionData base;

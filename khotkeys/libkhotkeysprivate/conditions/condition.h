@@ -34,7 +34,7 @@ class Condition_list_base;
 /**
  * @author Michael Jansen <kde@michael-jansen.biz>
  */
-class KDE_EXPORT Condition
+class Q_DECL_EXPORT Condition
     {
     Q_DISABLE_COPY( Condition )
 

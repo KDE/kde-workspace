@@ -41,7 +41,7 @@
 
 extern "C"
 {
-  KDE_EXPORT void kcminit_mouse()
+  Q_DECL_EXPORT void kcminit_mouse()
   {
       KConfig *config = new KConfig("kcminputrc", KConfig::NoGlobals );
     MouseSettings settings;

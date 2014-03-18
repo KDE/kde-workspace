@@ -7,7 +7,7 @@
 #include <kdemacros.h>
 #include <QX11Info>
 
-extern "C" KDE_EXPORT int kdemain(int argc, char * argv[] )
+extern "C" Q_DECL_EXPORT int kdemain(int argc, char * argv[] )
 {
   K4AboutData about(I18N_NOOP("kaccess"), 0, ki18n("KDE Accessibility Tool"),
                   0, KLocalizedString(), K4AboutData::License_GPL,

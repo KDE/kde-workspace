@@ -27,15 +27,15 @@ namespace KHotKeys {
 
     namespace Daemon {
 
-    KDE_EXPORT bool isRunning();
-    KDE_EXPORT bool reload();
-    KDE_EXPORT bool start();
-    KDE_EXPORT bool stop();
+    Q_DECL_EXPORT bool isRunning();
+    Q_DECL_EXPORT bool reload();
+    Q_DECL_EXPORT bool start();
+    Q_DECL_EXPORT bool stop();
 
     /**
      * Is the daemon enabled by the user?
      */
-    KDE_EXPORT bool isEnabled();
+    Q_DECL_EXPORT bool isEnabled();
     }
 
 } // namespace KHotKeys::Daemon

@@ -68,7 +68,7 @@ class KFONTINST_EXPORT File
 
 typedef QSet<File> FileCont;
 
-inline KDE_EXPORT uint qHash(const File &key)
+inline Q_DECL_EXPORT uint qHash(const File &key)
 {
     return qHash(key.path()); // +qHash(key.index());
 }
@@ -76,7 +76,7 @@ inline KDE_EXPORT uint qHash(const File &key)
 }
 
 Q_DECLARE_METATYPE(KFI::File)
-KDE_EXPORT QDBusArgument & operator<<(QDBusArgument &argument, const KFI::File &obj);
-KDE_EXPORT const QDBusArgument & operator>>(const QDBusArgument &argument, KFI::File &obj);
+Q_DECL_EXPORT QDBusArgument & operator<<(QDBusArgument &argument, const KFI::File &obj);
+Q_DECL_EXPORT const QDBusArgument & operator>>(const QDBusArgument &argument, KFI::File &obj);
 
 #endif

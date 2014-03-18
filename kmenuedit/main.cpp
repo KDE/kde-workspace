@@ -53,7 +53,7 @@ public:
 };
 
 
-extern "C" int KDE_EXPORT kdemain( int argc, char **argv )
+extern "C" int Q_DECL_EXPORT kdemain( int argc, char **argv )
 {
     KAboutData aboutData(QStringLiteral("kmenuedit"), QString(), i18n("KDE Menu Editor"),
                          QString(version), i18n(description), KAboutData::License_GPL,

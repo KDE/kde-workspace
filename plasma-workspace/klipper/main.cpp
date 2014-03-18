@@ -30,7 +30,7 @@
 #include "tray.h"
 #include "klipper.h"
 
-extern "C" int KDE_EXPORT kdemain(int argc, char *argv[])
+extern "C" int Q_DECL_EXPORT kdemain(int argc, char *argv[])
 {
   Klipper::createAboutData();
   KCmdLineArgs::init( argc, argv, Klipper::aboutData());

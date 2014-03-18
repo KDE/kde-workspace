@@ -24,7 +24,7 @@ namespace KHotKeys {
 class Gesture;
 class ActionData;
 
-KDE_EXPORT extern QPointer<Gesture> gesture_handler;
+Q_DECL_EXPORT extern QPointer<Gesture> gesture_handler;
 
 /**
  * A PointQuintet represents a point in the gesture,
@@ -55,7 +55,7 @@ typedef QVector<PointQuintet> StrokePoints;
  * returns the processed version of this raw data.
  */
 
-class KDE_EXPORT Stroke
+class Q_DECL_EXPORT Stroke
     {
     public:
         // largest number of points allowed to be sampled
@@ -89,7 +89,7 @@ class KDE_EXPORT Stroke
  * can handle it.
  */
 
-class KDE_EXPORT Gesture
+class Q_DECL_EXPORT Gesture
     : public QWidget // not QObject because of x11EventFilter()
     {
     Q_OBJECT

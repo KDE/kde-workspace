@@ -93,7 +93,7 @@ public:
     QVector<WeatherData::ForecastPeriod *> forecasts;
 };
 
-class KDE_EXPORT WetterComIon : public IonInterface
+class Q_DECL_EXPORT WetterComIon : public IonInterface
 {
     Q_OBJECT
 

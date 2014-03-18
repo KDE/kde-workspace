@@ -24,7 +24,7 @@
 
 class TouchpadEnablerDaemonPrivate;
 
-class KDE_EXPORT TouchpadEnablerDaemon : public KDEDModule
+class Q_DECL_EXPORT TouchpadEnablerDaemon : public KDEDModule
 {
     public:
         TouchpadEnablerDaemon(QObject *parent, const QList<QVariant>&);

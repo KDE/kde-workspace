@@ -37,7 +37,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include <QLabel>
 #include <QTextDocument>
 
-extern KDE_EXPORT KGreeterPluginInfo kgreeterplugin_info; // defined at bottom
+extern Q_DECL_EXPORT KGreeterPluginInfo kgreeterplugin_info; // defined at bottom
 
 static int echoMode;
 
@@ -346,7 +346,7 @@ create(KGreeterPluginHandler *handler,
     return new KGenericGreeter(handler, parent, fixedEntity, func, ctx);
 }
 
-KDE_EXPORT KGreeterPluginInfo kgreeterplugin_info = {
+Q_DECL_EXPORT KGreeterPluginInfo kgreeterplugin_info = {
     I18N_NOOP2("@item:inmenu authentication method", "Generic"), "generic",
     KGreeterPluginInfo::Local,
     init, done, create

@@ -59,63 +59,63 @@ namespace Misc
         quint32 styleInfo;
     };
 
-    extern KDE_EXPORT QString prettyUrl(const KUrl &url);
-    inline KDE_EXPORT bool    isHidden(const QString &f)    { return f.startsWith(QChar('.')); }
-    inline KDE_EXPORT bool    isHidden(const KUrl &url)     { return isHidden(url.fileName()); }
-    extern KDE_EXPORT bool    check(const QString &path, bool file, bool checkW=false);
-    inline KDE_EXPORT bool    fExists(const QString &p)     { return check(p, true, false); }
-    inline KDE_EXPORT bool    dExists(const QString &p)     { return check(p, false, false); }
-    inline KDE_EXPORT bool    fWritable(const QString &p)   { return check(p, true, true); }
-    inline KDE_EXPORT bool    dWritable(const QString &p)   { return check(p, false, true); }
-    extern KDE_EXPORT QString linkedTo(const QString &i);
-    extern KDE_EXPORT QString dirSyntax(const QString &d);  // Has trailing slash:  /file/path/
-    extern KDE_EXPORT QString fileSyntax(const QString &f);
-    extern KDE_EXPORT QString getDir(const QString &f);
-    extern KDE_EXPORT QString getFile(const QString &f);
-    extern KDE_EXPORT bool    createDir(const QString &dir);
-    extern KDE_EXPORT void    setFilePerms(const QByteArray &f);
-    inline KDE_EXPORT void    setFilePerms(const QString &f) { setFilePerms(QFile::encodeName(f)); }
-    extern KDE_EXPORT QString changeExt(const QString &f, const QString &newExt);
-    extern KDE_EXPORT bool    doCmd(const QString &cmd, const QString &p1=QString(),
+    extern Q_DECL_EXPORT QString prettyUrl(const KUrl &url);
+    inline Q_DECL_EXPORT bool    isHidden(const QString &f)    { return f.startsWith(QChar('.')); }
+    inline Q_DECL_EXPORT bool    isHidden(const KUrl &url)     { return isHidden(url.fileName()); }
+    extern Q_DECL_EXPORT bool    check(const QString &path, bool file, bool checkW=false);
+    inline Q_DECL_EXPORT bool    fExists(const QString &p)     { return check(p, true, false); }
+    inline Q_DECL_EXPORT bool    dExists(const QString &p)     { return check(p, false, false); }
+    inline Q_DECL_EXPORT bool    fWritable(const QString &p)   { return check(p, true, true); }
+    inline Q_DECL_EXPORT bool    dWritable(const QString &p)   { return check(p, false, true); }
+    extern Q_DECL_EXPORT QString linkedTo(const QString &i);
+    extern Q_DECL_EXPORT QString dirSyntax(const QString &d);  // Has trailing slash:  /file/path/
+    extern Q_DECL_EXPORT QString fileSyntax(const QString &f);
+    extern Q_DECL_EXPORT QString getDir(const QString &f);
+    extern Q_DECL_EXPORT QString getFile(const QString &f);
+    extern Q_DECL_EXPORT bool    createDir(const QString &dir);
+    extern Q_DECL_EXPORT void    setFilePerms(const QByteArray &f);
+    inline Q_DECL_EXPORT void    setFilePerms(const QString &f) { setFilePerms(QFile::encodeName(f)); }
+    extern Q_DECL_EXPORT QString changeExt(const QString &f, const QString &newExt);
+    extern Q_DECL_EXPORT bool    doCmd(const QString &cmd, const QString &p1=QString(),
                                     const QString &p2=QString(), const QString &p3=QString());
-    inline KDE_EXPORT bool    root() { return 0==getuid(); }
-    extern KDE_EXPORT void    getAssociatedFiles(const QString &file, QStringList &list,
+    inline Q_DECL_EXPORT bool    root() { return 0==getuid(); }
+    extern Q_DECL_EXPORT void    getAssociatedFiles(const QString &file, QStringList &list,
                                                  bool afmAndPfm=true);
-    extern KDE_EXPORT time_t  getTimeStamp(const QString &item);
-    extern KDE_EXPORT QString getFolder(const QString &defaultDir, const QString &root,
+    extern Q_DECL_EXPORT time_t  getTimeStamp(const QString &item);
+    extern Q_DECL_EXPORT QString getFolder(const QString &defaultDir, const QString &root,
                                         QStringList &dirs);
-    extern KDE_EXPORT bool    checkExt(const QString &fname, const QString &ext);
-    extern KDE_EXPORT bool    isBitmap(const QString &str);
-    extern KDE_EXPORT bool    isMetrics(const QString &str);
-    inline KDE_EXPORT bool    isMetrics(const KUrl &url) { return isMetrics(url.fileName()); }
-    inline KDE_EXPORT bool    isPackage(const QString &file)
+    extern Q_DECL_EXPORT bool    checkExt(const QString &fname, const QString &ext);
+    extern Q_DECL_EXPORT bool    isBitmap(const QString &str);
+    extern Q_DECL_EXPORT bool    isMetrics(const QString &str);
+    inline Q_DECL_EXPORT bool    isMetrics(const KUrl &url) { return isMetrics(url.fileName()); }
+    inline Q_DECL_EXPORT bool    isPackage(const QString &file)
                       { return file.indexOf(KFI_FONTS_PACKAGE)==(file.length()-KFI_FONTS_PACKAGE_LEN); }
-    extern KDE_EXPORT int     getIntQueryVal(const KUrl &url, const char *key, int defVal);
-    extern KDE_EXPORT bool    printable(const QString &mime);
-    inline KDE_EXPORT QString hide(const QString &f) { return '.'!=f[0] ? QChar('.')+f : f; }
-    inline KDE_EXPORT QString unhide(const QString &f) { return '.'==f[0] ? f.mid(1) : f; }
-    extern KDE_EXPORT uint    qHash(const TFont &key);
-    extern KDE_EXPORT QString encodeText(const QString &str, QTextStream &s);
-    extern KDE_EXPORT QString contractHome(QString path);
-    extern KDE_EXPORT QString expandHome(QString path);
-    extern KDE_EXPORT QMap<QString, QString> getFontFileMap(const QSet<QString> &files);
-    extern KDE_EXPORT QString modifyName(const QString &fname);
+    extern Q_DECL_EXPORT int     getIntQueryVal(const KUrl &url, const char *key, int defVal);
+    extern Q_DECL_EXPORT bool    printable(const QString &mime);
+    inline Q_DECL_EXPORT QString hide(const QString &f) { return '.'!=f[0] ? QChar('.')+f : f; }
+    inline Q_DECL_EXPORT QString unhide(const QString &f) { return '.'==f[0] ? f.mid(1) : f; }
+    extern Q_DECL_EXPORT uint    qHash(const TFont &key);
+    extern Q_DECL_EXPORT QString encodeText(const QString &str, QTextStream &s);
+    extern Q_DECL_EXPORT QString contractHome(QString path);
+    extern Q_DECL_EXPORT QString expandHome(QString path);
+    extern Q_DECL_EXPORT QMap<QString, QString> getFontFileMap(const QSet<QString> &files);
+    extern Q_DECL_EXPORT QString modifyName(const QString &fname);
     inline QString getDestFolder(const QString &folder, const QString &file)
     {
         return folder+file[0].toLower()+'/';
     }
-    extern KDE_EXPORT QString app(const QString &name, const char *path=0L);
+    extern Q_DECL_EXPORT QString app(const QString &name, const char *path=0L);
 }
 
 }
 
-inline KDE_EXPORT QDataStream & operator<<(QDataStream &ds, const KFI::Misc::TFont &font)
+inline Q_DECL_EXPORT QDataStream & operator<<(QDataStream &ds, const KFI::Misc::TFont &font)
 {
     ds << font.family << font.styleInfo;
     return ds;
 }
 
-inline KDE_EXPORT QDataStream & operator>>(QDataStream &ds, KFI::Misc::TFont &font)
+inline Q_DECL_EXPORT QDataStream & operator>>(QDataStream &ds, KFI::Misc::TFont &font)
 {
     ds >> font.family >> font.styleInfo;
     return ds;

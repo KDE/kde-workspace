@@ -73,7 +73,7 @@ public:
     QVector <WeatherData::ForecastInfo *> forecasts;
 };
 
-class KDE_EXPORT UKMETIon : public IonInterface, public Plasma::DataEngineConsumer
+class Q_DECL_EXPORT UKMETIon : public IonInterface, public Plasma::DataEngineConsumer
 {
     Q_OBJECT
 

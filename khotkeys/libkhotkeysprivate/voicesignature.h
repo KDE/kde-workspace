@@ -66,7 +66,7 @@ namespace KHotKeys
 /**
 @author Olivier Goffart
 */
-class KDE_EXPORT VoiceSignature{
+class Q_DECL_EXPORT VoiceSignature{
 public:
     explicit VoiceSignature(const Sound& s);
 

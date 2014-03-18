@@ -23,7 +23,7 @@ namespace KHotKeys
 
 class Condition;
 
-class KDE_EXPORT Not_condition
+class Q_DECL_EXPORT Not_condition
     : public Condition_list_base
     {
     typedef Condition_list_base base;
@@ -38,7 +38,7 @@ class KDE_EXPORT Not_condition
         virtual bool accepts_children() const;
     };
 
-class KDE_EXPORT And_condition
+class Q_DECL_EXPORT And_condition
     : public Condition_list_base
     {
     typedef Condition_list_base base;
@@ -51,7 +51,7 @@ class KDE_EXPORT And_condition
         virtual const QString description() const;
     };
 
-class KDE_EXPORT Or_condition
+class Q_DECL_EXPORT Or_condition
     : public Condition_list_base
     {
     typedef Condition_list_base base;

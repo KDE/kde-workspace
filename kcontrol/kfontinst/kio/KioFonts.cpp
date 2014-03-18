@@ -55,7 +55,7 @@ static const int constReconfigTimeout = 10;
 
 extern "C" {
 
-KDE_EXPORT int kdemain(int argc, char **argv)
+Q_DECL_EXPORT int kdemain(int argc, char **argv)
 {
     if (argc != 4)
     {

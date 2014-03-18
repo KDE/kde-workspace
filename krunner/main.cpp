@@ -37,7 +37,7 @@
 static const char description[] = I18N_NOOP( "KDE run command interface" );
 
 extern "C"
-KDE_EXPORT int kdemain(int argc, char* argv[])
+Q_DECL_EXPORT int kdemain(int argc, char* argv[])
 {
 #ifdef Q_WS_X11
     // krunner only works properly with Qt's native X11 backend; override any compile-time

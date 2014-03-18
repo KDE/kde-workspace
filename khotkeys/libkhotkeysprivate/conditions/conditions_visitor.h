@@ -29,7 +29,7 @@ namespace KHotKeys {
 /**
  * @author Michael Jansen <kde@michael-jansen.biz>
  */
-class KDE_EXPORT ConditionsVisitor
+class Q_DECL_EXPORT ConditionsVisitor
     {
 public:
 

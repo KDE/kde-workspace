@@ -45,7 +45,7 @@ typedef struct _XftColor XftColor;
 namespace KFI
 {
 
-class KDE_EXPORT CFcEngine
+class Q_DECL_EXPORT CFcEngine
 {
     public:
 

@@ -36,7 +36,7 @@ public:
 
 // this one is a base for all "real" resulting actions, e.g. running a command,
 // ActionData instances usually contain at least one Action
-class KDE_EXPORT Action
+class Q_DECL_EXPORT Action
     {
     Q_DISABLE_COPY( Action )
 
@@ -121,7 +121,7 @@ class KDE_EXPORT Action
 Q_DECLARE_OPERATORS_FOR_FLAGS(Action::ActionTypes)
 
 
-class KDE_EXPORT ActionList
+class Q_DECL_EXPORT ActionList
     : public QList< Action* >
     {
     Q_DISABLE_COPY( ActionList )
@@ -156,7 +156,7 @@ public:
     };
 
 
-class KDE_EXPORT CommandUrlAction
+class Q_DECL_EXPORT CommandUrlAction
     : public Action
     {
     typedef Action base;
@@ -192,7 +192,7 @@ public:
     };
 
 
-class KDE_EXPORT MenuEntryAction
+class Q_DECL_EXPORT MenuEntryAction
     : public CommandUrlAction
     {
     typedef CommandUrlAction base;
@@ -227,7 +227,7 @@ public:
     virtual void visit(DBusAction&) = 0;
     };
 
-class KDE_EXPORT DBusAction
+class Q_DECL_EXPORT DBusAction
     : public Action
     {
     typedef Action base;
@@ -276,7 +276,7 @@ public:
     virtual void visit(KeyboardInputAction&) = 0;
     };
 
-class KDE_EXPORT KeyboardInputAction
+class Q_DECL_EXPORT KeyboardInputAction
     : public Action
     {
     typedef Action base;
@@ -346,7 +346,7 @@ public:
     };
 
 
-class KDE_EXPORT ActivateWindowAction
+class Q_DECL_EXPORT ActivateWindowAction
     : public Action
     {
     typedef Action base;

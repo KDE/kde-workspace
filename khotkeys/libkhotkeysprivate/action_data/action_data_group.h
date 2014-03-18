@@ -31,7 +31,7 @@ namespace KHotKeys {
  * # The group can contain actions or action groups.
  * # The group has its own list of conditions. These conditions apply to all children.
  */
-class KDE_EXPORT ActionDataGroup
+class Q_DECL_EXPORT ActionDataGroup
     : public ActionDataBase
     {
     Q_OBJECT

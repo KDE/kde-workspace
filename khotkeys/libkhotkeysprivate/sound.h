@@ -27,7 +27,7 @@
 /**
 @author Olivier Goffart
 */
-class KDE_EXPORT Sound{
+class Q_DECL_EXPORT Sound{
 public:
     Sound();
     ~Sound();

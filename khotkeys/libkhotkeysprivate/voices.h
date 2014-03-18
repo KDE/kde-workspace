@@ -28,7 +28,7 @@ class Voice_trigger;
 class VoiceSignature;
 
 
-class KDE_EXPORT Voice  : public QObject
+class Q_DECL_EXPORT Voice  : public QObject
     {
     Q_OBJECT
     public:
@@ -76,7 +76,7 @@ class KDE_EXPORT Voice  : public QObject
     };
 
 	
-KDE_EXPORT extern Voice* voice_handler;
+Q_DECL_EXPORT extern Voice* voice_handler;
 
 } // namespace KHotKeys
 

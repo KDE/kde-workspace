@@ -81,7 +81,7 @@ public:
     QList<Forecast> forecasts;
 };
 
-class KDE_EXPORT NOAAIon : public IonInterface, public Plasma::DataEngineConsumer
+class Q_DECL_EXPORT NOAAIon : public IonInterface, public Plasma::DataEngineConsumer
 {
     Q_OBJECT
 

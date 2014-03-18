@@ -35,7 +35,7 @@ class ConditionsVisitor;
 /**
  * @author Michael Jansen <kde@michael-jansen.biz>
  */
-class KDE_EXPORT Condition_list_base : public Condition, private QList < Condition* >
+class Q_DECL_EXPORT Condition_list_base : public Condition, private QList < Condition* >
     {
     typedef Condition base;
 

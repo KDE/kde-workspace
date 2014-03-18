@@ -104,7 +104,7 @@ class Folder
     QSet<QString> itsModifiedDirs;
 };
 
-inline KDE_EXPORT uint qHash(const Folder::FlatFont &key)
+inline Q_DECL_EXPORT uint qHash(const Folder::FlatFont &key)
 {
     return qHash(key.file); // +qHash(key.index());
 }

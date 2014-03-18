@@ -45,7 +45,7 @@ enum ActionState
  *
  * Settings are saved to the khotkeysrc file.
  */
-class KDE_EXPORT Settings
+class Q_DECL_EXPORT Settings
 {
     Q_DISABLE_COPY( Settings )
 

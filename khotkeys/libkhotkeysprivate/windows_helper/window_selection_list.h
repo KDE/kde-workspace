@@ -24,7 +24,7 @@
 namespace KHotKeys {
 
 
-class KDE_EXPORT Windowdef_list : public QList< Windowdef* >
+class Q_DECL_EXPORT Windowdef_list : public QList< Windowdef* >
     {
     Q_DISABLE_COPY( Windowdef_list )
 

@@ -29,7 +29,7 @@
 
 namespace KHotKeys {
 
-struct KDE_EXPORT Window_data
+struct Q_DECL_EXPORT Window_data
     {
     Window_data( WId id_P );
     QString title; // _NET_WM_NAME or WM_NAME
@@ -38,7 +38,7 @@ struct KDE_EXPORT Window_data
     NET::WindowType type;
     };
 
-class KDE_EXPORT Windowdef
+class Q_DECL_EXPORT Windowdef
     {
     Q_DISABLE_COPY( Windowdef )
 

@@ -47,7 +47,7 @@ class Windowdef_list;
 /**
  * @author Michael Jansen <kde@michael-jansen.biz>
  */
-class KDE_EXPORT Existing_window_condition
+class Q_DECL_EXPORT Existing_window_condition
     : public QObject, public Condition
     {
     Q_OBJECT

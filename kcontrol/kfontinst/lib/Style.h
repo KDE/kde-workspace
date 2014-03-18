@@ -69,7 +69,7 @@ class KFONTINST_EXPORT Style
 
 typedef QSet<Style> StyleCont;
 
-inline KDE_EXPORT uint qHash(const Style &key)
+inline Q_DECL_EXPORT uint qHash(const Style &key)
 {
     return key.value();
 }
@@ -77,7 +77,7 @@ inline KDE_EXPORT uint qHash(const Style &key)
 }
 
 Q_DECLARE_METATYPE(KFI::Style)
-KDE_EXPORT QDBusArgument & operator<<(QDBusArgument &argument, const KFI::Style &obj);
-KDE_EXPORT const QDBusArgument & operator>>(const QDBusArgument &argument, KFI::Style &obj);
+Q_DECL_EXPORT QDBusArgument & operator<<(QDBusArgument &argument, const KFI::Style &obj);
+Q_DECL_EXPORT const QDBusArgument & operator>>(const QDBusArgument &argument, KFI::Style &obj);
 
 #endif

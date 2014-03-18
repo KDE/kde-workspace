@@ -94,7 +94,7 @@ K_EXPORT_PLUGIN(KCMStyleFactory("kcmstyle"))
 
 extern "C"
 {
-    KDE_EXPORT void kcminit_style()
+    Q_DECL_EXPORT void kcminit_style()
     {
         uint flags = KRdbExportQtSettings | KRdbExportQtColors | KRdbExportXftSettings | KRdbExportGtkTheme;
         KConfig _config( "kcmdisplayrc", KConfig::NoGlobals  );

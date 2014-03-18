@@ -25,7 +25,7 @@ namespace KHotKeys {
 /**
  * Rules to match a windows.
  */
-class KDE_EXPORT Windowdef_simple : public Windowdef
+class Q_DECL_EXPORT Windowdef_simple : public Windowdef
     {
 
     typedef Windowdef base;

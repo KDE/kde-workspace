@@ -26,7 +26,7 @@
 
 namespace KHotKeys {
 
-class KDE_EXPORT MenuEntryShortcutActionData
+class Q_DECL_EXPORT MenuEntryShortcutActionData
     : public SimpleActionDataHelper< ShortcutTrigger, MenuEntryAction >
     {
     public:

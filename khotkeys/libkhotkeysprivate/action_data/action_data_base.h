@@ -31,7 +31,7 @@ class Condition_list;
 /**
  * Base class for all actions.
  */
-class KDE_EXPORT ActionDataBase : public QObject
+class Q_DECL_EXPORT ActionDataBase : public QObject
     {
     Q_OBJECT
 

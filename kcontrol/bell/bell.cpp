@@ -56,7 +56,7 @@ K_EXPORT_PLUGIN(KBellConfigFactory("kcmbell"))
 
 extern "C"
 {
-  KDE_EXPORT void kcminit_bell()
+  Q_DECL_EXPORT void kcminit_bell()
   {
     XKeyboardState kbd;
     XKeyboardControl kbdc;

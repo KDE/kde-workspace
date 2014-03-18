@@ -27,16 +27,16 @@ namespace KHotKeys
 class WindowsHandler;
 class ShortcutsHandler;
 
-KDE_EXPORT extern QPointer<ShortcutsHandler> keyboard_handler;
+Q_DECL_EXPORT extern QPointer<ShortcutsHandler> keyboard_handler;
 extern QPointer<WindowsHandler> windows_handler;
 
 // CHECKME hmms :(
-KDE_EXPORT bool khotkeys_active();
-KDE_EXPORT void khotkeys_set_active( bool active_P );
+Q_DECL_EXPORT bool khotkeys_active();
+Q_DECL_EXPORT void khotkeys_set_active( bool active_P );
 
 QString get_menu_entry_from_path( const QString& path_P );
 
-KDE_EXPORT void init_global_data( bool active_P, QObject* owner_P );
+Q_DECL_EXPORT void init_global_data( bool active_P, QObject* owner_P );
 
 const char* const MENU_EDITOR_ENTRIES_GROUP_NAME = I18N_NOOP( "Menu Editor entries" );
 

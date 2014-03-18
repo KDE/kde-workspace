@@ -34,7 +34,7 @@ const NET::WindowTypes SUPPORTED_WINDOW_TYPES_MASK = NET::NormalMask | NET::Desk
 
 class Windowdef_list;
 
-class KDE_EXPORT WindowsHandler : public QObject
+class Q_DECL_EXPORT WindowsHandler : public QObject
                                   #include <QtGui/qwindowdefs.h>
     {
     Q_OBJECT
