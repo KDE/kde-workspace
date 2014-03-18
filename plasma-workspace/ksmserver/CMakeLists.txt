@@ -1,3 +1,4 @@
+project(ksmserver)
 
 # add_subdirectory( kcm )
 
