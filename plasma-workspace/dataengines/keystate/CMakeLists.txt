@@ -10,6 +10,7 @@ target_link_libraries(plasma_engine_keystate
     KF5::Plasma
     KF5::Service
     KF5::KIOCore
+    KF5::I18n
 )
 
 kservice_desktop_to_json(plasma_engine_keystate plasma-dataengine-keystate.desktop)

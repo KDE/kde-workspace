@@ -32,6 +32,9 @@ target_link_libraries(screenlocker_static
    Qt5::X11Extras
    KF5::IdleTime
    KF5::GlobalAccel
+   KF5::XmlGui
+   KF5::Crash
+   KF5::KDE4Support
    ${X11_LIBRARIES}
    ${X11_Xcursor_LIB}
    ${XCB_XCB_LIBRARY}
