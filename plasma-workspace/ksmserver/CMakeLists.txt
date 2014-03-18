@@ -62,6 +62,10 @@ qt5_add_dbus_adaptor( ksmserver_KDEINIT_SRCS org.kde.KSMServerInterface.xml serv
 
 kf5_add_kdeinit_executable( ksmserver ${ksmserver_KDEINIT_SRCS})
 
+configure_file(KSMServerDBusInterfaceConfig.cmake.in
+    ${CMAKE_CURRENT_BINARY_DIR}/KSMServerDBusInterfaceConfig.cmake @ONLY)
+set(CMAKECONFIG_INSTALL_DIR "${CMAKECONFIG_INSTALL_PREFIX}/KSMServerDBusInterface")
+
 target_link_libraries(kdeinit_ksmserver
     ${SCREEN_LOCKER}
     PW::KWorkspace
@@ -82,6 +86,8 @@ install(TARGETS kdeinit_ksmserver ${INSTALL_TARGETS_DEFAULT_ARGS})
 
 install(TARGETS ksmserver ${INSTALL_TARGETS_DEFAULT_ARGS})
 
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/KSMServerDBusInterfaceConfig.cmake
+    DESTINATION ${CMAKECONFIG_INSTALL_DIR})
 ########### next target ###############
 
 set(kcheckrunning_SRCS
