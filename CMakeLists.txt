@@ -213,6 +213,7 @@ set_package_properties(USB PROPERTIES DESCRIPTION "User level access to USB devi
 
 
 include(ConfigureChecks.cmake)
+configure_file(config-workspace.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/config-workspace.h)
 configure_file(config-unix.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/config-unix.h )
 configure_file(config-X11.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/config-X11.h )
 
