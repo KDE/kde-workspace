@@ -7,3 +7,7 @@ if(NOT CMAKE_INSTALL_PREFIX STREQUAL "/usr")
 endif()
 
 configure_file(startkde.cmake ${CMAKE_CURRENT_BINARY_DIR}/startkde  @ONLY)
+
+if(NOT WIN32)
+  install(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/startkde DESTINATION ${BIN_INSTALL_DIR})
+endif()
