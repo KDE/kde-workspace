@@ -29,7 +29,6 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <QSet>
 #include <QVector>
 
-#include <KSharedPtr>
 #include <KWindowSystem>
 
 class QUuid;

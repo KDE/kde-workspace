@@ -20,8 +20,6 @@
 #ifndef TIMESOURCE_H
 #define TIMESOURCE_H
 
-#include <KDateTime>
-
 #include <Plasma/DataContainer>
 
 class Sun;

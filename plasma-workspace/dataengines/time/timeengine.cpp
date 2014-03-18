@@ -26,7 +26,6 @@
 #include <QTime>
 #include <QTimeZone>
 
-#include <KDateTime>
 #include <Solid/PowerManagement>
 
 #include "timesource.h"

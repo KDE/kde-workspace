@@ -24,7 +24,6 @@
 #include "PreviewSelectAction.h"
 #include "UnicodeBlocks.h"
 #include "UnicodeScripts.h"
-#include <KLocale>
 
 namespace KFI
 {

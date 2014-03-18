@@ -29,14 +29,14 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 // KDE
 #include <KActionCollection>
 #include <KAuthorized>
-#include <KCrash>
-#include <KDebug>
 #include <KIdleTime>
 #include <KLocalizedString>
 // #include <KNotification>
 #include <KProcess>
 #include <KStandardDirs>
 #include <KGlobalAccel>
+#include <KCrash>
+#include <KDebug>
 // Qt
 #include <QAction>
 #include <QTimer>

@@ -33,7 +33,7 @@
 #include <KWindowSystem>
 #include <KPluginInfo>
 #ifdef Q_WS_X11
-#include <NETRootInfo>
+#include <netwm.h>
 #endif
 
 #include <QtCore/QStringBuilder> // % operator for QString

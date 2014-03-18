@@ -28,7 +28,6 @@
 #include "action_data/simple_action_data.h"
 
 #include <KDebug>
-#include <KLocale>
 #include <KUrl>
 
 #include <QtCore/QSignalMapper>

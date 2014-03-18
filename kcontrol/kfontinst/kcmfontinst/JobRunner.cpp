@@ -28,7 +28,6 @@
 #include "ActionLabel.h"
 #include <KGlobal>
 #include <KIconLoader>
-#include <KLocale>
 #include <kio/netaccess.h>
 #include <KStandardDirs>
 #include <KTempDir>

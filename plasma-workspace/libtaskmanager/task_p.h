@@ -28,7 +28,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "task.h"
 
 #include <QTime>
-#include <NETWinInfo>
+#include <netwm.h>
 
 namespace TaskManager
 {

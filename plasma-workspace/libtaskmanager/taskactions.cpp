@@ -38,7 +38,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <KServiceTypeTrader>
 #include <KDesktopFile>
 #include <KRun>
-#include <NETRootInfo>
+#include <netwm.h>
 
 #include <QtCore/QMap>
 #include <QtGui/QHelpEvent>

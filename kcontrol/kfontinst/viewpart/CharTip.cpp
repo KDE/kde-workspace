@@ -32,7 +32,6 @@
 #include "CharTip.h"
 #include "FontPreview.h"
 #include "UnicodeCategories.h"
-#include <KLocale>
 #include <KApplication>
 #include <KGlobalSettings>
 #include <QLabel>

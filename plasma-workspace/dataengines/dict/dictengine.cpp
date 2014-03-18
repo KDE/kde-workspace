@@ -20,7 +20,6 @@
 #include <iostream>
 
 #include <QDebug>
-#include <KLocale>
 #include <QTcpSocket>
 
 #include <Plasma/DataContainer>

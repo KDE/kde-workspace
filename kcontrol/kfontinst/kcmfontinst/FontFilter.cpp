@@ -24,7 +24,6 @@
 #include "FontFilter.h"
 #include "FontFilterProxyStyle.h"
 #include "FontList.h"
-#include <KLocale>
 #include <KIconLoader>
 #include <KToggleAction>
 #include <KSelectAction>

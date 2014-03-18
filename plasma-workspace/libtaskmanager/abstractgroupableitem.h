@@ -87,7 +87,7 @@ public:
     /**
     * @deprecated: use itemType() instead
     **/
-    KDE_DEPRECATED virtual bool isGroupItem() const = 0;
+    TASKMANAGER_DEPRECATED virtual bool isGroupItem() const = 0;
 
     virtual bool isStartupItem() const;
 

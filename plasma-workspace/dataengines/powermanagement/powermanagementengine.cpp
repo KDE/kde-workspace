@@ -28,9 +28,7 @@
 #include <solid/battery.h>
 #include <solid/powermanagement.h>
 
-#include <KLocale>
 #include <klocalizedstring.h>
-#include <KStandardDirs>
 #include <KIdleTime>
 
 #include <QDebug>

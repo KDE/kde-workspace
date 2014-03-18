@@ -34,7 +34,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <KConfig>
 #include <KConfigGroup>
 #include <KDirWatch>
-#include <NETWinInfo>
+#include <netwm.h>
 
 #include <config-workspace.h>
 

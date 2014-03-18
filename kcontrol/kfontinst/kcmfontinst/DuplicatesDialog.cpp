@@ -30,7 +30,6 @@
 #include "JobRunner.h"
 #include <KGlobal>
 #include <KIconLoader>
-#include <KLocale>
 #include <KMessageBox>
 #include <KFileItem>
 #include <KMimeType>

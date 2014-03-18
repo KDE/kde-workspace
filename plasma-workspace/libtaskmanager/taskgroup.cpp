@@ -32,7 +32,6 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <QtCore/QTimer>
 
 // KDE
-#include <ksharedptr.h>
 
 namespace TaskManager
 {

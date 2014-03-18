@@ -28,7 +28,6 @@
 #include <QTreeWidget>
 #include <QStringList>
 
-#include <KLocale>
 #include <KConfig>
 #include <KConfigGroup>
 #include <KShell>

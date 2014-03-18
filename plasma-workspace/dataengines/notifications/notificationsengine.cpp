@@ -23,10 +23,8 @@
 
 #include <QDebug>
 #include <KConfigGroup>
-#include <KGlobal>
 #include <klocalizedstring.h>
 #include <KNotifyConfigWidget>
-#include <KStandardDirs>
 
 #include <Plasma/DataContainer>
 #include <Plasma/Service>

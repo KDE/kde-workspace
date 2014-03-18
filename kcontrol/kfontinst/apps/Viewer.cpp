@@ -29,7 +29,6 @@
 #include <KUniqueApplication>
 #include <KPluginLoader>
 #include <KPluginFactory>
-#include <KLocale>
 #include <KGlobal>
 #include <KFileDialog>
 #include <KConfig>

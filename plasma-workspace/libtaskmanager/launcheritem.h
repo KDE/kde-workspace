@@ -50,7 +50,7 @@ public:
     /**
     * @deprecated: use itemType() instead
     **/
-    KDE_DEPRECATED bool isGroupItem() const;
+    TASKMANAGER_DEPRECATED bool isGroupItem() const;
     ItemType itemType() const;
 
     bool isValid() const;

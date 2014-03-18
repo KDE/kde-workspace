@@ -28,7 +28,6 @@
 #include <QtDBus/QtDBus>
 
 //#include <KDebug>
-#include <KLocale>
 #include <KRun>
 #include <KConfigDialog>
 #include <KDiskFreeSpaceInfo>

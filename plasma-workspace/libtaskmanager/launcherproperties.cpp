@@ -24,7 +24,6 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "launcherproperties.h"
 #include <KOpenWithDialog>
 #include <KDesktopFile>
-#include <KLocale>
 #include <KWindowInfo>
 #include <KWindowSystem>
 #include <KLocalizedString>

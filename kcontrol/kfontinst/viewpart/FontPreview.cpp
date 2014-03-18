@@ -25,7 +25,6 @@
 #include "FcEngine.h"
 #include "CharTip.h"
 #include <KApplication>
-#include <KLocale>
 #include <QtGui/QPainter>
 #include <QtGui/QPaintEvent>
 #include <QtGui/QMouseEvent>

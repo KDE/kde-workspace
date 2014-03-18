@@ -43,7 +43,6 @@
 
 #include <KAboutData>
 #include <KDebug>
-#include <KLocale>
 #include <KMessageBox>
 #include <KPluginLoader>
 #include <config-workspace.h>

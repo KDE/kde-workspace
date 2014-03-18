@@ -26,7 +26,7 @@
 
 #ifdef Q_WS_X11
 #include <QX11Info>
-#include <NETRootInfo>
+#include <netwm.h>
 #endif
 
 WindowsRunner::WindowsRunner(QObject* parent, const QVariantList& args)

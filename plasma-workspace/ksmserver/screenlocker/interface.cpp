@@ -24,7 +24,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "kscreensaveradaptor.h"
 #include "powerdevilpolicyagent.h"
 // KDE
-#include <KDebug>
 #include <KIdleTime>
 #include <KProcess>
 #include <KRandom>
@@ -70,7 +69,7 @@ Interface::Interface(KSldApp *parent)
     if (modules.contains(QLatin1String( "powerdevil" ))) {
       if (!QDBusConnection::sessionBus().connect(QLatin1String( "org.kde.kded5" ), QLatin1String( "/modules/powerdevil" ), QLatin1String( "org.kde.PowerDevil" ),
                           QLatin1String( "DPMSconfigUpdated" ), this, SLOT(configure()))) {
-            kDebug() << "error!";
+            qWarning() << "error!";
         }
     }
     // I make it a really random number to avoid

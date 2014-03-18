@@ -7,14 +7,11 @@
 #include "autologout.h"
 #include "lockwindow.h"
 
-#include <kapplication.h>
-#include <klocale.h>
-#include <kglobalsettings.h>
 #include <kconfig.h>
-#include <kiconloader.h>
-#include <kdebug.h>
 #include <kmessagebox.h>
+#include <KLocalizedString>
 #include <kdialog.h>
+#include <KIconLoader>
 #include <ksmserver_interface.h>
 
 #include <QLayout>

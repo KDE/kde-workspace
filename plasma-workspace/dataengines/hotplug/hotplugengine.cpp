@@ -28,7 +28,6 @@
 #include <KDirWatch>
 #include <KConfigGroup>
 #include <QDebug>
-#include <KLocale>
 #include <KDesktopFile>
 #include <kdesktopfileactions.h>
 #include <Plasma/DataContainer>

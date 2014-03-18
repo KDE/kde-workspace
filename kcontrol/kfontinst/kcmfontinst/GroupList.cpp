@@ -25,7 +25,6 @@
 #include "FontList.h"
 #include <KGlobal>
 #include <KStandardDirs>
-#include <KLocale>
 #include <KMimeType>
 #include <KIconLoader>
 #include <kde_file.h>

@@ -20,7 +20,6 @@
 
 #include <KConfig>
 #include <KConfigGroup>
-#include <KLocale>
 #include <KStandardDirs>
 
 #include <KGlobalSettings>

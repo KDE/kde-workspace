@@ -40,7 +40,6 @@
 #include <QApplication>
 #include <QGroupBox>
 #include <QProcess>
-#include <KLocale>
 #include <kio/netaccess.h>
 #include <KIO/Job>
 #include <KIO/JobUiDelegate>

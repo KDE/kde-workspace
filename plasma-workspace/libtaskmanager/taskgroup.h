@@ -65,7 +65,7 @@ public:
     /**
     * @deprecated: use itemType() instead
     **/
-    KDE_DEPRECATED bool isGroupItem() const;
+    TASKMANAGER_DEPRECATED bool isGroupItem() const;
     bool isRootGroup() const;
 
     /** only true if item is in this group */

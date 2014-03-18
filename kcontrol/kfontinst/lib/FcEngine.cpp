@@ -34,7 +34,6 @@
 #include <KGlobalSettings>
 #include <kio/netaccess.h>
 #include <KGlobal>
-#include <KLocale>
 #include <math.h>
 #include <X11/Xlib.h>
 #include <X11/Xft/Xft.h>

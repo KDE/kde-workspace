@@ -39,7 +39,7 @@
 #include <KLocalizedString>
 #include <KWindowSystem>
 #if HAVE_X11
-#include <NETRootInfo>
+#include <netwm.h>
 #endif
 
 #include <Plasma/FrameSvg>

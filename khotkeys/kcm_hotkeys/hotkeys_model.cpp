@@ -28,7 +28,6 @@
 #include <QMimeData>
 
 #include <KDebug>
-#include <KLocale>
 #include <KIcon>
 
 
