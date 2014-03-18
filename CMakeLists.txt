@@ -241,7 +241,6 @@ add_subdirectory(plasma-desktop)
 #
 # # core apps
 if(NOT WIN32)
-   ecm_optional_add_subdirectory( kcheckpass )
    ecm_optional_add_subdirectory( kwin )
    ecm_optional_add_subdirectory( powerdevil )
    if(Qt5WebKitWidgets_FOUND)

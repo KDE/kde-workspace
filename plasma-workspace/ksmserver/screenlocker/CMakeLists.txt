@@ -2,6 +2,7 @@
 include(PkgConfigGetVar)
 
 add_definitions(-DKDE_DEFAULT_DEBUG_AREA=1223)
+add_subdirectory(kcheckpass)
 add_subdirectory(data)
 add_subdirectory(greeter)
 
