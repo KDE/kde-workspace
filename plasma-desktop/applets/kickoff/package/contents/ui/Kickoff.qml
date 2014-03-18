@@ -181,24 +181,35 @@ Item {
             id: tabBar
 
             width: {
+                if (!visible) {
+                    return 0;
+                }
+
                 switch (plasmoid.location) {
                 case PlasmaCore.Types.LeftEdge:
                 case PlasmaCore.Types.RightEdge:
                     return units.gridUnit * 5;
                 default:
-                    return undefined;
+                    return 0;
                 }
             }
 
             height: {
+                if (!visible) {
+                    return 0;
+                }
+
                 switch (plasmoid.location) {
                 case PlasmaCore.Types.LeftEdge:
                 case PlasmaCore.Types.RightEdge:
-                    return undefined;
+                    return 0;
                 default:
                     return units.gridUnit * 5;
                 }
             }
+
+            Behavior on width { NumberAnimation { duration: units.longDuration; easing.type: Easing.InQuad; } }
+            Behavior on height { NumberAnimation { duration: units.longDuration; easing.type: Easing.InQuad; } }
 
             anchors {
                 top: {
