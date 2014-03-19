@@ -19,7 +19,7 @@ import QtQuick 2.0
 import QtQuick.Layouts 1.1
 import org.kde.plasma.core 2.0 as PlasmaCore
 import org.kde.plasma.components 2.0 as PlasmaComponents
-
+import org.kde.plasma.extras 2.0 as PlasmaExtras
 
 ColumnLayout {
     property string query
@@ -33,6 +33,7 @@ ColumnLayout {
         target: runnerWindow
         onVisibleChanged: queryField.forceActiveFocus();
     }
+
     RowLayout {
         PlasmaComponents.TextField {
             id: queryField
@@ -42,6 +43,17 @@ ColumnLayout {
         PlasmaComponents.ToolButton {
             iconSource: "window-close"
             onClicked: runnerWindow.visible = false
+        }
+    }
+
+    PlasmaExtras.ScrollArea {
+        visible: results.count > 0
+        Layout.fillWidth: true
+        Layout.minimumHeight: units.gridUnit * 25//results.count > 0 ? units.gridUnit * 25 : 0
+        //TODO: ResultsView in a component?
+        ResultsView {
+            id: results
+            queryString: queryField.text
         }
     }
 }
