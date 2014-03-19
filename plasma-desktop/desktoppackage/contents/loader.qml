@@ -20,8 +20,9 @@
 
 import QtQuick 2
 import org.kde.solid 1.0 as Solid
+import org.kde.plasma.platformcomponents 2.0 as Platform
 
-QtObject {
+Item {
     id: main
 
     property string shell  : "org.kde.desktop"
@@ -42,5 +43,9 @@ QtObject {
         query: "IS Keyboard"
     }
     */
+    Platform.Application {
+        application: "krunner"
+        running: main.loaded
+    }
 }
 

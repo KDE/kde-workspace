@@ -31,7 +31,13 @@ ColumnLayout {
 
     Connections {
         target: runnerWindow
-        onVisibleChanged: queryField.forceActiveFocus();
+        onVisibleChanged: {
+            if (runnerWindow.visible) {
+                queryField.forceActiveFocus();
+            } else {
+                queryField.text = "";
+            }
+        }
     }
 
     RowLayout {
