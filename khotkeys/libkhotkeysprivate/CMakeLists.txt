@@ -79,7 +79,7 @@ target_link_libraries(khotkeysprivate
     KF5::KIOWidgets
     KF5::XmlGui
     KF5::KDE4Support
-    ${X11_LIBRARIES})
+    ${X11_X11_LIB})
 if(X11_XTest_FOUND)
   target_link_libraries(khotkeysprivate ${X11_XTest_LIB})
 endif()
