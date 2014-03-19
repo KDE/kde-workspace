@@ -285,7 +285,9 @@ void NotificationsEngine::timerEvent(QTimerEvent *event)
 
 void NotificationsEngine::CloseNotification(uint id)
 {
-    removeSource(QString("notification %1").arg(id));
+    const QString source = QString("notification %1").arg(id);
+    m_activeNotifications.remove(source);
+    removeSource(source);
     emit NotificationClosed(id, 3);
 }
 
