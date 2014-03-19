@@ -28,7 +28,6 @@
 #include <knotification.h>
 #include <klocalizedstring.h>
 #include <kaboutdata.h>
-#include <config-workspace.h>
 
 #if defined(BUILD_AS_EXECUTABLE)
 # include <QtCore/QCoreApplication>
@@ -43,7 +42,7 @@
 
 static inline KAboutData aboutData()
 {
-    return KAboutData("kwrited", 0, i18n("kwrited"), WORKSPACE_VERSION_STRING);
+    return KAboutData("kwrited", 0, i18n("kwrited"), KWRITED_STRING_VERSION);
 }
 
 #if defined(BUILD_AS_EXECUTABLE)

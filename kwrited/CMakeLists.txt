@@ -1,3 +1,27 @@
+project(kwrited)
+cmake_minimum_required(VERSION 2.8.12 FATAL_ERROR)
+set(QT_MIN_VERSION "5.2.0")
+
+set(KWRITED_VERSION 4.9.97)
+set(KWRITED_STRING_VERSION "${KWRITED_VERSION}")
+
+remove_definitions(-DQT_NO_CAST_FROM_ASCII -DQT_STRICT_ITERATORS -DQT_NO_CAST_FROM_BYTEARRAY -DQT_NO_KEYWORDS)
+
+find_package(ECM 0.0.11 REQUIRED NO_MODULE)
+set(CMAKE_MODULE_PATH ${ECM_MODULE_PATH} ${ECM_KDE_MODULE_DIR})
+
+include(KDEInstallDirs)
+include(KDECMakeSettings)
+include(KDECompilerSettings)
+
+find_package(Qt5 ${QT_MIN_VERSION} CONFIG REQUIRED COMPONENTS
+    Core
+)
+find_package(KF5 CONFIG REQUIRED COMPONENTS
+    Pty
+    KDE4Support
+)
+
 # If libutempter is not available on the system, we build
 # kwrited as an executable that is installed with setuid root
 # (or setgid utmp) in order to be able to login successfully
@@ -12,6 +36,7 @@ configure_file(config-kwrited.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/config-kwrited
 
 if (BUILD_AS_EXECUTABLE)
     add_executable(kwrited kwrited.cpp)
+    target_compile_definitions(kwrited PRIVATE -DKWRITED_STRING_VERSION="${KWRITED_STRING_VERSION}")
     target_link_libraries(kwrited  KF5::KDE4Support KF5::Pty)
     install(TARGETS kwrited  ${INSTALL_TARGETS_DEFAULT_ARGS} )
     install(CODE "
@@ -34,6 +59,7 @@ if (BUILD_AS_EXECUTABLE)
     install(FILES kwrited-autostart.desktop DESTINATION ${AUTOSTART_INSTALL_DIR})
 else ()
     add_library(kded_kwrited MODULE kwrited.cpp)
+    target_compile_definitions(kded_kwrited PRIVATE -DKWRITED_STRING_VERSION="${KWRITED_STRING_VERSION}")
     target_link_libraries(kded_kwrited  KF5::KDE4Support KF5::Pty)
     install(TARGETS kded_kwrited  DESTINATION ${PLUGIN_INSTALL_DIR} )
 
