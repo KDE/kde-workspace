@@ -164,18 +164,12 @@ uint NotificationsEngine::Notify(const QString &app_name, uint replaces_id,
 
             // remove the old notification and replace it with the new one
             // TODO: maybe just update the current notification?
-            removeSource(source);
-            m_activeNotifications.remove(source);
+            CloseNotification(partOf);
         }
     }
 
     uint id = 0;
-    if (replaces_id > 0) {
-        id = replaces_id;
-    } else {
-        id = m_nextId++;
-    }
-//     id = replaces_id ? replaces_id : m_nextId++;
+    id = replaces_id ? replaces_id : m_nextId++;
 
     QString appname_str = app_name;
     if (appname_str.isEmpty()) {
