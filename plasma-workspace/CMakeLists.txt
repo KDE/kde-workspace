@@ -1,5 +1,7 @@
 project(plasma-workspace)
 
+plasma_install_package(lookandfeel org.kde.lookandfeel plasma/look-and-feel lookandfeel)
+
 add_subdirectory(libkworkspace)
 add_subdirectory(libtaskmanager)
 
