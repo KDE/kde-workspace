@@ -8,7 +8,7 @@ remove_definitions(-DQT_NO_CAST_FROM_BYTEARRAY)
 remove_definitions(-DQT_NO_CAST_TO_ASCII)
 
 
-set(ksmserver_xml  ${KDEBASE_WORKSPACE_SOURCE_DIR}/plasma-workspace/ksmserver/org.kde.KSMServerInterface.xml)
+set(ksmserver_xml  ${ksmserver_SOURCE_DIR}/org.kde.KSMServerInterface.xml)
 qt5_add_dbus_interface( kworkspace_LIB_SRCS ${ksmserver_xml} ksmserver_interface )
 
 set(kwin_xml  ${KDEBASE_WORKSPACE_SOURCE_DIR}/kwin/org.kde.KWin.xml)
@@ -26,8 +26,9 @@ set_target_properties(kworkspace PROPERTIES
                       )
 
 generate_export_header(kworkspace)
-# kdeui is needed for KWindowInfo
-target_link_libraries(kworkspace Qt5::DBus Qt5::Core KF5::I18n KF5::WindowSystem Xau KF5::Plasma)
+target_link_libraries(kworkspace Qt5::DBus Qt5::Core
+                                 KF5::I18n KF5::WindowSystem KF5::Plasma
+                                 Xau)
 target_include_directories(kworkspace PUBLIC "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>"
                                       INTERFACE "$<INSTALL_INTERFACE:${INCLUDE_INSTALL_DIR}/kworkspace>" )
 

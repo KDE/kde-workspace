@@ -38,7 +38,7 @@ add_library(taskmanager ${taskmanager_LIB_SRCS})
 generate_export_header(taskmanager)
 target_include_directories(taskmanager PRIVATE "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>")
 target_link_libraries(taskmanager
-    processcore
+    KF5::ProcessCore
     KF5::ConfigCore
     KF5::ConfigWidgets
     KF5::IconThemes

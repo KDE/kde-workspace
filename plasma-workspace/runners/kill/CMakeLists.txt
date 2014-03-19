@@ -18,7 +18,7 @@ target_link_libraries(kcm_krunner_kill
     
 add_library(krunner_kill MODULE ${krunner_kill_SRCS})
 target_link_libraries(krunner_kill
-                      KF5::Plasma KIOCore processcore)
+                      KF5::Plasma KIOCore KF5::ProcesCore)
 add_dependencies(krunner_kill kcm_krunner_kill)
 
 install(TARGETS krunner_kill kcm_krunner_kill

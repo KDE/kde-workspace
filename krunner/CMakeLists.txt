@@ -59,7 +59,7 @@ kf5_add_kdeinit_executable(krunner ${krunner_SRCS})
 target_link_libraries(kdeinit_krunner PW::KWorkspace  plasmagenericshell KF5::Plasma ${KDE4_SOLID_LIBRARIES} ${KDE4_THREADWEAVER_LIBRARIES} ${KDE4_KDEUI_LIBS}  ${KDE4_KCMUTILS_LIBS} )
 
 if(NOT WIN32)
-  target_link_libraries(kdeinit_krunner processui  ${X11_Xrender_LIB} ${X11_LIBRARIES})
+  target_link_libraries(kdeinit_krunner KF5::ProcessUi  ${X11_Xrender_LIB} ${X11_LIBRARIES})
 endif()
 
 if(X11_Xss_LIB)

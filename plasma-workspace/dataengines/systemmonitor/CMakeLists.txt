@@ -9,7 +9,7 @@ target_link_libraries(plasma_engine_systemmonitor
     Qt5::Network
     KF5::Plasma
     KF5::Service
-    ksgrd
+    KF5::SysGuard
 )
 
 kservice_desktop_to_json(plasma_engine_systemmonitor plasma-dataengine-systemmonitor.desktop)
