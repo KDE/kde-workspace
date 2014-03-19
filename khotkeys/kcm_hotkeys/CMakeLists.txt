@@ -77,8 +77,9 @@ qt5_add_dbus_interface(
     khotkeys_interface)
 
 
-kde4_add_plugin(
+add_library(
     kcm_hotkeys
+    MODULE
     ${kcm_hotkeys_PART_SRCS}
     )
 
