@@ -33,8 +33,8 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <KDesktopFile>
 #include <KService>
 #include <KServiceTypeTrader>
-#include <ksysguard/processcore/processes.h>
-#include <ksysguard/processcore/process.h>
+#include <processcore/processes.h>
+#include <processcore/process.h>
 
 #include <QtCore/QFile>
 #include <QtCore/QTimer>

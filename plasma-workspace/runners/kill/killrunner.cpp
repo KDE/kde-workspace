@@ -27,8 +27,8 @@
 #include <KUser>
 #include <kauth.h>
 
-#include "ksysguard/processcore/processes.h"
-#include "ksysguard/processcore/process.h"
+#include "processcore/processes.h"
+#include "processcore/process.h"
 
 #include "killrunner_config.h"
 

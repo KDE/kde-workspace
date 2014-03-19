@@ -231,6 +231,9 @@ include_directories(${CMAKE_SOURCE_DIR} ${CMAKE_BINARY_DIR} ${CMAKE_SOURCE_DIR}/
 # libs
 # add_subdirectory(cmake)
 add_subdirectory(libs)
+
+add_subdirectory(libksysguard)
+
 #
 # system settings (kcontrol replacement)
 ecm_optional_add_subdirectory( systemsettings )

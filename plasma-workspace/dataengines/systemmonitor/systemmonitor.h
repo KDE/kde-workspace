@@ -21,7 +21,7 @@
 
 #include <Plasma/DataEngine>
 
-#include "ksysguard/ksgrd/SensorClient.h"
+#include <ksgrd/SensorClient.h>
 
 #include <QStringList>
 
