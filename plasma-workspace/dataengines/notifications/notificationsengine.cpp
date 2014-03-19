@@ -158,14 +158,6 @@ uint NotificationsEngine::Notify(const QString &app_name, uint replaces_id,
         const QString source = QString("notification %1").arg(partOf);
         Plasma::DataContainer *container = containerForSource(source);
         if (container) {
-            // remove the timers for the first notification
-            // they need to be restarted with the second notification
-            // being appended
-            int timerId = m_sourceTimers.value(source);
-            killTimer(timerId);
-            m_sourceTimers.remove(source);
-            m_timeouts.remove(timerId);
-
             // append the body text
             _body = container->data()["body"].toString();
             _body.append("\n").append(body);
@@ -203,15 +195,6 @@ uint NotificationsEngine::Notify(const QString &app_name, uint replaces_id,
     timeout = 2000 + qMax(timeout, 3000);
 
     const QString source = QString("notification %1").arg(id);
-    if (replaces_id) {
-        Plasma::DataContainer *container = containerForSource(source);
-        if (container && container->data()["expireTimeout"].toInt() != timeout) {
-            int timerId = m_sourceTimers.value(source);
-            killTimer(timerId);
-            m_sourceTimers.remove(source);
-            m_timeouts.remove(timerId);
-        }
-    }
 
     Plasma::DataEngine::Data notificationData;
     notificationData.insert("id", QString::number(id));
@@ -258,29 +241,7 @@ uint NotificationsEngine::Notify(const QString &app_name, uint replaces_id,
 
     m_activeNotifications.insert(source, app_name + summary);
 
-    if (!isPersistent) {
-        int timerId = startTimer(timeout);
-        m_sourceTimers.insert(source, timerId);
-        m_timeouts.insert(timerId, source);
-    }
-
     return id;
-}
-
-void NotificationsEngine::timerEvent(QTimerEvent *event)
-{
-    const QString source = m_timeouts.value(event->timerId());
-    if (!source.isEmpty()) {
-        killTimer(event->timerId());
-        m_sourceTimers.remove(source);
-        m_timeouts.remove(event->timerId());
-        removeSource(source);
-        m_activeNotifications.remove(source);
-        emit NotificationClosed(source.split(" ").last().toInt(), 1);
-        return;
-    }
-
-    Plasma::DataEngine::timerEvent(event);
 }
 
 void NotificationsEngine::CloseNotification(uint id)
