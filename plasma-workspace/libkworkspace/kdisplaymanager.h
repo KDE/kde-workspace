@@ -26,7 +26,7 @@
 #include <QtCore/QString>
 #include <QtCore/QList>
 #include <QtCore/QByteArray>
-#include <config-workspace.h>
+#include <config-X11.h>
 
 struct KWORKSPACE_EXPORT SessEnt {
     QString display, from, user, session;

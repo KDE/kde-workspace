@@ -36,7 +36,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include <taskmanager.h>
 #include <taskmanager_export.h>
-#include <config-workspace.h>
+#include <config-X11.h>
 
 class NETWinInfo;
 

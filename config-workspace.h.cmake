@@ -157,5 +157,3 @@
 #define kde_socklen_t socklen_t
 
 #define WORKSPACE_VERSION_STRING "${KDE4WORKSPACE_VERSION}"
-
-#define HAVE_X11 ${HAVE_X11}

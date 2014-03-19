@@ -27,7 +27,7 @@
 #include <Plasma/Applet>
 
 #include "model.h"
-#include <config-workspace.h>
+#include <config-X11.h>
 
 class QDesktopWidget;
 

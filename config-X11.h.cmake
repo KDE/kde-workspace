@@ -39,3 +39,6 @@
 
 /* Define if you have XRandR 1.3 */
 #cmakedefine HAS_RANDR_1_3 1
+
+/* Define if you have X11 at all */
+#define HAVE_X11 ${HAVE_X11}
