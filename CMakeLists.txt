@@ -204,20 +204,6 @@ set_package_properties(USB PROPERTIES DESCRIPTION "User level access to USB devi
 
 
 include(ConfigureChecks.cmake)
-configure_file(config-workspace.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/config-workspace.h)
-configure_file(config-unix.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/config-unix.h )
-configure_file(config-X11.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/config-X11.h )
-
-add_definitions(${QT_DEFINITIONS} -DHAVE_CONFIG_H=1)
-add_definitions(-DQT_USE_FAST_CONCATENATION -DQT_USE_FAST_OPERATOR_PLUS)
-
-################# Enable C++11 features for clang and gcc #################
-
-if(UNIX)
-   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -std=c++0x")
-endif()
-
-include_directories(${CMAKE_SOURCE_DIR} ${CMAKE_BINARY_DIR})
 
 # libs
 # add_subdirectory(cmake)

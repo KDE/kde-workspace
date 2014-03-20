@@ -328,7 +328,7 @@ void DBusSystemTrayTask::syncIcons(const Plasma::DataEngine::Data &properties)
             QStringList tokens = path.split('/', QString::SkipEmptyParts);
             if (tokens.length() >= 3 && tokens.takeLast() == QLatin1String("icons")) {
                 QString appName = tokens.takeLast();
-                QString prefix = QChar('/') % tokens.join("/");
+                QString prefix = QChar('/') + tokens.join("/");
                 if (!QIcon::themeSearchPaths().contains(prefix)) {
                     QIcon::setThemeSearchPaths(QStringList(prefix) << QIcon::themeSearchPaths());
                 }
