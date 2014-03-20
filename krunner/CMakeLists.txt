@@ -1,3 +1,10 @@
+find_package(X11)
+set_package_properties(X11 PROPERTIES DESCRIPTION "X11 libraries"
+                        URL "http://www.x.org"
+                        TYPE OPTIONAL
+                        PURPOSE "Required for building the X11 based workspace"
+                    )
+
 #KDE4_NO_ENABLE_FINAL(krunner)
 add_definitions(-DKDE_DEFAULT_DEBUG_AREA=1207)
 

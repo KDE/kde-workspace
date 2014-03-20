@@ -87,10 +87,6 @@ if(X11_FOUND)
   if(XCB_SHAPE_FOUND)
     target_link_libraries(krunner ${XCB_SHAPE_LIBRARY})
   endif()
-
-  if(HAVE_GLX)
-    target_link_libraries(krunner ${OPENGL_gl_LIBRARY})
-  endif()
 endif()
 
 install(TARGETS krunner ${INSTALL_TARGETS_DEFAULT_ARGS})
