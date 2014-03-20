@@ -133,21 +133,23 @@ Item {
 
     PlasmaCore.FrameSvgItem {
         id: timezoneBg
-        imagePath: "widgets/background"
-        width: timezoneText.width+30
-        height: timezoneText.height+30
-        anchors.centerIn: timezoneText
-        visible: showTimezone
-    }
-    Text {
-        id: timezoneText
         anchors {
             horizontalCenter: parent.horizontalCenter
             bottom: parent.bottom
             bottomMargin: 10
         }
+        imagePath: "widgets/background"
+        width: childrenRect.width + margins.right + margins.left
+        height: childrenRect.height + margins.top + margins.bottom
+        anchors.centerIn: timezoneText
         visible: showTimezone
+        Text {
+            id: timezoneText
+            x: timezoneBg.margins.left
+            y: timezoneBg.margins.top
+        }
     }
+        
 
     PlasmaCore.Dialog {
         id: calendar
