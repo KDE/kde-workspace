@@ -40,9 +40,7 @@ PlasmaCore.Dialog {
     property var notificationProperties
 
     onVisibleChanged: {
-        if (visible) {
-            notificationTimer.running = true;
-        }
+        notificationTimer.running = visible;
     }
 
 //     onHeightChanged:  setCustomPosition(notificationPopup.savedPos, false)
