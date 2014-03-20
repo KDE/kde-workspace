@@ -1,5 +1,3 @@
-include_directories(${KDEBASE_WORKSPACE_SOURCE_DIR}/libs)
-
 set(krunner_activities_SRCS
     activityrunner.cpp
 )

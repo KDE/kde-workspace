@@ -226,11 +226,10 @@ if(UNIX)
    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -std=c++0x")
 endif()
 
-include_directories(${CMAKE_SOURCE_DIR} ${CMAKE_BINARY_DIR} ${CMAKE_SOURCE_DIR}/libs)
+include_directories(${CMAKE_SOURCE_DIR} ${CMAKE_BINARY_DIR})
 
 # libs
 # add_subdirectory(cmake)
-add_subdirectory(libs)
 
 add_subdirectory(libksysguard)
 
@@ -240,6 +239,7 @@ ecm_optional_add_subdirectory( systemsettings )
 
 add_subdirectory(plasma-workspace)
 add_subdirectory(plasma-desktop)
+add_subdirectory(oxygen)
 
 #
 # # core apps
