@@ -11,13 +11,12 @@ set_package_properties(XCB PROPERTIES DESCRIPTION "X protocol C-language Binding
                       )
 
 if(X11_FOUND AND XCB_XCB_FOUND)
-  set(HAVE_X11 1)
   find_package(Qt5 REQUIRED NO_MODULE COMPONENTS X11Extras)
   #X11_Xrender discovery is done by FindX11
   #add_feature_info("X Rendering Extension (libXrender)" X11_Xrender_FOUND "Support for compositing, rendering operations, and alpha-blending. STRONGLY RECOMMENDED")
 endif()
 
-if(HAVE_X11 AND XCB_XCB_FOUND AND XCB_COMPOSITE_FOUND AND XCB_DAMAGE_FOUND)
+if(X11_FOUND AND XCB_XCB_FOUND AND XCB_COMPOSITE_FOUND AND XCB_DAMAGE_FOUND)
     add_definitions(-DHAVE_XCB_COMPOSITE=1)
     include_directories(
         ${XCB_XCB_INCLUDE_DIR}
@@ -27,7 +26,7 @@ if(HAVE_X11 AND XCB_XCB_FOUND AND XCB_COMPOSITE_FOUND AND XCB_DAMAGE_FOUND)
 else()
     add_definitions(-DHAVE_XCB_COMPOSITE=0)
 endif()
-if(HAVE_X11 AND XCB_XCB_FOUND AND XCB_SHAPE_FOUND)
+if(X11_FOUND AND XCB_XCB_FOUND AND XCB_SHAPE_FOUND)
     add_definitions(-DHAVE_XCB_SHAPE=1)
     include_directories(${XCB_SHAPE_INCLUDE_DIR})
 else()
@@ -75,7 +74,7 @@ target_link_libraries(krunner
     KF5::DBusAddons
 )
 
-if(HAVE_X11)
+if(X11_FOUND)
   target_link_libraries(krunner ${X11_LIBRARIES} ${XCB_XCB_LIBRARY} )
   target_link_libraries(krunner Qt5::X11Extras)
 

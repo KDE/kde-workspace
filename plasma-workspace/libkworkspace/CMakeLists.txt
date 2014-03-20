@@ -32,8 +32,8 @@ target_link_libraries(kworkspace Qt5::DBus Qt5::Core
 target_include_directories(kworkspace PUBLIC "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>"
                                       INTERFACE "$<INSTALL_INTERFACE:${INCLUDE_INSTALL_DIR}/kworkspace>" )
 
-if(HAVE_X11)
-    set_target_properties(kworkspace PROPERTIES COMPILE_FLAGS -DHAVE_X11)
+if(X11_FOUND)
+    set_target_properties(kworkspace PROPERTIES COMPILE_FLAGS -DHAVE_X11=1)
     target_link_libraries(kworkspace Qt5::X11Extras ${X11_LIBRARIES})
 endif()
 

@@ -7,7 +7,7 @@ set( themes_RC
     qtwindows.themerc
 )
 
-if (HAVE_X11)
+if (X11_FOUND)
   set( themes_RC ${themes_RC}
       qtgtk.themerc
   )

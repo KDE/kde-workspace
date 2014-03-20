@@ -115,7 +115,6 @@ set_package_properties(XKB PROPERTIES
 
 
 find_package(X11)
-set (HAVE_X11 ${X11_FOUND})
 
 set_package_properties(X11 PROPERTIES DESCRIPTION "X11 libraries"
                         URL "http://www.x.org"
@@ -123,7 +122,7 @@ set_package_properties(X11 PROPERTIES DESCRIPTION "X11 libraries"
                         PURPOSE "Required for building the X11 based workspace"
                     )
 
-if(HAVE_X11)
+if(X11_FOUND)
   find_package(XCB REQUIRED COMPONENTS XCB XFIXES DAMAGE COMPOSITE SHAPE SYNC RENDER RANDR KEYSYMS IMAGE SHM XTEST)
   set_package_properties(XCB PROPERTIES TYPE REQUIRED)
   find_package(XCB COMPONENTS ICCCM)

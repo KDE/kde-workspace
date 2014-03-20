@@ -48,7 +48,7 @@ target_link_libraries(taskmanager
     KF5::Service
     KF5::WindowSystem
 )
-if (HAVE_X11)
+if (X11_FOUND)
     target_link_libraries(taskmanager ${Qt5X11Extras_LIBRARIES} ${X11_LIBRARIES})
     if (X11_Xfixes_FOUND)
     target_link_libraries(taskmanager ${X11_Xfixes_LIB})
