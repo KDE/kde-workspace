@@ -150,6 +150,13 @@ Column {
 
         onSourceRemoved: {
             notificationPositioner.closePopup(source);
+
+            for (var i = 0; i < notificationsModel.count; ++i) {
+                if (notificationsModel.get(i).source == source) {
+                    notificationsModel.remove(i)
+                    break
+                }
+            }
         }
 
         onNewData: {
