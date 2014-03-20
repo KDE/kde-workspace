@@ -212,7 +212,9 @@ PlasmaCore.Dialog {
             repeat: false
             running: false
             onTriggered: {
-                closeNotification(notificationProperties.source)
+                if (!notificationProperties.isPersistent) {
+                    closeNotification(notificationProperties.source)
+                }
                 notificationPopup.close()
             }
         }
