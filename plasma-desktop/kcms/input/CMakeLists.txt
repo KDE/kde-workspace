@@ -3,9 +3,6 @@ add_subdirectory( pics )
 
 configure_file (config-kcontrol-input.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/config-kcontrol-input.h )
 
-include_directories( ${KDE4_INCLUDES} )
-
-
 include_directories( ${LIBUSB_INCLUDE_DIR} )
 
 if(X11_Xcursor_FOUND)

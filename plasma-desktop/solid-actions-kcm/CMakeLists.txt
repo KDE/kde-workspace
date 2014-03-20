@@ -1,16 +1,5 @@
 project (solid-actions)
 
-# We allow this to be built seperately for convienence purposes
-if(CMAKE_SOURCE_DIR STREQUAL "${CMAKE_CURRENT_SOURCE_DIR}")
-
-    find_package(KDE4 REQUIRED)
-    include(KDE4Defaults)
-    add_definitions(${QT_DEFINITIONS} ${KDE4_DEFINITIONS})
-
-endif()
-
-include_directories (${CMAKE_BINARY_DIR} ${KDE4_INCLUDES})
-
 add_subdirectory(device-actions)
 
 ########### next target ###############

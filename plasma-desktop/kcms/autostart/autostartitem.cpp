@@ -26,6 +26,7 @@
 #include <QDir>
 #include <QDebug>
 
+#include <KLocalizedString>
 #include <KIO/CopyJob>
 
 AutoStartItem::AutoStartItem( const QString &service, QTreeWidgetItem *parent, Autostart* )

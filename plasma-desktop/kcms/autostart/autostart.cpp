@@ -36,7 +36,7 @@
 #include <KDesktopFile>
 #include <KMessageBox>
 #include <KAboutData>
-#include <kio/netaccess.h>
+#include <KLocalizedString>
 #include <KIO/DeleteJob>
 #include <KIO/CopyJob>
 #include <QDebug>
