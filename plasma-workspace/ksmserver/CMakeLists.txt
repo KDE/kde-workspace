@@ -2,12 +2,6 @@ project(ksmserver)
 
 # add_subdirectory( kcm )
 
-include_directories(
-   ${KDEBASE_WORKSPACE_SOURCE_DIR}/libs
-   ${KDECLARATIVE_INCLUDE_DIR}
-   ${plasma-workspace_SOURCE_DIR}/libkworkspace
-)
-#
 add_subdirectory( tests )
 #
 if(NOT WIN32)

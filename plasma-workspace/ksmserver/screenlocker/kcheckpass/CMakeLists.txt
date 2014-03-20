@@ -1,3 +1,4 @@
+project(KCheckPass)
 
 include_directories( ${UNIXAUTH_INCLUDE_DIRS} )
 check_include_files(paths.h HAVE_PATHS_H)

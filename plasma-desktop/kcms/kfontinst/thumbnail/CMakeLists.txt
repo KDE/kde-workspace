@@ -1,6 +1,6 @@
 
 include_directories(
-    ${KDEBASE_WORKSPACE_SOURCE_DIR}/kcontrol/kfontinst/viewpart/
+    ${kcms_SOURCE_DIR}/kfontinst/viewpart/
      )
 
 set(fontthumbnail_PART_SRCS FontThumbnail.cpp )

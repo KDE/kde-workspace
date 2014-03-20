@@ -1,6 +1,6 @@
 include_directories(${CMAKE_SOURCE_DIR} 
                     ${CMAKE_BINARY_DIR} ${KDE4_INCLUDES} ${CMAKE_CURRENT_BINARY_DIR}
-                    ${KDEBASE_WORKSPACE_SOURCE_DIR}/kcontrol/fonts)
+                    ${kcms_SOURCE_DIR}/fonts)
 add_definitions(${QT_DEFINITIONS})
 
 set(fontinst_bin_SRCS FcConfig.cpp FontInst.cpp Folder.cpp Main.cpp Utils.cpp ${libkfontinstdbusiface_SRCS} )
