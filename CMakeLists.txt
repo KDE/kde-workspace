@@ -36,9 +36,6 @@ include(KDECompilerSettings)
 include(ECMOptionalAddSubdirectory)
 include(ECMInstallIcons)
 
-#TODO: this was coming from KDELibs4, we need a replacement
-set(KDE_PLATFORM_PROFILE "Desktop")
-
 find_package(Qt5 ${QT_MIN_VERSION} CONFIG REQUIRED COMPONENTS Core DBus Quick Widgets Concurrent X11Extras Test UiTools)
 find_package(Qt5WebKitWidgets)
 
