@@ -60,9 +60,6 @@ void NotificationsHelper::positionPopup(QObject *win)
     connect(popup, SIGNAL(visibleChanged(bool)),
             this, SLOT(popupClosed(bool)));
 
-    connect(popup, SIGNAL(destroyed(QObject*)),
-            this, SLOT(popupDestroyed(QObject*)));
-
     popup->setX(workAreaForScreen(m_plasmoidScreen).width() - popup->width() - 20);
     popup->setY(workAreaForScreen(m_plasmoidScreen).height() - (m_popups.size() * (popup->height() + 30)));
 
@@ -91,21 +88,8 @@ void NotificationsHelper::popupClosed(bool visible)
         }
         qDebug() << "Repositioning" << m_popups.size() << "left windows";
         repositionPopups();
-
     }
 
-}
-
-void NotificationsHelper::popupDestroyed(QObject *object)
-{
-    qDebug() << ">>>>>> Stuff before:" << m_popups.size();
-    if (object) {
-        m_popups.removeOne(qobject_cast<QQuickWindow*>(object));
-        m_sourceMap.remove(object->property("sourceName").toString());
-    }
-    qDebug() << ">>>>>> Stuff after:" << m_popups.size();
-
-    repositionPopups();
 }
 
 void NotificationsHelper::repositionPopups()
