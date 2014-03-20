@@ -126,36 +126,6 @@ Column {
         property bool inserting: false;
     }
 
-    ListModel {
-        id: allApplicationsModel
-
-        function addApplication(icon, name) {
-            for (var i = 0; i < count; ++i) {
-                var item = get(i)
-                if (item.name == name) {
-                    setProperty(i, "count", item.count + 1)
-                    return
-                }
-            }
-            append({"icon": icon, "name": name, "count": 1})
-        }
-
-        function removeApplication(name) {
-            for (var i = 0; i < count; ++i) {
-                var item = get(i)
-                if (item.name == name) {
-                    if (item.count <= 1) {
-                        remove(i)
-                        appTabBar.currentTab = allAppsTab
-                        return
-                    }
-                    setProperty(i, "count", item.count - 1)
-                    return
-                }
-            }
-        }
-    }
-
     PlasmaCore.DataSource {
         id: idleTimeSource
 
@@ -228,30 +198,6 @@ Column {
         }
     }
 
-    PlasmaComponents.ListItem {
-        visible: allApplicationsModel.count > 1
-
-        PlasmaComponents.TabBar {
-            id: appTabBar
-            anchors.horizontalCenter: parent.horizontalCenter
-            width: Math.min(implicitWidth, parent.width-8)
-
-            PlasmaComponents.TabButton {
-                id: allAppsTab
-                text: i18n("All")
-                iconSource: "dialog-information"
-            }
-
-            Repeater {
-                model: allApplicationsModel
-
-                PlasmaComponents.TabButton {
-                    text: name
-                    iconSource: icon
-                }
-            }
-        }
-    }
 
     NotificationsHelper {
         id: notificationPositioner
