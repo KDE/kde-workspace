@@ -180,25 +180,6 @@ Column {
 
     }
 
-    Title {
-        visible: notificationsRepeater.count > 1 || (jobs && jobs.count > 0 && notificationsRepeater.count > 0)
-        text: i18n("Notifications")
-
-        PlasmaComponents.ToolButton {
-            anchors {
-                right: parent.right
-                verticalCenter: parent.verticalCenter
-            }
-            width: notificationsApplet.toolIconSize
-            height: width
-
-            iconSource: "window-close"
-
-            onClicked: notificationsModel.clear()
-        }
-    }
-
-
     NotificationsHelper {
         id: notificationPositioner
         plasmoidScreen: plasmoid.screen
