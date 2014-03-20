@@ -64,17 +64,12 @@ Q_SIGNALS:
     void NotificationClosed( uint id, uint reason );
     void ActionInvoked( uint id, const QString& actionKey );
 
-protected:
-    void timerEvent(QTimerEvent *event);
-
 private:
     /**
      * Holds the id that will be assigned to the next notification source
      * that will be created
      */
     uint m_nextId;
-    QHash<int, QString> m_timeouts; // timerIDs -> sources
-    QHash<QString, int> m_sourceTimers; // sources -> timerIDs
 
     QHash<QString, QString> m_activeNotifications;
 
