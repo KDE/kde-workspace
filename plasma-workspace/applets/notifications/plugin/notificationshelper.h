@@ -39,7 +39,6 @@ public:
 
 private Q_SLOTS:
     void popupClosed(bool visible);
-    void popupDestroyed(QObject *object);
 
 private:
     void repositionPopups();
