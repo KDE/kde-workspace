@@ -47,7 +47,7 @@ public:
         QCoreApplication::setOrganizationDomain(QStringLiteral("kde.org"));
         QApplication::setApplicationDisplayName(i18n("KDE Menu Editor"));
     }
-#ifndef Q_WS_WIN
+#ifdef WITH_HOTKEYS
    virtual ~KMenuApplication() { KHotKeys::cleanup(); }
 #endif
 };

@@ -55,7 +55,7 @@ BasicTab::BasicTab( QWidget *parent )
     initAdvancedTab();
     initConnections();
 
-#ifndef Q_WS_WIN
+#ifdef WITH_HOTKEYS
     if (!KHotKeys::present())
         _keyBindingGroup->hide();
 #endif
@@ -373,7 +373,7 @@ void BasicTab::setEntryInfo(MenuEntryInfo *entryInfo)
     _iconButton->setIcon(df->readIcon());
 
     // key binding part
-#ifndef Q_WS_WIN
+#ifdef WITH_HOTKEYS
     if( KHotKeys::present())
     {
         if ( !entryInfo->shortcut().isEmpty() )
@@ -531,7 +531,7 @@ void BasicTab::slotCapturedKeySequence(const QKeySequence& seq)
     if (signalsBlocked())
        return;
     KShortcut cut(seq, QKeySequence());
-#ifndef Q_WS_WIN
+#ifdef WITH_HOTKEYS
     if (_menuEntryInfo->isShortcutAvailable( cut ) && KHotKeys::present() )
     {
        _menuEntryInfo->setShortcut( cut );

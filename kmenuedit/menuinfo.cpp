@@ -330,7 +330,7 @@ void MenuEntryInfo::save()
       m_desktopFile->sync();
       dirty = false;
    }
-#ifndef Q_WS_WIN
+#ifdef WITH_HOTKEYS
    if (shortcutDirty)
    {
       if( KHotKeys::present())
@@ -372,7 +372,7 @@ void MenuEntryInfo::setIcon(const QString &_icon)
 
 KShortcut MenuEntryInfo::shortcut()
 {
-#ifndef Q_WS_WIN
+#ifdef WITH_HOTKEYS
    if (!shortcutLoaded)
    {
       shortcutLoaded = true;
