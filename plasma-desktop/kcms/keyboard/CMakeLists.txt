@@ -140,7 +140,7 @@ set(kcm_keyboard_PART_SRCS
 )
 
 
-kde4_add_ui_files(kcm_keyboard_PART_SRCS kcm_keyboard.ui kcm_add_layout_dialog.ui kcmmiscwidget.ui)
+qt5_wrap_ui(kcm_keyboard_PART_SRCS kcm_keyboard.ui kcm_add_layout_dialog.ui kcmmiscwidget.ui)
 
 add_library(kcm_keyboard MODULE ${kcm_keyboard_PART_SRCS})
 

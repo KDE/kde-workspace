@@ -9,7 +9,7 @@ set(kcm_keys_PART_SRCS
   export_scheme_dialog.cpp
   )
 
-kde4_add_ui_files( kcm_keys_PART_SRCS 
+qt5_wrap_ui( kcm_keys_PART_SRCS
     export_scheme_dialog.ui
     kglobalshortcutseditor.ui
     select_scheme_dialog.ui )

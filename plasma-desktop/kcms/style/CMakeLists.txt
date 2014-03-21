@@ -12,7 +12,7 @@ set(klauncher_xml ${KINIT_DBUS_INTERFACES_DIR}/kf5_org.kde.KLauncher.xml)
 qt5_add_dbus_interface(kcm_style_PART_SRCS ${klauncher_xml} klauncher_iface)
 
 
-kde4_add_ui_files(kcm_style_PART_SRCS stylepreview.ui finetuning.ui)
+qt5_wrap_ui(kcm_style_PART_SRCS stylepreview.ui finetuning.ui)
 
 add_library(kcm_style MODULE ${kcm_style_PART_SRCS})
 set_target_properties(kcm_style PROPERTIES COMPILE_FLAGS -DHAVE_X11=1)

@@ -2,7 +2,7 @@
 project(desktoptheme)
 
 set(kcmdesktoptheme_SRCS kcmdesktoptheme.cpp desktopthemedetails.cpp thememodel.cpp)
-kde4_add_ui_files(kcmdesktoptheme_SRCS DesktopTheme.ui DesktopThemeDetails.ui)
+qt5_wrap_ui(kcmdesktoptheme_SRCS DesktopTheme.ui DesktopThemeDetails.ui)
 
 add_library(kcm_desktoptheme MODULE ${kcmdesktoptheme_SRCS})
 target_link_libraries(kcm_desktoptheme ${X11_LIBRARIES}

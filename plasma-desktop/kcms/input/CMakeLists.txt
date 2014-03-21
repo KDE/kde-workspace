@@ -15,7 +15,7 @@ if(X11_Xcursor_FOUND)
     xcursor/itemdelegate.cpp
     xcursor/sortproxymodel.cpp
     ../krdb/krdb.cpp )
-  kde4_add_ui_files( libnoinst_SRCS xcursor/themepage.ui )
+  qt5_wrap_ui( libnoinst_SRCS xcursor/themepage.ui )
   include_directories( ${CMAKE_CURRENT_SOURCE_DIR}/xcursor/ )
 else()
   set( libnoinst_SRCS core/themepage.cpp )
@@ -46,7 +46,7 @@ install(TARGETS kapplymousetheme ${INSTALL_TARGETS_DEFAULT_ARGS})
 set(kcm_input_PART_SRCS mouse.cpp main.cpp logitechmouse.cpp)
 
 
-kde4_add_ui_files(kcm_input_PART_SRCS kmousedlg.ui logitechmouse_base.ui )
+qt5_wrap_ui(kcm_input_PART_SRCS kmousedlg.ui logitechmouse_base.ui )
 qt5_add_dbus_interface(kcm_input_PART_SRCS ${klauncher_xml} klauncher_iface)
 
 add_library(kcm_input MODULE ${kcm_input_PART_SRCS})
