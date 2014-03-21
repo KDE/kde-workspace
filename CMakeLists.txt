@@ -94,11 +94,6 @@ if(NOT WIN32)
    ecm_optional_add_subdirectory(kwrited)
 endif()
 
-if(NOT WIN32)
-    # data
-    ecm_optional_add_subdirectory(cursors)
-endif()
-#
 ecm_optional_add_subdirectory(kstyles)
 #
 
