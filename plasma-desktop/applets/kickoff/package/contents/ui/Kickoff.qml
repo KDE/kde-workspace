@@ -58,10 +58,6 @@ Item {
             connectedSources: ["Status"]
         }
 
-        onFocusChanged: {
-            root.focus = true;
-        }
-
         Kickoff.Launcher {
             id: launcher
         }
@@ -320,6 +316,9 @@ Item {
                     break;
                 }
                 case Qt.Key_Left: {
+                    if (header.input.focus) {
+                        break;
+                    }
                     if (!currentView.deactivateCurrentIndex()) {
                         // FIXME move to the previous tab immediately
                         root.state = "Normal"
@@ -328,6 +327,9 @@ Item {
                     break;
                 }
                 case Qt.Key_Right: {
+                    if (header.input.focus) {
+                        break;
+                    }
                     currentView.activateCurrentIndex();
                     event.accepted = true;
                     break;
@@ -352,24 +354,17 @@ Item {
                     event.accepted = true;
                     break;
                 }
-                case Qt.Key_Backspace: {
-                    var q = header.query;
-                    if (event.modifiers & Qt.ControlModifier) {
-                        header.query = "";
-                    } else { // NoModifier
-                        header.query = header.query.substring(0, header.query.length - 1);
-                    }
-                    searchBar.focus = true;
-                    event.accepted = true;
-                    break;
-                }
-
                 default: { // forward key to searchView
-                    if (event.text != "") {
-                        header.query += event.text;
-                        searchBar.focus = true;
+                    if (event.text != "" && !header.input.focus) {
+                        if (event.text == "v" && event.modifiers & Qt.ControlModifier) {
+                            header.input.paste();
+                        } else {
+                            header.query = "";
+                            header.query += event.text;
+                        }
+                        header.input.forceActiveFocus();
+                        event.accepted = true;
                     }
-                    event.accepted = true;
                 }
             }
         }
@@ -404,10 +399,6 @@ Item {
 
         onStateChanged: {
             print("root.state changed to : " + state);
-        }
-
-        Component.onCompleted: {
-            root.focus = true;
         }
     }
 } // root

@@ -29,6 +29,7 @@ Item {
     height: units.gridUnit * 5
 
     property alias query: queryField.text
+    property Item input: queryField
 
     Kickoff.KUser {
         id: kuser
