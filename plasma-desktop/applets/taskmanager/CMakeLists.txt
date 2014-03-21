@@ -13,7 +13,7 @@ add_library(taskmanagerplugin SHARED ${taskmanagerplugin_SRCS})
 
 # FIXME TODO HACK: The last two are temp, see comment in Backend::activateItem().
 target_link_libraries(taskmanagerplugin
-                      taskmanager
+                      PW::LibTaskManager
                       Qt5::Core
                       Qt5::Qml
                       Qt5::Quick

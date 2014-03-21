@@ -35,6 +35,7 @@ else()
 endif()
 
 add_library(taskmanager ${taskmanager_LIB_SRCS})
+add_library(PW::LibTaskManager ALIAS taskmanager)
 generate_export_header(taskmanager)
 target_include_directories(taskmanager PUBLIC "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>" "$<INSTALL_INTERFACE:${INCLUDE_INSTALL_DIR}/taskmanager>")
 target_link_libraries(taskmanager
@@ -61,7 +62,7 @@ if (X11_FOUND)
     endif ()
 endif()
 
-set_target_properties(taskmanager PROPERTIES VERSION ${GENERIC_LIB_VERSION} SOVERSION ${GENERIC_LIB_SOVERSION} )
+set_target_properties(taskmanager PROPERTIES VERSION ${GENERIC_LIB_VERSION} SOVERSION ${GENERIC_LIB_SOVERSION} EXPORT_NAME LibTaskManager)
 install(TARGETS taskmanager EXPORT libtaskmanagerLibraryTargets ${INSTALL_TARGETS_DEFAULT_ARGS} )
 
 install(FILES
