@@ -36,7 +36,7 @@ endif()
 
 add_library(taskmanager ${taskmanager_LIB_SRCS})
 generate_export_header(taskmanager)
-target_include_directories(taskmanager PRIVATE "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>")
+target_include_directories(taskmanager PUBLIC "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>" "$<INSTALL_INTERFACE:${INCLUDE_INSTALL_DIR}/taskmanager>")
 target_link_libraries(taskmanager
     KF5::ProcessCore
     KF5::ConfigCore
@@ -62,7 +62,7 @@ if (X11_FOUND)
 endif()
 
 set_target_properties(taskmanager PROPERTIES VERSION ${GENERIC_LIB_VERSION} SOVERSION ${GENERIC_LIB_SOVERSION} )
-install(TARGETS taskmanager EXPORT kdeworkspaceLibraryTargets ${INSTALL_TARGETS_DEFAULT_ARGS} )
+install(TARGETS taskmanager EXPORT libtaskmanagerLibraryTargets ${INSTALL_TARGETS_DEFAULT_ARGS} )
 
 install(FILES
    abstractgroupableitem.h
@@ -79,6 +79,19 @@ install(FILES
    ${CMAKE_CURRENT_BINARY_DIR}/taskmanager_export.h
    DESTINATION ${INCLUDE_INSTALL_DIR}/taskmanager COMPONENT Devel
    )
+
+write_basic_config_version_file(${CMAKE_CURRENT_BINARY_DIR}/LibTaskManagerConfigVersion.cmake VERSION "${PLASMAWORKSPACE_VERSION_STRING}" COMPATIBILITY AnyNewerVersion)
+
+set(CMAKECONFIG_INSTALL_DIR ${LIB_INSTALL_DIR}/cmake/LibTaskManager)
+configure_file(LibTaskManagerConfig.cmake.in "${CMAKE_CURRENT_BINARY_DIR}/LibTaskManagerConfig.cmake" @ONLY)
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/LibTaskManagerConfig.cmake
+              ${CMAKE_CURRENT_BINARY_DIR}/LibTaskManagerConfigVersion.cmake
+        DESTINATION ${CMAKECONFIG_INSTALL_DIR})
+
+install(EXPORT libtaskmanagerLibraryTargets
+        NAMESPACE KF5::
+        DESTINATION ${CMAKECONFIG_INSTALL_DIR}
+        FILE LibTaskManagerLibraryTargets.cmake )
 
 
 #set(tasksmodel_SRCS 
