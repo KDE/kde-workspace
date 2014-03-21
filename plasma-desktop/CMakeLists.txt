@@ -30,10 +30,16 @@ find_package(KF5 CONFIG REQUIRED COMPONENTS
     KDE4Support
     NotifyConfig
     Su
+    Runner
 )
 
-find_package(ScreenSaverDBusInterface CONFIG REQUIRED)
-find_package(KSMServerDBusInterface CONFIG REQUIRED)
+if(${CMAKE_SOURCE_DIR} STREQUAL ${CMAKE_CURRENT_SOURCE_DIR})
+    find_package(LibKWorkspace CONFIG REQUIRED)
+    find_package(ScreenSaverDBusInterface CONFIG REQUIRED)
+    find_package(KRunnerAppDBusInterface CONFIG REQUIRED)
+    find_package(KSMServerDBusInterface CONFIG REQUIRED)
+endif()
+
 find_package(USB)
 set(HAVE_LIBUSB ${LIBUSB_FOUND})
 set_package_properties(USB PROPERTIES DESCRIPTION "User level access to USB devices"
