@@ -11,11 +11,9 @@ remove_definitions(-DQT_NO_CAST_TO_ASCII)
 set(ksmserver_xml  ${plasma-workspace_SOURCE_DIR}/ksmserver/org.kde.KSMServerInterface.xml)
 qt5_add_dbus_interface( kworkspace_LIB_SRCS ${ksmserver_xml} ksmserver_interface )
 
-set(kwin_xml  ${KDEBASE_WORKSPACE_SOURCE_DIR}/kwin/org.kde.KWin.xml)
+set_source_files_properties(${KWIN_INTERFACE} PROPERTIES INCLUDE "interface_util.h")
 
-set_source_files_properties(${kwin_xml} PROPERTIES INCLUDE "interface_util.h")
-
-qt5_add_dbus_interface( kworkspace_LIB_SRCS ${kwin_xml} kwin_interface )
+qt5_add_dbus_interface( kworkspace_LIB_SRCS ${KWIN_INTERFACE} kwin_interface )
 
 
 add_library(kworkspace ${kworkspace_LIB_SRCS})

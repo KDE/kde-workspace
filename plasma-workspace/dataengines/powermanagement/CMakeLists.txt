@@ -4,7 +4,7 @@ set(powermanagement_engine_SRCS
     powermanagementservice.cpp
 )
 
-set(krunner_xml ${KDEBASE_WORKSPACE_SOURCE_DIR}/krunner/dbus/org.kde.krunner.App.xml)
+set(krunner_xml ${plasma-workspace_SOURCE_DIR}/krunner/dbus/org.kde.krunner.App.xml)
 qt5_add_dbus_interface(powermanagement_engine_SRCS ${krunner_xml} krunner_interface)
 
 add_library(plasma_engine_powermanagement MODULE ${powermanagement_engine_SRCS})

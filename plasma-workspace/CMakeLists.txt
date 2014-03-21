@@ -1,5 +1,32 @@
 project(plasma-workspace)
 
+cmake_minimum_required(VERSION 2.8.12 FATAL_ERROR)
+
+set(QT_MIN_VERSION "5.2.0")
+find_package(Qt5 ${QT_MIN_VERSION} CONFIG REQUIRED COMPONENTS Widgets Quick Test)
+
+find_package(ECM 0.0.11 REQUIRED NO_MODULE)
+set(CMAKE_MODULE_PATH ${ECM_MODULE_PATH} ${ECM_KDE_MODULE_DIR})
+
+find_package(KF5 CONFIG REQUIRED COMPONENTS
+                    Plasma DocTools Runner JsEmbed NotifyConfig Su NewStuff
+                    IdleTime ThreadWeaver Declarative PlasmaQuick KDE4Support)
+
+if(${CMAKE_SOURCE_DIR} STREQUAL ${CMAKE_CURRENT_SOURCE_DIR}) #TODO: remove after splitting
+    find_package(KF5 CONFIG REQUIRED COMPONENTS SysGuard)
+    find_package(KWinDBusInterface CONFIG REQUIRED)
+else()
+    set(KWIN_INTERFACE  ${KDEBASE_WORKSPACE_SOURCE_DIR}/kwin/org.kde.KWin.xml)
+endif()
+
+include(KDEInstallDirs)
+include(KDECMakeSettings)
+include(KDECompilerSettings)
+include(ECMPackageConfigHelpers)
+include(ECMMarkNonGuiExecutable)
+include(CheckIncludeFiles)
+include(FeatureSummary)
+
 find_package(ZLIB)
 set_package_properties(ZLIB PROPERTIES DESCRIPTION "Support for gzip compressed files and data streams"
                        URL "http://www.zlib.net"
@@ -12,7 +39,7 @@ set_package_properties(dbusmenu-qt5 PROPERTIES DESCRIPTION "Support for notifica
                        TYPE OPTIONAL
                       )
 
-find_package(QImageBlitz)
+find_package(QImageBlitz QUIET)
 set_package_properties(QImageBlitz PROPERTIES DESCRIPTION "An image effects library"
                        URL "http://sourceforge.net/projects/qimageblitz"
                        TYPE OPTIONAL
@@ -50,6 +77,8 @@ if(X11_FOUND)
   set_package_properties(XCB PROPERTIES TYPE REQUIRED)
   find_package(XCB COMPONENTS ICCCM)
   add_feature_info("XCB-ICCCM" XCB_ICCCM_FOUND "Required for building test applications for KWin")
+
+  find_package(Qt5 ${QT_MIN_VERSION} CONFIG REQUIRED COMPONENTS X11Extras)
 endif()
 
 set(PLASMAWORKSPACE_VERSION_MAJOR 4)
