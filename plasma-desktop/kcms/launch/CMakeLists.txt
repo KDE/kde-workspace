@@ -5,9 +5,15 @@
 
 set(kcm_launch_PART_SRCS kcmlaunch.cpp )
 
-set(kdesktop_xml  ${KDEBASE_WORKSPACE_SOURCE_DIR}/krunner/dbus/org.kde.krunner.App.xml)
+if(${CMAKE_SOURCE_DIR} STREQUAL ${plasma-desktop_SOURCE_DIR})
+    set(kwin_xml ${KWIN_EFFECTS_INTERFACE})
+    set(kdesktop_xml  ${KRUNNERAPP_INTERFACE})
+else()
+    set(kdesktop_xml  ${KDEBASE_WORKSPACE_SOURCE_DIR}/krunner/dbus/org.kde.krunner.App.xml)
+    set(kwin_xml ${KDEBASE_WORKSPACE_SOURCE_DIR}/kwin/org.kde.kwin.Effects.xml)
+endif()
+
 qt5_add_dbus_interface( kcm_launch_PART_SRCS ${kdesktop_xml} krunner_interface )
-set(kwin_xml ${KDEBASE_WORKSPACE_SOURCE_DIR}/kwin/org.kde.kwin.Effects.xml)
 set_source_files_properties(${kwin_xml} PROPERTIES INCLUDE "interface_util.h")
 qt5_add_dbus_interface( kcm_launch_PART_SRCS ${kwin_xml} kwin_interface )
 
