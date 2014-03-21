@@ -50,6 +50,7 @@ public Q_SLOTS:
     void query(const QString &term);
     void querySingleRunner(const QString &runnerName, const QString &term);
     void switchUser();
+    void initializeStartupNotification();
 
 protected Q_SLOTS:
     void screenResized(int screen);

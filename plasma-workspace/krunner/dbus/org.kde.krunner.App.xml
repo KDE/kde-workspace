@@ -17,5 +17,7 @@
     </method>
     <method name="switchUser">
     </method>
+    <method name="initializeStartupNotification">
+    </method>
   </interface>
 </node>

@@ -229,4 +229,12 @@ void View::switchUser()
     //And will invite afiestas for dinner in the japanese place.
     return;
 }
+
+void View::initializeStartupNotification()
+{
+    //vHanda will pay me another dinner if he does not implement this one
+    return;
+}
+
+
 #include "moc_view.cpp"
