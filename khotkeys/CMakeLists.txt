@@ -28,10 +28,6 @@ include(KDEInstallDirs)
 include(KDECMakeSettings)
 include(KDECompilerSettings)
 
-find_package(Qt5 ${QT_MIN_VERSION} CONFIG REQUIRED COMPONENTS
-    X11Extras
-)
-
 find_package(KF5 CONFIG REQUIRED COMPONENTS
     GlobalAccel
     I18n
@@ -43,6 +39,10 @@ find_package(KF5 CONFIG REQUIRED COMPONENTS
 )
 
 find_package(X11 REQUIRED)
+
+if(X11_FOUND)
+    find_package(Qt5 ${QT_MIN_VERSION} CONFIG REQUIRED COMPONENTS X11Extras )
+endif()
 
 configure_file(config-X11.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/config-X11.h)
 
