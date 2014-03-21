@@ -20,6 +20,7 @@ import QtQuick.Layouts 1.1
 import org.kde.plasma.core 2.0 as PlasmaCore
 import org.kde.plasma.components 2.0 as PlasmaComponents
 import org.kde.plasma.extras 2.0 as PlasmaExtras
+import org.kde.milou 0.1 as Milou
 
 ColumnLayout {
     id: root
@@ -74,7 +75,7 @@ ColumnLayout {
         Layout.fillWidth: true
         Layout.minimumHeight: units.gridUnit * 25//results.count > 0 ? units.gridUnit * 25 : 0
         //TODO: ResultsView in a component?
-        ResultsView {
+        Milou.ResultsView {
             id: results
             queryString: root.query
         }
