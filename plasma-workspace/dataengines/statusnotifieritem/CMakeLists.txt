@@ -1,6 +1,6 @@
 project(plasma-statusnotifieritem_engine)
 
-include_directories(${KDEBASE_WORKSPACE_SOURCE_DIR}/plasma-workspace/statusnotifierwatcher)
+include_directories(${plasma-workspace_SOURCE_DIR}/statusnotifierwatcher)
 include_directories(${dbusmenu-qt5_INCLUDE_DIRS})
 
 
