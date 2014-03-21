@@ -72,8 +72,9 @@ void PowerManagementJob::start()
         return;
     } else if (operation == "switchUser") {
         // Taken from kickoff/core/itemhandlers.cpp
-        org::kde::krunner::App krunner("org.kde.krunner", "/App", QDBusConnection::sessionBus());
-        krunner.switchUser();
+//         FIXME: vHanda says he's going to figure it out for the new KRunner interfaces
+//         org::kde::krunner::App krunner("org.kde.krunner", "/App", QDBusConnection::sessionBus());
+//         krunner.switchUser();
         setResult(true);
         return;
     } else if (operation == "beginSuppressingSleep") {
