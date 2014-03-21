@@ -57,6 +57,11 @@ ColumnLayout {
             onTextChanged: {
                 queryTimer.restart()
             }
+            Keys.onPressed: {
+                if (event.key == Qt.Key_Tab) {
+                    results.forceActiveFocus();
+                }
+            }
         }
         PlasmaComponents.ToolButton {
             iconSource: "window-close"
