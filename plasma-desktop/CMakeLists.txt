@@ -37,6 +37,7 @@ configure_file(config-X11.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/config-X11.h)
 
 plasma_install_package(desktoppackage org.kde.desktop plasma/shells shell)
 
+add_subdirectory(doc)
 # add_subdirectory(ktouchpadenabler)
 # add_subdirectory(solid-actions-kcm)
 

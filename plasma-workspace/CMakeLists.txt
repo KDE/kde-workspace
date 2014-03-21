@@ -65,6 +65,7 @@ configure_file(config-X11.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/config-X11.h)
 
 plasma_install_package(lookandfeel org.kde.lookandfeel plasma/look-and-feel lookandfeel)
 
+add_subdirectory(doc)
 add_subdirectory(libkworkspace)
 add_subdirectory(libtaskmanager)
 

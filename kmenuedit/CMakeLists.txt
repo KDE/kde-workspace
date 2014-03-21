@@ -35,6 +35,7 @@ find_package(KF5 CONFIG REQUIRED COMPONENTS
 find_package(KHotKeysDBusInterface QUIET)
 remove_definitions(-DQT_NO_CAST_FROM_ASCII -DQT_STRICT_ITERATORS -DQT_NO_CAST_FROM_BYTEARRAY -DQT_NO_KEYWORDS)
 add_subdirectory( pixmaps ) 
+add_subdirectory( doc )
 
 set(kmenueditcommon_STAT_SRCS preferencesdlg.cpp klinespellchecking.cpp basictab.cpp treeview.cpp kmenuedit.cpp menufile.cpp menuinfo.cpp configurationmanager.cpp )
 ########### next target ###############
