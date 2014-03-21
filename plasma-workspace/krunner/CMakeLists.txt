@@ -92,3 +92,7 @@ endif()
 install(TARGETS krunner ${INSTALL_TARGETS_DEFAULT_ARGS})
 install(FILES ${krunner_dbusAppXML} DESTINATION ${DBUS_INTERFACES_INSTALL_DIR} )
 
+configure_file(KRunnerAppDBusInterfaceConfig.cmake.in "${CMAKE_CURRENT_BINARY_DIR}/KRunnerAppDBusInterfaceConfig.cmake" @ONLY)
+set(CMAKECONFIG_INSTALL_DIR "${CMAKECONFIG_INSTALL_PREFIX}/KRunnerAppDBusInterface")
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/KRunnerAppDBusInterfaceConfig.cmake
+    DESTINATION ${CMAKECONFIG_INSTALL_DIR})
