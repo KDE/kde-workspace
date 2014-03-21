@@ -41,7 +41,7 @@ find_package(KF5 CONFIG REQUIRED COMPONENTS
 
 find_package(X11 REQUIRED)
 if(${CMAKE_SOURCE_DIR} STREQUAL ${CMAKE_CURRENT_SOURCE_DIR})
-    find_package(LibKWorkspace REQUIRED)
+    find_package(LibKWorkspace CONFIG REQUIRED)
 endif()
 
 if(X11_FOUND)
