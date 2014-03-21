@@ -32,6 +32,7 @@
 #include <KMessageBox>
 #include <KShortcut>
 #include <KStringHandler>
+#include <KLocalizedString>
 
 #include <QStackedWidget>
 #include <QMenu>

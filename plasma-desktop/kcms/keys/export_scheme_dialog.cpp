@@ -22,6 +22,7 @@
 #include <KDebug>
 
 #include <QCheckBox>
+#include <KLocalizedString>
 
 
 ExportSchemeDialog::ExportSchemeDialog(QStringList components, QWidget *parent)

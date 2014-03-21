@@ -30,6 +30,7 @@
 #include <kio/deletejob.h>
 #include <kio/job.h>
 #include <qstandardpaths.h>
+#include <KLocalizedString>
 
 #include <QDebug>
 

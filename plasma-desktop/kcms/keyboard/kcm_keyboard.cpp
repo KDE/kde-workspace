@@ -23,6 +23,7 @@
 #include <kaboutdata.h>
 #include <kpluginfactory.h>
 #include <kpluginloader.h>
+#include <KLocalizedString>
 #include <KDialog>
 
 #include <QtDBus/QDBusMessage>

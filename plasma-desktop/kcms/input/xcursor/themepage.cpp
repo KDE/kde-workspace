@@ -29,6 +29,7 @@
 #include <KIO/DeleteJob>
 #include <kio/netaccess.h>
 #include <KNewStuff3/KNS3/DownloadDialog>
+#include <KLocalizedString>
 
 
 #include <KTar>
