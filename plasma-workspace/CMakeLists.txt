@@ -24,6 +24,7 @@ include(KDECMakeSettings)
 include(KDECompilerSettings)
 include(ECMPackageConfigHelpers)
 include(ECMMarkNonGuiExecutable)
+include(CMakePackageConfigHelpers)
 include(CheckIncludeFiles)
 include(FeatureSummary)
 
