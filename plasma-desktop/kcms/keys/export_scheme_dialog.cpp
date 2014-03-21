@@ -19,8 +19,6 @@
 
 #include "export_scheme_dialog.h"
 
-#include <KDebug>
-
 #include <QCheckBox>
 #include <KLocalizedString>
 
