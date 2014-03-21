@@ -23,5 +23,7 @@
 
 void NotificationsHelperPlugin::registerTypes(const char *uri)
 {
+    Q_ASSERT(uri == QLatin1String("org.kde.plasma.private.notifications"));
+
     qmlRegisterType<NotificationsHelper>(uri, 1, 0, "NotificationsHelper");
 }
