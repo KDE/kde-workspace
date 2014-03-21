@@ -23,6 +23,7 @@ add_library(PW::KWorkspace ALIAS kworkspace)
 set_target_properties(kworkspace PROPERTIES
                              VERSION 5.0.0
                              SOVERSION 5
+                             EXPORT_NAME KWorkspace
                       )
 
 generate_export_header(kworkspace)
@@ -37,10 +38,24 @@ if(X11_FOUND)
     target_link_libraries(kworkspace Qt5::X11Extras ${X11_LIBRARIES})
 endif()
 
-#set_target_properties(kworkspace PROPERTIES VERSION ${GENERIC_LIB_VERSION} SOVERSION ${GENERIC_LIB_SOVERSION} DEFINE_SYMBOL MAKE_KWORKSPACE_LIB)
-install(TARGETS kworkspace EXPORT kdeworkspaceLibraryTargets ${INSTALL_TARGETS_DEFAULT_ARGS} )
+write_basic_config_version_file(${CMAKE_CURRENT_BINARY_DIR}/LibKWorkspaceConfigVersion.cmake VERSION
+                                     "${PLASMAWORKSPACE_VERSION_STRING}" COMPATIBILITY AnyNewerVersion)
+
+install(TARGETS kworkspace EXPORT libkworkspaceLibraryTargets ${INSTALL_TARGETS_DEFAULT_ARGS} )
 
 install( FILES kdisplaymanager.h
                kworkspace.h
                ${CMAKE_CURRENT_BINARY_DIR}/kworkspace_export.h
          DESTINATION ${INCLUDE_INSTALL_DIR}/kworkspace COMPONENT Devel )
+
+set(CMAKECONFIG_INSTALL_DIR ${LIB_INSTALL_DIR}/cmake/LibKWorkspace)
+
+configure_file(LibKWorkspaceConfig.cmake.in "${CMAKE_CURRENT_BINARY_DIR}/LibKWorkspaceConfig.cmake" @ONLY)
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/LibKWorkspaceConfig.cmake
+              ${CMAKE_CURRENT_BINARY_DIR}/LibKWorkspaceConfigVersion.cmake
+        DESTINATION ${CMAKECONFIG_INSTALL_DIR})
+
+install(EXPORT libkworkspaceLibraryTargets
+        NAMESPACE PW::
+        DESTINATION ${CMAKECONFIG_INSTALL_DIR}
+        FILE LibKWorkspaceLibraryTargets.cmake )
