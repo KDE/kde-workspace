@@ -80,7 +80,7 @@ install(TARGETS kmenuedit ${INSTALL_TARGETS_DEFAULT_ARGS})
 install( PROGRAMS kmenuedit.desktop  DESTINATION  ${XDG_APPS_INSTALL_DIR} )
 install( FILES kmenueditui.rc  DESTINATION  ${DATA_INSTALL_DIR}/kmenuedit )
 
-if(NOT WIN32)
+if(NOT WIN32 AND ${KHotKeysDBusInterface_FOUND})
 add_dependencies(kdeinit_kmenuedit kded_khotkeys)
 endif()
 
