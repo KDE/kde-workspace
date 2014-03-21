@@ -36,9 +36,11 @@ find_package(KF5 CONFIG REQUIRED COMPONENTS
     KDE4Support
     DBusAddons
     KCMUtils
+    Plasma
 )
 
 find_package(X11 REQUIRED)
+find_package(LibKWorkspace REQUIRED)
 
 if(X11_FOUND)
     find_package(Qt5 ${QT_MIN_VERSION} CONFIG REQUIRED COMPONENTS X11Extras )
