@@ -45,7 +45,8 @@
 View::View(QWindow *parent)
     : PlasmaQuick::Dialog(),
       m_shownOnScreen(-1),
-      m_offset(.5)
+      m_offset(.5),
+      m_floating(false)
 {
     QSurfaceFormat format;
     format.setAlphaBufferSize(8);
@@ -108,6 +109,7 @@ void View::showEvent(QShowEvent *event)
 {
     KWindowSystem::setOnAllDesktops(winId(), true);
     Dialog::showEvent(event);
+    positionOnScreen();
 }
 
 void View::screenResized(int screen)
@@ -165,8 +167,6 @@ void View::positionOnScreen()
     y = qBound(r.top(), y, r.bottom() - height());
 
     setPosition(x, y);
-
-    show();
 
     if (m_floating) {
         KWindowSystem::setOnDesktop(winId(), KWindowSystem::currentDesktop());

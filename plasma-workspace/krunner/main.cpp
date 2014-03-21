@@ -54,7 +54,7 @@ int main(int argc, char **argv)
     parser.process(app);
 
     View view;
-    view.setVisible(true);
+    view.setVisible(false);
 
     return app.exec();
 }
