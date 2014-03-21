@@ -22,6 +22,7 @@ import org.kde.plasma.components 2.0 as PlasmaComponents
 import org.kde.plasma.extras 2.0 as PlasmaExtras
 
 ColumnLayout {
+    id: root
     property string query
     property string runner
 
@@ -35,8 +36,16 @@ ColumnLayout {
             if (runnerWindow.visible) {
                 queryField.forceActiveFocus();
             } else {
-                queryField.text = "";
+                root.query = "";
             }
+        }
+    }
+
+    Timer {
+        id: queryTimer
+        interval: 250
+        onTriggered: {
+            root.query = queryField.text
         }
     }
 
@@ -45,6 +54,9 @@ ColumnLayout {
             id: queryField
             clearButtonShown: true
             Layout.minimumWidth: units.gridUnit * 25
+            onTextChanged: {
+                queryTimer.restart()
+            }
         }
         PlasmaComponents.ToolButton {
             iconSource: "window-close"
@@ -59,7 +71,7 @@ ColumnLayout {
         //TODO: ResultsView in a component?
         ResultsView {
             id: results
-            queryString: queryField.text
+            queryString: root.query
         }
     }
 }
