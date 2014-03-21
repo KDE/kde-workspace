@@ -58,10 +58,16 @@ ColumnLayout {
             onTextChanged: {
                 queryTimer.restart()
             }
-            Keys.onPressed: {
-                if (event.key == Qt.Key_Tab) {
-                    results.forceActiveFocus();
+            Keys.onEscapePressed: {
+                runnerWindow.visible = false
+            }
+            Keys.onTabPressed: results.incrementCurrentIndex()
+            Keys.onBacktabPressed: results.decrementCurrentIndex()
+            Keys.onReturnPressed: {
+                if (!results.currentIndex) {
+                    results.runAutomatically = true
                 }
+                results.runCurrentIndex();
             }
         }
         PlasmaComponents.ToolButton {
