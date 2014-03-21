@@ -57,6 +57,9 @@ Column {
                 runningJobs[source]["appName"],
                 i18n("%1 [Finished]", runningJobs[source]["infoMessage"]),
                 message,
+                true,
+                6000,
+                0,
                 0,
                 0,
                 [{"id": message, "text": i18n("Open")}])
