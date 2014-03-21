@@ -1,19 +1,54 @@
+project(kmenuedit)
+
+cmake_minimum_required(VERSION 2.8.12 FATAL_ERROR)
+set(QT_MIN_VERSION "5.2.0")
+
+find_package(ECM 0.0.11 REQUIRED NO_MODULE)
+set(CMAKE_MODULE_PATH ${ECM_MODULE_PATH} ${ECM_KDE_MODULE_DIR})
+
+include(KDEInstallDirs)
+include(KDECMakeSettings)
+include(KDECompilerSettings)
+include(ECMInstallIcons)
+
+find_package(Qt5 ${QT_MIN_VERSION} CONFIG REQUIRED COMPONENTS
+    Core
+    DBus
+    Xml
+)
+
+find_package(KF5 CONFIG REQUIRED COMPONENTS
+    I18n
+    XmlGui
+    WindowSystem
+    KCMUtils
+    Solid
+    Plasma
+    DBusAddons
+    IconThemes
+    KIO
+    Sonnet
+    Init
+    KDE4Support
+)
+
+find_package(KHotKeysDBusInterface QUIET)
 remove_definitions(-DQT_NO_CAST_FROM_ASCII -DQT_STRICT_ITERATORS -DQT_NO_CAST_FROM_BYTEARRAY -DQT_NO_KEYWORDS)
 add_subdirectory( pixmaps ) 
 
 set(kmenueditcommon_STAT_SRCS preferencesdlg.cpp klinespellchecking.cpp basictab.cpp treeview.cpp kmenuedit.cpp menufile.cpp menuinfo.cpp configurationmanager.cpp )
-if(NOT WIN32)
-set(kmenueditcommon_STAT_SRCS ${kmenueditcommon_STAT_SRCS} khotkeys.cpp)
-endif()
 ########### next target ###############
 
 qt5_add_dbus_adaptor( kmenueditcommon_STAT_SRCS org.kde.kmenuedit.xml kmenuedit.h KMenuEdit)
 
-if(NOT WIN32)
+if(NOT WIN32 AND ${KHotKeysDBusInterface_FOUND})
 qt5_add_dbus_interface(
     kmenueditcommon_STAT_SRCS
-    ${CMAKE_CURRENT_BINARY_DIR}/../khotkeys/app/org.kde.khotkeys.xml
+    ${KHOTKEYS_DBUS_INTERFACE}
     khotkeys_interface)
+set(kmenueditcommon_STAT_SRCS ${kmenueditcommon_STAT_SRCS} khotkeys.cpp)
+
+add_definitions(-DWITH_HOTKEYS)
 endif()
 
 set(kmenuedit_KDEINIT_SRCS main.cpp ${kmenueditcommon_STAT_SRCS})

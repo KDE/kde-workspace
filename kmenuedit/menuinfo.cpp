@@ -26,7 +26,7 @@
 #include <KConfigGroup>
 
 #include "menufile.h"
-#ifndef Q_WS_WIN
+#ifdef WITH_HOTKEYS
 #include "khotkeys.h"
 #endif
 
