@@ -18,8 +18,12 @@ if(X11_XTest_FOUND)
     target_link_libraries(kded_khotkeys ${X11_XTest_LIB})
 endif()
 
-
+configure_file(KHotKeysDBusInterfaceConfig.cmake.in
+    ${CMAKE_CURRENT_BINARY_DIR}/KHotKeysDBusInterfaceConfig.cmake @ONLY)
+set(CMAKECONFIG_INSTALL_DIR "${CMAKECONFIG_INSTALL_PREFIX}/KHotKeysDBusInterface")
 ########### install files ###############
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/KHotKeysDBusInterfaceConfig.cmake
+    DESTINATION ${CMAKECONFIG_INSTALL_DIR})
 
 install(TARGETS kded_khotkeys  DESTINATION ${PLUGIN_INSTALL_DIR})
 
