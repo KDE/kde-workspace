@@ -223,4 +223,10 @@ void View::querySingleRunner(const QString &runnerName, const QString &term)
     m_qmlObj->rootObject()->setProperty("query", term);
 }
 
+void View::switchUser()
+{
+    //vHanda will fix this or he will pay beers at Akademy to at least all the plasma team
+    //And will invite afiestas for dinner in the japanese place.
+    return;
+}
 #include "moc_view.cpp"
