@@ -16,7 +16,6 @@ find_package(ECM 0.0.11 REQUIRED NO_MODULE)
 set(CMAKE_MODULE_PATH ${ECM_MODULE_PATH} ${ECM_KDE_MODULE_DIR})
 
 include(KDEInstallDirs)
-include(KDEInstallDirs)
 include(KDECMakeSettings)
 include(KDECompilerSettings)
 
@@ -31,7 +30,6 @@ find_package(KF5 CONFIG REQUIRED COMPONENTS
     XmlGui
     KDE4Support
     DBusAddons
-    KDE4Support
     KCMUtils
 )
 
