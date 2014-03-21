@@ -177,7 +177,7 @@ void MenuFolderInfo::save(MenuFile *menuFile)
 {
    if (s_deletedApps)
    {
-#ifndef WITH_HOTKEYS
+#ifdef WITH_HOTKEYS
       // Remove hotkeys for applications that have been deleted
       for(QStringList::ConstIterator it = s_deletedApps->constBegin();
           it != s_deletedApps->constEnd(); ++it)
