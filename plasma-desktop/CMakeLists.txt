@@ -1,5 +1,39 @@
 project(plasma-desktop)
 
+cmake_minimum_required(VERSION 2.8.12 FATAL_ERROR)
+set(QT_MIN_VERSION "5.2.0")
+
+find_package(ECM 0.0.11 REQUIRED NO_MODULE)
+set(CMAKE_MODULE_PATH ${ECM_MODULE_PATH} ${ECM_KDE_MODULE_DIR})
+
+include(KDEInstallDirs)
+include(KDECMakeSettings)
+include(KDECompilerSettings)
+include(ECMInstallIcons)
+include(FeatureSummary)
+include(CheckIncludeFiles)
+
+find_package(Qt5 ${QT_MIN_VERSION} CONFIG REQUIRED COMPONENTS
+    Quick
+    DBus
+    Widgets
+    X11Extras
+    Concurrent
+)
+
+find_package(KF5 CONFIG REQUIRED COMPONENTS
+    Plasma
+    DocTools
+    I18n
+    KCMUtils
+    NewStuff
+    KDE4Support
+    NotifyConfig
+    Su
+)
+
+find_package(ScreenSaverDBusInterface CONFIG REQUIRED)
+find_package(KSMServerDBusInterface CONFIG REQUIRED)
 find_package(USB)
 set(HAVE_LIBUSB ${LIBUSB_FOUND})
 set_package_properties(USB PROPERTIES DESCRIPTION "User level access to USB devices"
@@ -30,6 +64,7 @@ endif()
 
 include_directories("${CMAKE_CURRENT_BINARY_DIR}")
 
+include(ConfigureChecks.cmake)
 configure_file(config-workspace.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/config-workspace.h)
 configure_file(config-unix.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/config-unix.h )
 configure_file(config-X11.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/config-X11.h)
