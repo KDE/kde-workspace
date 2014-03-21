@@ -17,6 +17,7 @@
  */
 
 #include "xkb_rules.h"
+#include "config-workspace.h"
 
 #include <kdebug.h>
 #include <kglobal.h>
