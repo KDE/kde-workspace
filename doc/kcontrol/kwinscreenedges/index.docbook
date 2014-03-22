@@ -14,8 +14,8 @@
 <!-- TRANS:ROLES_OF_TRANSLATORS -->
 </authorgroup>
 
-<date>2010-10-28</date>
-<releaseinfo>&kde; 4.5</releaseinfo>
+<date>2014-10-05</date>
+<releaseinfo>&kde; 4.13</releaseinfo>
 
 <keywordset>
 <keyword>KDE</keyword>
@@ -37,14 +37,32 @@ a grey colored square indicates that no effect is selected for this edge.</para>
 <para>The number of accessible items in the context menu depends on the settings in the module
 <ulink url="help:/kcontrol/kwincompositing/index.html">
 <guilabel>Desktop Effects</guilabel></ulink> in the <guilabel>Workspace Appearance and Behavior</guilabel>
-category. Select <guilabel>Enable desktop 
-effects</guilabel> to activate compositing, select the compositing type 
-<guilabel>OpenGL</guilabel>, and then choose your favorite effects on the 
+category. Enable desktop effects to activate compositing, select the compositing type, 
+and then choose your favorite effects on the 
 <guilabel>All Effects</guilabel> tab from the <guilabel>Windows Management</guilabel> 
 group. This activates the corresponding items in the context menu.</para>
 
-<para>If you are looking for the setting to enable switching of desktops by 
+<para><!--Obsolete?-->If you are looking for the setting to enable switching of desktops by 
 pushing your mouse cursor against the edge of the screen choose one of the <guilabel>Present 
 Windows</guilabel> effects from the context menu.</para>
+
+<para>The section <guilabel>Window Management</guilabel> has two additional options when moving windows to screen edges:
+<itemizedlist> 
+<listitem><para>Maximize windows by dragging them to the top of the screen.
+</para></listitem>
+<listitem><para>Tile windows by dragging them to the side of the screen. The windows will be tiled to a quarter of the screen if dragged to the upper or lower part of the screen height determined by the value in the spinbox, otherwise to the full height of the screen.
+</para></listitem>
+</itemizedlist>
+</para>
+
+<para>The <guilabel>Other Settings</guilabel> configure the behavior pushing the mouse cursor to a screen edge.</para>
+<para><guilabel>Switch desktop on edge</guilabel>: Change desktop when the mouse cursor is pushed against the edge of the screen.
+If <guilabel>Always Enabled</guilabel> is selected all effects configured for screen edges in the first section of this module will be disabled. 
+</para>
+<para><guilabel>Activation delay</guilabel>: The amount of time required for the mouse cursor to be pushed against the edge 
+of the screen before the action is triggered
+</para>
+<para><guilabel>Reactivation delay</guilabel>: The amount of time required after triggering an action until the next trigger can occur.
+</para>
 
 </article>
