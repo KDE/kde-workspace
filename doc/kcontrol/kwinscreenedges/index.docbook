@@ -15,7 +15,7 @@
 </authorgroup>
 
 <date>2014-10-05</date>
-<releaseinfo>&kde; 4.13</releaseinfo>
+<releaseinfo>&kde; 4.11</releaseinfo>
 
 <keywordset>
 <keyword>KDE</keyword>
@@ -42,9 +42,10 @@ and then choose your favorite effects on the
 <guilabel>All Effects</guilabel> tab from the <guilabel>Windows Management</guilabel> 
 group. This activates the corresponding items in the context menu.</para>
 
-<para><!--Obsolete?-->If you are looking for the setting to enable switching of desktops by 
-pushing your mouse cursor against the edge of the screen choose one of the <guilabel>Present 
-Windows</guilabel> effects from the context menu.</para>
+<para>If you are looking for the setting to enable switching of
+desktops by pushing your mouse cursor against the edge of
+the screen choose one of the above mentioned
+<guilabel>Window Management</guilabel> effects from the context menu.</para>
 
 <para>The section <guilabel>Window Management</guilabel> has two additional options when moving windows to screen edges:
 <itemizedlist> 
