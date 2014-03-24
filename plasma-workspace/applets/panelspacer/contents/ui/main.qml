@@ -48,5 +48,7 @@ Item {
         var action = plasmoid.action("expanding");
         action.checkable = true;
         action.checked = plasmoid.configuration.expanding;
+
+        plasmoid.action("configure").visible = false;
     }
 }
