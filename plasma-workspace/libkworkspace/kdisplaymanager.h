@@ -22,11 +22,11 @@
 #define KDISPLAYMANAGER_H
 
 #include "kworkspace.h"
+#include "config-libkworkspace.h"
 #include "kworkspace_export.h"
 #include <QtCore/QString>
 #include <QtCore/QList>
 #include <QtCore/QByteArray>
-#include <config-X11.h>
 
 struct KWORKSPACE_EXPORT SessEnt {
     QString display, from, user, session;

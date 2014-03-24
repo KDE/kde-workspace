@@ -22,6 +22,7 @@
 
 #include <QObject>
 #include "kworkspace.h"
+#include "config-libkworkspace.h"
 
 #if HAVE_X11
 #include <X11/SM/SMlib.h>

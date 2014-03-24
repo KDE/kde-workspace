@@ -18,6 +18,8 @@
 */
 
 #include "kworkspace.h"
+#include "config-libkworkspace.h"
+
 #include <QApplication>
 #include <QDataStream>
 #include <QFile>

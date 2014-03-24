@@ -31,8 +31,9 @@ target_link_libraries(kworkspace Qt5::DBus Qt5::Core
 target_include_directories(kworkspace PUBLIC "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>"
                                       INTERFACE "$<INSTALL_INTERFACE:${INCLUDE_INSTALL_DIR}/kworkspace>" )
 
+configure_file(config-libkworkspace.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/config-libkworkspace.h)
+
 if(X11_FOUND)
-    set_target_properties(kworkspace PROPERTIES COMPILE_FLAGS -DHAVE_X11=1)
     target_link_libraries(kworkspace Qt5::X11Extras ${X11_LIBRARIES})
 endif()
 
@@ -43,6 +44,7 @@ install(TARGETS kworkspace EXPORT libkworkspaceLibraryTargets ${INSTALL_TARGETS_
 
 install( FILES kdisplaymanager.h
                kworkspace.h
+               ${CMAKE_CURRENT_BINARY_DIR}/config-libkworkspace.h
                ${CMAKE_CURRENT_BINARY_DIR}/kworkspace_export.h
          DESTINATION ${INCLUDE_INSTALL_DIR}/kworkspace COMPONENT Devel )
 
