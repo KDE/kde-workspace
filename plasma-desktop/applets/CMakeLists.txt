@@ -1,6 +1,8 @@
 add_subdirectory(kickoff)
 plasma_install_package(trash org.kde.plasma.trash)
 
+add_subdirectory(folder)
+
 if(NOT WIN32)
    # tasks and windowlist depend on libs/taskmanager
    add_subdirectory(taskmanager)

@@ -86,15 +86,16 @@ MouseEventListener {
     }
 
     onPressed: {
-        pressed = true;
-
         if (mouse.buttons & Qt.LeftButton) {
+            pressed = true;
             pressX = mouse.x;
             pressY = mouse.y;
         } else if (mouse.buttons & Qt.RightButton) {
+            /*
             if (plasmoid.configuration.showToolTips) {
                 toolTip.hide();
             }
+            */
 
             tasks.itemContextMenu(task, plasmoid.action("configure"));
         }
