@@ -173,6 +173,7 @@ PlasmaCore.Dialog {
                         onClicked: {
                             executeAction(notificationProperties.source, modelData.id)
                             actionsColumn.visible = false
+                            notificationPopup.close()
                         }
                     }
                 }
