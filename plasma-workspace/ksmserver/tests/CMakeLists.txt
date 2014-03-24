@@ -21,6 +21,7 @@ target_link_libraries(testsh
     KF5::Notifications
     ${X11_LIBRARIES}
     ${X11_Xrender_LIB}
+    Qt5::X11Extras
     KF5::Solid
     Qt5::Quick
     KF5::Declarative

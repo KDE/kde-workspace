@@ -70,6 +70,7 @@ target_link_libraries(kdeinit_ksmserver
     KF5::KIOWidgets
     ${X11_LIBRARIES}
     ${X11_Xrender_LIB}
+    Qt5::X11Extras
     KF5::Solid
     Qt5::Quick
     KF5::Declarative
