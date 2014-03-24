@@ -61,13 +61,13 @@ Item {
             }
         }
 
-//TODO
-//         PlasmaComponents.Button {
-//             iconSource: "distribute-horizontal-x"
-//             text: i18n("Add spacer")
-//             onClicked: {
-//             }
-//         }
+        PlasmaComponents.Button {
+            iconSource: "distribute-horizontal-x"
+            text: i18n("Add spacer")
+            onClicked: {
+                configDialog.addPanelSpacer();
+            }
+        }
 
         PlasmaComponents.Button {
             id: settingsButton
