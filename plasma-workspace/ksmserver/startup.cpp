@@ -161,7 +161,9 @@ void KSMServer::launchWM( const QList< QStringList >& wmStartCommands )
     wmProcess = startApplication( wmStartCommands[ 0 ], QString(), QString(), true );
     connect( wmProcess, SIGNAL(error(QProcess::ProcessError)), SLOT(wmProcessChange()));
     connect( wmProcess, SIGNAL(finished(int,QProcess::ExitStatus)), SLOT(wmProcessChange()));
-    QTimer::singleShot( 4000, this, SLOT(autoStart0()) );
+    //Let's try to remove this and see how smooth things are nowadays
+//     QTimer::singleShot( 4000, this, SLOT(autoStart0()) );
+    autoStart0();
 }
 
 void KSMServer::clientSetProgram( KSMClient* client )
