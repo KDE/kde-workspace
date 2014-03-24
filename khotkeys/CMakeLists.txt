@@ -27,6 +27,7 @@ set(CMAKE_MODULE_PATH ${ECM_MODULE_PATH} ${ECM_KDE_MODULE_DIR})
 include(KDEInstallDirs)
 include(KDECMakeSettings)
 include(KDECompilerSettings)
+include(CMakePackageConfigHelpers)
 
 find_package(KF5 CONFIG REQUIRED COMPONENTS
     GlobalAccel
