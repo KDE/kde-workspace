@@ -76,7 +76,6 @@ if(NOT WIN32)
 endif()
 
 ecm_optional_add_subdirectory(kmenuedit)
-#    macro_optional_add_subdirectory(krunner)
 #    macro_optional_add_subdirectory(solid)
 
 #

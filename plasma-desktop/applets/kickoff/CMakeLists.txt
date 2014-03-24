@@ -34,7 +34,7 @@ if(${CMAKE_SOURCE_DIR} STREQUAL ${plasma-desktop_SOURCE_DIR})
     set(ksmserver_xml ${KSMSERVER_DBUS_INTERFACE})
 else()
     set(screensaver_xml ${KDEBASE_WORKSPACE_SOURCE_DIR}/plasma-workspace/ksmserver/screenlocker/dbus/org.freedesktop.ScreenSaver.xml)
-    set(krunner_xml ${KDEBASE_WORKSPACE_SOURCE_DIR}/krunner/dbus/org.kde.krunner.App.xml)
+    set(krunner_xml ${KDEBASE_WORKSPACE_SOURCE_DIR}/plasma-workspace/krunner/dbus/org.kde.krunner.App.xml)
     set(ksmserver_xml ${KDEBASE_WORKSPACE_SOURCE_DIR}/plasma-workspace/ksmserver/org.kde.KSMServerInterface.xml)
 endif()
 

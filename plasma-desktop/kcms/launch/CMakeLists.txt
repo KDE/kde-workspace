@@ -9,7 +9,7 @@ if(${CMAKE_SOURCE_DIR} STREQUAL ${plasma-desktop_SOURCE_DIR})
     set(kwin_xml ${KWIN_EFFECTS_INTERFACE})
     set(kdesktop_xml  ${KRUNNERAPP_INTERFACE})
 else()
-    set(kdesktop_xml  ${KDEBASE_WORKSPACE_SOURCE_DIR}/krunner/dbus/org.kde.krunner.App.xml)
+    set(kdesktop_xml  ${KDEBASE_WORKSPACE_SOURCE_DIR}/plasma-workspace/krunner/dbus/org.kde.krunner.App.xml)
     set(kwin_xml ${KDEBASE_WORKSPACE_SOURCE_DIR}/kwin/org.kde.kwin.Effects.xml)
 endif()
 
