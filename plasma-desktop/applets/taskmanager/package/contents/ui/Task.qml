@@ -47,6 +47,7 @@ MouseEventListener {
     property bool isStartup: model.IsStartup
     property bool demandsAttention: model.DemandsAttention
     property int textWidth: label.implicitWidth
+    property bool pressed: false
     property int pressX: -1
     property int pressY: -1
     property Item busyIndicator
@@ -77,27 +78,16 @@ MouseEventListener {
     }
 
     onContainsMouseChanged:  {
+        if (!containsMouse) {
+            pressed = false;
+        }
+
         tasks.itemHovered(model.Id, containsMouse);
     }
 
-    onClicked: {
-        if (!mouse.button == Qt.LeftButton) {
-            return;
-        }
-
-        if (isGroupParent) {
-            if (groupDialog.visible) {
-                groupDialog.visible = false;
-            } else {
-                groupDialog.visualParent = task;
-                groupDialog.visible = true;
-            }
-        } else {
-            tasks.activateItem(model.Id, true);
-        }
-    }
-
     onPressed: {
+        pressed = true;
+
         if (mouse.buttons & Qt.LeftButton) {
             pressX = mouse.x;
             pressY = mouse.y;
@@ -111,6 +101,24 @@ MouseEventListener {
     }
 
     onReleased: {
+        if (pressed) {
+            if (!mouse.button == Qt.LeftButton) {
+                return;
+            }
+
+            if (isGroupParent) {
+                if (groupDialog.visible) {
+                    groupDialog.visible = false;
+                } else {
+                    groupDialog.visualParent = task;
+                    groupDialog.visible = true;
+                }
+            } else {
+                tasks.activateItem(model.Id, true);
+            }
+        }
+
+        pressed = false;
         pressX = -1;
         pressY = -1;
     }
