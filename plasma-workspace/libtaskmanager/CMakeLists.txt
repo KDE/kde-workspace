@@ -77,6 +77,7 @@ install(FILES
    taskgroup.h
    taskitem.h
    taskmanager.h
+   tasksmodel.h
    ${CMAKE_CURRENT_BINARY_DIR}/taskmanager_export.h
    DESTINATION ${INCLUDE_INSTALL_DIR}/taskmanager COMPONENT Devel
    )
@@ -90,7 +91,7 @@ install(FILES ${CMAKE_CURRENT_BINARY_DIR}/LibTaskManagerConfig.cmake
         DESTINATION ${CMAKECONFIG_INSTALL_DIR})
 
 install(EXPORT libtaskmanagerLibraryTargets
-        NAMESPACE KF5::
+        NAMESPACE PW::
         DESTINATION ${CMAKECONFIG_INSTALL_DIR}
         FILE LibTaskManagerLibraryTargets.cmake )
 
