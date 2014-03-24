@@ -72,6 +72,7 @@ target_link_libraries(krunner
     KF5::PlasmaQuick
     KF5::GlobalAccel
     KF5::DBusAddons
+    KF5::WindowSystem
 )
 
 if(X11_FOUND)
