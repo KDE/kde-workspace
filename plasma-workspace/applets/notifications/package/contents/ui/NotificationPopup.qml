@@ -18,14 +18,9 @@
  */
 
 import QtQuick 2.0
-import QtQuick.Layouts 1.1
-import QtQml 2.2
 import org.kde.plasma.core 2.0 as PlasmaCore
 import org.kde.plasma.components 2.0 as PlasmaComponents
 import org.kde.qtextracomponents 2.0
-import org.kde.plasma.extras 2.0 as PlasmaExtras
-
-import QtQuick.Window 2.1
 
 PlasmaCore.Dialog {
     id: notificationPopup
@@ -34,26 +29,17 @@ PlasmaCore.Dialog {
     type: PlasmaCore.Dialog.Dock
     flags: Qt.WindowStaysOnTopHint
 
-//     property variant savedPos
-//     property bool customPosition: false
-
     property var notificationProperties
 
     onVisibleChanged: {
         notificationTimer.running = visible;
     }
 
-//     onHeightChanged:  setCustomPosition(notificationPopup.savedPos, false)
-//     onWidthChanged:   setCustomPosition(notificationPopup.savedPos, false)
-
     function populatePopup(notification)
     {
         notificationProperties = notification
-
+        print("Populating things");
         notificationTimer.interval = notification.expireTimeout
-//         notificationTimer.running = true;
-
-
         titleLabel.text = notification.summary
         bodyLabel.text = notification.body
         appIconItem.icon = notification.appIcon
@@ -103,11 +89,6 @@ PlasmaCore.Dialog {
         PlasmaComponents.Label {
             id: titleLabel
             font.weight: Font.Bold
-//             text: notificationProperties.body
-//             visible: model.summary.length > 0
-//             height: model.summary.length > 0 ? paintedHeight : 0
-//             horizontalAlignment: Text.AlignHCenter
-//             color: theme.textColor
             elide: Text.ElideRight
             anchors {
                 left: appIconItem.right
@@ -141,8 +122,6 @@ PlasmaCore.Dialog {
 //             }
             PlasmaComponents.Label {
                 id: bodyLabel
-//                 width: parent.width
-                //textFormat: Text.PlainText
                 color: theme.textColor
                 wrapMode: Text.Wrap
                 elide: Text.ElideRight
@@ -171,8 +150,7 @@ PlasmaCore.Dialog {
                 }
                 onClicked: {
                     closeNotification(notificationProperties.source)
-                    notificationPopup.close()//.visible = false
-                    //FIXME
+                    notificationPopup.close()
                 }
             }
 
@@ -192,13 +170,6 @@ PlasmaCore.Dialog {
                         text: modelData.text
                         width: theme.mSize(theme.defaultFont).width * 8
                         height: theme.mSize(theme.defaultFont).width * 2
-                        onPressedChanged: {
-                            if (pressed) {
-//                                 mainItem.buttonPressed = true
-                            } else {
-//                                 mainItem.buttonPressed = false
-                            }
-                        }
                         onClicked: {
                             executeAction(notificationProperties.source, modelData.id)
                             actionsColumn.visible = false

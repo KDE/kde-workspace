@@ -18,7 +18,6 @@
  */
 
 import QtQuick 2.0
-import org.kde.plasma.core 2.0 as PlasmaCore
 import org.kde.plasma.components 2.0 as PlasmaComponents
 import org.kde.qtextracomponents 2.0
 
@@ -30,7 +29,6 @@ PlasmaComponents.ListItem {
     property int toolIconSize: units.iconSizes.smallMedium
 
     opacity: 1-Math.abs(x)/width
-    visible: appTabBar.currentTab == allAppsTab || appTabBar.currentTab.text == appName
 
     Timer {
         interval: 10*60*1000
@@ -274,11 +272,9 @@ PlasmaComponents.ListItem {
     } //MouseArea
 
     Component.onCompleted: {
-        allApplicationsModel.addApplication(appIcon, appName)
         mainScrollArea.height = mainScrollArea.implicitHeight
     }
     Component.onDestruction: {
-        allApplicationsModel.removeApplication(model.appName)
         mainScrollArea.height = mainScrollArea.implicitHeight
     }
 }
