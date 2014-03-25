@@ -29,8 +29,8 @@ import org.kde.qtextracomponents 2.0
 
 Item {
 
-    Plasmoid.switchWidth: units.gridUnit * 20
-    Plasmoid.switchHeight: units.gridUnit * 30
+    Plasmoid.switchWidth: units.gridUnit * 200
+    Plasmoid.switchHeight: units.gridUnit * 300
 
 
     Plasmoid.fullRepresentation: Item {
