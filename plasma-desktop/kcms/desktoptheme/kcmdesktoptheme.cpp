@@ -48,6 +48,7 @@ K_PLUGIN_FACTORY_WITH_JSON(KCMDesktopThemeFactory, "desktoptheme.json", register
 
 KCMDesktopTheme::KCMDesktopTheme( QWidget* parent, const QVariantList& )
     : KCModule( parent )
+    , m_dialog(0)
     , m_defaultTheme(new Plasma::Theme(this))
 {
     setQuickHelp( i18n("<h1>Desktop Theme</h1>"
@@ -87,6 +88,7 @@ KCMDesktopTheme::KCMDesktopTheme( QWidget* parent, const QVariantList& )
     connect(m_theme->selectionModel(), SIGNAL(currentChanged(QModelIndex,QModelIndex)),
             this, SLOT(setDesktopThemeDirty()));
     connect(m_newThemeButton, SIGNAL(clicked()), this, SLOT(getNewThemes()));
+    connect(m_fileInstallButton, &QPushButton::clicked, this, &KCMDesktopTheme::showFileDialog);
 }
 
 
@@ -179,6 +181,39 @@ void KCMDesktopTheme::detailChanged()
     m_bDetailsDirty = true;
     emit changed(true);
 }
+
+void KCMDesktopTheme::showFileDialog()
+{
+    if (!m_dialog) {
+        QUrl baseUrl;
+        m_dialog = new QFileDialog(m_fileInstallButton, i18n("Open Theme"),
+                                      QDir::homePath(),
+                                      i18n("Theme Files (*.zip *.theme)"));
+        m_dialog->setFileMode(QFileDialog::ExistingFile);
+        connect(m_dialog, &QDialog::accepted, this, &KCMDesktopTheme::fileBrowserCompleted);
+    }
+
+    m_dialog->exec();
+    m_dialog->raise();
+    m_dialog->activateWindow();
+}
+
+void KCMDesktopTheme::fileBrowserCompleted()
+{
+    if (m_dialog && m_dialog->selectedFiles().count() > 0) {
+        foreach (const QString &file, m_dialog->selectedFiles()) {
+            qDebug() << "INSTALL Theme file: " << file;
+            installTheme(file);
+        }
+    }
+}
+
+void KCMDesktopTheme::installTheme(const QString &file)
+{
+    qDebug() << "Installing ... " << file;
+}
+
+
 
 #include "kcmdesktoptheme.moc"
 

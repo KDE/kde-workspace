@@ -30,6 +30,8 @@
 
 #include <kcmodule.h>
 
+#include <QFileDialog>
+
 #include "ui_DesktopTheme.h"
 
 class ThemeModel;
@@ -65,6 +67,11 @@ private:
 
     bool m_bDesktopThemeDirty;
     bool m_bDetailsDirty;
+
+    void showFileDialog();
+    QFileDialog *m_dialog;
+    void installTheme(const QString &file);
+    void fileBrowserCompleted();
 
     ThemeModel* m_themeModel;
     Plasma::Theme *m_defaultTheme;
