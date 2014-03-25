@@ -1238,8 +1238,7 @@ AbstractGroupingStrategy* GroupManager::taskGrouper() const
 
 void GroupManager::setGroupingStrategy(TaskGroupingStrategy strategy)
 {
-    if (d->changingGroupingStrategy ||
-            (d->abstractGroupingStrategy && d->abstractGroupingStrategy->type() == strategy)) {
+    if (d->changingGroupingStrategy || d->groupingStrategy == strategy) {
         return;
     }
 
