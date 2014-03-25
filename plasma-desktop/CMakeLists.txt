@@ -34,6 +34,7 @@ find_package(KF5 CONFIG REQUIRED COMPONENTS
 )
 
 if(${CMAKE_SOURCE_DIR} STREQUAL ${CMAKE_CURRENT_SOURCE_DIR})
+    find_package(KDecorations REQUIRED CONFIG)
     find_package(LibKWorkspace CONFIG REQUIRED)
     find_package(LibTaskManager CONFIG REQUIRED)
     find_package(KWinDBusInterface CONFIG REQUIRED)
