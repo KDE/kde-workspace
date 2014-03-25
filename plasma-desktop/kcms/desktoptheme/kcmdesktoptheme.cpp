@@ -205,6 +205,7 @@ void KCMDesktopTheme::fileBrowserCompleted()
     if (m_dialog && m_dialog->selectedFiles().count() > 0) {
         foreach (const QString &file, m_dialog->selectedFiles()) {
             qDebug() << "INSTALL Theme file: " << file;
+            m_newThemeButton->setEnabled(false);
             installTheme(file);
         }
     }
@@ -223,6 +224,8 @@ void KCMDesktopTheme::installTheme(const QString &file)
         QProcess *myProcess = new QProcess(this);
         //connect(myProcess, &QProcess::finished, this, &KCMDesktopTheme::installFinished);
         connect(myProcess, SIGNAL(finished(int, QProcess::ExitStatus)), this, SLOT(installFinished(int, QProcess::ExitStatus)));
+        connect(myProcess, SIGNAL(error(QProcess::ProcessError)), this, SLOT(installError(QProcess::ProcessError)));
+
         myProcess->start(program, arguments);
     } else {
         qWarning() << "theme install process already running, refusing to install simultaneously";
@@ -235,10 +238,20 @@ void KCMDesktopTheme::installFinished(int exitCode, QProcess::ExitStatus exitSta
     if (exitCode == 0) {
         qDebug() << "Theme installed successfully :)";
         m_themeModel->reload();
+        m_statusLabel->setText(i18n("Theme installed successfully."));
     } else {
         qDebug() << "Theme installation failed.";
-
+        m_statusLabel->setText(i18n("Theme installation failed. (%1)", exitCode));
     }
+    m_newThemeButton->setEnabled(true);
+}
+
+void KCMDesktopTheme::installError(QProcess::ProcessError e)
+{
+    qDebug() << "Theme installation failed. :(";
+    m_statusLabel->setText(i18n("Theme installation failed."));
+    m_newThemeButton->setEnabled(true);
+
 }
 
 

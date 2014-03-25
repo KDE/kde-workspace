@@ -64,7 +64,7 @@ protected Q_SLOTS:
 
     void detailChanged();
     void installFinished(int exitCode, QProcess::ExitStatus exitStatus);
-
+    void installError(QProcess::ProcessError e);
 
 private:
     static QString toolbarButtonText(int index);
