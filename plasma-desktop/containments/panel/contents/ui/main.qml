@@ -164,15 +164,23 @@ function checkLastSpacer() {
 
     Plasmoid.onUserConfiguringChanged: {
         if (plasmoid.immutable) {
+            if (dragOverlay) {
+                dragOverlay.destroy();
+            }
             return;
         }
 
         if (plasmoid.userConfiguring) {
-            var component = Qt.createComponent("ConfigOverlay.qml");
-            dragOverlay = component.createObject(root);
-            component.destroy();
+            if (!dragOverlay) {
+                var component = Qt.createComponent("ConfigOverlay.qml");
+                dragOverlay = component.createObject(root);
+                component.destroy();
+            } else {
+                dragOverlay.visible = true;
+            }
         } else {
-            dragOverlay.destroy()
+            dragOverlay.visible = false;
+            dragOverlay.destroy();
         }
     }
 
