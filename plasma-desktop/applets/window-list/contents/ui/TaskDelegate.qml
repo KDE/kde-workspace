@@ -16,7 +16,7 @@
  */
 import QtQuick 2.0
 import org.kde.plasma.components 2.0 as PlasmaComponents
-import org.kde.qtextracomponents 2.0
+import org.kde.kquickcontrolsaddons 2.0
 import org.kde.plasma.core 2.0 as PlasmaCore
 
 Item {

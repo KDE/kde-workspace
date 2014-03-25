@@ -22,7 +22,7 @@ import QtQuick 2.0
 import org.kde.plasma.core 2.0 as PlasmaCore
 import org.kde.plasma.components 2.0 as PlasmaComponents
 import org.kde.plasma.extras 2.0 as PlasmaExtras
-import org.kde.qtextracomponents 2.0 as QtExtras
+import org.kde.kquickcontrolsaddons 2.0 as KQuickControlsAddons
 
 import "plasmapackage:/code/LayoutManager.js" as LayoutManager
 
@@ -101,7 +101,7 @@ Item {
 
     Rectangle { color: Qt.rgba(0,0,0,0); border.width: 3; border.color: "white"; opacity: 0.5; visible: debug; anchors.fill: parent; }
 
-    QtExtras.MouseEventListener {
+    KQuickControlsAddons.MouseEventListener {
         id: mouseListener
 
         anchors { left: parent.left; top: parent.top; bottom: parent.bottom; }

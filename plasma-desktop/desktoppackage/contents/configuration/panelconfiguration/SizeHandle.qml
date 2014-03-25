@@ -21,11 +21,11 @@ import org.kde.plasma.components 2.0 as PlasmaComponents
 import org.kde.plasma.extras 2.0 as PlasmaExtras
 import org.kde.plasma.core 2.0 as PlasmaCore
 import org.kde.plasma.configuration 2.0
-import org.kde.qtextracomponents 2.0 as QtExtras
+import org.kde.kquickcontrolsaddons 2.0 as KQuickControlsAddons
 
 PlasmaComponents.Button {
     text: panel.location == PlasmaCore.Types.LeftEdge || panel.location == PlasmaCore.Types.RightEdge ? i18n("Width") : i18n("Height")
-    QtExtras.MouseEventListener {
+    KQuickControlsAddons.MouseEventListener {
         anchors.fill: parent
         property int startMouseX
         property int startMouseY

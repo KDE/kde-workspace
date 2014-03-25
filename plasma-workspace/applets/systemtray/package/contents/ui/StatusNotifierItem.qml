@@ -23,7 +23,7 @@
 
 import QtQuick 2.0
 import org.kde.plasma.core 2.0 as PlasmaCore
-import org.kde.qtextracomponents 2.0 as QtExtraComponents
+import org.kde.kquickcontrolsaddons 2.0 as KQuickControlsAddonsComponents
 import org.kde.private.systemtray 2.0 as SystemTray
 
 
@@ -111,7 +111,7 @@ Item {
     }
 
     // TODO: remove wheel area in QtQuick 2.0
-    QtExtraComponents.MouseEventListener {
+    KQuickControlsAddonsComponents.MouseEventListener {
         id: wheel_area
         anchors.fill: parent
         enabled: __has_task

@@ -19,7 +19,7 @@
 
 import QtQuick 1.1
 import org.kde.plasma.core 0.1 as PlasmaCore
-import org.kde.qtextracomponents 0.1 as QtExtras
+import org.kde.kquickcontrolsaddons 0.1 as KQuickControlsAddons
 
 Rectangle {
 
@@ -40,7 +40,7 @@ Rectangle {
         width: 400
         height: 400
 
-        QtExtras.MouseEventListener {
+        KQuickControlsAddons.MouseEventListener {
             /* The MouseEventListener
              *
              * this is the parent of the applet and handle,

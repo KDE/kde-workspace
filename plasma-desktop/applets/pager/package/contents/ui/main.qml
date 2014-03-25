@@ -20,7 +20,7 @@ import QtQuick.Layouts 1.1
 import org.kde.plasma.plasmoid 2.0
 import org.kde.plasma.core 2.0 as PlasmaCore
 import org.kde.plasma.components 2.0 as PlasmaComponents
-import org.kde.qtextracomponents 2.0 as QtExtraComponents
+import org.kde.kquickcontrolsaddons 2.0 as KQuickControlsAddonsComponents
 import org.kde.draganddrop 2.0
 import org.kde.plasma.private.pager 2.0
 import "utils.js" as Utils
@@ -226,7 +226,7 @@ Item {
                         border.color: model.active ? windowActiveBorderColor
                                                    : windowInactiveBorderColor
 
-                        QtExtraComponents.QPixmapItem {
+                        KQuickControlsAddonsComponents.QPixmapItem {
                             id: icon
                             anchors.centerIn: parent
                             pixmap: model.icon

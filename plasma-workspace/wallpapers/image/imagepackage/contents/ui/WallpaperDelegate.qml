@@ -18,7 +18,7 @@
  */
 
 import QtQuick 2.0
-import org.kde.qtextracomponents 2.0
+import org.kde.kquickcontrolsaddons 2.0
 
 MouseArea {
     id: wallpaperDelegate

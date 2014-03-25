@@ -21,7 +21,7 @@
 import QtQuick 2.0
 import org.kde.plasma.core 2.0 as PlasmaCore
 import org.kde.plasma.components 2.0 as Components
-import org.kde.qtextracomponents 2.0 as QtExtras
+import org.kde.kquickcontrolsaddons 2.0 as KQuickControlsAddons
 import "plasmapackage:/code/logic.js" as Logic
 
 Item {
@@ -99,7 +99,7 @@ Item {
             rightMargin: padding.margins.right
         }
 
-        QtExtras.QIconItem {
+        KQuickControlsAddons.QIconItem {
             id: batteryIcon
             width: units.iconSizes.medium
             height: width

@@ -20,7 +20,7 @@
 import QtQuick 2.0
 import org.kde.plasma.components 2.0 as PlasmaComponents
 import org.kde.plasma.extras 2.0 as PlasmaExtras
-import org.kde.qtextracomponents 2.0 as QtExtras
+import org.kde.kquickcontrolsaddons 2.0 as KQuickControlsAddons
 
 Item {
     id: toolBoxDelegate
@@ -33,7 +33,7 @@ Item {
     width: parent ? parent.width : 200
 
     visible: modelData.visible
-    QtExtras.QIconItem {
+    KQuickControlsAddons.QIconItem {
         id: iconItem
         height: toolBoxDelegate.iconSize
         width: toolBoxDelegate.iconSize

@@ -21,7 +21,7 @@
 import QtQuick 2.0
 import org.kde.plasma.core 2.0 as PlasmaCore
 import org.kde.plasma.components 2.0 as Components
-import org.kde.qtextracomponents 2.0 as QtExtras
+import org.kde.kquickcontrolsaddons 2.0 as KQuickControlsAddons
 
 FocusScope {
     id: brightnessItem
@@ -36,7 +36,7 @@ FocusScope {
 
     signal changed(int screenBrightness)
 
-    QtExtras.QIconItem {
+    KQuickControlsAddons.QIconItem {
         id: brightnessIcon
         width: units.iconSizes.medium
         height: width

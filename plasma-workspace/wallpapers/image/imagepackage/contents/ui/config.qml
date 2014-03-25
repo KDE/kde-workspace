@@ -20,7 +20,7 @@ import QtQuick 2.0
 import QtQuick.Controls 1.0 as QtControls
 import QtQuick.Layouts 1.0
 import org.kde.plasma.wallpapers.image 2.0 as Wallpaper
-import org.kde.qtextracomponents 2.0
+import org.kde.kquickcontrolsaddons 2.0
 
 ColumnLayout {
     id: root

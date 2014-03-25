@@ -19,13 +19,13 @@
 
 import QtQuick 2.0
 import org.kde.plasma.core 2.0 as PlasmaCore
-import org.kde.qtextracomponents 2.0 as QtExtraComponents
+import org.kde.kquickcontrolsaddons 2.0 as KQuickControlsAddonsComponents
 
 import org.kde.private.systemtray 2.0 as SystemTray
 //import "plasmapackage:/code/Layout.js" as LayoutManager
 
 
-QtExtraComponents.MouseEventListener {
+KQuickControlsAddonsComponents.MouseEventListener {
     id: taskItemContainer
     objectName: "taskItemContainer"
 

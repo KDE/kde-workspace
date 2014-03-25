@@ -17,7 +17,7 @@
     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 */
 import QtQuick 2.0
-import org.kde.qtextracomponents 2.0 as QtExtras
+import org.kde.kquickcontrolsaddons 2.0 as KQuickControlsAddons
 
 import org.kde.plasma.core 2.0 as PlasmaCore
 import org.kde.plasma.extras 2.0 as PlasmaExtras
@@ -143,7 +143,7 @@ Item {
             keyNavigationWraps: true
             interactive: contentHeight > height
             /*
-            delegate: QtExtras.MouseEventListener {
+            delegate: KQuickControlsAddons.MouseEventListener {
                 hoverEnabled: true
                 onContainsMouseChanged: {
                     if (containsMouse) {

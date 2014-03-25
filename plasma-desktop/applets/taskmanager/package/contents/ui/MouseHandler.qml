@@ -20,7 +20,7 @@
 import QtQuick 2.0
 
 import org.kde.draganddrop 2.0
-import org.kde.qtextracomponents 2.0
+import org.kde.kquickcontrolsaddons 2.0
 
 import "../code/layout.js" as LayoutManager
 import "../code/tools.js" as TaskTools

@@ -24,7 +24,7 @@ Inherits:
 Imports:
         QtQuick 2.0
         org.kde.plasma.core
-        org.kde.qtextracomponents
+        org.kde.kquickcontrolsaddons
 
 Description:
         A simple button with label at the bottom and icon at the top which uses the plasma theme.
@@ -55,7 +55,7 @@ Signals:
 
 import QtQuick 2.0
 import org.kde.plasma.core 2.0 as PlasmaCore
-import org.kde.qtextracomponents 2.0
+import org.kde.kquickcontrolsaddons 2.0
 
 PlasmaCore.FrameSvgItem {
     id: button
