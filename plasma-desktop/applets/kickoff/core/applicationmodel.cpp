@@ -539,10 +539,10 @@ void ApplicationModel::reloadMenu()
 {
     beginResetModel();
     delete d->root;
-    endResetModel();
     d->root = new AppNode();
     createNewProgramList();
     d->fillNode(QString(), d->root);
+    endResetModel();
 }
 
 void ApplicationModel::checkSycocaChange(const QStringList &changes)
