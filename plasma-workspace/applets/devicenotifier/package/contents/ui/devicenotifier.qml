@@ -38,8 +38,7 @@ Item {
     Plasmoid.icon: !sdSource.last ? "device-notifier" : sdSource.data[sdSource.last]["Icon"]
     Plasmoid.toolTipMainText: !sdSource.last ? i18n("No devices available") : i18n("Most recent device")
     Plasmoid.toolTipSubText: !sdSource.last ? "" : sdSource.data[sdSource.last]["Description"]
-
-
+    Plasmoid.status : (filterModel.count >  0) ? PlasmaCore.Types.ActiveStatus : PlasmaCore.Types.PassiveStatus
 
     PlasmaCore.DataSource {
         id: hpSource
@@ -116,6 +115,33 @@ Item {
         }
     }
 
+    PlasmaCore.SortFilterModel {
+        id: filterModel
+        sourceModel: PlasmaCore.DataModel {
+            dataSource: sdSource
+        }
+        filterRole: "Removable"
+        filterRegExp: {
+            var all = devicenotifier.Plasmoid.configuration.allDevices;
+            var removable = devicenotifier.Plasmoid.configuration.removableDevices;
+
+            if (all == true) {
+                devicesType = "all";
+                print("ST2P all");
+                return "";
+            } else if (removable == true) {
+                print("ST2P rem true");
+                devicesType = "removable";
+                return "true";
+            } else {
+                print("ST2P nonRemovable");
+                devicesType = "nonRemovable";
+                return "false";
+            }
+        }
+        sortRole: "Timestamp"
+        sortOrder: Qt.DescendingOrder
+    }
     Component.onCompleted: {
         if (sdSource.connectedSources.count == 0) {
             Plasmoid.status = PlasmaCore.Types.PassiveStatus;
@@ -199,33 +225,7 @@ Item {
                 focus: true
                 boundsBehavior: Flickable.StopAtBounds
 
-                model: PlasmaCore.SortFilterModel {
-                    id: filterModel
-                    sourceModel: PlasmaCore.DataModel {
-                        dataSource: sdSource
-                    }
-                    filterRole: "Removable"
-                    filterRegExp: {
-                        var all = devicenotifier.Plasmoid.configuration.allDevices;
-                        var removable = devicenotifier.Plasmoid.configuration.removableDevices;
-
-                        if (all == true) {
-                            devicesType = "all";
-                            print("ST2P all");
-                            return "";
-                        } else if (removable == true) {
-                            print("ST2P rem true");
-                            devicesType = "removable";
-                            return "true";
-                        } else {
-                            print("ST2P nonRemovable");
-                            devicesType = "nonRemovable";
-                            return "false";
-                        }
-                    }
-                    sortRole: "Timestamp"
-                    sortOrder: Qt.DescendingOrder
-                }
+                model: filterModel
 
                 property int currentExpanded: -1
                 property bool itemClicked: true
