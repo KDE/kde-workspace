@@ -60,8 +60,10 @@ void NotificationsHelper::positionPopup(QObject *win)
     connect(popup, SIGNAL(visibleChanged(bool)),
             this, SLOT(popupClosed(bool)));
 
-    popup->setX(workAreaForScreen(m_plasmoidScreen).width() - popup->width() - 20);
-    popup->setY(workAreaForScreen(m_plasmoidScreen).height() - (m_popups.size() * (popup->height() + 30)));
+    QRect screenArea = workAreaForScreen(m_plasmoidScreen);
+
+    popup->setX(screenArea.x() + screenArea.width() - popup->width() - 20);
+    popup->setY(screenArea.height() - (m_popups.size() * (popup->height() + 30)));
 
     if (!queued) {
         popup->setVisible(true);
