@@ -35,13 +35,64 @@ MouseArea {
     }
     hoverEnabled: true
 
+    property bool isResizingLeft: false
+    property bool isResizingRight: false
     property Item currentApplet
 
     property int lastX
     property int lastY
 
     onPositionChanged: {
+        if (currentApplet && currentApplet.applet &&
+            currentApplet.applet.pluginName == "org.kde.plasma.panelspacer") {
+            if (plasmoid.formFactor === PlasmaCore.Types.Vertical) {
+                if ((mouse.y - handle.y) < units.largeSpacing ||
+                    (mouse.y - handle.y) > (handle.height - units.largeSpacing)) {
+                    configurationArea.cursorShape = Qt.SizeVerCursor;
+                } else {
+                    configurationArea.cursorShape = Qt.ArrowCursor;
+                }
+            } else {
+                if ((mouse.x - handle.x) < units.largeSpacing ||
+                    (mouse.x - handle.x) > (handle.width - units.largeSpacing)) {
+                    configurationArea.cursorShape = Qt.SizeHorCursor;
+                } else {
+                    configurationArea.cursorShape = Qt.ArrowCursor;
+                }
+            }
+        } else {
+            configurationArea.cursorShape = Qt.ArrowCursor;
+        }
+
         if (pressed) {
+            if (currentApplet.applet.pluginName == "org.kde.plasma.panelspacer") {
+
+                if (isResizingLeft) {
+                    if (plasmoid.formFactor === PlasmaCore.Types.Vertical) {
+                        handle.y += (mouse.y - lastY);
+                        handle.height = currentApplet.height + (currentApplet.y - handle.y);
+                    } else {
+                        handle.x += (mouse.x - lastX);
+                        handle.width = currentApplet.width + (currentApplet.x - handle.x);
+                    }
+
+                    lastX = mouse.x;
+                    lastY = mouse.y;
+                    return;
+
+                } else if (isResizingRight) {
+                    if (plasmoid.formFactor === PlasmaCore.Types.Vertical) {
+                        handle.height = mouse.y - handle.y;
+                    } else {
+                        handle.width = mouse.x - handle.x;
+                    }
+
+                    lastX = mouse.x;
+                    lastY = mouse.y;
+                    return;
+                }
+            }
+
             if (plasmoid.formFactor === PlasmaCore.Types.Vertical) {
                 currentApplet.y += (mouse.y - lastY);
                 handle.y = currentApplet.y;
@@ -93,6 +144,33 @@ MouseArea {
             return;
         }
 
+        if (currentApplet.applet.pluginName == "org.kde.plasma.panelspacer") {
+            if (plasmoid.formFactor === PlasmaCore.Types.Vertical) {
+                if ((mouse.y - handle.y) < units.largeSpacing) {
+                    configurationArea.isResizingLeft = true;
+                    configurationArea.isResizingRight = false;
+                } else if ((mouse.y - handle.y) > (handle.height - units.largeSpacing)) {
+                    configurationArea.isResizingLeft = false;
+                    configurationArea.isResizingRight = true;
+                } else {
+                    configurationArea.isResizingLeft = false;
+                    configurationArea.isResizingRight = false;
+                }
+
+            } else {
+                if ((mouse.x - handle.x) < units.largeSpacing) {
+                    configurationArea.isResizingLeft = true;
+                    configurationArea.isResizingRight = false;
+                } else if ((mouse.x - handle.x) > (handle.width - units.largeSpacing)) {
+                    configurationArea.isResizingLeft = false;
+                    configurationArea.isResizingRight = true;
+                } else {
+                    configurationArea.isResizingLeft = false;
+                    configurationArea.isResizingRight = false;
+                }
+            }
+        }
+
         lastX = mouse.x;
         lastY = mouse.y;
         placeHolder.width = currentApplet.width;
@@ -106,15 +184,23 @@ MouseArea {
             return;
         }
 
+        if (plasmoid.formFactor === PlasmaCore.Types.Vertical) {
+            currentApplet.applet.configuration.length = handle.height;
+        } else {
+            currentApplet.applet.configuration.length = handle.width;
+        }
+
+        configurationArea.isResizingLeft = false;
+        configurationArea.isResizingRight = false;
+
         LayoutManager.insertBefore(placeHolder, currentApplet);
         placeHolder.parent = configurationArea;
         currentApplet.z = 1;
 
-        if (plasmoid.formFactor === PlasmaCore.Types.Vertical) {
-            handle.y = currentApplet.y;
-        } else {
-            handle.x = currentApplet.x;
-        }
+        handle.x = currentApplet.x;
+        handle.y = currentApplet.y;
+        handle.width = currentApplet.width;
+        handle.height = currentApplet.height;
         LayoutManager.save();
     }
     Item {
@@ -122,6 +208,14 @@ MouseArea {
         visible: configurationArea.containsMouse
         Layout.fillWidth: currentApplet ? currentApplet.Layout.fillWidth : false
         Layout.fillHeight: currentApplet ? currentApplet.Layout.fillHeight : false
+    }
+
+    Connections {
+        target: currentApplet
+        onXChanged: handle.x = currentApplet.x
+        onYChanged: handle.y = currentApplet.y
+        onWidthChanged: handle.width = currentApplet.width
+        onHeightChanged: handle.height = currentApplet.height
     }
 
     Rectangle {
@@ -135,6 +229,30 @@ MouseArea {
             width: Math.min(parent.width, parent.height)
             height: width
             anchors.centerIn: parent
+        }
+        Rectangle {
+            anchors {
+                left: parent.left
+                top: parent.top
+                bottom: (plasmoid.formFactor !== PlasmaCore.Types.Vertical) ? parent.bottom : undefined
+                right: (plasmoid.formFactor !== PlasmaCore.Types.Vertical) ? undefined : parent.right
+            }
+            visible: currentApplet.applet.pluginName == "org.kde.plasma.panelspacer"
+            width: units.largeSpacing
+            height: units.largeSpacing
+            color: theme.textColor
+        }
+        Rectangle {
+            anchors {
+                right: parent.right
+                top: (plasmoid.formFactor !== PlasmaCore.Types.Vertical) ? parent.top : undefined
+                bottom: parent.bottom
+                left: (plasmoid.formFactor !== PlasmaCore.Types.Vertical) ? undefined : parent.left
+            }
+            visible: currentApplet.applet.pluginName == "org.kde.plasma.panelspacer"
+            width: units.largeSpacing
+            height: units.largeSpacing
+            color: theme.textColor
         }
         Behavior on x {
             enabled: !configurationArea.pressed
@@ -151,12 +269,14 @@ MouseArea {
             }
         }
         Behavior on width {
+            enabled: !configurationArea.pressed
             NumberAnimation {
                 duration: units.longDuration
                 easing.type: Easing.InOutQuad
             }
         }
         Behavior on height {
+            enabled: !configurationArea.pressed
             NumberAnimation {
                 duration: units.longDuration
                 easing.type: Easing.InOutQuad

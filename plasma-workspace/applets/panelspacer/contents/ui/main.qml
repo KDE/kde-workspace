@@ -22,10 +22,12 @@ import QtQuick 2.0
 import QtQuick.Layouts 1.1
 import org.kde.plasma.core 2.0 as PlasmaCore
 import org.kde.plasma.plasmoid 2.0
+import org.kde.qtextracomponents 2.0 as QtExtras
 
 Item {
-    id:root
+    id: root
 
+    z: 9999
     property bool horizontal: plasmoid.formFactor != PlasmaCore.Vertical
 
     Layout.fillWidth: plasmoid.configuration.expanding
@@ -43,7 +45,6 @@ Item {
         plasmoid.configuration.expanding = plasmoid.action("expanding").checked;
     }
     Component.onCompleted: {
-
         plasmoid.setAction("expanding", i18n("Set flexible size"));
         var action = plasmoid.action("expanding");
         action.checkable = true;
