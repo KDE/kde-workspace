@@ -15,6 +15,7 @@ set(systemtrayplugin_SRCS
 add_library(systemtrayplugin SHARED ${systemtrayplugin_SRCS})
 
 target_link_libraries(systemtrayplugin
+    Qt5::DBus
     Qt5::Quick
     Qt5::Qml
     KF5::Declarative
