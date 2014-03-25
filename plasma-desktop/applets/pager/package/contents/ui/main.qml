@@ -40,7 +40,6 @@ Item {
     Layout.fillWidth: true
     Layout.fillHeight: true
 
-
     property bool dragging: false
     property int dragId
 
@@ -113,12 +112,18 @@ Item {
         id: repeater
         model: pager.model
 
-        Item {
+        PlasmaCore.ToolTipArea {
             id: desktop
 
             property int desktopId: index
             property string desktopName: model.desktopName ? model.desktopName : ""
             property bool active: (desktopId === pager.currentDesktop-1)
+
+            mainText: desktopName
+
+            Component.onCompleted: {
+                console.log(model.windows)
+            }
 
             x: model.x
             y: model.y
@@ -131,11 +136,6 @@ Item {
                 imagePath: "widgets/pager"
                 prefix: (desktopMouseArea.enabled && desktopMouseArea.containsMouse) || (root.dragging && root.dragId == desktopId) ?
                             "hover" : (desktop.active ? "active" : "normal")
-
-                onPrefixChanged: {
-                    if (prefix == "hover")
-                        pager.updateToolTip(desktopId);
-                }
             }
 
             DropArea {
@@ -159,7 +159,6 @@ Item {
             MouseArea {
                 id: desktopMouseArea
                 anchors.fill: parent
-                hoverEnabled: true
                 onClicked: pager.changeDesktop(desktopId);
             }
 
@@ -182,10 +181,27 @@ Item {
                 Repeater {
                     model: windows
 
+                    //update the tooltip whenever we add or remove a window
+                    onCountChanged: {
+                        var tooltipText = i18n("%1 windows", count)
+                        var i;
+                        for (i=0; i < Math.min(count,4); i++) {
+                            tooltipText += "<li>"+ itemAt(i).visibleName +"</li>";
+                        }
+                        if (i < count) {
+                            tooltipText += "<br/>"
+                            tooltipText += i18n("and %1 other windows", count-i)
+                        }
+
+
+                        desktop.subText = tooltipText
+                    }
+
                     Rectangle {
                         id: windowRect
 
                         property int windowId: model.windowId
+                        property string visibleName: model.visibleName
 
                         /* since we move clipRect with 1, move it back */
                         x: model.x - 1
