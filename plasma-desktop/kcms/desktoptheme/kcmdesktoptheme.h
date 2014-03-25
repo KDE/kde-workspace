@@ -30,10 +30,12 @@
 
 #include <kcmodule.h>
 
-#include <QFileDialog>
 
 #include "ui_DesktopTheme.h"
 
+#include <QProcess>
+
+class QFileDialog;
 class ThemeModel;
 
 namespace Plasma
@@ -61,6 +63,9 @@ protected Q_SLOTS:
     void getNewThemes();
 
     void detailChanged();
+    void installFinished(int exitCode, QProcess::ExitStatus exitStatus);
+
+
 private:
     static QString toolbarButtonText(int index);
     static int toolbarButtonIndex(const QString &text);
@@ -75,6 +80,7 @@ private:
 
     ThemeModel* m_themeModel;
     Plasma::Theme *m_defaultTheme;
+    QProcess *m_installProcess;
 
     bool m_isNetbook;
 };

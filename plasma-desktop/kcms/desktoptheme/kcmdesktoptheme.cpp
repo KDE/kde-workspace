@@ -29,6 +29,7 @@
 
 #include "thememodel.h"
 
+#include <QFileDialog>
 
 #include <kaboutdata.h>
 #include <kautostart.h>
@@ -49,6 +50,7 @@ K_PLUGIN_FACTORY_WITH_JSON(KCMDesktopThemeFactory, "desktoptheme.json", register
 KCMDesktopTheme::KCMDesktopTheme( QWidget* parent, const QVariantList& )
     : KCModule( parent )
     , m_dialog(0)
+    , m_installProcess(0)
     , m_defaultTheme(new Plasma::Theme(this))
 {
     setQuickHelp( i18n("<h1>Desktop Theme</h1>"
@@ -188,7 +190,7 @@ void KCMDesktopTheme::showFileDialog()
         QUrl baseUrl;
         m_dialog = new QFileDialog(m_fileInstallButton, i18n("Open Theme"),
                                       QDir::homePath(),
-                                      i18n("Theme Files (*.zip *.theme)"));
+                                      i18n("Theme Files (*.zip *.tar.gz *.tar.bz2)"));
         m_dialog->setFileMode(QFileDialog::ExistingFile);
         connect(m_dialog, &QDialog::accepted, this, &KCMDesktopTheme::fileBrowserCompleted);
     }
@@ -211,8 +213,33 @@ void KCMDesktopTheme::fileBrowserCompleted()
 void KCMDesktopTheme::installTheme(const QString &file)
 {
     qDebug() << "Installing ... " << file;
+
+    QString program = "plasmapkg2";
+    QStringList arguments;
+    arguments << "-t" << "theme" << "-i" << file;
+
+    if (!m_installProcess) {
+        qDebug() << program << arguments.join(" ");
+        QProcess *myProcess = new QProcess(this);
+        //connect(myProcess, &QProcess::finished, this, &KCMDesktopTheme::installFinished);
+        connect(myProcess, SIGNAL(finished(int, QProcess::ExitStatus)), this, SLOT(installFinished(int, QProcess::ExitStatus)));
+        myProcess->start(program, arguments);
+    } else {
+        qWarning() << "theme install process already running, refusing to install simultaneously";
+    }
 }
 
+void KCMDesktopTheme::installFinished(int exitCode, QProcess::ExitStatus exitStatus)
+{
+    //int exitCode = m_installProcess->exitCode();
+    if (exitCode == 0) {
+        qDebug() << "Theme installed successfully :)";
+        m_themeModel->reload();
+    } else {
+        qDebug() << "Theme installation failed.";
+
+    }
+}
 
 
 #include "kcmdesktoptheme.moc"
