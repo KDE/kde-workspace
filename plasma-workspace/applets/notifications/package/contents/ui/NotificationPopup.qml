@@ -144,7 +144,7 @@ PlasmaCore.Dialog {
 
             PlasmaComponents.ToolButton {
                 id: closeButton
-                opacity: 0
+//                 opacity: 0
                 iconSource: "window-close"
                 width: units.iconSizes.smallMedium
                 height: width
@@ -203,10 +203,10 @@ PlasmaCore.Dialog {
         states: [
         State {
             name: "controlsShown"
-            PropertyChanges {
-                target: closeButton
-                opacity: 1
-            }
+//             PropertyChanges {
+//                 target: closeButton
+//                 opacity: 1
+//             }
 //             PropertyChanges {
 //                 target: settingsButton
 //                 opacity: 1
@@ -214,10 +214,10 @@ PlasmaCore.Dialog {
         },
         State {
             name: "controlsHidden"
-            PropertyChanges {
-                target: closeButton
-                opacity: 0
-            }
+//             PropertyChanges {
+//                 target: closeButton
+//                 opacity: 0
+//             }
 //             PropertyChanges {
 //                 target: settingsButton
 //                 opacity: 0
