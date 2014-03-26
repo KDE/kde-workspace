@@ -148,6 +148,7 @@ PlasmaCore.Dialog {
                 iconSource: "window-close"
                 width: units.iconSizes.smallMedium
                 height: width
+                flat: false
                 anchors {
                     right: parent.right
                     top: parent.top
@@ -162,9 +163,8 @@ PlasmaCore.Dialog {
                 id: actionsColumn
                 spacing: 6
                 anchors {
-                    top: parent.top
                     bottom: parent.bottom
-                    right: closeButton.left
+                    right: count < 3 ? parent.right : closeButton.left
                     left: titleLabel.right
                     rightMargin: units.largeSpacing / 2
                     leftMargin: units.largeSpacing / 2
