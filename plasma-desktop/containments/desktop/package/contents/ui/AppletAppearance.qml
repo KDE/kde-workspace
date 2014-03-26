@@ -41,7 +41,7 @@ Item {
     property bool handleShown: true
     property string backgroundHints: "NoBackground"
     property bool hasBackground: false
-    property bool handleMerged: (height < minimumHandleHeight)
+    property bool handleMerged: (height > minimumHandleHeight)
     property bool animationsEnabled: false
 
     property int minimumWidth: Math.max(LayoutManager.cellSize.width,
@@ -61,12 +61,6 @@ Item {
     property alias imagePath: plasmoidBackground.imagePath
 
     visible: false
-
-    onHeightChanged: {
-        if (appletHandle.source != "" && appletHandle.visible) {
-            appletHandle.item.updateHeight();
-        }
-    }
 
     //FIXME: this delay is because backgroundHints gets updated only after a while in qml applets
     Timer {

@@ -34,23 +34,12 @@ Item {
 
     property int buttonMargin: 6
     property int minimumHeight:  6 * (root.iconSize + buttonMargin)
-    property Item buttonsParent: appletHandle
+    property Item buttonsParent: appletItem.handleMerged ? appletHandle : noBackgroundHandle
 
     signal removeApplet
 
     transform: Translate {
         x: handleMerged ? 0 : controlsOpacity * appletHandle.width
-    }
-
-    function updateHeight() {
-        var mini = appletHandle.minimumHeight + margins.top + margins.bottom;
-        if (height > mini) {
-            appletItem.handleMerged = true;
-            buttonsParent = appletHandle;
-        } else if (appletItem.handleMerged) {
-            appletItem.handleMerged = false;
-            buttonsParent = noBackgroundHandle;
-        }
     }
 
     PlasmaCore.FrameSvgItem {
@@ -60,11 +49,13 @@ Item {
 
         anchors {
             fill: parent
+
             leftMargin: -margins.left
             topMargin: -margins.top
             rightMargin: -margins.right
             bottomMargin: -margins.bottom
         }
+
         smooth: true
         imagePath: (backgroundHints == "NoBackground" || !handleMerged) ? "widgets/background" : ""
     }
