@@ -55,6 +55,14 @@ Item {
     property color windowInactiveColor: theme.textColor
     property color windowInactiveBorderColor: theme.textColor
 
+    function action_addDesktop() {
+        pager.slotAddDesktop();
+    }
+
+    function action_removeDesktop() {
+        pager.slotRemoveDesktop();
+    }
+
     Connections {
         target: theme
         onThemeChanged: {
@@ -74,6 +82,8 @@ Item {
         }
     }
     Component.onCompleted: {
+            plasmoid.setAction("addDesktop", i18n("Add Virtual Desktop"), "list-add");
+            plasmoid.setAction("removeDesktop", i18n("Remove Virtual Desktop"), "list-remove");
             windowActiveOnActiveDesktopColor = theme.textColor
             windowActiveOnActiveDesktopColor.a = 0.6
             windowActiveColor = theme.textColor
