@@ -926,6 +926,8 @@ void KSysGuardProcessList::showEvent ( QShowEvent * event )  //virtual protected
 {
     //Start updating the process list again if we are shown again
     updateList();
+    QHeaderView *header = d->mUi->treeView->header();
+    d->mUi->treeView->sortByColumn(header->sortIndicatorSection(), header->sortIndicatorOrder());
     QWidget::showEvent(event);
 }
 
