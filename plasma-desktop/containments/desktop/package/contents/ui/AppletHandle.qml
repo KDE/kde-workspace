@@ -30,7 +30,6 @@ Item {
     opacity: appletItem.controlsOpacity
     visible: opacity > 0
     width: appletItem.handleWidth
-    height: appletItem.handleHeight
     //z: dragMouseArea.z + 1
 
     property int buttonMargin: 6
@@ -47,7 +46,6 @@ Item {
         var mini = appletHandle.minimumHeight + margins.top + margins.bottom;
         if (height > mini) {
             appletItem.handleMerged = true;
-            height = appletItem.handleMerged ? appletItem.height : minimumHeight
             buttonsParent = appletHandle;
         } else if (appletItem.handleMerged) {
             appletItem.handleMerged = false;
