@@ -91,6 +91,7 @@ Item {
             height: dayHeading.height + dateHeading.height
             width: paintedWidth
             font.pixelSize: height
+            font.weight: Font.Light
             text: agenda.dateString("dd")
             opacity: 0.5
         }
