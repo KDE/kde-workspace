@@ -1,7 +1,7 @@
 # needed for including kdecoration.h
 include_directories (
-    ${KDEBASE_WORKSPACE_SOURCE_DIR}/kwin/libkwineffects
-    ${KDEBASE_WORKSPACE_SOURCE_DIR}/kwin/libkdecorations
+    ${CMAKE_SOURCE_DIR}/kwin/libkwineffects
+    ${CMAKE_SOURCE_DIR}/kwin/libkdecorations
     ${KDEBASE_WORKSPACE_BINARY_DIR}/kwin/libkwineffects
 )
 

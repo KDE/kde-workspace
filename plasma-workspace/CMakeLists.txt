@@ -16,7 +16,7 @@ if(${CMAKE_SOURCE_DIR} STREQUAL ${CMAKE_CURRENT_SOURCE_DIR}) #TODO: remove after
     find_package(KF5 CONFIG REQUIRED COMPONENTS SysGuard)
     find_package(KWinDBusInterface CONFIG REQUIRED)
 else()
-    set(KWIN_INTERFACE  ${KDEBASE_WORKSPACE_SOURCE_DIR}/kwin/org.kde.KWin.xml)
+    set(KWIN_INTERFACE  ${CMAKE_SOURCE_DIR}/kwin/org.kde.KWin.xml)
 endif()
 
 include(KDEInstallDirs)
