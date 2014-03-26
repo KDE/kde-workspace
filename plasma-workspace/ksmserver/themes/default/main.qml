@@ -241,7 +241,7 @@ PlasmaCore.FrameSvgItem {
 
                 PlasmaComponents.Button {
                     id: logoutButton
-                    text: i18n("&Logout")
+                    text: i18n("Logout")
                     iconSource: "system-log-out"
                     anchors.right: parent.right
                     visible: (choose || sdtype == ShutdownType.ShutdownTypeNone)
@@ -260,7 +260,7 @@ PlasmaCore.FrameSvgItem {
 
                 PlasmaComponents.Button {
                     id: shutdownButton
-                    text: i18n("&Turn Off Computer")
+                    text: i18n("Turn Off Computer")
                     iconSource: "system-shutdown"
                     anchors.right: parent.right
                     visible: (choose || sdtype == ShutdownType.ShutdownTypeHalt)
@@ -310,7 +310,7 @@ PlasmaCore.FrameSvgItem {
 
                 PlasmaComponents.Button {
                     id: rebootButton
-                    text: i18n("&Restart Computer")
+                    text: i18n("Restart Computer")
                     iconSource: "system-reboot"
                     anchors.right: parent.right
                     visible: (choose || sdtype == ShutdownType.ShutdownTypeReboot)
@@ -434,7 +434,7 @@ PlasmaCore.FrameSvgItem {
             PlasmaComponents.Button {
                 id: cancelButton
                 anchors.right: parent.right
-                text: i18n("&Cancel")
+                text: i18n("Cancel")
                 iconSource: "dialog-cancel"
 //                 smallButton: true
 //                 tabStopNext: logoutButton

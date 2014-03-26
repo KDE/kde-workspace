@@ -42,6 +42,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <QPainter>
 #include <QStandardPaths>
 #include <QtX11Extras/qx11info_x11.h>
+#include <QScreen>
 
 #include <kdialog.h>
 #include <kiconloader.h>
@@ -70,17 +71,25 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #define FONTCOLOR "#bfbfbf"
 
 Q_DECLARE_METATYPE(Solid::PowerManagement::SleepState)
-#include <QVBoxLayout>
 
-KSMShutdownDlg::KSMShutdownDlg( QWidget* parent,
+KSMShutdownDlg::KSMShutdownDlg( QWindow* parent,
                                 bool maysd, bool choose, KWorkSpace::ShutdownType sdtype,
                                 const QString& theme)
-  : QDialog( parent/*, Qt::Popup */) //krazy:exclude=qclasses
+  : QQuickView(parent), //krazy:exclude=qclasses
+    m_result(false)
     // this is a WType_Popup on purpose. Do not change that! Not
     // having a popup here has severe side effects.
 {
+    // window stuff
+    QSurfaceFormat format;
+    format.setAlphaBufferSize(8);
+    setFormat(format);
+    setClearBeforeRendering(true);
+    setColor(QColor(Qt::transparent));
+    setFlags(Qt::FramelessWindowHint);
+
     winId(); // workaround for Qt4.3 setWindowRole() assert
-    setWindowRole( QStringLiteral("logoutdialog") );
+//    setWindowRole( QStringLiteral("logoutdialog") );
 
     // Qt doesn't set this on unmanaged windows
     //FIXME: or does it?
@@ -88,16 +97,14 @@ KSMShutdownDlg::KSMShutdownDlg( QWidget* parent,
         XInternAtom( QX11Info::display(), "WM_WINDOW_ROLE", False ), XA_STRING, 8, PropModeReplace,
         (unsigned char *)"logoutdialog", strlen( "logoutdialog" ));
 
-    KDialog::centerOnScreen(this, -3);
+    setPosition(screen()->virtualGeometry().center().x() - width() / 2,
+                screen()->virtualGeometry().center().y() - height() / 2);
 
-     setMinimumSize(300, 200);
+     setMinimumSize(QSize(300, 200));
     //kDebug() << "Creating QML view";
-    QVBoxLayout *vbox = new QVBoxLayout(this);
-    m_view = new QQuickView( );
-    QWidget *windowContainer = QWidget::createWindowContainer(m_view, this);
-    vbox->addWidget(windowContainer);
-    windowContainer->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
-    QQmlContext *context = m_view->rootContext();
+    //QQuickView *windowContainer = QQuickView::createWindowContainer(m_view, this);
+    //windowContainer->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
+    QQmlContext *context = rootContext();
     context->setContextProperty(QStringLiteral("maysd"), maysd);
     context->setContextProperty(QStringLiteral("choose"), choose);
     context->setContextProperty(QStringLiteral("sdtype"), sdtype);
@@ -134,63 +141,46 @@ KSMShutdownDlg::KSMShutdownDlg( QWidget* parent,
     rebootOptionsMap->insert(QStringLiteral("default"), QVariant::fromValue(def));
     context->setContextProperty(QStringLiteral("rebootOptions"), rebootOptionsMap);
 
-    setModal( true );
+    setModality(Qt::ApplicationModal);
 
-    // window stuff
-//     setFlags(Qt::X11BypassWindowManagerHint);
-//     windowContainer->setFrameShape(QFrame::NoFrame);
-    windowContainer->setAttribute(Qt::WA_TranslucentBackground);
-    setAttribute(Qt::WA_TranslucentBackground);
-    setAttribute(Qt::WA_TranslucentBackground);
-    setStyleSheet(QStringLiteral("background:transparent;"));
-    QPalette pal = windowContainer->palette();
-    pal.setColor(backgroundRole(), Qt::transparent);
-    windowContainer->setPalette(pal);
-//    setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-//    setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     // engine stuff
     KDeclarative::KDeclarative kdeclarative;
-    kdeclarative.setDeclarativeEngine(m_view->engine());
+    kdeclarative.setDeclarativeEngine(engine());
     kdeclarative.initialize();
     kdeclarative.setupBindings();
-    windowContainer->installEventFilter(this);
+//    windowContainer->installEventFilter(this);
 
     QString fileName = QStandardPaths::locate(QStandardPaths::GenericDataLocation, QStringLiteral("ksmserver/themes/%1/main.qml").arg(theme));
     if (QFile::exists(fileName)) {
         //kDebug() << "Using QML theme" << fileName;
-        m_view->setSource(QUrl::fromLocalFile(fileName));
+        setSource(QUrl::fromLocalFile(fileName));
     }
-    QQuickItem *rootObject = m_view->rootObject();
-    connect(rootObject, SIGNAL(logoutRequested()), SLOT(slotLogout()));
-    connect(rootObject, SIGNAL(haltRequested()), SLOT(slotHalt()));
-    connect(rootObject, SIGNAL(suspendRequested(int)), SLOT(slotSuspend(int)) );
-    connect(rootObject, SIGNAL(rebootRequested()), SLOT(slotReboot()));
-    connect(rootObject, SIGNAL(rebootRequested2(int)), SLOT(slotReboot(int)) );
-    connect(rootObject, SIGNAL(cancelRequested()), SLOT(reject()));
-    connect(rootObject, SIGNAL(lockScreenRequested()), SLOT(slotLockScreen()));
 
-    adjustSize();
-}
+    connect(rootObject(), SIGNAL(logoutRequested()), SLOT(slotLogout()));
+    connect(rootObject(), SIGNAL(haltRequested()), SLOT(slotHalt()));
+    connect(rootObject(), SIGNAL(suspendRequested(int)), SLOT(slotSuspend(int)) );
+    connect(rootObject(), SIGNAL(rebootRequested()), SLOT(slotReboot()));
+    connect(rootObject(), SIGNAL(rebootRequested2(int)), SLOT(slotReboot(int)) );
+    connect(rootObject(), SIGNAL(cancelRequested()), SLOT(reject()));
+    connect(rootObject(), SIGNAL(lockScreenRequested()), SLOT(slotLockScreen()));
 
-bool KSMShutdownDlg::eventFilter ( QObject * watched, QEvent * event )
-{
-    if (watched == m_view && event->type() == QEvent::Resize) {
-        adjustSize();
-    }
-    return QDialog::eventFilter(watched, event);
+    show();
+//    adjustSize();
 }
 
 void KSMShutdownDlg::resizeEvent(QResizeEvent *e)
 {
-    QDialog::resizeEvent( e );
+    QQuickView::resizeEvent( e );
 
     if( KWindowSystem::compositingActive()) {
-        clearMask();
+        //TODO: reenable window mask when we are without composite?
+//        clearMask();
     } else {
-        setMask(m_view->mask());
+//        setMask(m_view->mask());
     }
 
-    KDialog::centerOnScreen(this, -3);
+    setPosition(screen()->virtualGeometry().center().x() - width() / 2,
+                screen()->virtualGeometry().center().y() - height() / 2);
 }
 
 void KSMShutdownDlg::slotLogout()
@@ -248,6 +238,28 @@ void KSMShutdownDlg::slotSuspend(int spdMethod)
             break;
     }
     reject();
+}
+
+void KSMShutdownDlg::accept()
+{
+    emit accepted();
+}
+
+void KSMShutdownDlg::reject()
+{
+    emit rejected();
+}
+
+bool KSMShutdownDlg::exec()
+{
+    QEventLoop loop;
+    m_result = false;
+    connect(this, &KSMShutdownDlg::accepted, &loop, &QEventLoop::quit);
+    connect(this, &KSMShutdownDlg::accepted, [=]() { m_result = true; });
+
+    connect(this, &KSMShutdownDlg::rejected, &loop, &QEventLoop::quit);
+    loop.exec();
+    return m_result;
 }
 
 bool KSMShutdownDlg::confirmShutdown(

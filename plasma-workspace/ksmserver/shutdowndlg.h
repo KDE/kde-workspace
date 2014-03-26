@@ -27,7 +27,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include <fixx11h.h>
 
-#include <QDialog>
+#include <QQuickView>
 #include <QPushButton>
 #include <kworkspace.h>
 
@@ -46,16 +46,20 @@ namespace Plasma
 class QQuickView;
 
 // The confirmation dialog
-class KSMShutdownDlg : public QDialog
+class KSMShutdownDlg : public QQuickView
 {
     Q_OBJECT
 
 public:
     static bool confirmShutdown(
             bool maysd, bool choose, KWorkSpace::ShutdownType& sdtype, QString& bopt, const QString& theme );
-    bool eventFilter( QObject* watched, QEvent* event );
+
+    bool result() const;
+    bool exec();
 
 public Q_SLOTS:
+    void accept();
+    void reject();
     void slotLogout();
     void slotHalt();
     void slotReboot();
@@ -63,15 +67,19 @@ public Q_SLOTS:
     void slotSuspend(int);
     void slotLockScreen();
 
+Q_SIGNALS:
+    void accepted();
+    void rejected();
+
 protected:
     void resizeEvent(QResizeEvent *e);
 
 private:
-    KSMShutdownDlg( QWidget* parent, bool maysd, bool choose, KWorkSpace::ShutdownType sdtype, const QString& theme );
+    KSMShutdownDlg( QWindow* parent, bool maysd, bool choose, KWorkSpace::ShutdownType sdtype, const QString& theme );
     KWorkSpace::ShutdownType m_shutdownType;
     QString m_bootOption;
     QStringList rebootOptions;
-    QQuickView* m_view;
+    bool m_result : 1;
 };
 
 #endif
