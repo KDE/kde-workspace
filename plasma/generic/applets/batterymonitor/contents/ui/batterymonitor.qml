@@ -72,6 +72,9 @@ Item {
         id: pmSource
         engine: "powermanagement"
         connectedSources: sources
+        onDataChanged: {
+            updateLogic(true);
+        }
         onSourceAdded: {
             disconnectSource(source);
             connectSource(source);
