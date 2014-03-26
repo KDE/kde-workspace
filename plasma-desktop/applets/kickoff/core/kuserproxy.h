@@ -41,11 +41,12 @@ public:
     QString fullName() const;
     QString loginName() const;
     QString faceIconPath() const;
-    QString os() const;
+    QString os();
     QString host() const;
 
 private:
     KUser m_user;
+    QString m_os;
 };
 
 #endif //KUSERPROXY_H

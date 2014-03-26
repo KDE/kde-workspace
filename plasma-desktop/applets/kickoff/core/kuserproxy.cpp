@@ -25,6 +25,8 @@
 #include <QTextStream>
 #include <QUrl>
 
+#include <KLocalizedString>
+
 #include <QDebug>
 
 KUserProxy::KUserProxy (QObject *parent)
@@ -48,33 +50,43 @@ QString KUserProxy::loginName() const
 
 QString KUserProxy::faceIconPath() const
 {
-    return QUrl::fromLocalFile(m_user.faceIconPath()).toString();
-}
-
-QString KUserProxy::os() const
-{
-    QFile osfile("/etc/os-release");
-    if (osfile.exists()) {
-        if (!osfile.open(QIODevice::ReadOnly | QIODevice::Text)) {
-            return QString();
-        }
-
-        QTextStream in(&osfile);
-        while(!in.atEnd()) {
-            QString line = in.readLine();
-            if (line.startsWith("PRETTY_NAME")) {
-                QStringList fields = line.split("PRETTY_NAME=\"");
-                if (fields.count() == 2) {
-                    osfile.close();
-                    QString pretty = fields.at(1);
-                    pretty.chop(1);
-                    return pretty;
-                }
-            }
-        }
-        osfile.close();
+    const QString u = m_user.faceIconPath();
+    const QFile f(u);
+    if (f.exists(u)) {
+        // We need to return a file URL, not a simple path
+        return QUrl::fromLocalFile(u).toString();
     }
     return QString();
+}
+
+QString KUserProxy::os()
+{
+    if (m_os.isEmpty()) {
+        m_os = i18n("Plasma by KDE");
+        QFile osfile("/etc/os-release");
+        if (osfile.exists()) {
+            if (!osfile.open(QIODevice::ReadOnly | QIODevice::Text)) {
+                return QString();
+            }
+
+            QTextStream in(&osfile);
+            while(!in.atEnd()) {
+                QString line = in.readLine();
+                if (line.startsWith("PRETTY_NAME")) {
+                    QStringList fields = line.split("PRETTY_NAME=\"");
+                    if (fields.count() == 2) {
+                        osfile.close();
+                        QString pretty = fields.at(1);
+                        pretty.chop(1);
+                        m_os = pretty;
+                        return pretty;
+                    }
+                }
+            }
+            osfile.close();
+        }
+    }
+    return m_os;
 }
 
 QString KUserProxy::host() const
