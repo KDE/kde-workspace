@@ -19,6 +19,7 @@
  */
 
 import QtQuick 2.0
+import QtQuick.Layouts 1.1
 import org.kde.plasma.core 2.0 as PlasmaCore
 
 import "plasmapackage:/code/LayoutManager.js" as LayoutManager
@@ -73,7 +74,7 @@ Item {
         imagePath: (backgroundHints == "NoBackground" || !handleMerged) ? "widgets/background" : ""
     }
 
-    Column {
+    ColumnLayout {
         id: buttonColumn
         width: handleWidth
         parent: buttonsParent
@@ -203,36 +204,34 @@ Item {
                 }
             }
         }
-    }
 
-    ActionButton {
-        width: handleWidth
-        anchors {
-            bottom: buttonsParent.bottom
-            bottomMargin: (handleMerged) ? appletItem.margins.bottom + 2 : noBackgroundHandle.margins.bottom + 2
-            right: appletItem.handleMerged ? parent.right : noBackgroundHandle.right
-            rightMargin: appletItem.handleMerged ? -buttonMargin : noBackgroundHandle.margins.right - buttonMargin
+        //spacer
+        Item {
+            Layout.fillHeight: true
+            height: 0
         }
 
-        svg: configIconsSvg
-        elementId: "close"
-        iconSize: root.iconSize
-        visible: {
-            var a = applet.action("remove");
-            return (a && typeof(a) != "undefined") ? a.enabled : false;
-        }
-        // we don't set action, since we want to catch the button click,
-        // animate, and then trigger the "remove" action
-        // Triggering the action is handled in the appletItem, we just
-        // emit a signal here to avoid the applet-gets-removed-before-we-
-        // can-animate it race condition.
-        onClicked: {
-            appletHandle.removeApplet();
-        }
-        Component.onCompleted: {
-            var a = applet.action("remove");
-            if (a && typeof(a) != "undefined") {
-                a.enabled = true
+        ActionButton {
+            svg: configIconsSvg
+            elementId: "close"
+            iconSize: root.iconSize
+            visible: {
+                var a = applet.action("remove");
+                return (a && typeof(a) != "undefined") ? a.enabled : false;
+            }
+            // we don't set action, since we want to catch the button click,
+            // animate, and then trigger the "remove" action
+            // Triggering the action is handled in the appletItem, we just
+            // emit a signal here to avoid the applet-gets-removed-before-we-
+            // can-animate it race condition.
+            onClicked: {
+                appletHandle.removeApplet();
+            }
+            Component.onCompleted: {
+                var a = applet.action("remove");
+                if (a && typeof(a) != "undefined") {
+                    a.enabled = true
+                }
             }
         }
     }
