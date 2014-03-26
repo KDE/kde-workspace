@@ -47,8 +47,12 @@ Item {
         visible: controlsOpacity > 0
         z: plasmoidBackground.z - 10
 
+        height: (backgroundHints != "NoBackground") ? appletItem.handleHeight : appletItem.handleHeight + noBackgroundHandle.margins.top + noBackgroundHandle.margins.bottom
+
         anchors {
-            fill: parent
+            left: parent.left
+            right: parent.right
+            verticalCenter: parent.verticalCenter
 
             leftMargin: -margins.left
             topMargin: -margins.top

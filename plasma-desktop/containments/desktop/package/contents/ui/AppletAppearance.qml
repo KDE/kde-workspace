@@ -98,7 +98,11 @@ Item {
     KQuickControlsAddons.MouseEventListener {
         id: mouseListener
 
-        anchors { left: parent.left; top: parent.top; bottom: parent.bottom; }
+        anchors {
+            left: parent.left
+            verticalCenter: parent.verticalCenter
+        }
+        height: handleHeight
         width: parent.width+handleWidth;
         z: 10
 
@@ -133,6 +137,14 @@ Item {
             onTriggered: showAppletHandle = true;
         }
         Rectangle { color: Qt.rgba(0,0,0,0); border.width: 3; border.color: "red"; opacity: 0.5; visible: debug; anchors.fill: parent; }
+    }
+
+
+    Item {
+        anchors { left: parent.left; top: parent.top; bottom: parent.bottom; }
+        width: parent.width+handleWidth;
+
+        z: mouseListener.z + 4
 
         PlasmaCore.FrameSvgItem {
             id: plasmoidBackground
@@ -140,7 +152,6 @@ Item {
             imagePath: "widgets/background"
             anchors { left: parent.left; top: parent.top; bottom: parent.bottom; }
             width: (showAppletHandle && handleMerged) ? parent.width : parent.width-handleWidth;
-            z: mouseListener.z-4
             smooth: true
 
             Behavior on width {
@@ -206,6 +217,7 @@ Item {
                 var globalMousePos = mapToItem(root, mouse.x, mouse.y)
                 lastX = globalMousePos.x
                 lastY = globalMousePos.y
+
 
                 placeHolder.syncWithItem(appletItem)
                 placeHolderPaint.opacity = root.haloOpacity;
