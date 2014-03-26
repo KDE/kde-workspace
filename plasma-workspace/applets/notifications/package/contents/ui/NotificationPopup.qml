@@ -20,6 +20,7 @@
 import QtQuick 2.0
 import org.kde.plasma.core 2.0 as PlasmaCore
 import org.kde.plasma.components 2.0 as PlasmaComponents
+import org.kde.plasma.extras 2.0 as PlasmaExtras
 import org.kde.kquickcontrolsaddons 2.0
 
 PlasmaCore.Dialog {
@@ -55,7 +56,7 @@ PlasmaCore.Dialog {
 
     mainItem: MouseEventListener {
         id: mainItem
-        height: 6 * units.gridUnit
+        height: 7 * units.gridUnit
         width: 19 * units.gridUnit
 
         state: "controlsHidden"
@@ -79,24 +80,24 @@ PlasmaCore.Dialog {
             anchors {
                 left: parent.left
                 top: parent.top
-                leftMargin: units.smallSpacing
-                topMargin: units.smallSpacing
-                rightMargin: units.smallSpacing
-                bottomMargin: units.smallSpacing
+                leftMargin: units.largeSpacing / 2
+                topMargin: units.largeSpacing / 2
+                rightMargin: units.largeSpacing / 2
+                bottomMargin: units.largeSpacing / 2
             }
         }
 
-        PlasmaComponents.Label {
+        PlasmaExtras.Heading {
             id: titleLabel
-            font.weight: Font.Bold
+            level: 3
             elide: Text.ElideRight
             anchors {
                 left: appIconItem.right
                 right: closeButton.left
                 top: parent.top
-                rightMargin: units.smallSpacing //settingsButton.visible ? settingsButton.width + closeButton.width : closeButton.width
-                leftMargin: units.largeSpacing
-                topMargin: units.smallSpacing
+                rightMargin: units.largeSpacing / 2 //settingsButton.visible ? settingsButton.width + closeButton.width : closeButton.width
+                leftMargin: units.largeSpacing / 2
+                topMargin: units.largeSpacing / 2
             }
             onLinkActivated: Qt.openUrlExternally(link)
         }
@@ -129,11 +130,10 @@ PlasmaCore.Dialog {
                 verticalAlignment: Text.AlignTop
                 onLinkActivated: Qt.openUrlExternally(link)
                 anchors {
-                    left: appIconItem.right
+                    left: titleLabel.left
                     right: actionsColumn.left
                     top: titleLabel.bottom
                     bottom: parent.bottom
-                    leftMargin: units.largeSpacing
                 }
             }
 //         }
