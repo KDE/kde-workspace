@@ -160,7 +160,11 @@ uint NotificationsEngine::Notify(const QString &app_name, uint replaces_id,
         if (container) {
             // append the body text
             _body = container->data()["body"].toString();
-            _body.append("\n").append(body);
+            if (_body != body) {
+                _body.append("\n").append(body);
+            } else {
+                _body = body;
+            }
 
             // remove the old notification and replace it with the new one
             // TODO: maybe just update the current notification?
