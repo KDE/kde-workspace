@@ -36,6 +36,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <KDE/KStandardDirs>
 #include <kdeclarative.h>
 #include <netwm_def.h>
+#include <QApplication>
+#include <QDesktopWidget>
 #include <QEvent>
 #include <QMouseEvent>
 #include <kglobalsettings.h>
@@ -75,6 +77,7 @@ DesktopGridEffect::DesktopGridEffect()
     a->setText(i18n("Show Desktop Grid"));
     a->setGlobalShortcut(KShortcut(Qt::CTRL + Qt::Key_F8));
     shortcut = a->globalShortcut();
+    connect(QApplication::desktop(), SIGNAL(screenCountChanged(int)), this, SLOT(setup()));
     connect(a, SIGNAL(triggered(bool)), this, SLOT(toggle()));
     connect(a, SIGNAL(globalShortcutChanged(QKeySequence)), this, SLOT(globalShortcutChanged(QKeySequence)));
     connect(effects, SIGNAL(windowAdded(KWin::EffectWindow*)), this, SLOT(slotWindowAdded(KWin::EffectWindow*)));
@@ -1063,9 +1066,13 @@ void DesktopGridEffect::setActive(bool active)
 
 void DesktopGridEffect::setup()
 {
-    keyboardGrab = effects->grabKeyboard(this);
-    effects->startMouseInterception(this, Qt::PointingHandCursor);
-    effects->setActiveFullScreenEffect(this);
+    if (!isActive())
+        return;
+    if (!keyboardGrab) {
+        keyboardGrab = effects->grabKeyboard(this);
+        effects->startMouseInterception(this, Qt::PointingHandCursor);
+        effects->setActiveFullScreenEffect(this);
+    }
     setHighlightedDesktop(effects->currentDesktop());
 
     // Soft highlighting

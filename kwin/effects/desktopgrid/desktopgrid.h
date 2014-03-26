@@ -104,6 +104,7 @@ private slots:
     void slotWindowDeleted(KWin::EffectWindow *w);
     void slotNumberDesktopsChanged(uint old);
     void slotWindowGeometryShapeChanged(KWin::EffectWindow *w, const QRect &old);
+    void setup();
 
 private:
     QPointF scalePos(const QPoint& pos, int desktop, int screen = -1) const;
@@ -117,7 +118,6 @@ private:
     int desktopUp(int desktop, bool wrap = true) const;
     int desktopDown(int desktop, bool wrap = true) const;
     void setActive(bool active);
-    void setup();
     void setupGrid();
     void finish();
     bool isMotionManagerMovingWindows() const;
