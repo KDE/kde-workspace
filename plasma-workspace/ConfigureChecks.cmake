@@ -21,27 +21,7 @@ if (PAM_FOUND)
         set(${var} "\"${${cvar}}\"")
     endmacro(define_pam_service)
 
-    macro(install_pam_service APP)
-        string(TOUPPER KDE4_${APP}_PAM_SERVICE cvar)
-        install(CODE "
-            set(DESTDIR_VALUE \"\$ENV{DESTDIR}\")
-            if (NOT DESTDIR_VALUE)
-                exec_program(\"${CMAKE_SOURCE_DIR}/mkpamserv\" ARGS ${${cvar}} RETURN_VALUE ret)
-                if (NOT ret)
-                    exec_program(\"${CMAKE_SOURCE_DIR}/mkpamserv\" ARGS -P ${${cvar}}-np)
-                endif (NOT ret)
-            endif (NOT DESTDIR_VALUE)
-                    ")
-    endmacro(install_pam_service)
-
-    define_pam_service(KDM)
     define_pam_service(kscreensaver)
-
-else (PAM_FOUND)
-
-    macro(install_pam_service APP)
-    endmacro(install_pam_service)
-
 endif (PAM_FOUND)
 
 find_program(some_x_program NAMES iceauth xrdb xterm)
