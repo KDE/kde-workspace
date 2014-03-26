@@ -330,42 +330,6 @@ Item {
 
         }
 
-        MouseArea {
-            id: resizeHandle
-
-            visible: !plasmoid.immutable
-            width:  handleWidth+appletItem.margins.right
-            height: width
-            z: appletHandle.z+10
-            anchors {
-                top: appletHandle.top
-                right: parent.right
-            }
-
-            property int startX
-            property int startY
-
-            onPressed: {
-                mouse.accepted = true
-                animationsEnabled = false;
-                startX = mouse.x;
-                startY = mouse.y;
-                LayoutManager.setSpaceAvailable(appletItem.x, appletItem.y, appletItem.width, appletItem.height, true)
-            }
-            onPositionChanged: {
-                appletItem.width = Math.max(appletItem.minimumWidth, appletItem.width + mouse.x-startX)
-                appletItem.y = appletItem.y + (mouse.y-startY);
-                appletItem.height = Math.max(appletItem.minimumHeight, appletItem.height + startY-mouse.y)
-            }
-            onReleased: {
-                animationsEnabled = true
-                LayoutManager.positionItem(appletItem)
-                LayoutManager.save()
-                LayoutManager.setSpaceAvailable(appletItem.x, appletItem.y, widthAnimation.to, heightAnimation.to, false)
-            }
-            Rectangle { color: "blue"; opacity: 0.4; visible: debug; anchors.fill: parent; }
-        }
-
         Rectangle { color: "orange"; opacity: 0.1; visible: debug; anchors.fill: parent; }
     }
     Behavior on controlsOpacity {
