@@ -64,6 +64,7 @@ Item {
         PlasmaComponents.Button {
             iconSource: "distribute-horizontal-x"
             text: i18n("Add spacer")
+            Layout.preferredWidth: panel.formFactor == PlasmaCore.Types.Vertical ? Math.max(implicitWidth, parent.width) : implicitWidth
             onClicked: {
                 configDialog.addPanelSpacer();
             }
