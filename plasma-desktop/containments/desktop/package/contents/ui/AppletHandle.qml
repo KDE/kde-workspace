@@ -252,8 +252,4 @@ Item {
             }
         }
     }
-
-    Component.onCompleted: {
-        updateHeight()
-    }
 }
