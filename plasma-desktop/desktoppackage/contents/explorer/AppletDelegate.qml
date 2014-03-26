@@ -98,10 +98,10 @@ PlasmaCore.FrameSvgItem {
             width: units.iconSizes.small
             height: width
             anchors {
-                right: parent.right
-                bottom: parent.bottom
-                rightMargin: background.margins.right
-                bottomMargin: background.margins.bottom
+                top: iconWidget.top
+                left: iconWidget.left
+                topMargin: iconWidget.margins.top
+                leftMargin: iconWidget.margins.left
             }
         }
         MouseArea {
