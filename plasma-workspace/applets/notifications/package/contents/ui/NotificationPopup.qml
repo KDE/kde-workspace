@@ -56,8 +56,8 @@ PlasmaCore.Dialog {
 
     mainItem: MouseEventListener {
         id: mainItem
-        height: 7 * units.gridUnit
-        width: 19 * units.gridUnit
+        height: 4 * units.gridUnit
+        width: 21 * units.gridUnit
 
         state: "controlsHidden"
         hoverEnabled: true
@@ -90,14 +90,16 @@ PlasmaCore.Dialog {
         PlasmaExtras.Heading {
             id: titleLabel
             level: 3
+            height: theme.mSize(theme.defaultFont).height
             elide: Text.ElideRight
             anchors {
                 left: appIconItem.right
-                right: closeButton.left
+                //right: closeButton.left
                 top: parent.top
                 rightMargin: units.largeSpacing / 2 //settingsButton.visible ? settingsButton.width + closeButton.width : closeButton.width
                 leftMargin: units.largeSpacing / 2
                 topMargin: units.largeSpacing / 2
+                bottomMargin: units.largeSpacing / 2
             }
             onLinkActivated: Qt.openUrlExternally(link)
         }
@@ -126,14 +128,16 @@ PlasmaCore.Dialog {
                 color: theme.textColor
                 wrapMode: Text.Wrap
                 elide: Text.ElideRight
-                maximumLineCount: 4
+                maximumLineCount: 2
                 verticalAlignment: Text.AlignTop
                 onLinkActivated: Qt.openUrlExternally(link)
                 anchors {
-                    left: titleLabel.left
-                    right: actionsColumn.left
+                    left: appIconItem.right
+                    right: notificationProperties.actions.length == 0 ? parent.right : actionsColumn.left
                     top: titleLabel.bottom
                     bottom: parent.bottom
+                    rightMargin: units.largeSpacing / 2
+                    leftMargin: units.largeSpacing / 2
                 }
             }
 //         }
@@ -158,10 +162,15 @@ PlasmaCore.Dialog {
                 id: actionsColumn
                 spacing: 6
                 anchors {
-                    top: closeButton.bottom
-                    right: parent.right
-                    rightMargin: 6
-                    verticalCenter: parent.verticalCenter
+                    top: parent.top
+                    bottom: parent.bottom
+                    right: closeButton.left
+                    left: titleLabel.right
+                    rightMargin: units.largeSpacing / 2
+                    leftMargin: units.largeSpacing / 2
+                    topMargin: units.largeSpacing / 2
+                    bottomMargin: units.largeSpacing / 2
+                    //verticalCenter: parent.verticalCenter
                 }
                 Repeater {
                     id: actionsRepeater
