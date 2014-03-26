@@ -302,7 +302,6 @@ Item {
             id: appletHandle
             z: appletContainer.z + 1
             anchors {
-                //verticalCenter: handleMerged ? undefined : parent.verticalCenter
                 top: parent.top
                 bottom: parent.bottom
                 right: plasmoidBackground.right
@@ -314,16 +313,6 @@ Item {
                     if (appletItem.showAppletHandle && appletHandle.source == "") {
                         //print("Loading applethandle ");
                         appletHandle.source = "AppletHandle.qml";
-                    }
-                }
-                onHandleMergedChanged: {
-                    print("handlemerged changed, correcting anchors" + appletItem.handleMerged)
-                    return
-                    if (appletHandle.item != null) {
-                        appletHandle.item.anchors.verticalCenter = appletItem.handleMerged ? undefined : appletItem.verticalCenter
-                        appletHandle.item.anchors.top = appletItem.handleMerged ? appletItem.top : undefined
-                        appletHandle.item.anchors.bottom = appletItem.handleMerged ? appletItem.bottom : undefined
-                        print("anchors corrected");
                     }
                 }
             }
