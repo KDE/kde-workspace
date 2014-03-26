@@ -56,7 +56,7 @@ PlasmaCore.Dialog {
 
     mainItem: MouseEventListener {
         id: mainItem
-        height: 4 * units.gridUnit
+        height: 5 * units.gridUnit
         width: 21 * units.gridUnit
 
         state: "controlsHidden"
@@ -96,6 +96,7 @@ PlasmaCore.Dialog {
                 left: appIconItem.right
                 //right: closeButton.left
                 top: parent.top
+                right: actionsRepeater.count < 3 ? parent.right : actionsColumn.left
                 rightMargin: units.largeSpacing / 2 //settingsButton.visible ? settingsButton.width + closeButton.width : closeButton.width
                 leftMargin: units.largeSpacing / 2
                 topMargin: units.largeSpacing / 2
@@ -136,6 +137,7 @@ PlasmaCore.Dialog {
                     right: notificationProperties.actions.length == 0 ? parent.right : actionsColumn.left
                     top: titleLabel.bottom
                     bottom: parent.bottom
+                    topMargin: units.largeSpacing / 2
                     rightMargin: units.largeSpacing / 2
                     leftMargin: units.largeSpacing / 2
                 }
@@ -152,6 +154,8 @@ PlasmaCore.Dialog {
                 anchors {
                     right: parent.right
                     top: parent.top
+                    topMargin: units.largeSpacing / 4
+                    rightMargin: units.largeSpacing / 4
                 }
                 onClicked: {
                     closeNotification(notificationProperties.source)
@@ -161,16 +165,12 @@ PlasmaCore.Dialog {
 
             Column {
                 id: actionsColumn
-                spacing: 6
+                spacing: units.smallSpacing
                 anchors {
                     bottom: parent.bottom
-                    right: count < 3 ? parent.right : closeButton.left
-                    left: titleLabel.right
-                    rightMargin: units.largeSpacing / 2
-                    leftMargin: units.largeSpacing / 2
-                    topMargin: units.largeSpacing / 2
-                    bottomMargin: units.largeSpacing / 2
-                    //verticalCenter: parent.verticalCenter
+                    right: actionsRepeater.count < 3 ? parent.right : closeButton.left
+                    rightMargin: units.largeSpacing / 4
+                    bottomMargin: units.largeSpacing / 4
                 }
                 Repeater {
                     id: actionsRepeater
