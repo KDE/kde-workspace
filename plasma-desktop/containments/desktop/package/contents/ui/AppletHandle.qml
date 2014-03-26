@@ -236,10 +236,7 @@ Item {
         }
     }
 
-    PlasmaCore.Svg {
-        id: buttonSvg
-        imagePath: "widgets/actionbutton"
+    Component.onCompleted: {
+        updateHeight()
     }
-
-    Component.onCompleted: updateHeight()
 }
