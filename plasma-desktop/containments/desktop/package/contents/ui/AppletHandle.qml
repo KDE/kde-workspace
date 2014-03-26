@@ -57,9 +57,6 @@ Item {
 
     PlasmaCore.FrameSvgItem {
         id: noBackgroundHandle
-
-        width: handleWidth + margins.left + margins.right - 4
-        height: (backgroundHints != "NoBackground") ? appletItem.handleHeight : appletItem.handleHeight + noBackgroundHandle.margins.top + noBackgroundHandle.margins.bottom
         visible: controlsOpacity > 0
         z: plasmoidBackground.z - 10
 
