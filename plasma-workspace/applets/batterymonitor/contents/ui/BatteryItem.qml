@@ -22,6 +22,7 @@ import QtQuick 2.0
 import org.kde.plasma.core 2.0 as PlasmaCore
 import org.kde.plasma.components 2.0 as Components
 import org.kde.kquickcontrolsaddons 2.0 as KQuickControlsAddons
+import org.kde.kcoreaddons 1.0 as KCoreAddons
 import "plasmapackage:/code/logic.js" as Logic
 
 Item {
@@ -56,8 +57,8 @@ Item {
         }
     }
 
-    PlasmaCore.Formats {
-	id: formats
+    KCoreAddons.Formats {
+        id: formats
     }
 
     PlasmaCore.FrameSvgItem {
