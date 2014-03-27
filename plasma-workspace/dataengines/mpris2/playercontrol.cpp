@@ -66,6 +66,7 @@ void PlayerControl::updateEnabledOperations()
     setOperationEnabled("SetLoopStatus", caps & PlayerContainer::CanControl);
     setOperationEnabled("SetRate", caps & PlayerContainer::CanControl);
     setOperationEnabled("SetShuffle", caps & PlayerContainer::CanControl);
+    setOperationEnabled("GetPosition", true);
 
     emit enabledOperationsChanged();
 }

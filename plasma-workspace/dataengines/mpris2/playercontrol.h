@@ -42,6 +42,8 @@ public:
         { return m_container->playerInterface(); }
     OrgFreedesktopDBusPropertiesInterface* propertiesInterface() const
         { return m_container->propertiesInterface(); }
+    void updatePosition() const
+        { m_container->updatePosition(); }
     QDBusObjectPath trackId() const;
 
     Plasma::ServiceJob* createJob(const QString& operation,

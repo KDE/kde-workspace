@@ -35,6 +35,16 @@ ColumnLayout {
 
     property int position: mpris2Source.data[mpris2Source.last].Position
 
+    property bool isExpanded: plasmoid.expanded
+
+    onIsExpandedChanged: {
+        if (isExpanded) {
+            var service = mpris2Source.serviceForSource(mpris2Source.last);
+            var operation = service.operationDescription("GetPosition");
+            service.startOperationCall(operation);
+        }
+    }
+
     onPositionChanged: {
         // don't set the position while the slider is pressed
         // which means the user is still holding it down
@@ -116,7 +126,7 @@ ColumnLayout {
             id: seekTimer
             interval: 1000
             repeat: true
-            running: root.state == "playing"
+            running: root.state == "playing" && plasmoid.expanded
             onTriggered: {
                 // add one second; value in microseconds
                 seekSlider.value += 1000000;

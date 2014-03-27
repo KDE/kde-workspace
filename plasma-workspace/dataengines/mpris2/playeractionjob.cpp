@@ -127,6 +127,8 @@ void PlayerActionJob::start()
             setError(MissingArgument);
             emitResult();
         }
+    } else if (operation == "GetPosition") {
+        m_controller->updatePosition();
     } else {
         setError(UnknownOperation);
         emitResult();

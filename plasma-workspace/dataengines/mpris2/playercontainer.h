@@ -65,6 +65,7 @@ public:
     };
 
     void refresh();
+    void updatePosition();
 
 Q_SIGNALS:
     void initialFetchFinished(PlayerContainer* self);
@@ -82,7 +83,6 @@ private Q_SLOTS:
 private:
     void copyProperty(const QString& propName, const QVariant& value, QVariant::Type expType, UpdateType updType);
     void updateFromMap(const QVariantMap& map, UpdateType updType);
-    void updatePosition();
     void recalculatePosition();
 
     Caps                                   m_caps;

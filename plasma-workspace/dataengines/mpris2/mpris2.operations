@@ -11,6 +11,7 @@
   <group name="Stop"/>
   <group name="Previous"/>
   <group name="Next"/>
+  <group name="GetPosition"/>
   <group name="Seek">
     <entry name="microseconds" type="LongLong">
       <label>The amount to seek by, in microseconds.</label>
