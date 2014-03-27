@@ -145,7 +145,7 @@ Item {
         anchors { left: parent.left; top: parent.top; bottom: parent.bottom; }
         width: parent.width+handleWidth;
 
-        z: mouseListener.z + 4
+        z: mouseListener.z - 4
 
         PlasmaCore.FrameSvgItem {
             id: plasmoidBackground
