@@ -28,12 +28,18 @@ Item {
     id: main
     signal closed()
 
+    function parentClosed() {
+        activityBrowser.parentClosed();
+    }
+
     //this is used to perfectly align the filter field and delegates
     property int cellWidth: theme.mSize(theme.defaultFont).width * 30
     property int spacing: 2 * units.smallSpacing
 
     property int minimumWidth: cellWidth + 4 * 2
     property int minimumHeight: 0
+
+    property bool showingDialog: activityBrowser.showingDialog
 
     width: minimumWidth
 

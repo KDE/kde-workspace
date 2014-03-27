@@ -30,6 +30,15 @@ Item {
 
     property int spacing: 2 * units.smallSpacing
 
+    property bool showingDialog:
+        newActivityDialog.visible ||
+        activityList.showingDialog
+
+    function parentClosed() {
+        newActivityDialog.close();
+        activityList.closeDialogs();
+    }
+
     signal closeRequested()
 
     focus: true

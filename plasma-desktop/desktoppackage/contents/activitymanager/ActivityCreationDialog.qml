@@ -55,6 +55,7 @@ PlasmaCore.FrameSvgItem {
     function close()
     {
         opacity = 0;
+        iconDialog.closeDialog();
     }
 
     opacity: 0

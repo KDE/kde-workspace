@@ -59,11 +59,13 @@ Rectangle {
         location: PlasmaCore.Types.LeftEdge
         type: PlasmaCore.Dialog.Dock
         flags: Qt.Window|Qt.WindowStaysOnTopHint|Qt.X11BypassWindowManagerHint
+
         hideOnWindowDeactivate: true
 
         onVisibleChanged: {
             if (!visible) {
                 sidePanelStack.state = "closed";
+                sidePanelStack.item.parentClosed();
             } else {
                 sidePanel.requestActivate();
                 // get the current available screen geometry and subtract the dialog's frame margins
@@ -79,6 +81,12 @@ Rectangle {
             onLoaded: {
                 if (sidePanelStack.item) {
                     item.closed.connect(function(){sidePanelStack.state = "closed";});
+
+                    if (sidePanelStack.state == "activityManager") {
+                        sidePanel.hideOnWindowDeactivate = Qt.binding(function() { return !sidePanelStack.item.showingDialog; })
+                    } else {
+                        sidePanel.hideOnWindowDeactivate = true;
+                    }
                 }
                 sidePanel.visible = true;
             }
