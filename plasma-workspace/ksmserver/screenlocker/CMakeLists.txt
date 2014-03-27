@@ -37,14 +37,12 @@ target_link_libraries(screenlocker_static
 # Needed to compile on Arm target.
 set_target_properties(screenlocker_static PROPERTIES COMPILE_FLAGS "-fPIC")
 
-configure_file(ScreenSaverDBusInterfaceConfig.cmake.in
-    ${CMAKE_CURRENT_BINARY_DIR}/ScreenSaverDBusInterfaceConfig.cmake @ONLY)
+set(CMAKECONFIG_INSTALL_DIR "${CMAKECONFIG_INSTALL_PREFIX}/ScreenSaverDBusInterface")
+ecm_configure_package_config_file(ScreenSaverDBusInterfaceConfig.cmake.in
+    ${CMAKE_CURRENT_BINARY_DIR}/ScreenSaverDBusInterfaceConfig.cmake
+    INSTALL_DESTINATION ${CMAKECONFIG_INSTALL_DIR})
 
 install(FILES kscreenlocker.notifyrc  DESTINATION ${DATA_INSTALL_DIR}/ksmserver/ RENAME ksmserver.notifyrc)
 install(FILES ${screensaver_dbusXML}
         DESTINATION ${DBUS_INTERFACES_INSTALL_DIR}
         RENAME kf5_org.freedesktop.ScreenSaver.xml)
-
-set(CMAKECONFIG_INSTALL_DIR "${CMAKECONFIG_INSTALL_PREFIX}/ScreenSaverDBusInterface")
-install(FILES ${CMAKE_CURRENT_BINARY_DIR}/ScreenSaverDBusInterfaceConfig.cmake
-    DESTINATION ${CMAKECONFIG_INSTALL_DIR})
