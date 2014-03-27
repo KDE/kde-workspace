@@ -162,8 +162,8 @@ Item {
                         }
                         text: i18n("Always visible")
                         checkable: true
-                        checked: panel.visibilityMode == 0
-                        onClicked: panel.visibilityMode = 0
+                        checked: configDialog.visibilityMode == 0
+                        onClicked: configDialog.visibilityMode = 0
                         flat: false
                     }
                     PlasmaComponents.ToolButton {
@@ -173,8 +173,8 @@ Item {
                         }
                         text: i18n("Auto Hide")
                         checkable: true
-                        checked: panel.visibilityMode == 1
-                        onClicked: panel.visibilityMode = 1
+                        checked: configDialog.visibilityMode == 1
+                        onClicked: configDialog.visibilityMode = 1
                         flat: false
                     }
                     PlasmaComponents.ToolButton {
@@ -184,8 +184,8 @@ Item {
                         }
                         text: i18n("Windows can cover")
                         checkable: true
-                        checked: panel.visibilityMode == 2
-                        onClicked: panel.visibilityMode = 2
+                        checked: configDialog.visibilityMode == 2
+                        onClicked: configDialog.visibilityMode = 2
                         flat: false
                     }
                     PlasmaComponents.ToolButton {
@@ -195,8 +195,8 @@ Item {
                         }
                         text: i18n("Windows go below")
                         checkable: true
-                        checked: panel.visibilityMode == 3
-                        onClicked: panel.visibilityMode = 3
+                        checked: configDialog.visibilityMode == 3
+                        onClicked: configDialog.visibilityMode = 3
                         flat: false
                     }
                 }
