@@ -49,10 +49,11 @@ install( FILES kdisplaymanager.h
          DESTINATION ${INCLUDE_INSTALL_DIR}/kworkspace COMPONENT Devel )
 
 set(CMAKECONFIG_INSTALL_DIR ${LIB_INSTALL_DIR}/cmake/LibKWorkspace)
+ecm_configure_package_config_file(LibKWorkspaceConfig.cmake.in
+    "${CMAKE_CURRENT_BINARY_DIR}/LibKWorkspaceConfig.cmake"
+    INSTALL_DESTINATION ${CMAKECONFIG_INSTALL_DIR})
 
-configure_file(LibKWorkspaceConfig.cmake.in "${CMAKE_CURRENT_BINARY_DIR}/LibKWorkspaceConfig.cmake" @ONLY)
-install(FILES ${CMAKE_CURRENT_BINARY_DIR}/LibKWorkspaceConfig.cmake
-              ${CMAKE_CURRENT_BINARY_DIR}/LibKWorkspaceConfigVersion.cmake
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/LibKWorkspaceConfigVersion.cmake
         DESTINATION ${CMAKECONFIG_INSTALL_DIR})
 
 install(EXPORT libkworkspaceLibraryTargets

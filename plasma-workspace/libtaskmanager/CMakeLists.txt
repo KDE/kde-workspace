@@ -85,9 +85,11 @@ install(FILES
 write_basic_config_version_file(${CMAKE_CURRENT_BINARY_DIR}/LibTaskManagerConfigVersion.cmake VERSION "${PLASMAWORKSPACE_VERSION_STRING}" COMPATIBILITY AnyNewerVersion)
 
 set(CMAKECONFIG_INSTALL_DIR ${LIB_INSTALL_DIR}/cmake/LibTaskManager)
-configure_file(LibTaskManagerConfig.cmake.in "${CMAKE_CURRENT_BINARY_DIR}/LibTaskManagerConfig.cmake" @ONLY)
-install(FILES ${CMAKE_CURRENT_BINARY_DIR}/LibTaskManagerConfig.cmake
-              ${CMAKE_CURRENT_BINARY_DIR}/LibTaskManagerConfigVersion.cmake
+ecm_configure_package_config_file(LibTaskManagerConfig.cmake.in
+    "${CMAKE_CURRENT_BINARY_DIR}/LibTaskManagerConfig.cmake"
+    INSTALL_DESTINATION ${CMAKECONFIG_INSTALL_DIR})
+
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/LibTaskManagerConfigVersion.cmake
         DESTINATION ${CMAKECONFIG_INSTALL_DIR})
 
 install(EXPORT libtaskmanagerLibraryTargets
