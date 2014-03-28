@@ -55,7 +55,7 @@ Item {
 
         anchors.margins: rowSpacing
 
-        property bool showText: plasmoid.formFactor == PlasmaCore.Types.Horizontal && (row.x + row.width < root.width - placeHolder.width - units.iconSizes.small*4 - units.largeSpacing*5)
+        property bool showText: plasmoid.formFactor == PlasmaCore.Types.Vertical || (row.x + row.width < root.width - placeHolder.width - units.iconSizes.small*4 - units.largeSpacing*5)
 
         rowSpacing: units.smallSpacing
         columnSpacing: units.smallSpacing
