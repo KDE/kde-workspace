@@ -117,13 +117,13 @@ Item {
         property Item categoryButton
 
         sourceComponent: verticalTopBarComponent
-        height: item.height + 2
         anchors {
             top: parent.top
             left: parent.left
             right: parent.right
             topMargin: 0
-            leftMargin: 4
+            leftMargin: units.smallSpacing
+            rightMargin: units.smallSpacing
         }
     }
     Component {
@@ -175,8 +175,9 @@ Item {
             left: parent.left
             right: parent.right
             bottom: bottomBar.top
-            leftMargin: 4
-            bottomMargin: 4
+            topMargin: units.smallSpacing
+            leftMargin: units.smallSpacing
+            bottomMargin: units.smallSpacing
         }
         flickableItem: ListView {
             id: list
@@ -230,13 +231,13 @@ Item {
         id: bottomBar
 
         sourceComponent: verticalBottomBarComponent
-        //height: item.height
-        height: 48 // FIXME
         anchors {
             left: parent.left
             right: parent.right
             bottom: parent.bottom
-            leftMargin: 4
+            leftMargin: units.smallSpacing
+            rightMargin: units.smallSpacing
+            bottomMargin: units.smallSpacing
         }
     }
 
@@ -249,7 +250,7 @@ Item {
                 bottom: parent.bottom
             }
 
-            spacing: 4
+            spacing: units.smallSpacing
 
             PlasmaComponents.Button {
                 anchors {
