@@ -34,9 +34,12 @@ Item {
         newActivityDialog.visible ||
         activityList.showingDialog
 
-    function parentClosed() {
-        newActivityDialog.close();
-        activityList.closeDialogs();
+    Connections {
+        target: parent
+        onVisibleChanged: {
+            newActivityDialog.close();
+            activityList.closeDialogs();
+        }
     }
 
     signal closeRequested()

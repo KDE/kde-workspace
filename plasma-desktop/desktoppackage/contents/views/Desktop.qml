@@ -65,7 +65,6 @@ Rectangle {
         onVisibleChanged: {
             if (!visible) {
                 sidePanelStack.state = "closed";
-                sidePanelStack.item.parentClosed();
             } else {
                 sidePanel.requestActivate();
                 // get the current available screen geometry and subtract the dialog's frame margins
