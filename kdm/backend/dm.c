@@ -74,8 +74,11 @@ static int stopping;
 SdRec sdRec = { 0, 0, 0, TO_INF, TO_INF, 0, 0, 0 };
 
 time_t now;
-#ifndef nowMonotonic
+#if (_POSIX_MONOTONIC_CLOCK >= 0)
+time_t nowWallDelta;
+# ifndef nowMonotonic
 int nowMonotonic;
+# endif
 #endif
 
 #if KDM_LIBEXEC_STRIP != -1
@@ -339,6 +342,11 @@ updateNow(void)
         clock_gettime(CLOCK_MONOTONIC, &ts);
         /* Linux' monotonic clock starts at zero, but this is assumed to mean "long ago". */
         now = ts.tv_sec + 10000;
+        /* When we read wall clock dates (e.g. from UTMP), we need to map
+           them to the monotonic clock. Of course, such mapping defeats the
+           point of a monotonic clock in the first place, but we have little
+           choice. */
+        nowWallDelta = time(0) - now;
     } else
 #endif
         time(&now);
@@ -486,11 +494,14 @@ checkUtmp(void)
                 utp->hadSess = True;
                 utp->state = UtActive;
             }
+            nck = ut->ut_time - nowWallDelta;
+            if (nck > now)
+                nck = 0; /* Clock jumped. Time out immediately. */
 #ifdef HAVE_VTS
             /* tty with latest activity wins */
-            if (utp->time < ut->ut_time)
+            if (utp->time < nck)
 #endif
-                utp->time = ut->ut_time;
+                utp->time = nck;
         }
 #ifdef BSD_UTMP
         close(fd);
