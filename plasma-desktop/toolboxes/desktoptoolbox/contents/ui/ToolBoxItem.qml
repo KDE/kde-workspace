@@ -183,11 +183,11 @@ Item {
     states: [
         State {
             name: "expanded"
-            PropertyChanges { target: toolBoxItem; opacity: 1.0; scale: 1;}
+            PropertyChanges { target: toolBoxItem; opacity: 1.0; scale: 1; enabled: true}
         },
         State {
             name: "collapsed"
-            PropertyChanges { target: toolBoxItem; opacity: 0; scale: 0.8;}
+            PropertyChanges { target: toolBoxItem; opacity: 0; scale: 0.8; enabled: false}
         }
     ]
 
