@@ -37,8 +37,8 @@ Item {
     Layout.maximumHeight: root.vertical ? pager.preferredSize.height : undefined
 
     Plasmoid.preferredRepresentation: Plasmoid.fullRepresentation
-    Layout.fillWidth: true
-    Layout.fillHeight: true
+    Layout.fillWidth: root.vertical 
+    Layout.fillHeight: !root.vertical 
 
     property bool dragging: false
     property int dragId

@@ -301,17 +301,12 @@ void Pager::updateSizes()
     qreal preferredItemWidth;
 
     if (orientation() == Qt::Vertical) {
-        // work out the preferred size based on the width of the geometry
-        preferredItemWidth = (m_size.width() - leftMargin - rightMargin -
-                              padding * (m_columns - 1)) / m_columns;
-        preferredItemHeight = preferredItemWidth / ratio;
-        // make sure items of the new size actually fit in the current geometry
-        itemHeight = (m_size.height() - topMargin - bottomMargin -
-                      padding * (m_rows - 1)) / m_rows;
-        if (itemHeight > preferredItemHeight) {
-            itemHeight = preferredItemHeight;
-        }
-        itemWidth = itemHeight * ratio;
+
+        itemWidth = (m_size.width() - leftMargin - rightMargin -
+                     padding * (m_columns - 1)) / m_columns;
+
+        itemHeight = itemWidth / ratio;
+
     } else {
         // work out the preferred size based on the height of the geometry
         preferredItemHeight = (m_size.height() - topMargin - bottomMargin -
@@ -348,6 +343,13 @@ void Pager::updateSizes()
 
     int pw = (int)(leftMargin + (itemWidth + padding) * m_columns + rightMargin);
     int ph = (int)(topMargin + (itemHeight + padding) * m_rows + bottomMargin);
+
+    if (orientation() == Qt::Vertical) {
+        pw = m_size.width();
+    } else {
+        ph = m_size.height();
+    }
+
     m_preferredSize = QSize(pw, ph);
     emit preferredSizeChanged();
 
