@@ -28,6 +28,7 @@ Item {
     state: parent.state
     implicitWidth: units.gridUnit * 10
     implicitHeight: row.height + 20
+
     GridLayout {
         id: row
         columns: dialogRoot.vertical ? 1 : 2
@@ -272,6 +273,10 @@ Item {
                     right: root.right
                 }
             }
+            PropertyChanges {
+                target: buttonsLayout
+                width: buttonsLayout.implicitWidth
+            }
         },
         State {
             name: "BottomEdge"
@@ -297,6 +302,10 @@ Item {
                     left: undefined
                     right: root.right
                 }
+            }
+            PropertyChanges {
+                target: buttonsLayout
+                width: buttonsLayout.implicitWidth
             }
         },
         State {
