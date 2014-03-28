@@ -138,196 +138,198 @@ Item {
             onTriggered: showAppletHandle = true;
         }
         Rectangle { color: Qt.rgba(0,0,0,0); border.width: 3; border.color: "red"; opacity: 0.5; visible: debug; anchors.fill: parent; }
-    }
+    
 
-
-    Item {
-        anchors { left: parent.left; top: parent.top; bottom: parent.bottom; }
-        width: parent.width+handleWidth;
-
-        z: mouseListener.z + 4
-
-        PlasmaCore.FrameSvgItem {
-            id: plasmoidBackground
-            visible: backgroundHints != "NoBackground"
-            imagePath: "widgets/background"
-            anchors { left: parent.left; top: parent.top; bottom: parent.bottom; }
-            width: (showAppletHandle && handleMerged) ? parent.width : parent.width-handleWidth;
-            smooth: true
-
-            Behavior on width {
-                enabled: animationsEnabled
-                NumberAnimation {
-                    duration: units.longDuration
-                    easing.type: Easing.InOutQuad
-                }
-            }
-        }
-
-        Connections {
-            target: plasmoid
-            onImmutableChanged: {
-                print(" TB dragMouseArea.visible: " + plasmoid.immutable)
-                dragMouseArea.visible = !plasmoid.immutable;
-                showAppletHandle = false;
-            }
-            onAppletRemoved: {
-                print("Applet removed Applet-" + applet.id)
-                if (applet.id == appletItem.applet.id) {
-                    print("Destroying Applet-" + applet.id)
-                    LayoutManager.setSpaceAvailable(appletItem.x, appletItem.y, appletItem.width, appletItem.height, true)
-                    //applet.action("remove").trigger();
-                    //appletItem.destroy()
-                    appletItem.destroy();
-                }
-            }
-        }
-        Connections {
-            target: applet
-            onBusyChanged: {
-                if (applet.busy) {
-                    busyLoader.source = "BusyOverlay.qml"
-                } else if (busyLoader.item && typeof(busyLoader.item) != "undefined") {
-                    busyLoader.item.disappear();
-                }
-            }
-            onBackgroundHintsChanged: {
-                print("plasmoid.backgroundHintsChanged");
-                updateBackgroundHints();
-            }
-        }
-
-        MouseArea {
-            id: dragMouseArea
-
-            anchors.fill: parent
-            z: appletContainer.z - 2
-
-            property int lastX
-            property int lastY
-            property int zoffset: 1000
-
-            onPressed: {
-                appletItem.z = appletItem.z + zoffset;
-                animationsEnabled = false
-                mouse.accepted = true
-                var x = Math.round(appletItem.x/LayoutManager.cellSize.width)*LayoutManager.cellSize.width
-                var y = Math.round(appletItem.y/LayoutManager.cellSize.height)*LayoutManager.cellSize.height
-                LayoutManager.setSpaceAvailable(x, y, appletItem.width, appletItem.height, true)
-
-                var globalMousePos = mapToItem(root, mouse.x, mouse.y)
-                lastX = globalMousePos.x
-                lastY = globalMousePos.y
-
-
-                placeHolder.syncWithItem(appletItem)
-                placeHolderPaint.opacity = root.haloOpacity;
-            }
-            onPositionChanged: {
-                placeHolder.syncWithItem(appletItem)
-
-                var globalPos = mapToItem(root, x, y)
-
-                var globalMousePos = mapToItem(root, mouse.x, mouse.y)
-                appletItem.x += (globalMousePos.x - lastX)
-                appletItem.y += (globalMousePos.y - lastY)
-
-                lastX = globalMousePos.x
-                lastY = globalMousePos.y
-            }
-            onReleased: {
-                appletItem.z = appletItem.z - zoffset;
-                repositionTimer.running = false
-                placeHolderPaint.opacity = 0
-                animationsEnabled = true
-                LayoutManager.positionItem(appletItem)
-                LayoutManager.save()
-            }
-        }
 
         Item {
-            id: appletContainer
-            anchors {
-                fill: parent
-                leftMargin: plasmoidBackground.margins.left
-                rightMargin: plasmoidBackground.margins.right + handleWidth
-                topMargin: plasmoidBackground.margins.top
-                bottomMargin: plasmoidBackground.margins.bottom
-            }
-            z: mouseListener.z+1
+            anchors { left: parent.left; top: parent.top; bottom: parent.bottom; }
+            width: parent.width+handleWidth;
 
-            property QtObject applet
+            z: mouseListener.z + 4
 
-            property int minimumWidth: applet && applet.Layout ? applet.Layout.minimumWidth : 0
-            property int minimumHeight: applet && applet.Layout ? applet.Layout.minimumHeight : 0
+            PlasmaCore.FrameSvgItem {
+                id: plasmoidBackground
+                visible: backgroundHints != "NoBackground"
+                imagePath: "widgets/background"
+                anchors { left: parent.left; top: parent.top; bottom: parent.bottom; }
+                width: (showAppletHandle && handleMerged) ? parent.width : parent.width-handleWidth;
+                smooth: true
 
-            function appletDestroyed() {
-                print("Applet DESTROYED.");
-                LayoutManager.setSpaceAvailable(appletItem.x, appletItem.y, appletItem.width, appletItem.height, true)
-                applet.action("remove").trigger();
-                appletItem.destroy()
-            }
-
-            onAppletChanged: {
-                if (applet) {
-                    appletTimer.running = true;
-                }
-            }
-            Connections {
-                target: appletHandle.item
-                onRemoveApplet: {
-                    killAnim.running = true;
-                }
-            }
-            Behavior on opacity {
-                NumberAnimation {
-                    duration: units.longDuration
-                    easing.type: Easing.InOutQuad
-                }
-            }
-            SequentialAnimation {
-                id: killAnim
-                PlasmaExtras.DisappearAnimation {
-                    targetItem: appletItem
-                }
-                ScriptAction {
-                    script: appletContainer.appletDestroyed()
-                }
-            }
-            Loader {
-                id: busyLoader
-                anchors.centerIn: parent
-                z: appletContainer.z + 1
-            }
-            Rectangle { color: "green"; opacity: 0.3; visible: debug; anchors.fill: parent; }
-            Component.onCompleted: PlasmaExtras.AppearAnimation {
-                targetItem: appletItem
-            }
-        }
-
-        Loader {
-            id: appletHandle
-            z: appletContainer.z + 1
-            anchors {
-                top: parent.top
-                bottom: parent.bottom
-                right: plasmoidBackground.right
-                rightMargin: appletItem.margins.right
-            }
-            Connections {
-                target: appletItem
-                onShowAppletHandleChanged: {
-                    if (appletItem.showAppletHandle && appletHandle.source == "") {
-                        //print("Loading applethandle ");
-                        appletHandle.source = "AppletHandle.qml";
+                Behavior on width {
+                    enabled: animationsEnabled
+                    NumberAnimation {
+                        duration: units.longDuration
+                        easing.type: Easing.InOutQuad
                     }
                 }
             }
 
-        }
+            Connections {
+                target: plasmoid
+                onImmutableChanged: {
+                    print(" TB dragMouseArea.visible: " + plasmoid.immutable)
+                    dragMouseArea.visible = !plasmoid.immutable;
+                    showAppletHandle = false;
+                }
+                onAppletRemoved: {
+                    print("Applet removed Applet-" + applet.id)
+                    if (applet.id == appletItem.applet.id) {
+                        print("Destroying Applet-" + applet.id)
+                        LayoutManager.setSpaceAvailable(appletItem.x, appletItem.y, appletItem.width, appletItem.height, true)
+                        //applet.action("remove").trigger();
+                        //appletItem.destroy()
+                        appletItem.destroy();
+                    }
+                }
+            }
+            Connections {
+                target: applet
+                onBusyChanged: {
+                    if (applet.busy) {
+                        busyLoader.source = "BusyOverlay.qml"
+                    } else if (busyLoader.item && typeof(busyLoader.item) != "undefined") {
+                        busyLoader.item.disappear();
+                    }
+                }
+                onBackgroundHintsChanged: {
+                    print("plasmoid.backgroundHintsChanged");
+                    updateBackgroundHints();
+                }
+            }
 
-        Rectangle { color: "orange"; opacity: 0.1; visible: debug; anchors.fill: parent; }
+            MouseArea {
+                id: dragMouseArea
+
+                anchors.fill: parent
+                z: appletContainer.z - 2
+
+                property int lastX
+                property int lastY
+                property int zoffset: 1000
+
+                onPressed: {
+                    appletItem.z = appletItem.z + zoffset;
+                    animationsEnabled = false
+                    mouse.accepted = true
+                    var x = Math.round(appletItem.x/LayoutManager.cellSize.width)*LayoutManager.cellSize.width
+                    var y = Math.round(appletItem.y/LayoutManager.cellSize.height)*LayoutManager.cellSize.height
+                    LayoutManager.setSpaceAvailable(x, y, appletItem.width, appletItem.height, true)
+
+                    var globalMousePos = mapToItem(root, mouse.x, mouse.y)
+                    lastX = globalMousePos.x
+                    lastY = globalMousePos.y
+
+
+                    placeHolder.syncWithItem(appletItem)
+                    placeHolderPaint.opacity = root.haloOpacity;
+                }
+                onPositionChanged: {
+                    placeHolder.syncWithItem(appletItem)
+
+                    var globalPos = mapToItem(root, x, y)
+
+                    var globalMousePos = mapToItem(root, mouse.x, mouse.y)
+                    appletItem.x += (globalMousePos.x - lastX)
+                    appletItem.y += (globalMousePos.y - lastY)
+
+                    lastX = globalMousePos.x
+                    lastY = globalMousePos.y
+                }
+                onReleased: {
+                    appletItem.z = appletItem.z - zoffset;
+                    repositionTimer.running = false
+                    placeHolderPaint.opacity = 0
+                    animationsEnabled = true
+                    LayoutManager.positionItem(appletItem)
+                    LayoutManager.save()
+                }
+            }
+
+            Item {
+                id: appletContainer
+                anchors {
+                    fill: parent
+                    leftMargin: plasmoidBackground.margins.left
+                    rightMargin: plasmoidBackground.margins.right + handleWidth
+                    topMargin: plasmoidBackground.margins.top
+                    bottomMargin: plasmoidBackground.margins.bottom
+                }
+                z: mouseListener.z+1
+
+                property QtObject applet
+
+                property int minimumWidth: applet && applet.Layout ? applet.Layout.minimumWidth : 0
+                property int minimumHeight: applet && applet.Layout ? applet.Layout.minimumHeight : 0
+
+                function appletDestroyed() {
+                    print("Applet DESTROYED.");
+                    LayoutManager.setSpaceAvailable(appletItem.x, appletItem.y, appletItem.width, appletItem.height, true)
+                    applet.action("remove").trigger();
+                    appletItem.destroy()
+                }
+
+                onAppletChanged: {
+                    if (applet) {
+                        appletTimer.running = true;
+                    }
+                }
+                Connections {
+                    target: appletHandle.item
+                    onRemoveApplet: {
+                        killAnim.running = true;
+                    }
+                }
+                Behavior on opacity {
+                    NumberAnimation {
+                        duration: units.longDuration
+                        easing.type: Easing.InOutQuad
+                    }
+                }
+                SequentialAnimation {
+                    id: killAnim
+                    PlasmaExtras.DisappearAnimation {
+                        targetItem: appletItem
+                    }
+                    ScriptAction {
+                        script: appletContainer.appletDestroyed()
+                    }
+                }
+                Loader {
+                    id: busyLoader
+                    anchors.centerIn: parent
+                    z: appletContainer.z + 1
+                }
+                Rectangle { color: "green"; opacity: 0.3; visible: debug; anchors.fill: parent; }
+                Component.onCompleted: PlasmaExtras.AppearAnimation {
+                    targetItem: appletItem
+                }
+            }
+
+            Loader {
+                id: appletHandle
+                z: appletContainer.z + 1
+                anchors {
+                    top: parent.top
+                    bottom: parent.bottom
+                    right: plasmoidBackground.right
+                    rightMargin: appletItem.margins.right
+                }
+                Connections {
+                    target: appletItem
+                    onShowAppletHandleChanged: {
+                        if (appletItem.showAppletHandle && appletHandle.source == "") {
+                            //print("Loading applethandle ");
+                            appletHandle.source = "AppletHandle.qml";
+                        }
+                    }
+                }
+
+            }
+
+            Rectangle { color: "orange"; opacity: 0.1; visible: debug; anchors.fill: parent; }
+        }
     }
+
     Behavior on controlsOpacity {
         NumberAnimation {
             duration: units.longDuration
