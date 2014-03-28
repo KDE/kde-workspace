@@ -41,19 +41,27 @@ Item {
         SizeHandle {}
     }
 
+    PlasmaComponents.Label {
+        id: placeHolder
+        visible: false
+        text: i18n("Add Widgets...") + i18n("Add spacer") + i18n("More Settings...") 
+    }
+
     GridLayout {
         id: buttonsLayout
         rows: 1
         columns: 1
-        flow:plasmoid.formFactor == PlasmaCore.Types.Horizontal ? GridLayout.TopToBottom : GridLayout.LeftToRight
+        flow: plasmoid.formFactor == PlasmaCore.Types.Horizontal ? GridLayout.TopToBottom : GridLayout.LeftToRight
 
         anchors.margins: rowSpacing
+
+        property bool showText: plasmoid.formFactor == PlasmaCore.Types.Horizontal && (row.x + row.width < root.width - placeHolder.width - units.iconSizes.small*4 - units.largeSpacing*5)
 
         rowSpacing: units.smallSpacing
         columnSpacing: units.smallSpacing
 
         PlasmaComponents.Button {
-            text: i18n("Add Widgets...")
+            text: buttonsLayout.showText ? i18n("Add Widgets...") : ""
             iconSource: "list-add"
             Layout.preferredWidth: panel.formFactor == PlasmaCore.Types.Vertical ? Math.max(implicitWidth, parent.width) : implicitWidth
             onClicked: {
@@ -63,7 +71,7 @@ Item {
 
         PlasmaComponents.Button {
             iconSource: "distribute-horizontal-x"
-            text: i18n("Add spacer")
+            text: buttonsLayout.showText ? i18n("Add spacer") : ""
             Layout.preferredWidth: panel.formFactor == PlasmaCore.Types.Vertical ? Math.max(implicitWidth, parent.width) : implicitWidth
             onClicked: {
                 configDialog.addPanelSpacer();
@@ -73,7 +81,7 @@ Item {
         PlasmaComponents.Button {
             id: settingsButton
             iconSource: "configure"
-            text: i18n("More Settings...")
+            text: buttonsLayout.showText ? i18n("More Settings...") : ""
             Layout.preferredWidth: panel.formFactor == PlasmaCore.Types.Vertical ? Math.max(implicitWidth, parent.width) : implicitWidth
             onClicked: {
                 contextMenu.visible = !contextMenu.visible;
