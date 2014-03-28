@@ -30,6 +30,12 @@ include(WriteBasicConfigVersionFile)
 include(CheckIncludeFiles)
 include(FeatureSummary)
 
+find_package(KF5Activities ${KF5_VERSION})
+set_package_properties(KF5Activities PROPERTIES DESCRIPTION "management of Plasma activities"
+                       TYPE OPTIONAL
+                       PURPOSE "Needed by activity related plasmoids."
+                      )
+
 find_package(ZLIB)
 set_package_properties(ZLIB PROPERTIES DESCRIPTION "Support for gzip compressed files and data streams"
                        URL "http://www.zlib.net"

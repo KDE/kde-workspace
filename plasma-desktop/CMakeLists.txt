@@ -43,6 +43,12 @@ if(${CMAKE_SOURCE_DIR} STREQUAL ${CMAKE_CURRENT_SOURCE_DIR})
     find_package(KSMServerDBusInterface CONFIG REQUIRED)
 endif()
 
+find_package(KF5Activities ${KF5_VERSION})
+set_package_properties(KF5Activities PROPERTIES DESCRIPTION "management of Plasma activities"
+                       TYPE OPTIONAL
+                       PURPOSE "Needed by activity related plasmoids and the pager."
+                      )
+
 find_package(USB)
 set(HAVE_LIBUSB ${LIBUSB_FOUND})
 set_package_properties(USB PROPERTIES DESCRIPTION "User level access to USB devices"
