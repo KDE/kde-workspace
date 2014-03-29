@@ -31,6 +31,7 @@
 #include <KToolInvocation>
 #include <KUrl>
 #include <KStandardDirs>
+#include <KSharedConfig>
 #include <QDebug>
 #include "bookmarkmatch.h"
 #include "browserfactory.h"
