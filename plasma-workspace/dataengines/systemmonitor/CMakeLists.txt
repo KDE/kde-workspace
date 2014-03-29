@@ -10,6 +10,7 @@ target_link_libraries(plasma_engine_systemmonitor
     KF5::Plasma
     KF5::Service
     KF5::SysGuard
+    KF5::KDE4Support
 )
 
 kservice_desktop_to_json(plasma_engine_systemmonitor plasma-dataengine-systemmonitor.desktop)

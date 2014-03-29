@@ -29,7 +29,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <QSet>
 #include <QVector>
 
-#include <KWindowSystem>
+#include <KStartupInfo>
 
 class QUuid;
 

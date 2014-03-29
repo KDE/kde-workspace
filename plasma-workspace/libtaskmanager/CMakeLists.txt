@@ -39,26 +39,30 @@ add_library(PW::LibTaskManager ALIAS taskmanager)
 generate_export_header(taskmanager)
 target_include_directories(taskmanager PUBLIC "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>" "$<INSTALL_INTERFACE:${INCLUDE_INSTALL_DIR}/taskmanager>")
 target_link_libraries(taskmanager
-    KF5::ProcessCore
-    KF5::ConfigCore
-    KF5::ConfigWidgets
-    KF5::IconThemes
-    KF5::I18n
-    KF5::KIOCore
-    KF5::KIOWidgets # KRun
-    KF5::Service
-    KF5::WindowSystem
+    PUBLIC
+        Qt5::Core
+        Qt5::Gui
+        KF5::WindowSystem # KStartupInfo
+    PRIVATE
+        KF5::ProcessCore
+        KF5::ConfigCore
+        KF5::ConfigWidgets
+        KF5::IconThemes
+        KF5::I18n
+        KF5::KIOCore
+        KF5::KIOWidgets # KRun
+        KF5::Service
 )
 if (X11_FOUND)
-    target_link_libraries(taskmanager ${Qt5X11Extras_LIBRARIES} ${X11_LIBRARIES})
+    target_link_libraries(taskmanager PRIVATE ${Qt5X11Extras_LIBRARIES} ${X11_LIBRARIES})
     if (X11_Xfixes_FOUND)
-    target_link_libraries(taskmanager ${X11_Xfixes_LIB})
+    target_link_libraries(taskmanager PRIVATE ${X11_Xfixes_LIB})
     endif ()
     if (X11_Xrender_FOUND)
-    target_link_libraries(taskmanager ${X11_Xrender_LIB})
+    target_link_libraries(taskmanager PRIVATE ${X11_Xrender_LIB})
     endif ()
     if (X11_Xcomposite_FOUND)
-    target_link_libraries(taskmanager ${X11_Xcomposite_LIB})
+    target_link_libraries(taskmanager PRIVATE ${X11_Xcomposite_LIB})
     endif ()
 endif()
 

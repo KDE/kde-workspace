@@ -70,7 +70,8 @@ set(khotkeysprivate_SRCS
 )
 
 add_library(khotkeysprivate SHARED ${khotkeysprivate_SRCS})
-target_link_libraries(khotkeysprivate
+# Not exported, so just make all links PUBLIC
+target_link_libraries(khotkeysprivate PUBLIC
     PW::KWorkspace
     Qt5::X11Extras
     KF5::GlobalAccel
@@ -81,7 +82,7 @@ target_link_libraries(khotkeysprivate
     KF5::KDE4Support
     ${X11_X11_LIB})
 if(X11_XTest_FOUND)
-  target_link_libraries(khotkeysprivate ${X11_XTest_LIB})
+    target_link_libraries(khotkeysprivate PUBLIC ${X11_XTest_LIB})
 endif()
 set_target_properties(khotkeysprivate PROPERTIES VERSION ${GENERIC_LIB_VERSION} SOVERSION ${GENERIC_LIB_SOVERSION})
 install(TARGETS khotkeysprivate ${INSTALL_TARGETS_DEFAULT_ARGS} LIBRARY NAMELINK_SKIP)

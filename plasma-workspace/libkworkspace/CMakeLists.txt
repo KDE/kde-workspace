@@ -25,16 +25,23 @@ set_target_properties(kworkspace PROPERTIES
                       )
 
 generate_export_header(kworkspace)
-target_link_libraries(kworkspace Qt5::DBus Qt5::Core
-                                 KF5::I18n KF5::WindowSystem KF5::Plasma
-                                 Xau)
+target_link_libraries(kworkspace
+    PUBLIC
+        Qt5::Core
+    PRIVATE
+        Qt5::DBus
+        KF5::I18n
+        KF5::WindowSystem
+        KF5::Plasma
+        Xau
+)
 target_include_directories(kworkspace PUBLIC "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>"
                                       INTERFACE "$<INSTALL_INTERFACE:${INCLUDE_INSTALL_DIR}/kworkspace>" )
 
 configure_file(config-libkworkspace.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/config-libkworkspace.h)
 
 if(X11_FOUND)
-    target_link_libraries(kworkspace Qt5::X11Extras ${X11_LIBRARIES})
+    target_link_libraries(kworkspace PRIVATE Qt5::X11Extras ${X11_LIBRARIES})
 endif()
 
 write_basic_config_version_file(${CMAKE_CURRENT_BINARY_DIR}/LibKWorkspaceConfigVersion.cmake VERSION

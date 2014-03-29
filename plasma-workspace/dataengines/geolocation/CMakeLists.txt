@@ -4,7 +4,13 @@ project(geolocation)
 
 set(plasma_geolocation_interface_SRCS geolocationprovider.cpp)
 add_library(plasma-geolocation-interface SHARED ${plasma_geolocation_interface_SRCS})
-target_link_libraries(plasma-geolocation-interface KF5::KIOCore KF5::Plasma)
+target_link_libraries(plasma-geolocation-interface
+    PUBLIC
+        Qt5::Core
+        KF5::Plasma
+    PRIVATE
+        KF5::KIOCore
+)
 set_target_properties(plasma-geolocation-interface PROPERTIES
    VERSION ${GENERIC_LIB_VERSION}
    SOVERSION ${GENERIC_LIB_SOVERSION}
@@ -40,7 +46,7 @@ install(FILES plasma-geolocationprovider.desktop DESTINATION ${SERVICETYPES_INST
 
 set(plasma_geolocation_ip_SRCS location_ip.cpp)
 add_library(plasma-geolocation-ip MODULE ${plasma_geolocation_ip_SRCS})
-target_link_libraries(plasma-geolocation-ip plasma-geolocation-interface)
+target_link_libraries(plasma-geolocation-ip plasma-geolocation-interface KF5::KIOCore)
 install(FILES plasma-geolocation-ip.desktop DESTINATION ${SERVICES_INSTALL_DIR})
 install(TARGETS plasma-geolocation-ip DESTINATION ${PLUGIN_INSTALL_DIR}/plasma/geolocationprovider)
 

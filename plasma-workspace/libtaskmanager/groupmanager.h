@@ -26,8 +26,6 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include <QtCore/QObject>
 
-#include <KConfigGroup>
-
 #include <abstractgroupableitem.h>
 #include <task.h>
 #include <taskitem.h>
