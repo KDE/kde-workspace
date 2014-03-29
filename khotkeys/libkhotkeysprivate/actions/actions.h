@@ -18,6 +18,7 @@
 #include <kservice.h>
 
 class KConfig;
+class KConfigGroup;
 
 #include "khotkeysglobal.h"
 

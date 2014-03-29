@@ -24,6 +24,7 @@
 #include <KConfigGroup>
 #include <KDebug>
 #include <KPluginFactory>
+#include <KSharedConfig>
 #include <KShortcutsEditor>
 #include <KStandardAction>
 #include <KMessageBox>

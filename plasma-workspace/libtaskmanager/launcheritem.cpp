@@ -24,6 +24,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "launcheritem.h"
 
 #include <KConfigGroup>
+#include <KSharedConfig>
 #include <KDesktopFile>
 #include <KFileItem>
 #include <QMimeData>

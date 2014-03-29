@@ -20,6 +20,7 @@
 #include "actions.h"
 
 #include <kconfiggroup.h>
+#include <ksharedconfig.h>
 
 namespace KHotKeys {
 

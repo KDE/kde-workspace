@@ -25,6 +25,7 @@
 #include "windows_helper/window_selection_list.h"
 
 #include <KConfigGroup>
+#include <KSharedConfig>
 #include <KDebug>
 
 // #include <X11/X.h>

@@ -21,6 +21,7 @@
 #include "windows_helper/window_selection_list.h"
 
 #include <KConfigGroup>
+#include <KSharedConfig>
 #include <KDebug>
 
 namespace KHotKeys {
