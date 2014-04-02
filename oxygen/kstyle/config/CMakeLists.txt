@@ -38,6 +38,6 @@ add_executable(oxygen-settings
 )
 
 target_link_libraries(oxygen-settings Qt5::Core Qt5::Gui Qt5::Widgets)
-target_link_libraries(oxygen-settings KF5::I18n KF5::WidgetsAddons KF5::ConfigCore KF5::ConfigGui KF5::Service)
+target_link_libraries(oxygen-settings KF5::I18n KF5::WidgetsAddons KF5::ConfigCore KF5::ConfigGui KF5::Service KF5::KDE4Support)
 
 install (TARGETS oxygen-settings ${INSTALL_TARGETS_DEFAULT_ARGS} )
