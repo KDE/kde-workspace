@@ -15,6 +15,7 @@ target_link_libraries(kdecorations
         KF5::ConfigCore
         KF5::Service # KLibrary
         KF5::WindowSystem # NETWM defines
+        KF5::KDE4Support
     PRIVATE
         KF5::I18n
 )
