@@ -3,6 +3,7 @@ Encoding=UTF-8
 Type=XSession
 Exec=${BIN_INSTALL_DIR}/startkde --failsafe
 TryExec=${BIN_INSTALL_DIR}/startkde
+DesktopNames=KDE
 Name=KDE Plasma Workspace (failsafe session)
 Name[ar]=مساحة عمل بلازما كدي (الجلسة الآمنة)
 Name[bn]=কে.ডি.ই. প্লাসমা ওয়ার্কস্পেস (failsafe session)

@@ -2,6 +2,7 @@
 Type=XSession
 Exec=gnome-session
 TryExec=gnome-session
+DesktopNames=GNOME
 Name=GNOME
 Name[af]=GNOME
 Name[ar]=جنوم

@@ -2,6 +2,7 @@
 Type=XSession
 Exec=xfwm
 TryExec=xfwm
+DesktopNames=XFCE
 Name=XFce
 Name[af]=XFce
 Name[ar]=XFce

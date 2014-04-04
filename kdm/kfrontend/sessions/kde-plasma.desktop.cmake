@@ -3,6 +3,7 @@ Encoding=UTF-8
 Type=XSession
 Exec=${BIN_INSTALL_DIR}/startkde
 TryExec=${BIN_INSTALL_DIR}/startkde
+DesktopNames=KDE
 Name=KDE Plasma Workspace
 Name[ar]=مساحة عمل بلازما كدي
 Name[bg]=Работно пространство Plasma на KDE

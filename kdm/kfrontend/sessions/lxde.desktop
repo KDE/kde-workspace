@@ -2,6 +2,7 @@
 Type=XSession
 Exec=startlxde
 TryExec=startlxde
+DesktopNames=LXDE
 Name=LXDE
 Name[ar]=LXDE
 Name[ast]=LXDE
