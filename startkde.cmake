@@ -319,6 +319,11 @@ export KDE_SESSION_UID
 XDG_CURRENT_DESKTOP=KDE
 export XDG_CURRENT_DESKTOP
 
+# At this point all the environment is ready, let's send it to kwalletd if running
+if test -n "PAM_KWALLET_LOGIN" ; then
+    env | socat STDIN UNIX-CONNECT:/tmp/test.socket
+fi
+
 # We set LD_BIND_NOW to increase the efficiency of kdeinit.
 # kdeinit unsets this variable before loading applications.
 LD_BIND_NOW=true @KDE4_LIBEXEC_INSTALL_DIR@/start_kdeinit_wrapper +kcminit_startup
