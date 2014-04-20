@@ -47,7 +47,11 @@ Item {
 
     function updateLogic(updateBrightness) {
         Logic.updateCumulative();
-        plasmoid.status = Logic.plasmoidStatus();
+
+        if (!dialogItem.popupShown) {
+            plasmoid.status = Logic.plasmoidStatus()
+        }
+
         Logic.updateTooltip();
         if (updateBrightness) {
             Logic.updateBrightness(pmSource);
@@ -58,6 +62,8 @@ Item {
         dialogItem.popupShown = popped;
         if (popped) {
             dialogItem.forceActiveFocus();
+        } else {
+            updateLogic();
         }
     }
 

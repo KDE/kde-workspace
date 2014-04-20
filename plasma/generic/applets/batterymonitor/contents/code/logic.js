@@ -57,20 +57,20 @@ function updateCumulative() {
 }
 
 function plasmoidStatus() {
-    var status = "PassiveStatus";
+    var status = PassiveStatus;
     if (powermanagementDisabled) {
-        status = "ActiveStatus";
+        status = ActiveStatus;
     }
 
     if (batteries.cumulativePluggedin) {
         if (batteries.cumulativePercent <= 10) {
-            status = "NeedsAttentionStatus";
+            status = NeedsAttentionStatus;
         } else if (!batteries.allCharged) {
-            status = "ActiveStatus";
+            status = ActiveStatus;
         }
     } else if (batteries.count > 0) { // in case your mouse gets low
         if (batteries.cumulativePercent && batteries.cumulativePercent <= 10) {
-            status = "NeedsAttentionStatus";
+            status = NeedsAttentionStatus;
         }
     }
     return status;
