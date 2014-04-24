@@ -374,7 +374,7 @@ void KSldApp::unlock()
         return;
     }
     s_graceTimeKill = true;
-    m_lockProcess->kill();
+    m_lockProcess->terminate();
 }
 
 void KSldApp::inhibit()
