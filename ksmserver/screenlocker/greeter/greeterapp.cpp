@@ -383,6 +383,12 @@ void UnlockApp::setImmediateLock(bool immediate)
     m_immediateLock = immediate;
 }
 
+void UnlockApp::lockImmediately()
+{
+    setImmediateLock(true);
+    setLockedPropertyOnViews();
+}
+
 bool UnlockApp::eventFilter(QObject *obj, QEvent *event)
 {
     if (obj != this && event->type() == QEvent::Show) {
