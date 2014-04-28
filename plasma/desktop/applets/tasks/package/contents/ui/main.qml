@@ -188,6 +188,12 @@ Item {
         dragSource = null;
     }
 
+    function isTaskAt(pos) {
+        var mapped = mapToItem(taskList, pos.x, pos.y);
+
+        return (taskList.childAt(mapped.x, mapped.y) != null);
+    }
+
     Component.onCompleted: {
         dragHelper.dropped.connect(resetDragSource);
     }

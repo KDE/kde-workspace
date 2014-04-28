@@ -56,7 +56,8 @@ class Tasks : public Plasma::Applet
 
     protected:
         void createConfigurationInterface(KConfigDialog *parent);
-        QSizeF sizeHint(Qt::SizeHint which, const QSizeF & constraint = QSizeF()) const;
+        QSizeF sizeHint(Qt::SizeHint which, const QSizeF &constraint = QSizeF()) const;
+        void contextMenuEvent(QGraphicsSceneContextMenuEvent *event);
 
     private slots:
         void activateItem(int id, bool toggle);

@@ -128,7 +128,7 @@ void Tasks::init()
     optimumCapacity.connectNotifySignal(this, SLOT(optimumCapacityChanged()));
 
     connect(m_declarativeWidget->rootObject(), SIGNAL(activateItem(int,bool)), this, SLOT(activateItem(int,bool)));
-    connect(m_declarativeWidget->rootObject(), SIGNAL(itemContextMenu(int)), this, SLOT(itemContextMenu(int)));
+    connect(m_declarativeWidget->rootObject(), SIGNAL(itemContextMenu(int)), this, SLOT(itemContextMenu(int)), Qt::QueuedConnection);
     connect(m_declarativeWidget->rootObject(), SIGNAL(itemMove(int,int)), this, SLOT(itemMove(int,int)));
     connect(m_declarativeWidget->rootObject(), SIGNAL(itemGeometryChanged(int,int,int,int,int)),
         this, SLOT(itemGeometryChanged(int,int,int,int,int)));
@@ -275,6 +275,18 @@ void Tasks::itemContextMenu(int id)
 
     menu->exec(containment()->corona()->popupPosition(declItem, menu->size()));
     menu->deleteLater();
+}
+
+void Tasks::contextMenuEvent(QGraphicsSceneContextMenuEvent* event)
+{
+    QVariant ret;
+
+    QMetaObject::invokeMethod(m_declarativeWidget->rootObject(), "isTaskAt",
+        Q_RETURN_ARG(QVariant, ret), Q_ARG(QVariant, event->pos()));
+
+    if (!ret.toBool()) {
+        Plasma::Applet::contextMenuEvent(event);
+    }
 }
 
 void Tasks::itemHovered(int id, bool hovered)
