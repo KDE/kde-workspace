@@ -98,8 +98,12 @@ MouseEventListener {
 
     onClicked: {
         if (isGroupParent) {
-            groupDialog.target = task;
-            groupDialog.visible = true;
+            if (mouse.modifiers & Qt.ControlModifier) {
+                tasks.presentWindows(model.Id);
+            } else {
+                groupDialog.target = task;
+                groupDialog.visible = true;
+            }
         } else {
             tasks.activateItem(model.Id, true);
         }

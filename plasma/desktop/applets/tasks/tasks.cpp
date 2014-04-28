@@ -133,6 +133,7 @@ void Tasks::init()
     connect(m_declarativeWidget->rootObject(), SIGNAL(itemGeometryChanged(int,int,int,int,int)),
         this, SLOT(itemGeometryChanged(int,int,int,int,int)));
     connect(m_declarativeWidget->rootObject(), SIGNAL(itemNeedsAttention(bool)), this, SLOT(itemNeedsAttention(bool)));
+    connect(m_declarativeWidget->rootObject(), SIGNAL(presentWindows(int)), this, SLOT(presentWindows(int)));
 
     connect(KWindowSystem::self(), SIGNAL(activeWindowChanged(WId)), this, SLOT(handleActiveWindowChanged(WId)));
 
@@ -355,6 +356,15 @@ void Tasks::itemNeedsAttention(bool needs)
         }
 
         setStatus(Plasma::PassiveStatus);
+    }
+}
+
+void Tasks::presentWindows(int groupParentId)
+{
+    TaskManager:: AbstractGroupableItem *item = m_groupManager->rootGroup()->getMemberById(groupParentId);
+
+    if (item) {
+        Plasma::WindowEffects::presentWindows(view()->winId(), QList<WId>::fromSet(item->winIds()));
     }
 }
 

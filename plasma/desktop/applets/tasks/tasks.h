@@ -65,6 +65,7 @@ class Tasks : public Plasma::Applet
         void itemMove(int id, int newIndex);
         void itemGeometryChanged(int id, int x, int y, int width, int height);
         void itemNeedsAttention(bool needs);
+        void presentWindows(int groupParentId);
 
         void handleActiveWindowChanged(WId activeWindow);
 

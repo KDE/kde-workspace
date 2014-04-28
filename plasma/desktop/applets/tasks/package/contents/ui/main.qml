@@ -61,6 +61,7 @@ Item {
     signal itemMove(int id, int newIndex)
     signal itemGeometryChanged(int id, int x, int y, int width, int height)
     signal itemNeedsAttention(bool needs)
+    signal presentWindows(int groupParentId)
 
     onWidthChanged: {
         taskList.width = Layout.layoutWidth();
