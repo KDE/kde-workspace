@@ -74,7 +74,7 @@ Item {
                     (devicesType == "removable" && data[last] && data[last]["Removable"] == true) ||
                     (devicesType == "nonRemovable" && data[last] && data[last]["Removable"] == false)) {
                     updateTooltip();
-                    if (expand) {
+                    if (expand && hpSource.data[last]["added"]) {
                         expandDevice(last)
                     }
                     last = "";
