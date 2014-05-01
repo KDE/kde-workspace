@@ -59,6 +59,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #endif
 #include <fixx11h.h>
 #include <QCheckBox>
+#include <QPointer>
 #include <QPushButton>
 
 #include <kglobalsettings.h>
@@ -716,7 +717,7 @@ void UserActionsMenu::activityPopupAboutToShow()
     QAction *action = m_activityMenu->addAction(i18n("&All Activities"));
     action->setData(QString());
     action->setCheckable(true);
-    static QActionGroup *allActivitiesGroup = NULL;
+    static QPointer<QActionGroup> allActivitiesGroup;
     if (!allActivitiesGroup) {
         allActivitiesGroup = new QActionGroup(m_activityMenu);
     }
