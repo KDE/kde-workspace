@@ -1810,12 +1810,14 @@ startClient(volatile int *pid)
                             !(sessargs = iniEntry(str, "Desktop Entry", "Exec", 0)))
                         sessargs = "";
                     buf = iniEntry(str, "Desktop Entry", "DesktopNames", 0);
-                    for (buf2 = buf; *buf2; ++buf2) {
-                        if (*buf2 == ';')
-                            *buf2 = ':';
+                    if (buf) {
+                        for (buf2 = buf; *buf2; ++buf2) {
+                            if (*buf2 == ';')
+                                *buf2 = ':';
+                        }
+                        userEnviron = setEnv(userEnviron, "XDG_CURRENT_DESKTOP", buf);
+                        free(buf);
                     }
-                    userEnviron = setEnv(userEnviron, "XDG_CURRENT_DESKTOP", buf);
-                    free(buf);
                     free(str);
                     free(fname);
                     goto gotit;
