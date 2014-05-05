@@ -108,6 +108,8 @@ namespace Oxygen
 
             // reparent
             XReparentWindow( QX11Info::display(), winId(), current, 0, 0 );
+            setWindowTitle( "Oxygen::SizeGrip" );
+            
         } else {
 
             hide();
