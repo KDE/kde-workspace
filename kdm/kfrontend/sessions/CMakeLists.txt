@@ -41,6 +41,7 @@ install(FILES
 	ratpoison.desktop
 	sapphire.desktop
 	sawfish.desktop
+	subtle.desktop
 	twm.desktop
 	ude.desktop
 	vtwm.desktop
