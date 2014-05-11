@@ -1,7 +1,17 @@
 [Desktop Entry]
 Encoding=UTF-8
 Name=Subtle
+Name[ca]=Subtle
+Name[pt]=Subtil
+Name[sv]=Subtil
+Name[uk]=Subtle
+Name[x-test]=xxSubtlexx
 Comment=Subtle Tiling Window Manager
+Comment[ca]=Gestor de finestres en mosaic Subtle
+Comment[pt]=Gestor de Janelas Lado-a-Lado Subtil
+Comment[sv]=Subtil fönsterhanterare
+Comment[uk]=Мозаїчний засіб керування вікнами Subtle
+Comment[x-test]=xxSubtle Tiling Window Managerxx
 Exec=subtle
 Type=XSession
 
