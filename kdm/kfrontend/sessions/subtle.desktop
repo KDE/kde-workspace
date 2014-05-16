@@ -31,5 +31,6 @@ Comment[sv]=Subtil fönsterhanterare
 Comment[uk]=Мозаїчний засіб керування вікнами Subtle
 Comment[x-test]=xxSubtle Tiling Window Managerxx
 Exec=subtle
+TryExec=subtle
 Type=XSession
 
