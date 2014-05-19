@@ -213,6 +213,7 @@ PlasmaCore.Dialog {
                     anchors.fill: appIconItem
                     image: model.image
                     smooth: true
+                    fillMode: Image.PreserveAspectFit
                     visible: nativeWidth > 0
                 }
                /*
