@@ -388,9 +388,14 @@ namespace Oxygen
 
             case LM_ButtonWidth:
             case LM_ButtonHeight:
-            case LM_TitleHeight:
             {
                 return buttonSize;
+            }
+
+            case LM_TitleHeight:
+            {
+                const int titleHeight = QFontMetrics(options()->font(true)).height();
+                return qMax(buttonSize, titleHeight);
             }
 
             case LM_ButtonSpacing:
@@ -613,7 +618,7 @@ namespace Oxygen
             int offset = layoutMetric( LM_OuterPaddingTop );
 
             // radial gradient positionning
-            const int height = hideTitleBar() ? 0:buttonSize();
+            const int height = hideTitleBar() ? 0:layoutMetric(LM_TitleHeight);
             if( isMaximized() ) offset -= 3;
 
             const QWidget* window( isPreview() ? this->widget() : widget->window() );
@@ -631,11 +636,11 @@ namespace Oxygen
             int offset = layoutMetric( LM_OuterPaddingTop );
 
             // radial gradient positionning
-            const int height = hideTitleBar() ? 0:buttonSize();
+            const int height = hideTitleBar() ? 0:layoutMetric(LM_TitleHeight);
             if( isMaximized() ) offset -= 3;
 
             // background pixmap
-            QPoint backgroundPixmapOffset( layoutMetric( LM_OuterPaddingLeft ) + layoutMetric( LM_BorderLeft ), 0 );
+            const QPoint backgroundPixmapOffset( layoutMetric( LM_OuterPaddingLeft ) + layoutMetric( LM_BorderLeft ), 0 );
             helper().setBackgroundPixmapOffset( backgroundPixmapOffset );
 
             const QWidget* window( isPreview() ? this->widget() : widget->window() );
