@@ -469,7 +469,7 @@ readConfig()
                         for (restl--; restl; restl--) {
                             if (dnum[dnuml] == '_') {
                                 dclass = dnum + dnuml + 1;
-                                dclassl = restl;
+                                dclassl = restl - 1;
                                 goto gotall;
                             }
                             dnuml++;

@@ -436,7 +436,7 @@ addServers(char **srv, int bType)
         if ((cls = strchr(*srv, '_'))) {
             if (!strNDup(&name, *srv, cls - *srv))
                 return;
-            if (!strDup(&class2, cls)) {
+            if (!strDup(&class2, cls + 1)) {
                 free(name);
                 return;
             }
