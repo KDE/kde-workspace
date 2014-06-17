@@ -456,8 +456,20 @@ void Core::onDeviceAdded(const QString& udi)
     }
     m_loadedBatteriesUdi.append(udi);
 
+    // Compute the current global percentage
+    int globalChargePercent = 0;
+    for (QHash<QString,int>::const_iterator i = m_batteriesPercent.constBegin(); i != m_batteriesPercent.constEnd(); ++i) {
+        globalChargePercent += i.value();
+    }
+
+    // If a new battery has been added, let's clear some pending suspend actions if the new global batteries percentage is
+    // higher than the battery low level. (See bug 329537)
+    if (m_criticalBatteryTimer->isActive() && globalChargePercent > PowerDevilSettings::batteryCriticalLevel()) {
+        m_criticalBatteryTimer->stop();
+    }
+
     // So we get a "Battery is low" notification directly on system startup if applicable
-    emitBatteryChargePercentNotification(b->chargePercent(), 100);
+    emitBatteryChargePercentNotification(globalChargePercent, 100);
 }
 
 void Core::onDeviceRemoved(const QString& udi)
