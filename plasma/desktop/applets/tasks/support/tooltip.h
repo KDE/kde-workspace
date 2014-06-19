@@ -121,7 +121,7 @@ private:
     QString m_mainText;
     QString m_subText;
     QVariant m_image;
-    QGraphicsWidget *m_widget;
+    QWeakPointer<QGraphicsWidget> m_widget;
     QWeakPointer<DeclarativeItemContainer> m_declarativeItemContainer;
     QWeakPointer<QGraphicsObject> m_target;
     QList<WId> m_windowsToPreview;

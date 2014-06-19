@@ -35,7 +35,7 @@
 #include <KDE/Plasma/ToolTipManager>
 
 ToolTipProxy::ToolTipProxy(QObject *parent)
-    : QObject(parent), m_mainText(""), m_subText(""), m_widget(0), m_highlightWindows(false)
+    : QObject(parent), m_mainText(""), m_subText(""), m_highlightWindows(false)
 {
     connect(this, SIGNAL(targetChanged()), this, SLOT(updateToolTip()));
     connect(this, SIGNAL(mainTextChanged()), this, SLOT(updateToolTip()));
@@ -197,7 +197,7 @@ void ToolTipProxy::setHighlightWindows(bool highlight)
 void ToolTipProxy::hide() const
 {
     if (m_widget) {
-        Plasma::ToolTipManager::self()->hide(m_widget);
+        Plasma::ToolTipManager::self()->hide(m_widget.data());
     }
 }
 
@@ -249,7 +249,7 @@ void ToolTipProxy::updateToolTip()
         default:
             break;
     }
-    Plasma::ToolTipManager::self()->setContent(m_widget, data);
+    Plasma::ToolTipManager::self()->setContent(m_widget.data(), data);
 }
 
 #include "tooltip.moc"
