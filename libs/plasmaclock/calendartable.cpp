@@ -89,6 +89,8 @@ class CalendarTablePrivate
               calendarDataEngine(0),
               automaticUpdates(true),
               opacity(0.5),
+              hoverWeekRow(-1),
+              hoverWeekdayColumn(-1),
               pendingPopulations(NoPendingPopulation),
               delayedPopulationTimer(new QTimer())
         {
