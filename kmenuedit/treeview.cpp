@@ -1616,6 +1616,8 @@ void TreeView::moveUpOrDownItem(bool isMovingUpAction)
 {
     // get the selected item and its parent
     TreeItem *sourceItem = static_cast<TreeItem*>(selectedItem());
+    if (!sourceItem)
+       return;
     TreeItem *parentItem = getParentItem(sourceItem);
 
     // get selected item index
