@@ -64,7 +64,7 @@ void InfoSumPlugin::createOsBox()
   OsDepInfo *osInfo = new OsDepInfo();
   
   osWidget->setLabelOne(osInfo->osVersion());
-  osWidget->setLabelTwo(QString(KDE_VERSION_STRING));
+  osWidget->setLabelTwo(QString(KDE::versionString()));
   osWidget->setLabelThree(osInfo->hostName());
   osWidget->setWhatsThis(i18nc("OS whats this","This shows information about your Operating System"));
   
