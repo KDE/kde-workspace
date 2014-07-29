@@ -65,6 +65,19 @@ FdoGraphicsWidget::FdoGraphicsWidget(WId winId, QGraphicsWidget *parent)
 
     setCacheMode(QGraphicsItem::NoCache);
 
+    QGraphicsView *parentView = 0;
+
+    foreach (QGraphicsView *view, scene()->views()) {
+        if (view->isVisible() && view->sceneRect().intersects(sceneBoundingRect())) {
+            parentView = view;
+            break;
+        }
+    }
+
+    if (parentView) {     
+        parentView->setViewportUpdateMode(QGraphicsView::FullViewportUpdate);      
+    }
+
     connect(Plasma::Theme::defaultTheme(), SIGNAL(themeChanged()),
             this, SLOT(updateWidgetBackground()));
     QTimer::singleShot(0, this, SLOT(setupXEmbedDelegate()));
