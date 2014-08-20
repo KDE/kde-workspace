@@ -480,8 +480,10 @@ void BackgroundDialog::changeBackgroundMode(int index)
     }
 
     if (d->wallpaper) {
-        d->wallpaper->setPreviewing(true);
-        d->preview->setPreview(d->wallpaper);
+        if (mode == "SingleImage") {
+            d->wallpaper->setPreviewing(true);
+            d->preview->setPreview(d->wallpaper);
+        }
         d->wallpaper->setRenderingMode(mode);
         KConfigGroup cfg = wallpaperConfig(plugin);
         //kDebug() << "making a" << plugin << "in mode" << mode;
