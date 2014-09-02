@@ -84,11 +84,15 @@ Item {
     Greeter {
         id: unlockUI
 
-        switchUserEnabled: userSessionsUI.switchUserSupported
+        switchUserEnabled: sessions.switchUserSupported
+
+        Sessions {
+            id: sessions
+        }
 
         Connections {
             onAccepted: lockScreen.unlockRequested()
-            onSwitchUserClicked: { mainStack.push(userSessionsUI); userSessionsUI.forceActiveFocus(); }
+            onSwitchUserClicked: { mainStack.push(userSessionsUIComponent); mainStack.currentPage.forceActiveFocus(); }
         }
     }
 
@@ -97,15 +101,18 @@ Item {
         unlockUI.resetFocus();
     }
 
-    // TODO: loader
-    SessionSwitching {
-        id: userSessionsUI
-        visible: false
+    Component {
+        id: userSessionsUIComponent
 
-        Connections {
-            onCancel: returnToLogin()
-            onActivateSession: returnToLogin()
-            onStartNewSession: returnToLogin()
+        SessionSwitching {
+            id: userSessionsUI
+            visible: false
+
+            Connections {
+                onCancel: returnToLogin()
+                onActivateSession: returnToLogin()
+                onStartNewSession: returnToLogin()
+            }
         }
     }
 }
