@@ -109,9 +109,9 @@ Item {
             visible: false
 
             Connections {
-                onCancel: returnToLogin()
-                onActivateSession: returnToLogin()
-                onStartNewSession: returnToLogin()
+                onSwitchingCanceled: returnToLogin()
+                onSessionActivated: returnToLogin()
+                onNewSessionStarted: returnToLogin()
             }
         }
     }
