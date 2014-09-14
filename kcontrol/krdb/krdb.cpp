@@ -372,6 +372,7 @@ static void createGtkrc( bool exportColors, const QPalette& cg, bool exportGtkTh
         t << "style \"MenuItem\"" << endl;
         t << "{" << endl;
         t << "  bg[PRELIGHT] = " << color( cg.color(QPalette::Highlight) ) << endl;
+        t << "  fg[PRELIGHT] = " << color( cg.color(QPalette::HighlightedText) ) << endl;
         t << "}" << endl;
         t << endl;
         t << "class \"*MenuItem\" style \"MenuItem\"" << endl;
