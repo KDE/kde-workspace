@@ -75,8 +75,8 @@ bool checkSystemdVersion(uint requiredVersion)
 
 PowerDevilUPowerBackend::PowerDevilUPowerBackend(QObject* parent)
     : BackendInterface(parent),
-      m_brightnessControl(0),
-      m_lidIsPresent(false), m_lidIsClosed(false), m_onBattery(false), m_kbdMaxBrightness(0)
+      m_brightnessControl(0), m_kbdMaxBrightness(0),
+      m_lidIsPresent(false), m_lidIsClosed(false), m_onBattery(false)
 {
 
 }
