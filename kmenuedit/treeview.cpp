@@ -227,13 +227,6 @@ bool TreeItem::isLayoutDirty() const
 static QPixmap appIcon(const QString &iconName)
 {
     QPixmap normal = KIconLoader::global()->loadIcon(iconName, KIconLoader::Small, 0, KIconLoader::DefaultState, QStringList(), 0L, true);
-    // make sure they are not larger than 20x20
-    if (normal.width() > 20 || normal.height() > 20)
-    {
-       QImage tmp = normal.toImage();
-       tmp = tmp.scaled(20, 20, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
-       normal = QPixmap::fromImage(tmp);
-    }
     return normal;
 }
 
@@ -818,7 +811,8 @@ void TreeView::startDrag(Qt::DropActions supportedActions)
     }
 
     QDrag *drag = new QDrag(this);
-    drag->setPixmap(selectedItem()->icon(0).pixmap(24, 24));
+    int iconSize = KIconLoader::global()->currentSize(KIconLoader::Small);
+    drag->setPixmap(selectedItem()->icon(0).pixmap(iconSize, iconSize));
     drag->setMimeData(data);
     drag->exec(supportedActions, Qt::MoveAction);
 }
