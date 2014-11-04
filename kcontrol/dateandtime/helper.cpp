@@ -123,6 +123,13 @@ int ClockHelper::date( const QString& newdate, const QString& olddate )
 int ClockHelper::tz( const QString& selectedzone )
 {
     int ret = 0;
+
+    //only allow letters, numbers hyphen underscore plus and forward slash
+    //allowed pattern taken from time-util.c in systemd
+    if (!QRegExp("[a-zA-Z0-9-_+/]*").exactMatch(selectedzone)) {
+        return ret;
+    }
+
 #if defined(USE_SOLARIS)	// MARCO
 
         KTemporaryFile tf;
