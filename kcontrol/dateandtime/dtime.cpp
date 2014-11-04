@@ -142,27 +142,15 @@ void Dtime::serverTimeCheck() {
   //kclock->setEnabled(enabled);
 }
 
-void Dtime::findNTPutility(){
-  QByteArray envpath = qgetenv("PATH");
-  if (!envpath.isEmpty() && envpath[0] == ':') {
-    envpath = envpath.mid(1);
-  }
-
-  QString path = "/sbin:/usr/sbin:";
-  if (!envpath.isEmpty()) {
-    path += QString::fromLocal8Bit(envpath);
-  } else {
-    path += QLatin1String("/bin:/usr/bin");
-  }
-
-  foreach(const QString &possible_ntputility, QStringList() << "ntpdate" << "rdate" ) {
-    if( !((ntpUtility = KStandardDirs::findExe(possible_ntputility, path)).isEmpty()) ) {
-      kDebug() << "ntpUtility = " << ntpUtility;
-      return;
+void Dtime::findNTPutility()
+{
+    const QString exePath = QLatin1String("/usr/sbin:/usr/bin:/sbin:/bin");
+    foreach(const QString &possible_ntputility, QStringList() << "ntpdate" << "rdate" ) {
+        ntpUtility = KStandardDirs::findExe(possible_ntputility, exePath);
+        if (!ntpUtility.isEmpty()) {
+            return;
+        }
     }
-  }
-
-  kDebug() << "ntpUtility not found!";
 }
 
 void Dtime::set_time()
@@ -238,7 +226,6 @@ void Dtime::save( QVariantMap& helperargs )
   helperargs["ntp"] = true;
   helperargs["ntpServers"] = list;
   helperargs["ntpEnabled"] = setDateTimeAuto->isChecked();
-  helperargs["ntpUtility"] = ntpUtility;
 
   if(setDateTimeAuto->isChecked() && !ntpUtility.isEmpty()){
     // NTP Time setting - done in helper
