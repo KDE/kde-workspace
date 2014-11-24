@@ -151,8 +151,8 @@ void UnlockApp::desktopResized()
     const bool canLogout = KAuthorized::authorizeKAction("logout") && KAuthorized::authorize("logout");
     const QSet<Solid::PowerManagement::SleepState> spdMethods = Solid::PowerManagement::supportedSleepStates();
     for (int i = m_views.count(); i < nScreens; ++i) {
-        // create the view
-        QDeclarativeView *view = new QDeclarativeView();
+        // create the view - we need create a view per screen in multihead cases
+        QDeclarativeView *view = new QDeclarativeView(desktop()->screen(i));
         connect(view, SIGNAL(statusChanged(QDeclarativeView::Status)),
                 this, SLOT(viewStatusChanged(QDeclarativeView::Status)));
         view->setWindowFlags(Qt::X11BypassWindowManagerHint);
