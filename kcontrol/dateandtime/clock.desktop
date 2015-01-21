@@ -177,6 +177,7 @@ X-KDE-Keywords[mr]=घड्याळ, दिनांक, वेळ, समय 
 X-KDE-Keywords[nb]=klokke,dato,tid,tidssone,ntp,synkronisere,kalender,lokal tid,regiontid
 X-KDE-Keywords[nds]=Klock,Datum,Tiet,Tietrebeet,NTP,synkroniseren,Kalenner,lokaal Tiet
 X-KDE-Keywords[nl]=klok,datum,tijd,tijdzone,ntp,synchroniseren,agenda,lokale tijd,tijd in regio
+X-KDE-Keywords[pa]=ਘੜੀ,ਕਲਾਕ,ਮਿਤੀ,ਸਮਾਂ,ਟਾਈਮ,ਸਮਾਂ ਖੇਤਰ,ntp,ਸਮਕਾਲੀ,ਸੈਕਰੋਨਾਈਜ਼,ਕੈਲੰਡਰ,ਲੋਕਲ ਸਮਾਂ,ਖੇਤਰ ਸਮਾਂ
 X-KDE-Keywords[pl]=zegar,data,czas,strefa czasowa,ntp,synchronizuj,kalendarz,czas lokalny,czas regionalny
 X-KDE-Keywords[pt]=relógio,data,hora,fuso-horário,ntp,sincronizar,calendário,hora local,hora regional
 X-KDE-Keywords[pt_BR]=relógio,data,hora,fuso horário,ntp,sincronizar,calendário,hora local,hora regional
@@ -190,7 +191,7 @@ X-KDE-Keywords[sr@latin]=clock,date,time,time zone,ntp,synchronize,calendar,loca
 X-KDE-Keywords[sv]=klocka,datum,tid,tidszon,ntp,synkronisera,kalender,lokal tid,områdestid
 X-KDE-Keywords[tr]=saat,tarih,zaman,zaman dilimi,ntp,eşzamanlama,takvim,yerel saat,bölge saati
 X-KDE-Keywords[uk]=годинник,дата,час,часовий пояс,синхронізація,календар,місцевий час,clock,date,time,time zone,ntp,synchronize,calendar,local time,region time
-X-KDE-Keywords[x-test]=xxclock,date,time,time zone,ntp,synchronize,calendar,local time,region timexx
+X-KDE-Keywords[x-test]=xxclockxx,xxdatexx,xxtimexx,xxtime zonexx,xxntpxx,xxsynchronizexx,xxcalendarxx,xxlocal timexx,xxregion timexx
 X-KDE-Keywords[zh_CN]=clock,date,time,time zone,ntp,synchronize,calendar,local time,region time,时钟,日期,时间,时区,同步,日历,本地时间,区域时间
 X-KDE-Keywords[zh_TW]=clock,date,time,time zone,ntp,synchronize,calendar,local time,region time
 

@@ -171,6 +171,7 @@ X-KDE-Keywords[mr]=फॉन्ट, फॉन्टस, इंस्टालर
 X-KDE-Keywords[nb]=skrift,skrifter,installer,truetrype,type1,bitmap
 X-KDE-Keywords[nds]=Schrift,Schriften,Schriftoort,Schriftoorden,TrueType,Type1,Bitmap
 X-KDE-Keywords[nl]=lettertype,lettertypen,installatieprogramma,truetype,type1,bitmap
+X-KDE-Keywords[pa]=ਫੋਂਟ,ਫੌਂਟ,ਇੰਸਟਾਲਰ,ਟਰੂਟਾਈਪ,ਟਾਈਪ 1,ਬਿਟਮੈਪ
 X-KDE-Keywords[pl]=czcionki,czcionka,instalator,truetype,typ1,mapa bitowa
 X-KDE-Keywords[pt]=tipo de letra,tipos de letra,instalador,truetype,type1,imagem
 X-KDE-Keywords[pt_BR]=fonte,fontes,instalador,truetype,type1,bitmap,imagem
@@ -184,7 +185,7 @@ X-KDE-Keywords[sr@latin]=font,fonts,installer,truetype,type1,bitmap,font,fontovi
 X-KDE-Keywords[sv]=teckensnitt,installation,truetype,type1,bitavbildning
 X-KDE-Keywords[tr]=yazı tipi,yazı tipleri,yükleyici,kurucu,trueytpe,type1,resim
 X-KDE-Keywords[uk]=шрифт,шрифти,встановлювач,truetype,type1,растрові
-X-KDE-Keywords[x-test]=xxfont,fonts,installer,truetype,type1,bitmapxx
+X-KDE-Keywords[x-test]=xxfontxx,xxfontsxx,xxinstallerxx,xxtruetypexx,xxtype1xx,xxbitmapxx
 X-KDE-Keywords[zh_CN]=font,fonts,installer,truetype,type1,bitmap,字体,安装器,点阵
 X-KDE-Keywords[zh_TW]=font,fonts,installer,truetype,type1,bitmap
 
