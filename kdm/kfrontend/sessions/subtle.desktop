@@ -1,6 +1,7 @@
 [Desktop Entry]
 Encoding=UTF-8
 Name=Subtle
+Name[bs]=Subtle
 Name[ca]=Subtle
 Name[cs]=Subtle
 Name[da]=Diskret
@@ -32,6 +33,7 @@ Name[uk]=Subtle
 Name[x-test]=xxSubtlexx
 Name[zh_TW]=Subtle
 Comment=Subtle Tiling Window Manager
+Comment[bs]=Subtle menadžer prozora popločan
 Comment[ca]=Gestor de finestres en mosaic Subtle
 Comment[cs]=Dlaždicový správce oken Subtle
 Comment[da]=Diskret vindueshåndtering med fliseudlægning
