@@ -12,13 +12,13 @@ target_link_libraries(processtest processui ${KDE4_KDECORE_LIBS} ${QT_QTTEST_LIB
 
 # KSignalPlotter benchmark
 set( signalplotterbenchmark_SRCS signalplotterbenchmark.cpp ../signalplotter/ksignalplotter.cpp)
-kde4_add_unit_test( signalplotterbenchmark TESTNAME ksysguard-signalplottertest ${signalplotterbenchmark_SRCS} )
+kde4_add_unit_test( signalplotterbenchmark TESTNAME ksysguard-signalplotterbenchmark ${signalplotterbenchmark_SRCS} )
 target_link_libraries( signalplotterbenchmark ${KDE4_KDEUI_LIBS} ${QT_QTTEST_LIBRARY} ${QT_QTBENCHMARK_LIBRARY} )
 
 
 # KGraphicsSignalPlotter benchmark
 set( graphicssignalplotterbenchmark_SRCS graphicssignalplotterbenchmark.cpp ../signalplotter/kgraphicssignalplotter.cpp)
-kde4_add_unit_test( graphicssignalplotterbenchmark TESTNAME ksysguard-signalplottertest ${graphicssignalplotterbenchmark_SRCS} )
+kde4_add_unit_test( graphicssignalplotterbenchmark TESTNAME ksysguard-graphicssignalplotterbenchmark ${graphicssignalplotterbenchmark_SRCS} )
 target_link_libraries( graphicssignalplotterbenchmark ${KDE4_KDEUI_LIBS} ${QT_QTTEST_LIBRARY} ${QT_QTBENCHMARK_LIBRARY} )
 
 
