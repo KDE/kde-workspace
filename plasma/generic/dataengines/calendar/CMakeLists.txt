@@ -33,7 +33,7 @@ target_link_libraries(
 if(Akonadi_FOUND)
     target_link_libraries(
         plasma_engine_calendar
-        akonadi-calendar
+        ${KDEPIMLIBS_AKONADI_CALENDAR_LIBS}
         ${KDE4_AKONADI_LIBS}
         ${KDEPIMLIBS_AKONADI_KCAL_LIBS}
     )

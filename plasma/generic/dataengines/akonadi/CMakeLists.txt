@@ -21,7 +21,7 @@ target_link_libraries(
     ${KDE4_AKONADI_KMIME_LIBS}
     ${KDE4_KABC_LIBS}
     ${QT_QTXML_LIBRARY}
-    microblog
+    ${KDE4_MICROBLOG_LIBS}
 )
 
 install(TARGETS plasma_engine_akonadi DESTINATION ${PLUGIN_INSTALL_DIR})
