@@ -149,7 +149,7 @@ FDialog::exec()
     if (_grabInput)
         fakeFocusIn(winId());
     else
-        activateWindow();
+        XSetInputFocus(QX11Info::display(), winId(), RevertToParent, CurrentTime);
     QWidget *previous = current;
     current = this;
     inherited::exec();
@@ -158,7 +158,7 @@ FDialog::exec()
         if (_grabInput)
             fakeFocusIn(current->winId());
         else
-            current->activateWindow();
+            XSetInputFocus(QX11Info::display(), current->winId(), RevertToParent, CurrentTime);
     } else {
         if (_grabInput)
             unsecureInputs(QX11Info::display());
